@@ -1,7 +1,7 @@
 // src/features/departments/components/MemberDetailModal.tsx
 import React from "react";
 import { X } from "lucide-react";
-import type { User } from './../../types/index';
+import type { User } from "../../../types/index";
 
 interface MemberDetailModalProps {
   member: User | null;

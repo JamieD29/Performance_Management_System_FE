@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -8,8 +8,8 @@ import {
   Button,
   Stack,
   Alert,
-} from '@mui/material';
-import { api } from '../../services/api'; // ⚠️ Check đường dẫn api
+} from "@mui/material";
+import { api } from "../../../services/api"; // ⚠️ Check đường dẫn api
 
 interface AddDepartmentModalProps {
   open: boolean;
@@ -23,12 +23,12 @@ export default function AddDepartmentModal({
   onSuccess,
 }: AddDepartmentModalProps) {
   const [formData, setFormData] = useState({
-    name: '',
-    code: '',
-    description: '',
+    name: "",
+    code: "",
+    description: "",
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -37,15 +37,15 @@ export default function AddDepartmentModal({
   const handleSubmit = async () => {
     // Validate cơ bản
     if (!formData.name || !formData.code) {
-      setError('Tên và Mã bộ môn là bắt buộc');
+      setError("Tên và Mã bộ môn là bắt buộc");
       return;
     }
 
     setLoading(true);
-    setError('');
+    setError("");
     try {
-      await api.post('/departments', formData);
-      setFormData({ name: '', code: '', description: '' }); // Reset form
+      await api.post("/departments", formData);
+      setFormData({ name: "", code: "", description: "" }); // Reset form
       onSuccess(); // Báo cho cha biết là xong rồi
       onClose(); // Đóng modal
     } catch (err: any) {
@@ -57,7 +57,7 @@ export default function AddDepartmentModal({
         setError(errorMsg[0]);
       } else {
         // Nếu là chuỗi đơn
-        setError(errorMsg || 'Có lỗi xảy ra');
+        setError(errorMsg || "Có lỗi xảy ra");
       }
     } finally {
       setLoading(false);
@@ -66,7 +66,7 @@ export default function AddDepartmentModal({
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ fontWeight: 'bold', color: '#1e3a8a' }}>
+      <DialogTitle sx={{ fontWeight: "bold", color: "#1e3a8a" }}>
         Thêm Bộ Môn Mới
       </DialogTitle>
       <DialogContent dividers>
@@ -120,7 +120,7 @@ export default function AddDepartmentModal({
           Hủy
         </Button>
         <Button onClick={handleSubmit} variant="contained" disabled={loading}>
-          {loading ? 'Đang tạo...' : 'Tạo mới'}
+          {loading ? "Đang tạo..." : "Tạo mới"}
         </Button>
       </DialogActions>
     </Dialog>

@@ -1,6 +1,6 @@
 import React from "react";
 import { Users, Edit, Trash2, GraduationCap } from "lucide-react";
-import type { User } from "../../types/index";
+import type { User } from "../../../types/index";
 
 interface MemberTableProps {
   members: User[]; // Đổi từ Member[] thành User[]
