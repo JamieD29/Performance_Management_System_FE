@@ -61,67 +61,68 @@ export default function Login() {
 
   // --- LOGIC BẮT TOKEN & XỬ LÝ LỖI ---
   useEffect(() => {
-    // 1. Kiểm tra nếu có accessToken trên URL (Đăng nhập thành công trả về)
-    const accessToken = searchParams.get('accessToken');
-    const refreshToken = searchParams.get('refreshToken');
-    const userParam = searchParams.get('user');
+    // 1. Kiểm tra Token đăng nhập thành công
+    const accessToken = searchParams.get("accessToken");
+    const refreshToken = searchParams.get("refreshToken");
+    const userParam = searchParams.get("user");
 
     if (accessToken) {
       setIsLoading(true);
-      console.log('🎉 Login Success! Token captured.');
+      sessionStorage.setItem("authToken", accessToken);
+      if (refreshToken) sessionStorage.setItem("refreshToken", refreshToken);
 
-      // Lưu Token vào Storage
-      sessionStorage.setItem('authToken', accessToken);
-      if (refreshToken) sessionStorage.setItem('refreshToken', refreshToken);
-
-      // Xử lý thông tin User
       if (userParam) {
         try {
-          // Decode URL component trước khi parse JSON (Sửa lỗi JSON.decodeURIComponent)
-          const userString = decodeURIComponent(userParam);
-          const userObj = JSON.parse(userString);
-
-          sessionStorage.setItem('user', JSON.stringify(userObj));
-
-          navigate('/dashboard', { replace: true });
+          const userObj = JSON.parse(decodeURIComponent(userParam));
+          sessionStorage.setItem("user", JSON.stringify(userObj));
         } catch (e) {
-          console.error('Error parsing user data:', e);
-          // Nếu lỗi parse user, vẫn cho vào dashboard nhưng log lỗi
-          window.location.href = '/dashboard';
+          console.error("Parse user error:", e);
         }
-      } else {
-        // Không có user info thì cứ vào dashboard
-        window.location.href = '/dashboard';
       }
+
+      // Xóa params trên URL cho đẹp và an toàn
+      window.history.replaceState({}, document.title, "/dashboard");
+      navigate("/dashboard", { replace: true });
       return;
     }
 
-    // 2. Kiểm tra nếu có lỗi trả về trên URL
-    const errorParam = searchParams.get('error');
+    // 2. 🔥 XỬ LÝ LỖI TỪ BACKEND TRẢ VỀ
+    const errorParam = searchParams.get("error");
+
     if (errorParam) {
-      let errorMessage = 'Authentication failed';
+      // ✅ LOGIC MỚI: Nếu lỗi là "domain_not_allowed" -> Chuyển ngay sang trang 404
+      if (errorParam === "domain_not_allowed") {
+        // replace: true để user không back lại được trang login có lỗi này
+        navigate("/404", { replace: true });
+        return;
+      }
+
+      // Các lỗi khác (huỷ login, lỗi server...) thì hiện thông báo đỏ tại trang Login
+      let errorMessage = "Authentication failed";
       switch (errorParam) {
-        case 'domain_not_allowed':
-          errorMessage = '❌ Email domain not allowed!';
+        case "auth_failed":
+          errorMessage = "❌ Đăng nhập thất bại. Vui lòng thử lại.";
           break;
-        case 'auth_failed':
-          errorMessage = '❌ Login failed. Please try again.';
+        case "access_denied":
+          errorMessage = "❌ Bạn đã từ chối cấp quyền truy cập.";
           break;
         default:
-          errorMessage = `❌ Error: ${errorParam}`;
+          errorMessage = `❌ Lỗi: ${errorParam}`;
       }
+
       setError(errorMessage);
       setIsLoading(false);
       setIsMsLoading(false);
-      // Xóa URL cho sạch
-      window.history.replaceState({}, document.title, '/login');
+
+      // Xóa query param lỗi trên URL để nhìn cho sạch
+      window.history.replaceState({}, document.title, "/login");
     }
 
-    // 3. Fetch whitelist (chỉ chạy khi chưa login)
-    if (!accessToken) {
+    // 3. Chỉ fetch whitelist khi không có token và chưa có lỗi
+    if (!accessToken && !errorParam) {
       fetchAllowedDomains();
     }
-  }, [searchParams]);
+  }, [searchParams, navigate]);
 
   const fetchAllowedDomains = async () => {
     try {

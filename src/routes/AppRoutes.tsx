@@ -14,6 +14,7 @@ import AcceptInvitation from "../components/AcceptInvitation";
 // Import Layouts
 import MainLayout from "../layouts/MainLayout";
 import DepartmentOverview from "../pages/DepartmentOverview";
+import NotFoundPage from "../pages/ErrorPage/NotFoundPage";
 
 // 1. Hook check đăng nhập
 function useAuth() {
@@ -64,10 +65,8 @@ export default function AppRoutes() {
       {/* --- CÁC ROUTE PHỤ --- */}
       <Route path="/auth/microsoft/callback" element={<AuthCallback />} />
       <Route path="/invite/accept/:token" element={<AcceptInvitation />} />
-
       {/* --- ROOT REDIRECT --- */}
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
-
       {/* --- LOGIN --- */}
       <Route
         path="/login"
@@ -77,7 +76,6 @@ export default function AppRoutes() {
           </PublicRoute>
         }
       />
-
       {/* --- MAIN LAYOUT GROUP (Đã đăng nhập) --- */}
       <Route
         element={
@@ -123,9 +121,10 @@ export default function AppRoutes() {
         {/* Route cũ (Giữ lại để tương thích nếu cần, hoặc xóa đi) */}
         <Route path="/admin/department" element={<Department />} />
       </Route>
-
       {/* --- CATCH ALL --- */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      {/* ✅ Route dành cho trường hợp navigate('/404') */}
+      <Route path="/404" element={<NotFoundPage />} />
+      <Route path="*" element={<NotFoundPage />} />{" "}
     </Routes>
   );
 }
