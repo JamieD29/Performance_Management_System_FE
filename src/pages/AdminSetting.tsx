@@ -57,17 +57,26 @@ import { api } from '../services/api';
 // Vì user.roles bây giờ có thể là Object, ta dùng any hoặc sửa Type User sau.
 // Tạm thời frontend xử lý linh hoạt.
 import type { Domain, User } from '../types';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 
 // ==========================================
 // 1. COMPONENT: WHITELIST MANAGER (Giữ nguyên)
 // ==========================================
 const WhitelistManager = () => {
+  // State lưu trạng thái của Modal xác nhận
+  const [confirmDelete, setConfirmDelete] = useState<{
+    open: boolean;
+    id: string | null;
+  }>({
+    open: false,
+    id: null,
+  });
   const [domains, setDomains] = useState<Domain[]>([]);
-  const [domainInput, setDomainInput] = useState('');
+  const [domainInput, setDomainInput] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<{
-    type: 'success' | 'error';
+    type: "success" | "error";
     text: string;
   } | null>(null);
 
@@ -77,7 +86,7 @@ const WhitelistManager = () => {
 
   const fetchDomains = async () => {
     try {
-      const response = await api.get('/admin/domains');
+      const response = await api.get("/admin/domains");
       const data = response.data?.domains || response.data || [];
       setDomains(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -87,55 +96,82 @@ const WhitelistManager = () => {
     }
   };
 
-  const showMessage = (type: 'success' | 'error', text: string) => {
+  const showMessage = (type: "success" | "error", text: string) => {
     setMessage({ type, text });
     setTimeout(() => setMessage(null), 5000);
   };
 
   const handleAddDomain = async () => {
     const rawDomain = domainInput.trim().toLowerCase();
-    if (!rawDomain) return showMessage('error', 'Please enter a domain');
+    if (!rawDomain) return showMessage("error", "Please enter a domain");
 
     const domainRegex =
       /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/;
     if (!domainRegex.test(rawDomain))
-      return showMessage('error', 'Invalid domain format');
+      return showMessage("error", "Invalid domain format");
 
     if (domains.some((d) => d.domain.toLowerCase() === rawDomain)) {
-      return showMessage('error', 'Domain already exists');
+      return showMessage("error", "Domain already exists");
     }
 
     setIsSaving(true);
     try {
-      const response = await api.post('/admin/domains', { domain: rawDomain });
+      const response = await api.post("/admin/domains", { domain: rawDomain });
       const newDomain = response.data?.domain || response.data;
       setDomains([...domains, newDomain]);
-      setDomainInput('');
-      showMessage('success', `Added @${rawDomain}`);
+      setDomainInput("");
+      showMessage("success", `Added @${rawDomain}`);
     } catch (err: any) {
-      showMessage('error', err.response?.data?.message || 'Failed to add');
+      showMessage("error", err.response?.data?.message || "Failed to add");
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleDeleteDomain = async (id: string) => {
-    if (!window.confirm('Remove this domain? Users will lose access.')) return;
-    setIsSaving(true);
+  const handleOpenDelete = (id: string) => {
+    // Thay vì window.confirm, ta chỉ mở Modal và lưu ID lại
+    setConfirmDelete({ open: true, id });
+  };
+
+  const handleConfirmDelete = async () => {
+    const id = confirmDelete.id;
+    if (!id) return;
+
+    setIsSaving(true); // Bật loading cho nút trong Modal
     try {
       await api.delete(`/admin/domains/${id}`);
+
+      // Cập nhật lại danh sách domains
       setDomains(domains.filter((d) => d.id !== id));
-      showMessage('success', 'Domain removed');
+
+      showMessage("success", "Domain removed");
+
+      // Xóa xong thì đóng Modal
+      setConfirmDelete({ open: false, id: null });
     } catch (err: any) {
-      showMessage('error', err.response?.data?.message || 'Failed to delete');
+      showMessage("error", err.response?.data?.message || "Failed to delete");
     } finally {
       setIsSaving(false);
     }
   };
+
+  // const handleDeleteDomain = async (id: string) => {
+  //   if (!window.confirm("Remove this domain? Users will lose access.")) return;
+  //   setIsSaving(true);
+  //   try {
+  //     await api.delete(`/admin/domains/${id}`);
+  //     setDomains(domains.filter((d) => d.id !== id));
+  //     showMessage("success", "Domain removed");
+  //   } catch (err: any) {
+  //     showMessage("error", err.response?.data?.message || "Failed to delete");
+  //   } finally {
+  //     setIsSaving(false);
+  //   }
+  // };
 
   if (isLoading)
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 5 }}>
+      <Box sx={{ display: "flex", justifyContent: "center", p: 5 }}>
         <CircularProgress />
       </Box>
     );
@@ -152,7 +188,7 @@ const WhitelistManager = () => {
         </Alert>
       )}
 
-      <Card sx={{ mb: 3, boxShadow: 'none', border: '1px solid #e2e8f0' }}>
+      <Card sx={{ mb: 3, boxShadow: "none", border: "1px solid #e2e8f0" }}>
         <CardContent sx={{ p: 3 }}>
           <Typography variant="h6" fontWeight={600} gutterBottom>
             Allowed Email Domains
@@ -162,7 +198,7 @@ const WhitelistManager = () => {
           </Typography>
 
           <Box
-            sx={{ mb: 3, display: 'flex', gap: 2, alignItems: 'flex-start' }}
+            sx={{ mb: 3, display: "flex", gap: 2, alignItems: "flex-start" }}
           >
             <TextField
               fullWidth
@@ -173,7 +209,7 @@ const WhitelistManager = () => {
               helperText="Only lowercase letters, numbers, hyphens allowed"
               disabled={isSaving}
               sx={{
-                '& .MuiFormHelperText-root': { marginLeft: 0, marginTop: 1 },
+                "& .MuiFormHelperText-root": { marginLeft: 0, marginTop: 1 },
               }}
             />
 
@@ -186,14 +222,14 @@ const WhitelistManager = () => {
               sx={{
                 minWidth: 100,
                 height: 40,
-                whiteSpace: 'nowrap',
-                mt: '1px',
+                whiteSpace: "nowrap",
+                mt: "1px",
               }}
             >
               {isSaving ? (
                 <CircularProgress size={20} color="inherit" />
               ) : (
-                'ADD'
+                "ADD"
               )}
             </Button>
           </Box>
@@ -202,9 +238,9 @@ const WhitelistManager = () => {
 
           <List
             sx={{
-              bgcolor: 'grey.50',
+              bgcolor: "grey.50",
               borderRadius: 1,
-              border: '1px solid #f1f5f9',
+              border: "1px solid #f1f5f9",
             }}
           >
             {domains.map((d) => (
@@ -217,7 +253,7 @@ const WhitelistManager = () => {
                 />
                 <ListItemSecondaryAction>
                   <IconButton
-                    onClick={() => handleDeleteDomain(d.id)}
+                    onClick={() => handleOpenDelete(d.id)}
                     color="error"
                   >
                     <Delete />
@@ -227,7 +263,7 @@ const WhitelistManager = () => {
             ))}
             {domains.length === 0 && (
               <Typography
-                sx={{ p: 2, textAlign: 'center', color: 'text.secondary' }}
+                sx={{ p: 2, textAlign: "center", color: "text.secondary" }}
               >
                 No domains configured.
               </Typography>
@@ -239,7 +275,7 @@ const WhitelistManager = () => {
               Domain Policy
             </Typography>
             <Typography variant="body2">
-              • You can add any valid domain (e.g. <strong>gmail.com</strong>,{' '}
+              • You can add any valid domain (e.g. <strong>gmail.com</strong>,{" "}
               <strong>abc.com</strong>)<br />
               • Users with emails matching these domains will be allowed to log
               in.
@@ -249,9 +285,20 @@ const WhitelistManager = () => {
           </Alert>
         </CardContent>
       </Card>
+      {/* Đặt ở cuối hàm return của Component */}
+      <ConfirmDialog
+        open={confirmDelete.open}
+        onClose={() => setConfirmDelete({ ...confirmDelete, open: false })} // Đóng khi bấm Hủy/Click ra ngoài
+        onConfirm={handleConfirmDelete} // Gọi hàm xóa thật sự khi bấm "Xác nhận"
+        title="Xóa tên miền?"
+        content="Hành động này sẽ xóa tên miền khỏi hệ thống. Người dùng thuộc tên miền này sẽ mất quyền truy cập."
+        variant="danger"
+        confirmText="Xóa ngay"
+        isLoading={isSaving} // Truyền state loading vào để nút disable/quay vòng
+      />
     </Box>
   );
-};
+};;
 
 // ==========================================
 // 2. COMPONENT: USER ROLE MANAGER (ĐÃ FIX LỖI OBJECT)
