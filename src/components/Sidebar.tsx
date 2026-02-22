@@ -12,7 +12,7 @@ import {
   Typography,
   Divider,
   Collapse,
-  Tooltip, // Import thêm Tooltip cho đẹp
+  Tooltip,
 } from '@mui/material';
 import {
   LayoutDashboard,
@@ -27,6 +27,7 @@ import {
   ChevronDown,
   ChevronUp,
   FileText,
+  ClipboardCheck,
 } from 'lucide-react';
 
 const drawerWidth = 280;
@@ -40,33 +41,31 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // State điều khiển menu
   const [openPersonal, setOpenPersonal] = useState(true);
   const [openDept, setOpenDept] = useState(true);
 
   // ==========================================
-  // 👇 1. XỬ LÝ DỮ LIỆU USER & ROLE
+  // 1. XỬ LÝ DỮ LIỆU USER & ROLE (ĐÃ FIX LỖI CASE SENSITIVE)
   // ==========================================
   const userStr = sessionStorage.getItem('user');
   const user = userStr ? JSON.parse(userStr) : {};
   const rawRoles = user.roles || [];
 
-  // Chuẩn hóa role
+  // 🔥 FIX: Chuyển hết về chữ HOA để so sánh (tránh lỗi 'dean' != 'DEAN')
   const userRoles = Array.isArray(rawRoles)
-    ? rawRoles.map((r: any) => (typeof r === 'string' ? r : r.slug || r.name))
+    ? rawRoles.map((r: any) => {
+        const val = typeof r === 'string' ? r : r.slug || r.name || '';
+        return val.toString().toUpperCase();
+      })
     : [];
 
-  // Xác định Manager
+  // Check quyền: Chỉ hiện tab Nhân sự cho Sếp
   const isManager =
     userRoles.includes('SUPER_ADMIN') ||
     userRoles.includes('SYSTEM_ADMIN') ||
     userRoles.includes('DEAN');
 
-  // 🔥 LOGIC HIỂN THỊ TÊN BỘ MÔN
-  // Nếu user có thuộc tính department -> Lấy tên. Nếu không -> "Bộ môn"
-  // (Lưu ý: Backend login phải trả về relation department nhé)
   const departmentName = user.department?.name || 'Bộ môn';
-
   // ==========================================
 
   const handleNavigate = (path: string) => {
@@ -76,7 +75,6 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
 
   const isActive = (path: string) => location.pathname === path;
 
-  // Style chung cho item
   const getItemStyles = (path: string) => ({
     borderRadius: 2,
     minHeight: 48,
@@ -91,10 +89,16 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
     minWidth: 40,
   });
 
-  // Nội dung bên trong Sidebar
+  const sidebarStyles = {
+    bgcolor: '#1e3a8a',
+    background: 'linear-gradient(180deg, #1e3a8a 0%, #172554 100%)',
+    color: 'white',
+    borderRight: 'none',
+  };
+
   const drawerContent = (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {/* 1. HEADER */}
+      {/* HEADER */}
       <Toolbar
         sx={{
           display: 'flex',
@@ -126,19 +130,16 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
 
       <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)', mb: 2 }} />
 
-      {/* 2. MENU LIST */}
+      {/* MENU LIST */}
       <Box
         sx={{
           flexGrow: 1,
           overflowY: 'auto',
           px: 2,
           '&::-webkit-scrollbar': { display: 'none' },
-          msOverflowStyle: 'none',
-          scrollbarWidth: 'none',
         }}
       >
         <List component="nav">
-          {/* Dashboard */}
           <ListItem disablePadding sx={{ display: 'block', mb: 1 }}>
             <ListItemButton
               onClick={() => handleNavigate('/')}
@@ -154,7 +155,7 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
             </ListItemButton>
           </ListItem>
 
-          {/* Cá nhân */}
+          {/* NHÓM CÁ NHÂN */}
           <ListItemButton
             onClick={() => setOpenPersonal(!openPersonal)}
             sx={{ borderRadius: 2, mb: 0.5, color: 'white' }}
@@ -180,7 +181,7 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
                 </ListItemIcon>
                 <ListItemText primary="Hồ sơ của tôi" />
               </ListItemButton>
-              <ListItemButton
+              {/* <ListItemButton
                 sx={{ ...getItemStyles('/my-okr'), pl: 4, mb: 1 }}
                 onClick={() => handleNavigate('/my-okr')}
               >
@@ -188,11 +189,20 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
                   <Target size={18} />
                 </ListItemIcon>
                 <ListItemText primary="OKR của tôi" />
+              </ListItemButton> */}
+              <ListItemButton
+                sx={{ ...getItemStyles('/performance/evaluate'), pl: 4, mb: 1 }}
+                onClick={() => handleNavigate('/performance/evaluate')}
+              >
+                <ListItemIcon sx={getIconStyles('/performance/evaluate')}>
+                  <ClipboardCheck size={18} />
+                </ListItemIcon>
+                <ListItemText primary="OKR Của tôi" />
               </ListItemButton>
             </List>
           </Collapse>
 
-          {/* 🔥 BỘ MÔN (Đã sửa tên động) */}
+          {/* NHÓM BỘ MÔN */}
           <Tooltip title={departmentName} placement="right" arrow>
             <ListItemButton
               onClick={() => setOpenDept(!openDept)}
@@ -202,11 +212,8 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
                 <Building2 size={20} />
               </ListItemIcon>
               <ListItemText
-                primary={departmentName} // 👈 Tên bộ môn ở đây
-                primaryTypographyProps={{
-                  fontWeight: 'bold',
-                  noWrap: true, // Nếu tên dài quá thì hiện ...
-                }}
+                primary={departmentName}
+                primaryTypographyProps={{ fontWeight: 'bold', noWrap: true }}
               />
               {openDept ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
             </ListItemButton>
@@ -242,10 +249,14 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
                 <ListItemText primary="KPI Bộ môn" />
               </ListItemButton>
 
-              {/* Chỉ hiện Nhân sự nếu là Manager */}
+              {/* 🔥 MỤC NHÂN SỰ (HIỆN NẾU LÀ MANAGER) */}
               {isManager && (
                 <ListItemButton
-                  sx={{ ...getItemStyles('/departments/users'), pl: 4, mb: 1 }}
+                  sx={{
+                    ...getItemStyles('/departments/users'),
+                    pl: 4,
+                    mb: 1,
+                  }}
                   onClick={() => handleNavigate('/departments/users')}
                 >
                   <ListItemIcon sx={getIconStyles('/departments/users')}>
@@ -257,7 +268,7 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
             </List>
           </Collapse>
 
-          {/* Research & Docs */}
+          {/* DOCS */}
           <ListItem disablePadding sx={{ display: 'block', mb: 1, mt: 1 }}>
             <ListItemButton
               onClick={() => handleNavigate('/docs')}
@@ -275,10 +286,9 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
         </List>
       </Box>
 
-      {/* 3. FOOTER */}
+      {/* FOOTER */}
       <Box sx={{ p: 2, mt: 'auto' }}>
         <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)', mb: 2 }} />
-
         <ListItemButton sx={{ borderRadius: 2, color: 'white' }}>
           <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
             <HelpCircle size={20} />
@@ -288,13 +298,6 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
       </Box>
     </Box>
   );
-
-  const sidebarStyles = {
-    bgcolor: '#1e3a8a',
-    background: 'linear-gradient(180deg, #1e3a8a 0%, #172554 100%)',
-    color: 'white',
-    borderRight: 'none',
-  };
 
   return (
     <Box
@@ -319,6 +322,7 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
       </Drawer>
       <Drawer
         variant="permanent"
+        open
         sx={{
           display: { xs: 'none', sm: 'block' },
           '& .MuiDrawer-paper': {
@@ -327,7 +331,6 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
             ...sidebarStyles,
           },
         }}
-        open
       >
         {drawerContent}
       </Drawer>
