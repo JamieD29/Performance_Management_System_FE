@@ -5,7 +5,7 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Login from '../pages/Login';
 import Dashboard from '../pages/Dashboard';
 import AdminSettings from '../pages/Admin/AdminSetting';
-import ProfileSettings from '../pages/ProfileSetting';
+// import ProfileSettings from '../pages/ProfileSetting';
 import Department from '../pages/Department/Department'; // 👈 Component này sẽ dùng cho mục "Nhân sự"
 import DepartmentOKR from '../pages/DepartmentOKR';
 import AuthCallback from '../pages/AuthCallback';
@@ -17,6 +17,7 @@ import DepartmentReviewPage from '../pages/Performance/DepartmentReviewPage';
 import MainLayout from '../layouts/MainLayout';
 import DepartmentOverview from '../pages/DepartmentOverview';
 import NotFoundPage from '../pages/ErrorPage/NotFoundPage';
+import ProfileSetting from '../pages/ProfileSetting/ProfileSettingPage';
 
 // 1. Hook check đăng nhập
 function useAuth() {
@@ -90,7 +91,7 @@ export default function AppRoutes() {
         <Route path="/dashboard" element={<Dashboard />} />
 
         {/* 2. Hồ sơ cá nhân */}
-        <Route path="/profile" element={<ProfileSettings />} />
+        <Route path="/profile" element={<ProfileSetting />} />
         <Route
           path="/my-okr"
           element={<div>Trang OKR cá nhân (Coming Soon)</div>}
