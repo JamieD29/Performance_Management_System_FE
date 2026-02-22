@@ -1,313 +1,391 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
-  Container,
-  Grid, // MUI v5 hoặc Grid2 v6
-  Paper,
-  Typography,
   Card,
   CardContent,
-  LinearProgress,
-  Avatar,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Chip,
+  Typography,
   Button,
+  CircularProgress,
+  Avatar,
+  Paper,
   Divider,
+  Breadcrumbs,
+  Link,
 } from '@mui/material';
+import Grid from '@mui/material/Grid'; // 👈 Grid V6 chuẩn
 import {
+  ArrowLeft,
+  Users,
   TrendingUp,
-  Groups,
-  Warning,
-  CheckCircle,
-  Business,
-  ArrowForward,
-  NotificationsActive,
-} from '@mui/icons-material';
+  AlertCircle,
+  Briefcase,
+  ChevronRight,
+  BarChart3,
+  Home,
+} from 'lucide-react';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
+import { api } from '../services/api'; // Đảm bảo import đúng axios instance
 
-// --- MOCK DATA ---
-const STATS = [
-  {
-    title: 'Tổng số Bộ môn',
-    value: '6',
-    icon: <Business />,
-    color: '#3b82f6',
-    bg: '#eff6ff',
-  },
-  {
-    title: 'Tổng Nhân sự',
-    value: '148',
-    icon: <Groups />,
-    color: '#10b981',
-    bg: '#ecfdf5',
-  },
-  {
-    title: 'Tiến độ OKR TB',
-    value: '68%',
-    icon: <TrendingUp />,
-    color: '#8b5cf6',
-    bg: '#f5f3ff',
-  },
-  {
-    title: 'OKR Rủi ro',
-    value: '5',
-    icon: <Warning />,
-    color: '#ef4444',
-    bg: '#fef2f2',
-  },
-];
-
-const TOP_DEPARTMENTS = [
-  { name: 'Khoa học Máy tính', progress: 85, staff: 24, status: 'Xuất sắc' },
-  { name: 'Công nghệ Phần mềm', progress: 72, staff: 18, status: 'Tốt' },
-  { name: 'Hệ thống Thông tin', progress: 60, staff: 15, status: 'Khá' },
-  { name: 'Mạng máy tính', progress: 45, staff: 12, status: 'Cần nỗ lực' },
-  { name: 'Thị giác máy tính', progress: 30, staff: 8, status: 'Chậm' },
-];
-
-const RECENT_ALERTS = [
-  {
-    id: 1,
-    text: 'Bộ môn CNPM chưa cập nhật KR tháng 10',
-    time: '2 giờ trước',
-    type: 'warning',
-  },
-  {
-    id: 2,
-    text: 'Giảng viên Nguyễn Văn A hoàn thành mục tiêu sớm',
-    time: '5 giờ trước',
-    type: 'success',
-  },
-  {
-    id: 3,
-    text: 'Hạn chót thiết lập OKR Q1/2026 sắp đến',
-    time: '1 ngày trước',
-    type: 'info',
-  },
-];
-
-// --- COMPONENT CON ---
-
-// 1. Stat Card
-const StatCard = ({ item }: { item: any }) => (
-  <Card
-    sx={{
-      height: '100%',
-      borderRadius: 3,
-      boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-    }}
-  >
-    <CardContent
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-      }}
-    >
-      <Box>
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          fontWeight="bold"
-          sx={{ mb: 0.5 }}
-        >
-          {item.title.toUpperCase()}
-        </Typography>
-        <Typography variant="h4" fontWeight="bold" color="#1e293b">
-          {item.value}
-        </Typography>
-      </Box>
-      <Avatar
-        sx={{
-          bgcolor: item.bg,
-          color: item.color,
-          width: 56,
-          height: 56,
-          borderRadius: 3,
-        }}
-      >
-        {item.icon}
-      </Avatar>
-    </CardContent>
-  </Card>
-);
-
-// 2. Department Performance Row
-const DeptPerformanceRow = ({ dept }: { dept: any }) => {
-  let color: 'success' | 'primary' | 'warning' | 'error' = 'primary';
-  if (dept.progress >= 80) color = 'success';
-  else if (dept.progress < 50) color = 'error';
-  else if (dept.progress < 70) color = 'warning';
-
-  return (
-    <Box sx={{ py: 2 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-        <Typography variant="body1" fontWeight="600">
-          {dept.name}
-        </Typography>
-        <Typography variant="body2" fontWeight="bold" color="text.secondary">
-          {dept.progress}%
-        </Typography>
-      </Box>
-      <LinearProgress
-        variant="determinate"
-        value={dept.progress}
-        color={color}
-        sx={{ height: 10, borderRadius: 5, bgcolor: '#f1f5f9' }}
-      />
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
-        <Typography variant="caption" color="text.secondary">
-          {dept.staff} nhân sự
-        </Typography>
-        <Typography
-          variant="caption"
-          color={color === 'error' ? 'error.main' : 'text.secondary'}
-          fontWeight={500}
-        >
-          {dept.status}
-        </Typography>
-      </Box>
-    </Box>
-  );
-};
+// Interface khớp với DB của bạn
+interface Department {
+  id: string;
+  name: string;
+  code: string;
+  // Các trường này Backend nên trả về thêm (nếu join bảng).
+  // Nếu chưa có thì Frontend sẽ hiện mặc định/ẩn.
+  memberCount?: number;
+  headOfDeptName?: string;
+}
 
 export default function DepartmentOverview() {
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedDept, setSelectedDept] = useState<Department | null>(null);
+
+  // Load danh sách bộ môn thật từ DB
+  useEffect(() => {
+    fetchDepartments();
+  }, []);
+
+  const fetchDepartments = async () => {
+    setLoading(true);
+    try {
+      // Gọi API lấy danh sách
+      const res = await api.get('/departments');
+      setDepartments(res.data);
+    } catch (error) {
+      console.error('Lỗi tải danh sách bộ môn:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --- COMPONENT: BREADCRUMBS ---
+  const renderBreadcrumbs = () => (
+    <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 3 }}>
+      <Link
+        underline="hover"
+        color="inherit"
+        href="/"
+        sx={{ display: 'flex', alignItems: 'center' }}
+      >
+        <Home size={16} style={{ marginRight: 4 }} />
+        Trang chủ
+      </Link>
+      <Link
+        underline="hover"
+        color={!selectedDept ? 'text.primary' : 'inherit'}
+        href="#"
+        onClick={(e) => {
+          e.preventDefault();
+          setSelectedDept(null);
+        }}
+        aria-current={!selectedDept ? 'page' : undefined}
+      >
+        Bộ môn
+      </Link>
+      {selectedDept && (
+        <Typography color="text.primary">{selectedDept.name}</Typography>
+      )}
+    </Breadcrumbs>
+  );
+
+  // --- VIEW 1: DANH SÁCH BỘ MÔN (Grid v6) ---
+  if (!selectedDept) {
+    return (
+      <Box sx={{ p: 3 }}>
+        {renderBreadcrumbs()}
+
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h4" fontWeight="bold" sx={{ color: '#1e293b' }}>
+            Tổng quan Khoa
+          </Typography>
+          <Typography color="text.secondary">
+            Danh sách các bộ môn trực thuộc khoa ({departments.length})
+          </Typography>
+        </Box>
+
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', p: 5 }}>
+            <CircularProgress />
+          </Box>
+        ) : (
+          <Grid container spacing={3}>
+            {departments.length > 0 ? (
+              departments.map((dept) => (
+                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={dept.id}>
+                  <Card
+                    elevation={0}
+                    sx={{
+                      border: '1px solid #e2e8f0',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      height: '100%',
+                      '&:hover': {
+                        transform: 'translateY(-4px)',
+                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                        borderColor: '#3b82f6',
+                      },
+                    }}
+                    onClick={() => setSelectedDept(dept)}
+                  >
+                    <CardContent>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'start',
+                          mb: 2,
+                        }}
+                      >
+                        {/* Hiển thị Mã Bộ Môn (SE, CS...) */}
+                        <Avatar
+                          sx={{
+                            bgcolor: '#eff6ff',
+                            color: '#3b82f6',
+                            fontWeight: 'bold',
+                          }}
+                          variant="rounded"
+                        >
+                          {dept.code}
+                        </Avatar>
+                        <ChevronRight size={20} className="text-gray-400" />
+                      </Box>
+
+                      <Typography
+                        variant="h6"
+                        fontWeight="bold"
+                        gutterBottom
+                        sx={{ minHeight: 50 }}
+                      >
+                        {dept.name}
+                      </Typography>
+
+                      <Divider sx={{ my: 1.5 }} />
+
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: 1,
+                        }}
+                      >
+                        {/* Nếu Backend chưa trả về count thì ẩn hoặc hiện 0 */}
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1.5,
+                            color: '#64748b',
+                            fontSize: 14,
+                          }}
+                        >
+                          <Users size={16} />
+                          <span>{dept.memberCount || 0} nhân sự</span>
+                        </Box>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1.5,
+                            color: '#64748b',
+                            fontSize: 14,
+                          }}
+                        >
+                          <Briefcase size={16} />
+                          <span className="truncate">
+                            Trưởng BM: {dept.headOfDeptName || 'Chưa cập nhật'}
+                          </span>
+                        </Box>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))
+            ) : (
+              <Grid size={{ xs: 12 }}>
+                <Typography align="center" color="text.secondary">
+                  Chưa có dữ liệu bộ môn.
+                </Typography>
+              </Grid>
+            )}
+          </Grid>
+        )}
+      </Box>
+    );
+  }
+
+  // --- VIEW 2: DASHBOARD CHI TIẾT (Khi click vào 1 bộ môn) ---
+  // *Lưu ý: Phần Chart và Stats dưới đây nên được gọi API thật dựa trên selectedDept.id*
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
-      {/* HEADER */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" fontWeight="bold" color="#1e3a8a">
-          Tổng quan Bộ môn
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Báo cáo hiệu suất và tình hình hoạt động của các đơn vị
-        </Typography>
+    <Box sx={{ p: 3 }}>
+      {renderBreadcrumbs()}
+
+      {/* Nút Back Mobile Friendly */}
+      <Button
+        variant="text"
+        startIcon={<ArrowLeft size={18} />}
+        onClick={() => setSelectedDept(null)}
+        sx={{ mb: 2, color: '#64748b', display: { xs: 'flex', md: 'none' } }}
+      >
+        Quay lại
+      </Button>
+
+      <Box
+        sx={{
+          mb: 4,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
+        <Box>
+          <Typography variant="h4" fontWeight="bold" sx={{ color: '#1e293b' }}>
+            {selectedDept.name}
+          </Typography>
+          <Typography color="text.secondary">
+            Báo cáo hiệu suất & Thống kê
+          </Typography>
+        </Box>
+        <Avatar
+          sx={{ width: 56, height: 56, bgcolor: '#1e3a8a', fontSize: 20 }}
+        >
+          {selectedDept.code}
+        </Avatar>
       </Box>
 
-      {/* 1. STATS CARDS GRID */}
+      {/* 3 Widgets Thống kê (Cần API real để fill số liệu) */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        {STATS.map((item, index) => (
-          <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index}>
-            <StatCard item={item} />
-          </Grid>
-        ))}
-      </Grid>
-
-      {/* 2. MAIN CONTENT GRID */}
-      <Grid container spacing={3}>
-        {/* LEFT COLUMN: PERFORMANCE RANKING */}
-        <Grid size={{ xs: 12, md: 8 }}>
-          <Paper
-            sx={{
-              p: 3,
-              borderRadius: 3,
-              boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-              height: '100%',
-            }}
-          >
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                mb: 3,
-              }}
-            >
-              <Typography variant="h6" fontWeight="bold" color="#1e3a8a">
-                Hiệu suất thực hiện OKR theo Bộ môn
-              </Typography>
-              <Button endIcon={<ArrowForward />} size="small">
-                Xem chi tiết
-              </Button>
-            </Box>
-
-            <Divider sx={{ mb: 2 }} />
-
-            {TOP_DEPARTMENTS.map((dept, index) => (
-              <DeptPerformanceRow key={index} dept={dept} />
-            ))}
-          </Paper>
-        </Grid>
-
-        {/* RIGHT COLUMN: NOTIFICATIONS / ALERTS */}
         <Grid size={{ xs: 12, md: 4 }}>
           <Paper
+            elevation={0}
             sx={{
               p: 3,
+              bgcolor: '#eff6ff',
               borderRadius: 3,
-              boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-              height: '100%',
+              border: '1px solid #dbeafe',
             }}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
-              <NotificationsActive color="warning" />
-              <Typography variant="h6" fontWeight="bold" color="#1e3a8a">
-                Cần chú ý
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 1 }}>
+              <Box sx={{ p: 1, bgcolor: 'white', borderRadius: 2 }}>
+                <Users size={24} color="#3b82f6" />
+              </Box>
+              <Typography fontWeight="bold" color="#1e3a8a">
+                Nhân sự
               </Typography>
             </Box>
-
-            <List>
-              {RECENT_ALERTS.map((alert) => (
-                <ListItem
-                  key={alert.id}
-                  disableGutters
-                  sx={{ py: 1.5, borderBottom: '1px dashed #e2e8f0' }}
-                >
-                  <ListItemAvatar>
-                    <Avatar
-                      sx={{
-                        bgcolor:
-                          alert.type === 'warning'
-                            ? '#fff7ed'
-                            : alert.type === 'success'
-                              ? '#f0fdf4'
-                              : '#eff6ff',
-                        color:
-                          alert.type === 'warning'
-                            ? '#ea580c'
-                            : alert.type === 'success'
-                              ? '#16a34a'
-                              : '#2563eb',
-                      }}
-                    >
-                      {alert.type === 'warning' ? (
-                        <Warning fontSize="small" />
-                      ) : alert.type === 'success' ? (
-                        <CheckCircle fontSize="small" />
-                      ) : (
-                        <NotificationsActive fontSize="small" />
-                      )}
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={alert.text}
-                    secondary={alert.time}
-                    primaryTypographyProps={{
-                      variant: 'body2',
-                      fontWeight: 500,
-                    }}
-                    secondaryTypographyProps={{ variant: 'caption' }}
-                  />
-                </ListItem>
-              ))}
-            </List>
-
-            <Box sx={{ mt: 3, p: 2, bgcolor: '#f8fafc', borderRadius: 2 }}>
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                display="block"
-                gutterBottom
-              >
-                💡 <b>Mẹo quản lý:</b> Các bộ môn có tiến độ dưới 50% cần được
-                nhắc nhở cập nhật Key Result hàng tuần.
+            {/* Dùng data thật hoặc fallback */}
+            <Typography
+              variant="h3"
+              fontWeight="bold"
+              sx={{ color: '#1e40af' }}
+            >
+              {selectedDept.memberCount || 0}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              Giảng viên / Cán bộ
+            </Typography>
+          </Paper>
+        </Grid>
+        <Grid size={{ xs: 12, md: 4 }}>
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              bgcolor: '#f0fdf4',
+              borderRadius: 3,
+              border: '1px solid #dcfce7',
+            }}
+          >
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 1 }}>
+              <Box sx={{ p: 1, bgcolor: 'white', borderRadius: 2 }}>
+                <TrendingUp size={24} color="#16a34a" />
+              </Box>
+              <Typography fontWeight="bold" color="#14532d">
+                KPI Trung bình
               </Typography>
             </Box>
+            <Typography
+              variant="h3"
+              fontWeight="bold"
+              sx={{ color: '#15803d' }}
+            >
+              --
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              Chờ dữ liệu kỳ đánh giá
+            </Typography>
+          </Paper>
+        </Grid>
+        <Grid size={{ xs: 12, md: 4 }}>
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              bgcolor: '#fff7ed',
+              borderRadius: 3,
+              border: '1px solid #ffedd5',
+            }}
+          >
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 1 }}>
+              <Box sx={{ p: 1, bgcolor: 'white', borderRadius: 2 }}>
+                <AlertCircle size={24} color="#ea580c" />
+              </Box>
+              <Typography fontWeight="bold" color="#7c2d12">
+                Cần xử lý
+              </Typography>
+            </Box>
+            <Typography
+              variant="h3"
+              fontWeight="bold"
+              sx={{ color: '#c2410c' }}
+            >
+              0
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              Hồ sơ chờ duyệt
+            </Typography>
           </Paper>
         </Grid>
       </Grid>
-    </Container>
+
+      {/* Chart (Placeholder cho Recharts) */}
+      <Paper
+        elevation={0}
+        sx={{ p: 3, borderRadius: 3, border: '1px solid #e2e8f0' }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
+          <BarChart3 size={20} className="text-gray-500" />
+          <Typography variant="h6" fontWeight="bold">
+            Tiến độ (Demo Chart)
+          </Typography>
+        </Box>
+        <Box
+          sx={{
+            height: 350,
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            bgcolor: '#f8fafc',
+            borderRadius: 2,
+          }}
+        >
+          <Typography color="text.secondary">
+            Biểu đồ sẽ hiển thị khi có dữ liệu đánh giá chi tiết của{' '}
+            {selectedDept.code}.
+          </Typography>
+        </Box>
+      </Paper>
+    </Box>
   );
 }

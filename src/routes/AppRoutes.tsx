@@ -1,42 +1,44 @@
-import React from "react";
-import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import React from 'react';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
 // Import Pages
-import Login from "../pages/Login";
-import Dashboard from "../pages/Dashboard";
-import AdminSettings from "../pages/AdminSetting";
-import ProfileSettings from "../pages/ProfileSetting";
-import Department from "../pages/Department/Department"; // 👈 Component này sẽ dùng cho mục "Nhân sự"
-import DepartmentOKR from "../pages/DepartmentOKR";
-import AuthCallback from "../pages/AuthCallback";
-import AcceptInvitation from "../components/AcceptInvitation";
+import Login from '../pages/Login';
+import Dashboard from '../pages/Dashboard';
+import AdminSettings from '../pages/Admin/AdminSetting';
+import ProfileSettings from '../pages/ProfileSetting';
+import Department from '../pages/Department/Department'; // 👈 Component này sẽ dùng cho mục "Nhân sự"
+import DepartmentOKR from '../pages/DepartmentOKR';
+import AuthCallback from '../pages/AuthCallback';
+import AcceptInvitation from '../components/AcceptInvitation';
+import PerformancePage from '../pages/Performance/PerformancePage';
+import DepartmentReviewPage from '../pages/Performance/DepartmentReviewPage';
 
 // Import Layouts
-import MainLayout from "../layouts/MainLayout";
-import DepartmentOverview from "../pages/DepartmentOverview";
-import NotFoundPage from "../pages/ErrorPage/NotFoundPage";
+import MainLayout from '../layouts/MainLayout';
+import DepartmentOverview from '../pages/DepartmentOverview';
+import NotFoundPage from '../pages/ErrorPage/NotFoundPage';
 
 // 1. Hook check đăng nhập
 function useAuth() {
-  const authToken = sessionStorage.getItem("authToken");
+  const authToken = sessionStorage.getItem('authToken');
   return !!authToken;
 }
 
 // 2. Component bảo vệ Admin
 function AdminRoute({ children }: { children: React.ReactNode }) {
-  const userStr = sessionStorage.getItem("user");
+  const userStr = sessionStorage.getItem('user');
   const user = userStr ? JSON.parse(userStr) : {};
   const roles = user.roles || [];
 
-  console.log("👮 AdminRoute Check:", { roles });
+  console.log('👮 AdminRoute Check:', { roles });
 
   const isAdmin =
-    roles.includes("SYSTEM_ADMIN") ||
-    roles.includes("admin") ||
-    roles.includes("SUPER_ADMIN");
+    roles.includes('SYSTEM_ADMIN') ||
+    roles.includes('admin') ||
+    roles.includes('SUPER_ADMIN');
 
   if (!isAdmin) {
-    console.warn("⛔ Access Denied: Not an Admin -> Redirecting to Dashboard");
+    console.warn('⛔ Access Denied: Not an Admin -> Redirecting to Dashboard');
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -99,12 +101,10 @@ export default function AppRoutes() {
         <Route path="/departments/overview" element={<DepartmentOverview />} />
         {/* OKR Bộ môn */}
         <Route path="/departments/okr" element={<DepartmentOKR />} />
-        {/* KPI Bộ môn */}
-        <Route
-          path="/departments/kpi"
-          element={<div>Trang KPI Bộ môn (Coming Soon)</div>}
-        />
 
+        {/* KPI Bộ môn */}
+        <Route path="/departments/kpi" element={<DepartmentReviewPage />} />
+        <Route path="/performance/evaluate" element={<PerformancePage />} />
         {/* 🔥 "NHÂN SỰ" - KẾT NỐI VÀO COMPONENT DEPARTMENT CŨ TẠI ĐÂY */}
         <Route path="/departments/users" element={<Department />} />
 
@@ -124,7 +124,7 @@ export default function AppRoutes() {
       {/* --- CATCH ALL --- */}
       {/* ✅ Route dành cho trường hợp navigate('/404') */}
       <Route path="/404" element={<NotFoundPage />} />
-      <Route path="*" element={<NotFoundPage />} />{" "}
+      <Route path="*" element={<NotFoundPage />} />{' '}
     </Routes>
   );
 }
