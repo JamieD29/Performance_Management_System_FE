@@ -164,14 +164,14 @@ const getColorfulInputStyle = (color: string) => ({
 export default function ProfileSetting() {
   const theme = useTheme();
   // Check màn hình nhỏ để chuyển tab về ngang nếu cần, nhưng ưu tiên dọc theo yêu cầu
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
   const [notification, setNotification] = useState<{
-    type: 'success' | 'error' | 'info';
+    type: "success" | "error" | "info";
     message: string;
   } | null>(null);
 
@@ -181,54 +181,61 @@ export default function ProfileSetting() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
+    name: "",
+    email: "",
     roles: [] as any[],
-    jobTitle: '',
-    academicRank: 'Không',
-    degree: 'Cử nhân',
+    jobTitle: "",
+    academicRank: "Không",
+    degree: "Cử nhân",
     teachingHours: 0,
-    awards: '',
-    intellectualProperty: '',
-    joinDate: '',
-    gender: 'Nam',
-    departmentID: '',
-    staffCode: '',
-    avatarUrl: '',
+    awards: "",
+    intellectualProperty: "",
+    joinDate: "",
+    gender: "Nam",
+    departmentID: "",
+    staffCode: "",
+    avatarUrl: "",
   });
 
   const [originalData, setOriginalData] = useState<any>(null);
+  interface FormErrors {
+    joinDate?: string;
+  }
+  const [errors, setErrors] = useState<FormErrors>({});
 
+  // Lấy ngày hiện tại và mốc lịch sử (Năm 1996 - năm thành lập trường KHTN)
+  const todayStr = new Date().toISOString().split("T")[0];
+  const minJoinDateStr = "1996-01-01";
   useEffect(() => {
     const initData = async () => {
       setLoading(true);
       try {
         const [deptRes, profileRes] = await Promise.all([
-          api.get('/departments'),
-          api.get('/users/profile'),
+          api.get("/departments"),
+          api.get("/users/profile"),
         ]);
         setDepartments(deptRes.data);
         const u = profileRes.data;
         const mappedData = {
-          name: u.name || '',
-          email: u.email || '',
+          name: u.name || "",
+          email: u.email || "",
           roles: u.roles || [],
-          jobTitle: u.jobTitle || '',
-          academicRank: u.academicRank || 'Không',
-          degree: u.degree || 'Cử nhân',
+          jobTitle: u.jobTitle || "",
+          academicRank: u.academicRank || "Không",
+          degree: u.degree || "Cử nhân",
           teachingHours: u.teachingHours || 0,
-          awards: u.awards || '',
-          intellectualProperty: u.intellectualProperty || '',
-          joinDate: u.joinDate ? u.joinDate.split('T')[0] : '',
-          gender: u.gender || 'Nam',
-          departmentID: u.department ? u.department.id : '',
-          staffCode: u.staffCode || '',
-          avatarUrl: u.avatarUrl || '',
+          awards: u.awards || "",
+          intellectualProperty: u.intellectualProperty || "",
+          joinDate: u.joinDate ? u.joinDate.split("T")[0] : "",
+          gender: u.gender || "Nam",
+          departmentID: u.department ? u.department.id : "",
+          staffCode: u.staffCode || "",
+          avatarUrl: u.avatarUrl || "",
         };
         setFormData(mappedData);
         setOriginalData(mappedData);
       } catch (error) {
-        console.error('Lỗi khởi tạo:', error);
+        console.error("Lỗi khởi tạo:", error);
       } finally {
         setLoading(false);
       }
@@ -238,6 +245,53 @@ export default function ProfileSetting() {
 
   const handleChange = (field: string, value: any) =>
     setFormData((prev) => ({ ...prev, [field]: value }));
+
+  // === THÊM MỚI: XỬ LÝ GIỜ GIẢNG ===
+  // 1. Lọc dữ liệu khi copy/paste hoặc gõ (chỉ giữ lại số 0-9)
+  const handleTeachingHoursChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    // Thay thế mọi thứ không phải là số (\D) thành rỗng
+    const sanitizedValue = e.target.value.replace(/[^0-9]/g, "");
+    handleChange("teachingHours", sanitizedValue);
+  };
+
+  // 2. Chặn ngay từ lúc gõ phím các ký tự e, E, +, -, .
+  const handlePreventInvalidChars = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+  ) => {
+    if (["e", "E", "+", "-", ".", ","].includes(e.key)) {
+      e.preventDefault();
+    }
+  };
+  // ===================================
+
+  // === THÊM MỚI: HÀM VALIDATE VÀ XỬ LÝ SỰ KIỆN ===
+  const validateJoinDate = (dateValue: string): string => {
+    if (!dateValue) return ""; // Nếu cho phép để trống. Nếu bắt buộc thì return "Vui lòng nhập ngày"
+
+    const selectedDate = new Date(dateValue);
+    const currentDate = new Date();
+    const minimumDate = new Date(minJoinDateStr);
+
+    if (selectedDate > currentDate) {
+      return "Ngày vào trường không thể ở tương lai.";
+    }
+    if (selectedDate < minimumDate) {
+      return `Không hợp lệ (phải từ năm ${minimumDate.getFullYear()}).`;
+    }
+    return "";
+  };
+
+  const handleJoinDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    handleChange("joinDate", value); // Vẫn update vào formData gốc
+
+    // Cập nhật trạng thái lỗi
+    const errorMsg = validateJoinDate(value);
+    setErrors((prev) => ({ ...prev, joinDate: errorMsg }));
+  };
+  // ===============================================
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -249,7 +303,7 @@ export default function ProfileSetting() {
 
   const handleEdit = () => {
     setIsEditing(true);
-    setNotification({ type: 'info', message: 'Chế độ chỉnh sửa đã bật.' });
+    setNotification({ type: "info", message: "Chế độ chỉnh sửa đã bật." });
   };
   const handleCancel = () => {
     setFormData(originalData);
@@ -259,13 +313,27 @@ export default function ProfileSetting() {
   };
 
   const handleSave = async () => {
+    // === CẬP NHẬT KIỂM TRA LỖI TRƯỚC KHI LƯU ===
+    const dateError = validateJoinDate(formData.joinDate);
+
     if (!formData.name || !formData.staffCode || !formData.departmentID) {
       setNotification({
-        type: 'error',
-        message: 'Vui lòng điền các trường bắt buộc (*)',
+        type: "error",
+        message: "Vui lòng điền các trường bắt buộc (*)",
       });
       return;
     }
+
+    if (dateError) {
+      setErrors((prev) => ({ ...prev, joinDate: dateError }));
+      setNotification({
+        type: "error",
+        message: "Vui lòng kiểm tra lại Ngày vào trường hợp lệ.",
+      });
+      setActiveTab(0); // Tự động chuyển về tab 1 để user thấy lỗi
+      return;
+    }
+    // ===========================================
     setSaving(true);
     try {
       const payload = {
@@ -282,20 +350,20 @@ export default function ProfileSetting() {
         staffCode: formData.staffCode,
         avatarUrl: formData.avatarUrl,
       };
-      await api.patch('/users/profile', payload);
-      setNotification({ type: 'success', message: 'Lưu thành công!' });
+      await api.patch("/users/profile", payload);
+      setNotification({ type: "success", message: "Lưu thành công!" });
       setOriginalData(formData);
       setAvatarFile(null);
       setIsEditing(false);
-      const userStr = sessionStorage.getItem('user');
+      const userStr = sessionStorage.getItem("user");
       if (userStr) {
         const user = JSON.parse(userStr);
         user.name = formData.name;
-        sessionStorage.setItem('user', JSON.stringify(user));
+        sessionStorage.setItem("user", JSON.stringify(user));
         setTimeout(() => window.location.reload(), 1000);
       }
     } catch (error) {
-      setNotification({ type: 'error', message: 'Lỗi khi lưu' });
+      setNotification({ type: "error", message: "Lỗi khi lưu" });
     } finally {
       setSaving(false);
     }
@@ -305,20 +373,20 @@ export default function ProfileSetting() {
     departments.find((d) => d.id === id)?.name || id;
 
   const getDisplayRole = (userRoles: any[]) => {
-    if (!userRoles || userRoles.length === 0) return 'Giảng viên';
+    if (!userRoles || userRoles.length === 0) return "Giảng viên";
     const roles = userRoles.map((r: any) =>
-      typeof r === 'string' ? r : r.slug || r.name,
+      typeof r === "string" ? r : r.slug || r.name,
     );
-    if (roles.includes('SUPER_ADMIN')) return 'Super Admin';
-    if (roles.includes('SYSTEM_ADMIN')) return 'System Admin';
-    if (roles.includes('DEAN')) return 'Trưởng bộ môn';
-    if (roles.includes('USER')) return 'Giảng viên';
-    return 'Cán bộ';
+    if (roles.includes("SUPER_ADMIN")) return "Super Admin";
+    if (roles.includes("SYSTEM_ADMIN")) return "System Admin";
+    if (roles.includes("DEAN")) return "Trưởng bộ môn";
+    if (roles.includes("USER")) return "Giảng viên";
+    return "Cán bộ";
   };
 
   const RequiredLabel = ({ label }: { label: string }) => (
     <span>
-      {label} <span style={{ color: '#ef4444' }}>*</span>
+      {label} <span style={{ color: "#ef4444" }}>*</span>
     </span>
   );
 
@@ -412,7 +480,7 @@ export default function ProfileSetting() {
                 <Box
                   sx={{
                     p: 3,
-                    bgcolor: '#fbfbfb',
+                    bgcolor: "#fbfbfb",
                     borderRadius: 4,
                     border: `1px solid ${THEME_COLORS.ACHIEVEMENT}40`,
                     mb: 3,
@@ -420,50 +488,50 @@ export default function ProfileSetting() {
                 >
                   <Box
                     sx={{
-                      display: 'flex',
-                      alignItems: 'center',
+                      display: "flex",
+                      alignItems: "center",
                       mb: 2,
                       color: THEME_COLORS.ACHIEVEMENT,
                     }}
                   >
-                    <EmojiEvents sx={{ color: '#eab308', mr: 1 }} />
+                    <EmojiEvents sx={{ color: "#eab308", mr: 1 }} />
                     <Typography fontWeight="bold" variant="subtitle2">
                       KHEN THƯỞNG & DANH HIỆU
                     </Typography>
                   </Box>
                   <Typography
                     variant="body1"
-                    sx={{ whiteSpace: 'pre-line', color: '#334155' }}
+                    sx={{ whiteSpace: "pre-line", color: "#334155" }}
                   >
-                    {formData.awards || 'Chưa có dữ liệu'}
+                    {formData.awards || "Chưa có dữ liệu"}
                   </Typography>
                 </Box>
                 <Box
                   sx={{
                     p: 3,
-                    bgcolor: '#fbfbfb',
+                    bgcolor: "#fbfbfb",
                     borderRadius: 4,
                     border: `1px solid ${THEME_COLORS.ACHIEVEMENT}40`,
                   }}
                 >
                   <Box
                     sx={{
-                      display: 'flex',
-                      alignItems: 'center',
+                      display: "flex",
+                      alignItems: "center",
                       mb: 2,
                       color: THEME_COLORS.ACHIEVEMENT,
                     }}
                   >
-                    <Lightbulb sx={{ color: '#eab308', mr: 1 }} />
+                    <Lightbulb sx={{ color: "#eab308", mr: 1 }} />
                     <Typography fontWeight="bold" variant="subtitle2">
                       SỞ HỮU TRÍ TUỆ / CÔNG TRÌNH
                     </Typography>
                   </Box>
                   <Typography
                     variant="body1"
-                    sx={{ whiteSpace: 'pre-line', color: '#334155' }}
+                    sx={{ whiteSpace: "pre-line", color: "#334155" }}
                   >
-                    {formData.intellectualProperty || 'Chưa có dữ liệu'}
+                    {formData.intellectualProperty || "Chưa có dữ liệu"}
                   </Typography>
                 </Box>
               </Grid>
@@ -477,8 +545,8 @@ export default function ProfileSetting() {
     // EDIT MODE
     const commonProps = {
       fullWidth: true,
-      variant: 'outlined' as const,
-      size: 'medium' as const,
+      variant: "outlined" as const,
+      size: "medium" as const,
     };
     switch (activeTab) {
       case 0:
@@ -489,7 +557,7 @@ export default function ProfileSetting() {
                 {...commonProps}
                 label={<RequiredLabel label="Họ và tên" />}
                 value={formData.name}
-                onChange={(e) => handleChange('name', e.target.value)}
+                onChange={(e) => handleChange("name", e.target.value)}
                 sx={getColorfulInputStyle(THEME_COLORS.IDENTITY)}
                 InputProps={{
                   startAdornment: (
@@ -505,7 +573,7 @@ export default function ProfileSetting() {
                 {...commonProps}
                 label={<RequiredLabel label="Mã cán bộ" />}
                 value={formData.staffCode}
-                onChange={(e) => handleChange('staffCode', e.target.value)}
+                onChange={(e) => handleChange("staffCode", e.target.value)}
                 sx={getColorfulInputStyle(THEME_COLORS.IDENTITY)}
                 InputProps={{
                   startAdornment: (
@@ -522,7 +590,7 @@ export default function ProfileSetting() {
                 disabled
                 label="Email"
                 value={formData.email}
-                sx={{ ...getColorfulInputStyle('#94a3b8'), bgcolor: '#f1f5f9' }}
+                sx={{ ...getColorfulInputStyle("#94a3b8"), bgcolor: "#f1f5f9" }}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -541,7 +609,7 @@ export default function ProfileSetting() {
                 <Select
                   value={formData.gender}
                   label="Giới tính"
-                  onChange={(e) => handleChange('gender', e.target.value)}
+                  onChange={(e) => handleChange("gender", e.target.value)}
                   startAdornment={
                     <InputAdornment position="start" sx={{ mr: 2, ml: 1 }}>
                       <Wc fontSize="small" />
@@ -562,8 +630,17 @@ export default function ProfileSetting() {
                 type="date"
                 label="Ngày vào trường"
                 InputLabelProps={{ shrink: true }}
-                value={formData.joinDate}
-                onChange={(e) => handleChange('joinDate', e.target.value)}
+                // === THÊM THUỘC TÍNH NÀY ===
+                inputProps={{
+                  max: todayStr,
+                  min: minJoinDateStr,
+                }}
+                value={formData.joinDate || ""}
+                onChange={handleJoinDateChange} // Thay bằng hàm handler mới
+                error={!!errors.joinDate} // Hiển thị viền đỏ
+                helperText={errors.joinDate} // Hiển thị dòng text lỗi
+                // ===========================
+
                 sx={getColorfulInputStyle(THEME_COLORS.IDENTITY)}
               />
             </Grid>
@@ -581,9 +658,9 @@ export default function ProfileSetting() {
                   <RequiredLabel label="Đơn vị / Bộ môn" />
                 </InputLabel>
                 <Select
-                  value={formData.departmentID || ''}
+                  value={formData.departmentID || ""}
                   label={<RequiredLabel label="Đơn vị / Bộ môn" />}
-                  onChange={(e) => handleChange('departmentID', e.target.value)}
+                  onChange={(e) => handleChange("departmentID", e.target.value)}
                   startAdornment={
                     <InputAdornment position="start" sx={{ mr: 2, ml: 1 }}>
                       <Business fontSize="small" />
@@ -607,7 +684,7 @@ export default function ProfileSetting() {
                 <Select
                   value={formData.jobTitle}
                   label="Chức vụ"
-                  onChange={(e) => handleChange('jobTitle', e.target.value)}
+                  onChange={(e) => handleChange("jobTitle", e.target.value)}
                   startAdornment={
                     <InputAdornment position="start" sx={{ mr: 2, ml: 1 }}>
                       <Work fontSize="small" />
@@ -631,7 +708,7 @@ export default function ProfileSetting() {
                 <Select
                   value={formData.degree}
                   label="Học vị"
-                  onChange={(e) => handleChange('degree', e.target.value)}
+                  onChange={(e) => handleChange("degree", e.target.value)}
                   startAdornment={
                     <InputAdornment position="start" sx={{ mr: 2, ml: 1 }}>
                       <School fontSize="small" />
@@ -655,7 +732,7 @@ export default function ProfileSetting() {
                 <Select
                   value={formData.academicRank}
                   label="Học hàm"
-                  onChange={(e) => handleChange('academicRank', e.target.value)}
+                  onChange={(e) => handleChange("academicRank", e.target.value)}
                 >
                   {ACADEMIC_RANKS.map((r) => (
                     <MenuItem key={r} value={r}>
@@ -671,7 +748,15 @@ export default function ProfileSetting() {
                 type="number"
                 label="Giờ giảng/năm"
                 value={formData.teachingHours}
-                onChange={(e) => handleChange('teachingHours', e.target.value)}
+                // === THAY ĐỔI 3 DÒNG NÀY ===
+                onChange={handleTeachingHoursChange}
+                onKeyDown={handlePreventInvalidChars}
+                inputProps={{
+                  min: 0,
+                  step: 1, // Chỉ cho phép tăng/giảm số nguyên
+                }}
+                // ===========================
+
                 sx={getColorfulInputStyle(THEME_COLORS.WORK)}
                 InputProps={{
                   startAdornment: (
@@ -699,12 +784,12 @@ export default function ProfileSetting() {
                 rows={3}
                 label="Khen thưởng & Danh hiệu"
                 value={formData.awards}
-                onChange={(e) => handleChange('awards', e.target.value)}
+                onChange={(e) => handleChange("awards", e.target.value)}
                 sx={getColorfulInputStyle(THEME_COLORS.ACHIEVEMENT)}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start" sx={{ mt: 1 }}>
-                      <EmojiEvents sx={{ color: '#eab308' }} />
+                      <EmojiEvents sx={{ color: "#eab308" }} />
                     </InputAdornment>
                   ),
                 }}
@@ -718,13 +803,13 @@ export default function ProfileSetting() {
                 label="Sở hữu trí tuệ"
                 value={formData.intellectualProperty}
                 onChange={(e) =>
-                  handleChange('intellectualProperty', e.target.value)
+                  handleChange("intellectualProperty", e.target.value)
                 }
                 sx={getColorfulInputStyle(THEME_COLORS.ACHIEVEMENT)}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start" sx={{ mt: 1 }}>
-                      <Lightbulb sx={{ color: '#eab308' }} />
+                      <Lightbulb sx={{ color: "#eab308" }} />
                     </InputAdornment>
                   ),
                 }}
@@ -739,15 +824,15 @@ export default function ProfileSetting() {
 
   if (loading)
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 5 }}>
+      <Box sx={{ display: "flex", justifyContent: "center", p: 5 }}>
         <CircularProgress />
       </Box>
     );
 
   return (
-    <Box sx={{ bgcolor: '#f8fafc', minHeight: '100vh', pb: 8 }}>
-      <Box sx={{ height: 200, bgcolor: '#3f829f', mb: -10 }} />
-      <Box sx={{ maxWidth: 1200, mx: 'auto', px: 2 }}>
+    <Box sx={{ bgcolor: "#f8fafc", minHeight: "100vh", pb: 8 }}>
+      <Box sx={{ height: 200, bgcolor: "#3f829f", mb: -10 }} />
+      <Box sx={{ maxWidth: 1200, mx: "auto", px: 2 }}>
         {/* HEADER CARD */}
         <Paper
           elevation={3}
@@ -755,16 +840,16 @@ export default function ProfileSetting() {
             borderRadius: 4,
             p: 3,
             mb: 3,
-            display: 'flex',
-            flexDirection: { xs: 'column', md: 'row' },
-            alignItems: 'center',
-            position: 'relative',
-            bgcolor: '#fff',
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            alignItems: "center",
+            position: "relative",
+            bgcolor: "#fff",
           }}
         >
           <Box
             sx={{
-              position: 'relative',
+              position: "relative",
               mt: -8,
               mb: { xs: 2, md: 0 },
               mr: { md: 4 },
@@ -774,9 +859,9 @@ export default function ProfileSetting() {
               sx={{
                 width: 140,
                 height: 140,
-                border: '4px solid white',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                bgcolor: '#3b82f6',
+                border: "4px solid white",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                bgcolor: "#3b82f6",
                 fontSize: 50,
               }}
               src={previewAvatar || formData.avatarUrl || undefined}
@@ -786,10 +871,10 @@ export default function ProfileSetting() {
             {isEditing && (
               <IconButton
                 sx={{
-                  position: 'absolute',
+                  position: "absolute",
                   bottom: 5,
                   right: 5,
-                  bgcolor: '#fff',
+                  bgcolor: "#fff",
                   boxShadow: 2,
                 }}
                 onClick={() => fileInputRef.current?.click()}
@@ -805,30 +890,30 @@ export default function ProfileSetting() {
               onChange={handleAvatarChange}
             />
           </Box>
-          <Box sx={{ flexGrow: 1, textAlign: { xs: 'center', md: 'left' } }}>
+          <Box sx={{ flexGrow: 1, textAlign: { xs: "center", md: "left" } }}>
             <Typography
               variant="h4"
               fontWeight="800"
-              sx={{ color: '#0f172a', mb: 0.5 }}
+              sx={{ color: "#0f172a", mb: 0.5 }}
             >
-              {formData.name || 'Người dùng'}
+              {formData.name || "Người dùng"}
             </Typography>
             <Box
               sx={{
-                display: 'flex',
+                display: "flex",
                 gap: 1,
-                justifyContent: { xs: 'center', md: 'flex-start' },
-                alignItems: 'center',
-                color: '#64748b',
+                justifyContent: { xs: "center", md: "flex-start" },
+                alignItems: "center",
+                color: "#64748b",
               }}
             >
-              {getDisplayRole(formData.roles) === 'Super Admin' ? (
+              {getDisplayRole(formData.roles) === "Super Admin" ? (
                 <Chip
                   icon={<AdminPanelSettings fontSize="small" />}
                   label="Super Admin"
                   color="error"
                   size="small"
-                  sx={{ fontWeight: 'bold' }}
+                  sx={{ fontWeight: "bold" }}
                 />
               ) : (
                 <Typography fontWeight="500">
@@ -849,20 +934,20 @@ export default function ProfileSetting() {
                 onClick={handleEdit}
                 sx={{
                   borderRadius: 3,
-                  textTransform: 'none',
-                  fontWeight: 'bold',
+                  textTransform: "none",
+                  fontWeight: "bold",
                 }}
               >
                 Chỉnh sửa
               </Button>
             ) : (
-              <Box sx={{ display: 'flex', gap: 1 }}>
+              <Box sx={{ display: "flex", gap: 1 }}>
                 <Button
                   variant="outlined"
                   color="error"
                   startIcon={<Cancel />}
                   onClick={handleCancel}
-                  sx={{ borderRadius: 3, textTransform: 'none' }}
+                  sx={{ borderRadius: 3, textTransform: "none" }}
                 >
                   Hủy
                 </Button>
@@ -874,8 +959,8 @@ export default function ProfileSetting() {
                   disabled={saving}
                   sx={{
                     borderRadius: 3,
-                    textTransform: 'none',
-                    fontWeight: 'bold',
+                    textTransform: "none",
+                    fontWeight: "bold",
                   }}
                 >
                   Lưu
@@ -888,8 +973,8 @@ export default function ProfileSetting() {
         {/* --- MAIN LAYOUT: VERTICAL TABS (Sidebar) + CONTENT --- */}
         <Box
           sx={{
-            display: 'flex',
-            flexDirection: { xs: 'column', md: 'row' },
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
             gap: 3,
           }}
         >
@@ -899,47 +984,47 @@ export default function ProfileSetting() {
             sx={{
               minWidth: 260,
               borderRadius: 4,
-              overflow: 'hidden',
-              border: '1px solid #e2e8f0',
-              bgcolor: '#fff',
-              height: 'fit-content',
+              overflow: "hidden",
+              border: "1px solid #e2e8f0",
+              bgcolor: "#fff",
+              height: "fit-content",
             }}
           >
             <Typography
               variant="subtitle2"
               sx={{
                 p: 2,
-                color: '#94a3b8',
-                fontWeight: 'bold',
-                textTransform: 'uppercase',
+                color: "#94a3b8",
+                fontWeight: "bold",
+                textTransform: "uppercase",
                 letterSpacing: 1,
               }}
             >
               Danh mục
             </Typography>
             <Tabs
-              orientation={isMobile ? 'horizontal' : 'vertical'}
+              orientation={isMobile ? "horizontal" : "vertical"}
               variant="scrollable"
               value={activeTab}
               onChange={(e, v) => setActiveTab(v)}
               sx={{
-                borderRight: { md: '1px solid #f1f5f9' },
-                '& .MuiTabs-indicator': { display: 'none' }, // Ẩn thanh gạch dưới
-                '& .MuiTab-root': {
-                  alignItems: 'center',
-                  justifyContent: 'flex-start',
-                  textAlign: 'left',
-                  textTransform: 'none',
-                  fontWeight: '600',
-                  fontSize: '0.95rem',
+                borderRight: { md: "1px solid #f1f5f9" },
+                "& .MuiTabs-indicator": { display: "none" }, // Ẩn thanh gạch dưới
+                "& .MuiTab-root": {
+                  alignItems: "center",
+                  justifyContent: "flex-start",
+                  textAlign: "left",
+                  textTransform: "none",
+                  fontWeight: "600",
+                  fontSize: "0.95rem",
                   minHeight: 48,
                   mx: 1.5,
                   my: 0.5,
                   borderRadius: 2, // Bo tròn tab (8px)
-                  color: '#64748b',
-                  transition: 'all 0.2s',
-                  '&:hover': { bgcolor: '#f8fafc', color: '#334155' },
-                  '&.Mui-selected': {
+                  color: "#64748b",
+                  transition: "all 0.2s",
+                  "&:hover": { bgcolor: "#f8fafc", color: "#334155" },
+                  "&.Mui-selected": {
                     bgcolor:
                       activeTab === 0
                         ? alpha(THEME_COLORS.IDENTITY, 0.1)
@@ -952,7 +1037,7 @@ export default function ProfileSetting() {
                         : activeTab === 1
                           ? THEME_COLORS.WORK
                           : THEME_COLORS.ACHIEVEMENT,
-                    fontWeight: 'bold',
+                    fontWeight: "bold",
                   },
                 },
               }}
@@ -982,28 +1067,28 @@ export default function ProfileSetting() {
             sx={{
               flexGrow: 1,
               borderRadius: 4,
-              border: '1px solid #e2e8f0',
-              bgcolor: '#fff',
+              border: "1px solid #e2e8f0",
+              bgcolor: "#fff",
               minHeight: 400,
             }}
           >
             <Box
               sx={{
                 p: 3,
-                borderBottom: '1px solid #f1f5f9',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
+                borderBottom: "1px solid #f1f5f9",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
               }}
             >
               <Typography
                 variant="h6"
                 fontWeight="bold"
-                sx={{ color: '#1e293b' }}
+                sx={{ color: "#1e293b" }}
               >
-                {activeTab === 0 && 'Thông tin cá nhân'}
-                {activeTab === 1 && 'Công việc và Học vấn'}
-                {activeTab === 2 && 'Thành tích và Nghiên cứu'}
+                {activeTab === 0 && "Thông tin cá nhân"}
+                {activeTab === 1 && "Công việc và Học vấn"}
+                {activeTab === 2 && "Thành tích và Nghiên cứu"}
               </Typography>
               {/* <Chip
                 size="small"
@@ -1024,12 +1109,12 @@ export default function ProfileSetting() {
         open={!!notification}
         autoHideDuration={3000}
         onClose={() => setNotification(null)}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <Alert
           severity={notification?.type as any}
           onClose={() => setNotification(null)}
-          sx={{ width: '100%', boxShadow: 3 }}
+          sx={{ width: "100%", boxShadow: 3 }}
         >
           {notification?.message}
         </Alert>
