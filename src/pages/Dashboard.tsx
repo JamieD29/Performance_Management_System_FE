@@ -69,7 +69,14 @@ export default function Dashboard() {
   }, []);
 
   const loadDashboardData = async () => {
+    const token = sessionStorage.getItem('accessToken');
+    if (!token || !user.id) {
+      setLoading(false);
+      return;
+    }
+
     try {
+      setLoading(true);
       // 1. Lấy kỳ đánh giá mới nhất
       const cycles = await performanceService.getCycles();
       if (cycles.length === 0) {

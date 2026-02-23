@@ -107,7 +107,7 @@ export default function DepartmentOverview() {
 
         <Box sx={{ mb: 4 }}>
           <Typography variant="h4" fontWeight="bold" sx={{ color: '#1e293b' }}>
-            Tổng quan Khoa
+            Tổng quan bộ môn
           </Typography>
           <Typography color="text.secondary">
             Danh sách các bộ môn trực thuộc khoa ({departments.length})

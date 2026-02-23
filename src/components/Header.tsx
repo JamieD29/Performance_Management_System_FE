@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { api } from '../services/api';
 import {
   AppBar,
   Toolbar,
@@ -52,9 +53,22 @@ export default function Header({ onToggleSidebar, user }: HeaderProps) {
     displayRole = 'System Admin';
   else if (normalizedRoles.length > 0) displayRole = normalizedRoles[0];
 
-  const handleLogout = () => {
-    sessionStorage.clear();
-    navigate('/login', { replace: true });
+  const handleLogout = async () => {
+    try {
+      await api.post('/auth/logout');
+    } catch (error) {
+      console.log('Lỗi báo Backend (bỏ qua)');
+    } finally {
+      // 1. Dọn sạch ổ cứng
+      sessionStorage.clear();
+      localStorage.clear();
+      if (typeof setAnchorEl === 'function') setAnchorEl(null);
+
+      // 2. DÙNG SETTIMEOUT ĐỂ ÉP CHUYỂN TRANG BẤT CHẤP LỖI REACT
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 100); // Trễ 0.1s để văng khỏi call stack bị lỗi
+    }
   };
 
   return (
@@ -169,7 +183,7 @@ export default function Header({ onToggleSidebar, user }: HeaderProps) {
           )}
           <Divider />
           <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
-            <Logout fontSize="small" sx={{ mr: 1.5 }} /> Sign Out
+            <Logout fontSize="small" sx={{ mr: 1.5 }} /> Đăng xuất
           </MenuItem>
         </Menu>
       </Toolbar>
