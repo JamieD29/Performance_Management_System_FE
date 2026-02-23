@@ -7,7 +7,7 @@ import Dashboard from '../pages/Dashboard';
 import AdminSettings from '../pages/Admin/AdminSetting';
 // import ProfileSettings from '../pages/ProfileSetting';
 import Department from '../pages/Department/Department'; // 👈 Component này sẽ dùng cho mục "Nhân sự"
-import DepartmentOKR from '../pages/DepartmentOKR';
+import DepartmentOKR from '../pages/DepartmentOKR/departmentOKR';
 import AuthCallback from '../pages/AuthCallback';
 import AcceptInvitation from '../components/AcceptInvitation';
 import PerformancePage from '../pages/Performance/PerformancePage';
