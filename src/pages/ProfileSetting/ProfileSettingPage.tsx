@@ -8,23 +8,28 @@ import {
   Tab,
   Paper,
   Fade,
+  CircularProgress,
   Snackbar,
   Alert,
-  CircularProgress,
   useTheme,
   useMediaQuery,
+  alpha,
 } from "@mui/material";
-import { Person, WorkHistory, EmojiEvents } from "@mui/icons-material";
+import { Person, School, Star } from "@mui/icons-material";
 
 // Import Logic và Components con
 import { useProfileLogic } from "./useProfileLogic";
+import { THEME_COLORS } from "./profile.constants";
 import ProfileHeader from "./components/ProfileHeader";
 import PersonalInfoTab from "./components/PersonalInfoTab";
 import WorkEducationTab from "./components/WorkEducationTab";
 import AchievementsTab from "./components/AchievementsTab";
 
 export default function ProfileSetting() {
-  // 1. GỌI "BỘ NÃO" ĐỂ LẤY DATA VÀ CÁC HÀM XỬ LÝ
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
+  // 1. GỌI HOOK LẤY DATA VÀ LOGIC
   const {
     activeTab,
     setActiveTab,
@@ -36,6 +41,8 @@ export default function ProfileSetting() {
     setNotification,
     formData,
     errors,
+    departments,
+    getDepartmentName, // <-- Đã lấy 2 biến này ra
     handleChange,
     handleJoinDateChange,
     handleTeachingHoursChange,
@@ -46,21 +53,10 @@ export default function ProfileSetting() {
     handleSave,
   } = useProfileLogic();
 
-  // Responsive: Chuyển Tab dọc/ngang tùy kích thước màn hình
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-
-  // 2. HIỂN THỊ LOADING KHI ĐANG FETCH API LÚC MỚI VÀO
+  // 2. HIỂN THỊ LOADING LÚC MỚI VÀO
   if (loading) {
     return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "60vh",
-        }}
-      >
+      <Box sx={{ display: "flex", justifyContent: "center", p: 5 }}>
         <CircularProgress />
       </Box>
     );
@@ -68,90 +64,140 @@ export default function ProfileSetting() {
 
   // 3. RENDER GIAO DIỆN CHÍNH
   return (
-    <Box sx={{ maxWidth: 1200, margin: "0 auto", p: { xs: 2, md: 4 } }}>
-      {/* --- PHẦN HEADER (AVATAR, TÊN, NÚT LƯU) --- */}
-      <ProfileHeader
-        formData={formData}
-        isEditing={isEditing}
-        saving={saving}
-        onEdit={() => setIsEditing(true)}
-        onSave={handleSave}
-        onCancel={handleCancel}
-        onAvatarChange={handleAvatarChange}
-      />
-
-      {/* --- PHẦN THÂN: TABS VÀ NỘI DUNG --- */}
+    <Box sx={{ bgcolor: "#f8fafc", minHeight: "100vh", pb: 8 }}>
+      {/* BANNER XANH PHÍA TRÊN */}
       <Box
         sx={{
-          display: "flex",
-          flexDirection: { xs: "column", md: "row" },
-          gap: 4,
+          height: 220, // Tăng chiều cao lên chút cho thoáng
+          background: "linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%)",
+          borderRadius: { xs: "20px", md: "40px" },
+          mb: -12, // Đẩy content lên trên banner một chút
+          boxShadow: "0 4px 20px rgba(37, 99, 235, 0.15)", // Đổ bóng nhẹ
         }}
-      >
-        {/* CỘT TRÁI: DANH SÁCH TABS */}
-        <Box sx={{ width: { xs: "100%", md: "280px" }, flexShrink: 0 }}>
-          <Tabs
-            orientation={isMobile ? "horizontal" : "vertical"}
-            variant={isMobile ? "scrollable" : "standard"}
-            value={activeTab}
-            onChange={(e, newValue) => setActiveTab(newValue)}
-            sx={{
-              borderRight: isMobile ? 0 : 1,
-              borderBottom: isMobile ? 1 : 0,
-              borderColor: "divider",
-              "& .MuiTab-root": {
-                alignItems: isMobile ? "center" : "flex-start",
-                textAlign: "left",
-                py: 2,
-                px: 3,
-                minHeight: "64px",
-                textTransform: "none",
-                fontSize: "1rem",
-                fontWeight: 600,
-                color: "#64748b",
-                transition: "all 0.3s",
-                "&.Mui-selected": {
-                  color: "#0ea5e9",
-                  bgcolor: "rgba(14, 165, 233, 0.05)",
-                },
-              },
-            }}
-          >
-            <Tab
-              icon={<Person sx={{ mr: isMobile ? 0 : 2 }} />}
-              iconPosition={isMobile ? "top" : "start"}
-              label="Thông tin cá nhân"
-            />
-            <Tab
-              icon={<WorkHistory sx={{ mr: isMobile ? 0 : 2 }} />}
-              iconPosition={isMobile ? "top" : "start"}
-              label="Công việc & Học vấn"
-            />
-            <Tab
-              icon={<EmojiEvents sx={{ mr: isMobile ? 0 : 2 }} />}
-              iconPosition={isMobile ? "top" : "start"}
-              label="Thành tích & Nghiên cứu"
-            />
-          </Tabs>
-        </Box>
+      />
 
-        {/* CỘT PHẢI: NỘI DUNG TAB ĐƯỢC CHỌN */}
-        <Box sx={{ flexGrow: 1 }}>
+      <Box sx={{ maxWidth: 1200, mx: "auto", px: 2 }}>
+        {/* --- KHU VỰC HEADER (Đã truyền getDepartmentName) --- */}
+        <ProfileHeader
+          formData={formData}
+          isEditing={isEditing}
+          saving={saving}
+          onEdit={() => setIsEditing(true)}
+          onSave={handleSave}
+          onCancel={handleCancel}
+          onAvatarChange={handleAvatarChange}
+          getDepartmentName={getDepartmentName} // <-- TRUYỀN XUỐNG ĐÂY
+        />
+
+        {/* --- MAIN LAYOUT: VERTICAL TABS + CONTENT --- */}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            gap: 3,
+          }}
+        >
+          {/* MỤC TAB DỌC (DANH MỤC) */}
           <Paper
             elevation={0}
             sx={{
+              minWidth: 260,
               borderRadius: 4,
-              border: "1px solid #e2e8f0",
               overflow: "hidden",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.03)",
+              border: "1px solid #e2e8f0",
+              bgcolor: "#fff",
+              height: "fit-content",
             }}
           >
-            {/* Tiêu đề Tab đang mở */}
+            <Typography
+              variant="subtitle2"
+              sx={{
+                p: 2,
+                color: "#94a3b8",
+                fontWeight: "bold",
+                textTransform: "uppercase",
+                letterSpacing: 1,
+              }}
+            >
+              Danh mục
+            </Typography>
+            <Tabs
+              orientation={isMobile ? "horizontal" : "vertical"}
+              variant="scrollable"
+              value={activeTab}
+              onChange={(e, v) => setActiveTab(v)}
+              sx={{
+                borderRight: { md: "1px solid #f1f5f9" },
+                "& .MuiTabs-indicator": { display: "none" }, // Ẩn thanh gạch dưới
+                "& .MuiTab-root": {
+                  alignItems: "center",
+                  justifyContent: "flex-start",
+                  textAlign: "left",
+                  textTransform: "none",
+                  fontWeight: "600",
+                  fontSize: "0.95rem",
+                  minHeight: 48,
+                  mx: 1.5,
+                  my: 0.5,
+                  borderRadius: 2,
+                  color: "#64748b",
+                  transition: "all 0.2s",
+                  "&:hover": { bgcolor: "#f8fafc", color: "#334155" },
+                  "&.Mui-selected": {
+                    bgcolor:
+                      activeTab === 0
+                        ? alpha(THEME_COLORS.IDENTITY, 0.1)
+                        : activeTab === 1
+                          ? alpha(THEME_COLORS.WORK, 0.1)
+                          : alpha(THEME_COLORS.ACHIEVEMENT, 0.1),
+                    color:
+                      activeTab === 0
+                        ? THEME_COLORS.IDENTITY
+                        : activeTab === 1
+                          ? THEME_COLORS.WORK
+                          : THEME_COLORS.ACHIEVEMENT,
+                    fontWeight: "bold",
+                  },
+                },
+              }}
+            >
+              <Tab
+                label="Thông tin cá nhân"
+                icon={<Person />}
+                iconPosition="start"
+              />
+              <Tab
+                label="Công việc & Học vấn"
+                icon={<School />}
+                iconPosition="start"
+              />
+              <Tab
+                label="Thành tích & Khác"
+                icon={<Star />}
+                iconPosition="start"
+              />
+            </Tabs>
+            <Box sx={{ mb: 2 }} />
+          </Paper>
+
+          {/* CỘT PHẢI: NỘI DUNG TỪNG TAB */}
+          <Paper
+            elevation={0}
+            sx={{
+              flexGrow: 1,
+              borderRadius: 4,
+              border: "1px solid #e2e8f0",
+              bgcolor: "#fff",
+              minHeight: 400,
+            }}
+          >
             <Box
               sx={{
                 p: 3,
                 borderBottom: "1px solid #f1f5f9",
-                bgcolor: "#f8fafc",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
               }}
             >
               <Typography
@@ -164,11 +210,10 @@ export default function ProfileSetting() {
                 {activeTab === 2 && "Thành tích và Nghiên cứu"}
               </Typography>
             </Box>
-
-            {/* Khung chứa các Component con */}
-            <Box sx={{ p: { xs: 2, sm: 4 } }}>
+            <Box sx={{ p: 4 }}>
               <Fade in={true} key={activeTab}>
                 <Box>
+                  {/* TAB 0: THÔNG TIN CÁ NHÂN */}
                   {activeTab === 0 && (
                     <PersonalInfoTab
                       formData={formData}
@@ -178,6 +223,8 @@ export default function ProfileSetting() {
                       handleJoinDateChange={handleJoinDateChange}
                     />
                   )}
+
+                  {/* TAB 1: CÔNG VIỆC VÀ HỌC VẤN (Đã truyền departments) */}
                   {activeTab === 1 && (
                     <WorkEducationTab
                       formData={formData}
@@ -186,8 +233,12 @@ export default function ProfileSetting() {
                       handleTeachingHoursChange={handleTeachingHoursChange}
                       handlePreventInvalidChars={handlePreventInvalidChars}
                       handleSmartPaste={handleSmartPaste}
+                      departments={departments} // <-- TRUYỀN XUỐNG ĐÂY
+                      getDepartmentName={getDepartmentName} // <-- TRUYỀN XUỐNG ĐÂY
                     />
                   )}
+
+                  {/* TAB 2: THÀNH TÍCH VÀ NGHIÊN CỨU */}
                   {activeTab === 2 && (
                     <AchievementsTab
                       formData={formData}
@@ -202,18 +253,17 @@ export default function ProfileSetting() {
         </Box>
       </Box>
 
-      {/* --- THÔNG BÁO (SNACKBAR) --- */}
+      {/* THÔNG BÁO SNACKBAR */}
       <Snackbar
         open={!!notification}
-        autoHideDuration={4000}
+        autoHideDuration={3000}
         onClose={() => setNotification(null)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <Alert
-          severity={(notification?.type as any) || "info"}
+          severity={notification?.type as any}
           onClose={() => setNotification(null)}
-          sx={{ width: "100%", boxShadow: 3, borderRadius: 2 }}
-          variant="filled"
+          sx={{ width: "100%", boxShadow: 3 }}
         >
           {notification?.message}
         </Alert>

@@ -1,12 +1,12 @@
 // src/pages/ProfileSetting/useProfileLogic.ts
 
 import { useState, useEffect } from "react";
-// Lưu ý: Hãy đảm bảo đường dẫn import api đúng với project của bạn
+// Lưu ý: Đảm bảo đường dẫn import api đúng với project của bạn
 import { api } from "../../services/api";
 import type {
-    UserProfileForm,
-    FormErrors,
-    NotificationState,
+  UserProfileForm,
+  FormErrors,
+  NotificationState,
 } from "./profile.types";
 
 export const useProfileLogic = () => {
@@ -30,6 +30,9 @@ export const useProfileLogic = () => {
   );
   const [errors, setErrors] = useState<FormErrors>({});
 
+  // Bổ sung State lưu danh sách Đơn vị / Bộ môn
+  const [departments, setDepartments] = useState<any[]>([]);
+
   const minJoinDateStr = "1996-01-01"; // Mốc thời gian hợp lệ cho ngày vào trường
 
   // --------------------------------------------------------
@@ -39,15 +42,28 @@ export const useProfileLogic = () => {
     const fetchProfile = async () => {
       try {
         setLoading(true);
-        // Thay đổi endpoint '/users/profile' theo đúng API thực tế của Backend bạn
-        const res = await api.get("/users/profile");
 
-        setFormData(res.data);
-        setOriginalData(res.data); // Lưu lại bản gốc để dùng cho nút "Hủy"
+        // Gọi song song 2 API: Lấy danh sách phòng ban và Lấy thông tin user
+        const [deptRes, profileRes] = await Promise.all([
+          api.get("/departments"),
+          api.get("/users/profile"),
+        ]);
+
+        setDepartments(deptRes.data);
+
+        // Xử lý map dữ liệu department vào formData cho chuẩn
+        const u = profileRes.data;
+        const mappedData = {
+          ...u,
+          departmentID: u.department ? u.department.id : u.departmentID || "",
+        };
+
+        setFormData(mappedData);
+        setOriginalData(mappedData);
       } catch (error) {
         setNotification({
           type: "error",
-          message: "Lỗi khi tải thông tin cá nhân. Vui lòng thử lại.",
+          message: "Lỗi khi tải thông tin. Vui lòng thử lại.",
         });
       } finally {
         setLoading(false);
@@ -57,12 +73,17 @@ export const useProfileLogic = () => {
     fetchProfile();
   }, []);
 
+  // --- Hàm lấy tên phòng ban từ ID ---
+  const getDepartmentName = (id: string) => {
+    return departments.find((d) => d.id === id)?.name || id || "Chưa cập nhật";
+  };
+
   // --------------------------------------------------------
   // 3. CÁC HÀM CẬP NHẬT DỮ LIỆU & VALIDATE CHUNG
   // --------------------------------------------------------
   const handleChange = (field: keyof UserProfileForm, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    // Nếu đang có lỗi ở field này mà user gõ lại thì xoá lỗi đi cho đẹp
+    // Xóa lỗi nếu user đang gõ lại trường đó
     if (errors[field as keyof FormErrors]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
@@ -123,7 +144,7 @@ export const useProfileLogic = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Gán tạm ảnh preview để user xem trước (Có thể cần gọi API upload riêng ở đây tùy Backend)
+    // Gán tạm ảnh preview để user xem trước
     const previewUrl = URL.createObjectURL(file);
     handleChange("avatarUrl", previewUrl);
   };
@@ -141,13 +162,13 @@ export const useProfileLogic = () => {
     // 1. Kiểm tra lỗi validate trước khi cho lưu
     const dateError = validateJoinDate(formData.joinDate);
 
-    // Kiểm tra trường bắt buộc
-    if (!formData.name || !formData.staffCode) {
+    // Kiểm tra trường bắt buộc (Cập nhật thêm bắt buộc bộ môn nếu cần)
+    if (!formData.name || !formData.staffCode || !formData.departmentID) {
       setNotification({
         type: "error",
         message: "Vui lòng điền đầy đủ các trường bắt buộc (*)",
       });
-      setActiveTab(0); // Nhảy về tab đầu tiên để user thấy
+      setActiveTab(0); // Nhảy về tab đầu tiên (hoặc tab chứa lỗi)
       return;
     }
 
@@ -164,7 +185,6 @@ export const useProfileLogic = () => {
     // 2. Tiến hành gọi API lưu dữ liệu
     setSaving(true);
     try {
-      // Thay đổi endpoint '/users/profile' theo backend thực tế
       await api.put("/users/profile", formData);
 
       setOriginalData(formData); // Cập nhật lại bản gốc bằng data mới
@@ -198,6 +218,8 @@ export const useProfileLogic = () => {
     setNotification,
     formData,
     errors,
+    departments, // Xuất danh sách phòng ban
+    getDepartmentName, // Xuất hàm lấy tên phòng ban
 
     // Handlers
     handleChange,

@@ -12,9 +12,7 @@ import {
   MenuItem,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
-import { Work, School, Star, AccessTime } from "@mui/icons-material";
-
-// Import Types và Constants
+import { Work, School, Star, AccessTime, Business } from "@mui/icons-material";
 import type { UserProfileForm } from "../profile.types";
 import {
   THEME_COLORS,
@@ -110,6 +108,10 @@ interface WorkEducationTabProps {
   handleTeachingHoursChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handlePreventInvalidChars: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   handleSmartPaste: (e: React.ClipboardEvent<HTMLInputElement>) => void;
+
+  // Bổ sung props cho Đơn vị / Bộ môn
+  departments: any[];
+  getDepartmentName: (id: string) => string;
 }
 
 export default function WorkEducationTab({
@@ -119,6 +121,8 @@ export default function WorkEducationTab({
   handleTeachingHoursChange,
   handlePreventInvalidChars,
   handleSmartPaste,
+  departments,
+  getDepartmentName,
 }: WorkEducationTabProps) {
   // Các props mặc định cho Form Control / TextField
   const commonProps = {
@@ -134,6 +138,13 @@ export default function WorkEducationTab({
     return (
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 6 }}>
+          {/* Bổ sung hiển thị Đơn vị / Bộ môn */}
+          <ProfileField
+            icon={<Business />}
+            label="Đơn vị / Bộ môn"
+            value={getDepartmentName(formData.departmentID)}
+            color={THEME_COLORS.WORK}
+          />
           <ProfileField
             icon={<Work />}
             label="Chức vụ"
@@ -175,8 +186,37 @@ export default function WorkEducationTab({
   // --------------------------------------------------------
   return (
     <Grid container spacing={3} sx={{ mt: 1 }}>
+      {/* ĐƠN VỊ / BỘ MÔN (Bắt buộc) */}
+      <Grid size={{ xs: 12, md: 6 }}>
+        <FormControl fullWidth sx={getColorfulInputStyle(THEME_COLORS.WORK)}>
+          <InputLabel>Đơn vị / Bộ môn *</InputLabel>
+          <Select
+            value={formData.departmentID || ""}
+            label="Đơn vị / Bộ môn *"
+            onChange={(e) => handleChange("departmentID", e.target.value)}
+            startAdornment={
+              <InputAdornment position="start" sx={{ mr: 2, ml: 1 }}>
+                <Business fontSize="small" />
+              </InputAdornment>
+            }
+          >
+            {departments && departments.length > 0 ? (
+              departments.map((dept) => (
+                <MenuItem key={dept.id} value={dept.id}>
+                  {dept.name}
+                </MenuItem>
+              ))
+            ) : (
+              <MenuItem value="" disabled>
+                Đang tải dữ liệu...
+              </MenuItem>
+            )}
+          </Select>
+        </FormControl>
+      </Grid>
+
       {/* CHỨC VỤ */}
-      <Grid size={{ xs: 12, md: 4 }}>
+      <Grid size={{ xs: 12, md: 6 }}>
         <FormControl fullWidth sx={getColorfulInputStyle(THEME_COLORS.WORK)}>
           <InputLabel>Chức vụ</InputLabel>
           <Select
@@ -244,21 +284,17 @@ export default function WorkEducationTab({
         </FormControl>
       </Grid>
 
-      {/* GIỜ GIẢNG/NĂM (ĐÃ TÍCH HỢP LOGIC CHẶN) */}
+      {/* GIỜ GIẢNG/NĂM (TÍCH HỢP LOGIC CHẶN) */}
       <Grid size={{ xs: 12, md: 4 }}>
         <TextField
           {...commonProps}
           type="number"
           label="Giờ giảng/năm"
           value={formData.teachingHours || ""}
-          // Các hàm xử lý bảo mật UX/UI từ Hook
           onChange={handleTeachingHoursChange}
           onKeyDown={handlePreventInvalidChars}
           onPaste={handleSmartPaste}
-          inputProps={{
-            min: 0,
-            step: 1,
-          }}
+          inputProps={{ min: 0, step: 1 }}
           sx={getColorfulInputStyle(THEME_COLORS.WORK)}
           InputProps={{
             startAdornment: (
