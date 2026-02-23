@@ -68,10 +68,12 @@ export default function SystemLogs() {
   const getActionColor = (action: string) => {
     switch (action) {
       case 'CREATE':
+      case 'LOGIN':
         return 'success';
       case 'UPDATE':
         return 'info';
       case 'DELETE':
+      case 'LOGOUT':
         return 'error';
       default:
         return 'default';
@@ -129,6 +131,7 @@ export default function SystemLogs() {
                 <MenuItem value="UPDATE">Cập nhật (UPDATE)</MenuItem>
                 <MenuItem value="DELETE">Xóa (DELETE)</MenuItem>
                 <MenuItem value="LOGIN">Đăng nhập (LOGIN)</MenuItem>
+                <MenuItem value="LOGOUT">Đăng xuất (LOGOUT)</MenuItem>
               </Select>
             </FormControl>
           </Grid>
@@ -212,9 +215,9 @@ export default function SystemLogs() {
                   </TableCell>
                   <TableCell>
                     <Typography variant="body2">{log.message}</Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      Đối tượng: {log.resource}
-                    </Typography>
+                    {/* <Typography variant="caption" color="text.secondary">
+                      Chức năng của: {log.resource}
+                    </Typography> */}
                   </TableCell>
                   <TableCell align="center">
                     <Chip
