@@ -14,8 +14,8 @@ import {
   Fade,
 } from '@mui/material';
 import { School as SchoolIcon } from '@mui/icons-material';
-import { api } from '../services/api';
-import loginBg from '../assets/images/login-bg2.jpg';
+import { api } from '../../services/api';
+import loginBg from '../../assets/images/login-bg2.jpg';
 
 // --- CUSTOM ICONS (Giữ nguyên như cũ) ---
 const GoogleLogo = () => (
@@ -71,18 +71,22 @@ export default function Login() {
       sessionStorage.setItem("authToken", accessToken);
       if (refreshToken) sessionStorage.setItem("refreshToken", refreshToken);
 
+      let parsedUser: any = null;
       if (userParam) {
         try {
-          const userObj = JSON.parse(decodeURIComponent(userParam));
-          sessionStorage.setItem("user", JSON.stringify(userObj));
+          parsedUser = JSON.parse(decodeURIComponent(userParam));
+          sessionStorage.setItem("user", JSON.stringify(parsedUser));
         } catch (e) {
           console.error("Parse user error:", e);
         }
       }
 
-      // Xóa params trên URL cho đẹp và an toàn
-      window.history.replaceState({}, document.title, "/dashboard");
-      navigate("/dashboard", { replace: true });
+      // Kiểm tra profile đã hoàn tất chưa
+      const profileCompleted = parsedUser?.jobTitle || parsedUser?.profileCompleted;
+      const destination = profileCompleted ? "/dashboard" : "/profile-setup";
+
+      window.history.replaceState({}, document.title, destination);
+      navigate(destination, { replace: true });
       return;
     }
 

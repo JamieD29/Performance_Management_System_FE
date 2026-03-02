@@ -33,7 +33,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import { api } from '../services/api'; // Đảm bảo import đúng axios instance
+import { api } from '../../services/api'; // Đảm bảo import đúng axios instance
 
 // Interface khớp với DB của bạn
 interface Department {

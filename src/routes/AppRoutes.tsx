@@ -2,20 +2,19 @@ import React from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
 // Import Pages
-import Login from '../pages/Login';
-import Dashboard from '../pages/Dashboard';
+import Login from '../pages/Auth/Login';
+import Dashboard from '../pages/Dashboard/Dashboard';
 import AdminSettings from '../pages/Admin/AdminSetting';
-// import ProfileSettings from '../pages/ProfileSetting';
-import Department from '../pages/Department/Department'; // 👈 Component này sẽ dùng cho mục "Nhân sự"
+import Department from '../pages/Department/Department';
 import DepartmentOKR from '../pages/DepartmentOKR/departmentOKR';
-import AuthCallback from '../pages/AuthCallback';
-import AcceptInvitation from '../components/AcceptInvitation';
+import AuthCallback from '../pages/Auth/AuthCallback';
 import PerformancePage from '../pages/Performance/PerformancePage';
+import ProfileSetup from '../pages/ProfileSetup/ProfileSetup';
 import DepartmentReviewPage from '../pages/Performance/DepartmentReviewPage';
 
 // Import Layouts
 import MainLayout from '../layouts/MainLayout';
-import DepartmentOverview from '../pages/DepartmentOverview';
+import DepartmentOverview from '../pages/DepartmentOverview/DepartmentOverview';
 import NotFoundPage from '../pages/ErrorPage/NotFoundPage';
 import ProfileSetting from '../pages/ProfileSetting/ProfileSettingPage';
 
@@ -52,6 +51,16 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   if (!isAuthenticated)
     return <Navigate to="/login" state={{ from: location }} replace />;
+
+  // Kiểm tra profile đã hoàn tất chưa → redirect nếu chưa
+  const userStr = sessionStorage.getItem('user');
+  const user = userStr ? JSON.parse(userStr) : null;
+  const isProfileComplete =
+    user?.profileCompleted || (user?.jobTitle && user?.department?.id);
+  if (user && !isProfileComplete && location.pathname !== '/profile-setup') {
+    return <Navigate to="/profile-setup" replace />;
+  }
+
   return <>{children}</>;
 }
 
@@ -67,7 +76,6 @@ export default function AppRoutes() {
     <Routes>
       {/* --- CÁC ROUTE PHỤ --- */}
       <Route path="/auth/microsoft/callback" element={<AuthCallback />} />
-      <Route path="/invite/accept/:token" element={<AcceptInvitation />} />
       {/* --- ROOT REDIRECT --- */}
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       {/* --- LOGIN --- */}
@@ -77,6 +85,15 @@ export default function AppRoutes() {
           <PublicRoute>
             <Login />
           </PublicRoute>
+        }
+      />
+      {/* --- PROFILE SETUP (Protected, no layout) --- */}
+      <Route
+        path="/profile-setup"
+        element={
+          <ProtectedRoute>
+            <ProfileSetup />
+          </ProtectedRoute>
         }
       />
       {/* --- MAIN LAYOUT GROUP (Đã đăng nhập) --- */}
