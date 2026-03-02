@@ -19,7 +19,7 @@ import { Add, Delete, Info } from '@mui/icons-material';
 
 import { api } from '../../../services/api';
 import type { Domain } from '../../../types';
-import { ConfirmDialog } from '../../../components/ConfirmDialog';
+import { ConfirmDialog } from '../../../components/common/ConfirmDialog';
 
 export default function WhitelistManager() {
   const [confirmDelete, setConfirmDelete] = useState<{

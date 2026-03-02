@@ -16,16 +16,13 @@ import {
   Target,
   TrendingUp,
   Users,
-  Calendar,
   CheckCircle,
-  AlertCircle,
   ArrowRight,
-  Clock,
   FileText,
   Award,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { performanceService } from '../services/performanceService';
+import { performanceService } from '../../services/performanceService';
 
 // --- INTERFACES ---
 interface DashboardStats {

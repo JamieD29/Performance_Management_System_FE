@@ -395,7 +395,7 @@ export default function DepartmentPage() {
       >
         <Box>
           <Typography variant="h4" fontWeight="bold" color="#1e3a8a">
-            Danh sách cán bộ nhân viên thuộc bộ môn
+            Danh sách cán bộ nhân viên
           </Typography>
           <Typography variant="body1" color="text.secondary">
             Xem và quản lý cấu trúc nhân sự theo dạng danh sách

@@ -1,5 +1,5 @@
 // src/pages/AuthCallback/AuthCallback.tsx
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Box, CircularProgress, Typography } from "@mui/material";
 
@@ -42,10 +42,13 @@ export default function AuthCallback() {
         sessionStorage.setItem("authToken", token);
         sessionStorage.setItem("user", JSON.stringify(user));
 
-        // Redirect based on first user status
+        // Redirect based on first user status & profile completeness
         if (isFirstUser) {
           console.log("🎉 First user! Redirecting to Admin Settings...");
           navigate("/admin/settings", { replace: true });
+        } else if (!user.profileCompleted && !user.jobTitle && !user.department?.id) {
+          console.log("📋 Profile incomplete → Redirecting to Profile Setup...");
+          navigate("/profile-setup", { replace: true });
         } else {
           navigate("/dashboard", { replace: true });
         }

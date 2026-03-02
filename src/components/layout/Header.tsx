@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../services/api';
+import { api } from '../../services/api';
 import {
   AppBar,
   Toolbar,
@@ -12,7 +12,6 @@ import {
   Menu,
   MenuItem,
   Divider,
-  useTheme,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -76,12 +75,12 @@ export default function Header({ onToggleSidebar, user }: HeaderProps) {
       position="fixed"
       elevation={0}
       sx={{
-        bgcolor: 'white',
+        bgcolor: '#ffffff',
         color: '#1e293b',
         borderBottom: '1px solid #e2e8f0',
-        // 🔥 MAGIC LÀ Ở ĐÂY:
-        width: { sm: `calc(100% - ${drawerWidth}px)` }, // Trên Desktop: Width = 100% - 280px
-        ml: { sm: `${drawerWidth}px` }, // Đẩy sang phải 280px
+        boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+        width: { sm: `calc(100% - ${drawerWidth}px)` },
+        ml: { sm: `${drawerWidth}px` },
       }}
     >
       <Toolbar>
@@ -122,14 +121,14 @@ export default function Header({ onToggleSidebar, user }: HeaderProps) {
             textTransform: 'none',
             color: 'text.primary',
             borderRadius: '50px',
-            bgcolor: 'rgba(241, 245, 249, 0.7)',
+            bgcolor: '#f8fafc',
             border: '1px solid #e2e8f0',
             p: '4px 16px 4px 6px',
-            transition: 'all 0.2s ease-in-out',
+            transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
             '&:hover': {
-              bgcolor: 'white',
+              bgcolor: '#f1f5f9',
               borderColor: '#cbd5e1',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
               transform: 'translateY(-1px)',
             },
           }}
@@ -169,21 +168,63 @@ export default function Header({ onToggleSidebar, user }: HeaderProps) {
           anchorEl={anchorEl}
           open={openMenu}
           onClose={() => setAnchorEl(null)}
-          PaperProps={{ sx: { mt: 1, minWidth: 200 } }}
+          PaperProps={{
+            sx: {
+              mt: 1.5,
+              minWidth: 220,
+              borderRadius: '12px',
+              boxShadow: '0 8px 30px rgba(0,0,0,0.08)',
+              border: '1px solid #e2e8f0',
+            },
+          }}
         >
-          <MenuItem onClick={() => navigate('/profile')}>
-            <Settings fontSize="small" style={{ marginRight: 10 }} /> Profile
-            Settings
+          <MenuItem
+            onClick={() => navigate('/profile')}
+            sx={{
+              py: 1.2,
+              px: 2,
+              borderRadius: '8px',
+              mx: 0.5,
+              mb: 0.3,
+              transition: 'all 0.2s ease',
+              '&:hover': { bgcolor: '#f1f5f9' },
+            }}
+          >
+            <Settings fontSize="small" sx={{ mr: 1.5, color: '#64748b' }} />
+            <Typography variant="body2" fontWeight={500}>Hồ sơ cá nhân</Typography>
           </MenuItem>
           {isAdmin && (
-            <MenuItem onClick={() => navigate('/admin/settings')}>
-              <AdminPanelSettings fontSize="small" sx={{ mr: 1.5 }} /> Admin
-              Portal
+            <MenuItem
+              onClick={() => navigate('/admin/settings')}
+              sx={{
+                py: 1.2,
+                px: 2,
+                borderRadius: '8px',
+                mx: 0.5,
+                mb: 0.3,
+                transition: 'all 0.2s ease',
+                '&:hover': { bgcolor: '#f1f5f9' },
+              }}
+            >
+              <AdminPanelSettings fontSize="small" sx={{ mr: 1.5, color: '#64748b' }} />
+              <Typography variant="body2" fontWeight={500}>Admin Portal</Typography>
             </MenuItem>
           )}
-          <Divider />
-          <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
-            <Logout fontSize="small" sx={{ mr: 1.5 }} /> Đăng xuất
+          <Divider sx={{ mx: 1, my: 0.5 }} />
+          <MenuItem
+            onClick={handleLogout}
+            sx={{
+              py: 1.2,
+              px: 2,
+              borderRadius: '8px',
+              mx: 0.5,
+              color: '#ef4444',
+              transition: 'all 0.2s ease',
+              '&:hover': { bgcolor: '#fef2f2' },
+            }}
+          >
+            <Logout fontSize="small" sx={{ mr: 1.5 }} />
+            <Typography variant="body2" fontWeight={500}>Đăng xuất</Typography>
           </MenuItem>
         </Menu>
       </Toolbar>
