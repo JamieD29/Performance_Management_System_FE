@@ -1,15 +1,19 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Box, CssBaseline, Toolbar } from '@mui/material';
 
 import Header from '../components/layout/Header';
-import Sidebar from '../components/layout/Sidebar';
-
-const drawerWidth = 280;
+import Sidebar, { DRAWER_WIDTH, COLLAPSED_DRAWER_WIDTH } from '../components/layout/Sidebar';
+import NotificationToast from '../components/common/NotificationToast';
 
 export default function MainLayout() {
-  const [openSidebar, setOpenSidebar] = useState(true);
-  const handleToggleSidebar = () => setOpenSidebar(!openSidebar);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+
+  const handleToggleMobile = () => setMobileOpen(!mobileOpen);
+  const handleToggleCollapse = () => setCollapsed(!collapsed);
+
+  const currentWidth = collapsed ? COLLAPSED_DRAWER_WIDTH : DRAWER_WIDTH;
 
   let user: any = {};
   try {
@@ -20,8 +24,6 @@ export default function MainLayout() {
   }
 
   return (
-    // 🔥 SỬA 1: Root Box dùng height: '100vh' và overflow: 'hidden'
-    // (Để khóa thanh cuộn của trình duyệt, chỉ cuộn nội dung bên trong thôi)
     <Box
       sx={{
         display: 'flex',
@@ -32,35 +34,38 @@ export default function MainLayout() {
     >
       <CssBaseline />
 
-      <Header onToggleSidebar={handleToggleSidebar} user={user} />
+      <Header
+        onToggleSidebar={handleToggleMobile}
+        user={user}
+        sidebarWidth={currentWidth}
+      />
 
-      <Sidebar mobileOpen={openSidebar} onClose={handleToggleSidebar} />
+      <Sidebar
+        mobileOpen={mobileOpen}
+        onClose={handleToggleMobile}
+        collapsed={collapsed}
+        onToggleCollapse={handleToggleCollapse}
+      />
 
-      {/* 🔥 SỬA 2: Main Content */}
       <Box
         component="main"
         sx={{
           flexGrow: 1,
           p: 4,
           width: '100%',
-          marginLeft: openSidebar ? `0px` : `0px`,
-          // Cho phép cuộn dọc (y) nếu nội dung dài, ẩn cuộn ngang (x)
           overflowY: 'auto',
           overflowX: 'hidden',
-          height: '100vh', // Chiều cao full để scroll hoạt động
-          transition: (theme) =>
-            theme.transitions.create(['margin', 'width'], {
-              easing: theme.transitions.easing.sharp,
-              duration: theme.transitions.duration.leavingScreen,
-            }),
+          height: '100vh',
+          transition: 'margin 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         }}
       >
-        <Toolbar /> {/* Cái này để đẩy nội dung xuống dưới Header */}
-        {/* Nội dung trang sẽ nằm ở đây và có thể scroll thoải mái */}
+        <Toolbar />
         <Outlet />
-        {/* Hack nhẹ: Thêm chút padding bottom để scroll không bị sát đáy quá */}
         <Box sx={{ pb: 5 }} />
       </Box>
+
+      {/* Notification Toast — góc phải dưới */}
+      <NotificationToast />
     </Box>
   );
 }

@@ -32,10 +32,7 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 
   console.log('👮 AdminRoute Check:', { roles });
 
-  const isAdmin =
-    roles.includes('SYSTEM_ADMIN') ||
-    roles.includes('admin') ||
-    roles.includes('SUPER_ADMIN');
+  const isAdmin = roles.includes('ADMIN');
 
   if (!isAdmin) {
     console.warn('⛔ Access Denied: Not an Admin -> Redirecting to Dashboard');

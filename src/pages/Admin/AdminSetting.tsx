@@ -18,6 +18,7 @@ import {
   AdminPanelSettings,
   ArrowBack,
   CalendarToday,
+  BadgeOutlined,
 } from '@mui/icons-material';
 
 // 1. SỬA ĐƯỜNG DẪN: Lùi 2 cấp (Admin -> pages -> src/types)
@@ -30,6 +31,7 @@ import CycleManagement from '../Performance/components/CycleManagement';
 import WhitelistManager from './components/WhitelistManager';
 import UserRoleManager from './components/UserRoleManager';
 import SystemLogs from './components/SystemLogs';
+import ManagementPositionManager from './components/ManagementPositionManager';
 
 export default function AdminSettings() {
   const navigate = useNavigate();
@@ -46,10 +48,8 @@ export default function AdminSettings() {
         (typeof r === 'string' ? r : r?.slug || r?.name || '').toString(),
       );
 
-      const checkSuper = normalizedRoles.includes('SUPER_ADMIN');
-      const checkAccess = normalizedRoles.some((r: string) =>
-        ['SYSTEM_ADMIN', 'SUPER_ADMIN', 'admin'].includes(r),
-      );
+      const checkSuper = normalizedRoles.includes('ADMIN');
+      const checkAccess = normalizedRoles.includes('ADMIN');
 
       if (!checkAccess) {
         navigate('/dashboard');
@@ -78,6 +78,7 @@ export default function AdminSettings() {
       restricted: false,
     },
     { id: 'users', label: 'User Roles', icon: <People />, restricted: true },
+    { id: 'positions', label: 'Chức vụ quản lý', icon: <BadgeOutlined />, restricted: true },
     { id: 'logs', label: 'System Logs', icon: <History />, restricted: true },
   ];
 
@@ -189,6 +190,7 @@ export default function AdminSettings() {
           {activeTab === 'cycles' && <CycleManagement />}
           {activeTab === 'whitelist' && <WhitelistManager />}
           {activeTab === 'users' && <UserRoleManager />}
+          {activeTab === 'positions' && <ManagementPositionManager />}
           {activeTab === 'logs' && <SystemLogs />}
         </Container>
       </Box>

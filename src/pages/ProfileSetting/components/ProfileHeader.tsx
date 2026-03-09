@@ -66,9 +66,7 @@ export default function ProfileHeader({
     const roles = userRoles.map((r: any) =>
       typeof r === "string" ? r : r.slug || r.name,
     );
-    if (roles.includes("SUPER_ADMIN")) return "Super Admin";
-    if (roles.includes("SYSTEM_ADMIN")) return "System Admin";
-    if (roles.includes("DEAN")) return "Trưởng bộ môn";
+    if (roles.includes("ADMIN")) return "Admin";
     return "Giảng viên";
   };
 
@@ -227,10 +225,10 @@ export default function ProfileHeader({
           }}
         >
           {/* Badge hiển thị Quyền */}
-          {userRoleStr === "Super Admin" ? (
+          {userRoleStr === "Admin" ? (
             <Chip
               icon={<AdminPanelSettings sx={{ color: "white !important" }} />}
-              label="Super Admin"
+              label="Admin"
               sx={{
                 bgcolor: "#ef4444",
                 color: "white",
