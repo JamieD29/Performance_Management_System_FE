@@ -12,7 +12,7 @@ export interface User {
   email: string;
   name: string;
   avatarUrl?: string;
-  roles: string[]; // ['SYSTEM_ADMIN', 'USER'...]
+  roles: string[]; // ['ADMIN', 'USER']
   department?: {
     id: string;
     name: string;
@@ -26,6 +26,23 @@ export interface User {
   awards?: string;
   intellectualProperty?: string;
   joinDate?: string;
+
+  // Chức vụ quản lý (Admin định nghĩa)
+  managementPosition?: ManagementPosition | null;
+}
+
+export interface ManagementPosition {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+}
+
+export interface AppNotification {
+  id: string;
+  message: string;
+  isRead: boolean;
+  createdAt: string;
 }
 
 export interface OKR {
@@ -50,3 +67,4 @@ export interface Domain {
   domain: string;
   addedAt: string;
 }
+

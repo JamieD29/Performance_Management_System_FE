@@ -20,14 +20,13 @@ import {
   Settings,
 } from '@mui/icons-material';
 
-const drawerWidth = 280;
-
 interface HeaderProps {
   onToggleSidebar: () => void;
   user: any;
+  sidebarWidth?: number;
 }
 
-export default function Header({ onToggleSidebar, user }: HeaderProps) {
+export default function Header({ onToggleSidebar, user, sidebarWidth = 280 }: HeaderProps) {
   const navigate = useNavigate();
   // const theme = useTheme(); // <-- Có thể xóa dòng này nếu không dùng theme ở chỗ khác
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -35,21 +34,17 @@ export default function Header({ onToggleSidebar, user }: HeaderProps) {
 
   const rawRoles = Array.isArray(user.roles) ? user.roles : [];
 
-  // Nếu là Object { slug: 'SUPER_ADMIN' } -> lấy 'SUPER_ADMIN'
-  // Nếu là String 'SUPER_ADMIN' -> giữ nguyên
+  // Nếu là Object { slug: 'ADMIN' } -> lấy 'ADMIN'
+  // Nếu là String 'ADMIN' -> giữ nguyên
   const normalizedRoles = rawRoles.map((r: any) =>
     (typeof r === 'string' ? r : r?.slug || r?.name || '').toString(),
   );
 
-  // 3. Check quyền (Thêm SUPER_ADMIN vào danh sách VIP)
-  const isAdmin = normalizedRoles.some((role: string) =>
-    ['SYSTEM_ADMIN', 'SUPER_ADMIN', 'admin'].includes(role),
-  );
+  // 3. Check quyền (Thêm ADMIN vào danh sách VIP)
+  const isAdmin = normalizedRoles.includes('ADMIN');
 
   let displayRole = 'User';
-  if (normalizedRoles.includes('SUPER_ADMIN')) displayRole = 'Super Admin';
-  else if (normalizedRoles.includes('SYSTEM_ADMIN'))
-    displayRole = 'System Admin';
+  if (normalizedRoles.includes('ADMIN')) displayRole = 'Admin';
   else if (normalizedRoles.length > 0) displayRole = normalizedRoles[0];
 
   const handleLogout = async () => {
@@ -79,8 +74,9 @@ export default function Header({ onToggleSidebar, user }: HeaderProps) {
         color: '#1e293b',
         borderBottom: '1px solid #e2e8f0',
         boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-        width: { sm: `calc(100% - ${drawerWidth}px)` },
-        ml: { sm: `${drawerWidth}px` },
+        width: { sm: `calc(100% - ${sidebarWidth}px)` },
+        ml: { sm: `${sidebarWidth}px` },
+        transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1), margin 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
       }}
     >
       <Toolbar>

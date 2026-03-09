@@ -65,9 +65,7 @@ export default function UserRoleManager() {
   };
 
   const getRoleColor = (role: string) => {
-    if (role === 'SUPER_ADMIN') return 'error';
-    if (role === 'SYSTEM_ADMIN') return 'warning';
-    if (role === 'DEAN') return 'primary';
+    if (role === 'ADMIN') return 'error';
     return 'default';
   };
 
@@ -77,7 +75,7 @@ export default function UserRoleManager() {
         User Role Management
       </Typography>
       <Alert severity="warning" sx={{ mb: 3 }}>
-        Only Super Admin can promote users.
+        Only Admin can promote users.
       </Alert>
 
       <TableContainer component={Paper} variant="outlined">
@@ -164,10 +162,8 @@ export default function UserRoleManager() {
               onChange={(e: SelectChangeEvent) => setNewRole(e.target.value)}
             >
               <MenuItem value="USER">User</MenuItem>
-              <MenuItem value="DEAN">Dean</MenuItem>
-              <MenuItem value="SYSTEM_ADMIN">System Admin</MenuItem>
-              <MenuItem value="SUPER_ADMIN" sx={{ color: 'red' }}>
-                Super Admin
+              <MenuItem value="ADMIN" sx={{ color: 'red' }}>
+                Admin
               </MenuItem>
             </Select>
           </FormControl>

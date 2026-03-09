@@ -57,9 +57,7 @@ export default function Dashboard() {
     ? roles.map((r: any) => (typeof r === 'string' ? r : r.slug))
     : [];
 
-  const isManager = normalizedRoles.some((r: string) =>
-    ['DEAN', 'SUPER_ADMIN', 'SYSTEM_ADMIN', 'MANAGER'].includes(r),
-  );
+  const isManager = normalizedRoles.includes('ADMIN');
 
   useEffect(() => {
     loadDashboardData();

@@ -34,9 +34,11 @@ import {
   KeyboardArrowUp,
   PersonRemove,
   Groups,
+  BadgeOutlined,
 } from '@mui/icons-material';
 import { api } from '../../services/api';
 import AddDepartmentModal from './components/AddDepartmentModal';
+import AssignPositionModal from './components/AssignPositionModal';
 
 // --- INTERFACES ---
 interface User {
@@ -46,6 +48,11 @@ interface User {
   avatarUrl?: string;
   jobTitle?: string;
   staffCode?: string;
+  managementPosition?: {
+    id: string;
+    name: string;
+    slug: string;
+  } | null;
 }
 
 interface Department {
@@ -68,6 +75,8 @@ function DepartmentRow({
   const [users, setUsers] = useState<User[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [userSearch, setUserSearch] = useState('');
+  const [assignModalUser, setAssignModalUser] = useState<User | null>(null);
+  const [assignModalOpen, setAssignModalOpen] = useState(false);
 
   // Hàm load user khi mở row
   const handleExpandClick = async () => {
@@ -89,6 +98,20 @@ function DepartmentRow({
       } finally {
         setLoadingUsers(false);
       }
+    }
+  };
+
+  // Load lại danh sách user
+  const reloadUsers = async () => {
+    setLoadingUsers(true);
+    try {
+      const res = await api.get('/users', { params: { departmentId: row.id } });
+      const data = Array.isArray(res.data) ? res.data : res.data.data || [];
+      setUsers(data);
+    } catch (error) {
+      console.error('Lỗi tải user', error);
+    } finally {
+      setLoadingUsers(false);
     }
   };
 
@@ -237,6 +260,9 @@ function DepartmentRow({
                       <TableCell sx={{ color: '#64748b', fontWeight: 600 }}>
                         Chức danh
                       </TableCell>
+                      <TableCell sx={{ color: '#64748b', fontWeight: 600 }}>
+                        Chức vụ quản lý
+                      </TableCell>
                       <TableCell
                         align="right"
                         sx={{ color: '#64748b', fontWeight: 600 }}
@@ -284,7 +310,36 @@ function DepartmentRow({
                               style={{ height: 24, fontSize: 11 }}
                             />
                           </TableCell>
+                          <TableCell>
+                            {user.managementPosition ? (
+                              <Chip
+                                icon={<BadgeOutlined style={{ fontSize: 14 }} />}
+                                label={user.managementPosition.name}
+                                size="small"
+                                color="primary"
+                                variant="outlined"
+                                sx={{ fontWeight: 600, fontSize: 11 }}
+                              />
+                            ) : (
+                              <Typography variant="caption" color="text.disabled">
+                                —
+                              </Typography>
+                            )}
+                          </TableCell>
                           <TableCell align="right">
+                            <Tooltip title="Gán chức vụ quản lý">
+                              <IconButton
+                                size="small"
+                                color="primary"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setAssignModalUser(user);
+                                  setAssignModalOpen(true);
+                                }}
+                              >
+                                <BadgeOutlined fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
                             <Tooltip title="Gỡ khỏi bộ môn">
                               <IconButton size="small" color="warning">
                                 <PersonRemove fontSize="small" />
@@ -296,7 +351,7 @@ function DepartmentRow({
                     ) : (
                       <TableRow>
                         <TableCell
-                          colSpan={4}
+                          colSpan={5}
                           align="center"
                           sx={{
                             py: 3,
@@ -317,6 +372,14 @@ function DepartmentRow({
           </Collapse>
         </TableCell>
       </TableRow>
+
+      {/* MODAL GÁN CHỨC VỤ */}
+      <AssignPositionModal
+        open={assignModalOpen}
+        onClose={() => setAssignModalOpen(false)}
+        user={assignModalUser}
+        onSuccess={reloadUsers}
+      />
     </React.Fragment>
   );
 }

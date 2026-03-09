@@ -265,11 +265,11 @@ export default function ProfileSetting() {
 
   // --- HELPER ---
   const getDisplayRole = (userRoles: any[]) => {
-    if (!userRoles || userRoles.length === 0) return 'Lecturer';
+    if (!userRoles || userRoles.length === 0) return 'User';
     const roles = userRoles.map((r: any) =>
       typeof r === 'string' ? r : r.slug || r.name,
     );
-    if (roles.includes('DEAN')) return 'Trưởng bộ môn';
+    if (roles.includes('ADMIN')) return 'Admin';
     if (roles.includes('USER')) return 'Giảng viên';
     return 'Cán bộ';
   };
