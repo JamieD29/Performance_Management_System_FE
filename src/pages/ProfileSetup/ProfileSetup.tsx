@@ -1,5 +1,4 @@
-// src/pages/ProfileSetup.tsx
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Box,
@@ -9,111 +8,44 @@ import {
     Paper,
     Stack,
     Fade,
-    Grow,
-    Select,
-    MenuItem,
-    FormControl,
-    InputLabel,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    CircularProgress,
     Alert,
-    Divider,
-    Chip,
+    Stepper,
+    Step,
+    StepLabel,
 } from '@mui/material';
-import type { SelectChangeEvent } from '@mui/material';
 import {
     School as SchoolIcon,
-    Business as BusinessIcon,
-    WorkspacePremium as WorkspacePremiumIcon,
-    MenuBook as MenuBookIcon,
-    Badge as BadgeIcon,
     CheckCircle as CheckCircleIcon,
-    Warning as WarningIcon,
+    NavigateNext as NavigateNextIcon,
+    ArrowBack as ArrowBackIcon,
 } from '@mui/icons-material';
 import { api } from '../../services/api';
 
-// --- Interfaces ---
-interface DepartmentOption {
-    id: string;
-    name: string;
-    code: string;
-}
+import type { DepartmentOption, ProfileFormData } from './types';
+import { ACADEMIC_RANKS, DEGREES } from './constants';
+import { PersonalInfoStep } from './components/PersonalInfoStep';
+import { WorkInfoStep } from './components/WorkInfoStep';
+import { ConfirmationDialog } from './components/ConfirmationDialog';
 
-// --- Constants ---
-const ACADEMIC_RANKS = [
-    { value: 'Giáo sư', label: 'Giáo sư (GS)' },
-    { value: 'Phó giáo sư', label: 'Phó Giáo sư (PGS)' },
-    { value: 'Không', label: 'Không có học hàm' },
-];
-
-const DEGREES = [
-    { value: 'Tiến sĩ', label: 'Tiến sĩ (TS)' },
-    { value: 'Thạc sĩ', label: 'Thạc sĩ (ThS)' },
-    { value: 'Cử nhân', label: 'Cử nhân (CN)' },
-];
-
-const JOB_TITLES = [
-    { value: 'Trưởng khoa', label: 'Trưởng khoa' },
-    { value: 'Phó khoa', label: 'Phó khoa' },
-    { value: 'Trưởng bộ môn', label: 'Trưởng bộ môn' },
-    { value: 'Giảng viên chính', label: 'Giảng viên chính' },
-    { value: 'Giảng viên', label: 'Giảng viên' },
-    { value: 'Trợ giảng', label: 'Trợ giảng' },
-    { value: 'Chuyên viên', label: 'Chuyên viên' },
-    { value: 'Nghiên cứu viên', label: 'Nghiên cứu viên' },
-    { value: 'Giáo vụ', label: 'Giáo vụ' },
-    { value: 'Kỹ thuật viên', label: 'Kỹ thuật viên' },
-    { value: 'Nhân viên hỗ trợ', label: 'Nhân viên hỗ trợ' },
-];
-
-// --- Reusable animated dropdown card ---
-function AnimatedField({
-    delay,
-    children,
-}: {
-    delay: number;
-    children: React.ReactNode;
-}) {
-    const [show, setShow] = useState(false);
-    useEffect(() => {
-        const t = setTimeout(() => setShow(true), delay);
-        return () => clearTimeout(t);
-    }, [delay]);
-
-    return (
-        <Grow in={show} timeout={600}>
-            <Paper
-                elevation={0}
-                sx={{
-                    p: 2.5,
-                    borderRadius: '14px',
-                    border: '1px solid rgba(25, 118, 210, 0.12)',
-                    bgcolor: 'rgba(255,255,255,0.85)',
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                    '&:hover': {
-                        transform: 'translateY(-4px)',
-                        boxShadow: '0 8px 30px rgba(25, 118, 210, 0.15)',
-                        borderColor: 'rgba(25, 118, 210, 0.35)',
-                    },
-                }}
-            >
-                {children}
-            </Paper>
-        </Grow>
-    );
-}
+const steps = ['Thông tin cá nhân', 'Thông tin công tác'];
 
 export default function ProfileSetup() {
     const navigate = useNavigate();
 
+    const [activeStep, setActiveStep] = useState(0);
+
     // Form state
-    const [departmentId, setDepartmentId] = useState('');
-    const [academicRank, setAcademicRank] = useState('');
-    const [degree, setDegree] = useState('');
-    const [jobTitle, setJobTitle] = useState('');
+    const [formData, setFormData] = useState<ProfileFormData>({
+        employeeId: '',
+        fullName: '',
+        dob: '',
+        email: '',
+        joinDate: '',
+        departmentId: '',
+        academicRank: '',
+        degree: '',
+        jobTitle: '',
+    });
 
     // Data & UI state
     const [departments, setDepartments] = useState<DepartmentOption[]>([]);
@@ -122,8 +54,23 @@ export default function ProfileSetup() {
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState('');
 
-    // Fetch departments on mount
+    // Fetch departments and set initial user data on mount
     useEffect(() => {
+        // Load initial user data from session
+        const storedUser = sessionStorage.getItem('user');
+        if (storedUser) {
+            try {
+                const user = JSON.parse(storedUser);
+                setFormData((prev) => ({
+                    ...prev,
+                    fullName: user.fullName || user.name || prev.fullName,
+                    email: user.email || prev.email,
+                }));
+            } catch (e) {
+                console.error('Failed to parse user from session', e);
+            }
+        }
+
         (async () => {
             try {
                 const res = await api.get('/departments');
@@ -138,30 +85,51 @@ export default function ProfileSetup() {
         })();
     }, []);
 
-    const isFormComplete =
-        departmentId !== '' &&
-        academicRank !== '' &&
-        degree !== '' &&
-        jobTitle !== '';
+    const handleFieldChange = (field: keyof ProfileFormData, value: string) => {
+        setFormData((prev) => ({ ...prev, [field]: value }));
+    };
+
+    const isStep1Complete =
+        formData.employeeId.trim() !== '' &&
+        formData.fullName.trim() !== '' &&
+        formData.dob !== '' &&
+        formData.email.trim() !== '' &&
+        formData.joinDate !== '';
+
+    const isStep2Complete =
+        formData.departmentId !== '' &&
+        formData.academicRank !== '' &&
+        formData.degree !== '' &&
+        formData.jobTitle !== '';
+
+    const handleNext = () => {
+        if (activeStep === 0 && isStep1Complete) {
+            setActiveStep((prev) => prev + 1);
+        } else if (activeStep === 1 && isStep2Complete) {
+            setConfirmOpen(true);
+        }
+    };
+
+    const handleBack = () => {
+        setActiveStep((prev) => prev - 1);
+    };
 
     // Labels cho hiển thị
     const selectedDeptName =
-        departments.find((d) => d.id === departmentId)?.name || '';
+        departments.find((d) => d.id === formData.departmentId)?.name || '';
     const selectedRankLabel =
-        ACADEMIC_RANKS.find((r) => r.value === academicRank)?.label || '';
+        ACADEMIC_RANKS.find((r) => r.value === formData.academicRank)?.label || '';
     const selectedDegreeLabel =
-        DEGREES.find((d) => d.value === degree)?.label || '';
+        DEGREES.find((d) => d.value === formData.degree)?.label || '';
 
     const handleSubmit = async () => {
         setSubmitting(true);
         setError('');
         try {
             // PATCH user profile (JWT token xác định user, không cần userId trong URL)
+            // Gửi toàn bộ formData lên API (nếu có các trường API chưa hỗ trợ, chúng có thể bị bỏ qua bởi BE, nhưng cứ gửi đầy đủ)
             await api.patch('/users/profile', {
-                departmentId,
-                academicRank,
-                degree,
-                jobTitle,
+                ...formData,
                 profileCompleted: true,
             });
 
@@ -169,11 +137,15 @@ export default function ProfileSetup() {
             const storedUser = sessionStorage.getItem('user');
             if (storedUser) {
                 const user = JSON.parse(storedUser);
-                user.jobTitle = jobTitle;
-                user.academicRank = academicRank;
-                user.degree = degree;
+                user.employeeId = formData.employeeId;
+                user.jobTitle = formData.jobTitle;
+                user.academicRank = formData.academicRank;
+                user.degree = formData.degree;
+                user.fullName = formData.fullName;
+                user.name = formData.fullName; // Update name as it is what the system usually relies on
+                user.email = formData.email;
                 user.profileCompleted = true;
-                user.department = { id: departmentId, name: selectedDeptName };
+                user.department = { id: formData.departmentId, name: selectedDeptName };
                 sessionStorage.setItem('user', JSON.stringify(user));
             }
 
@@ -189,21 +161,6 @@ export default function ProfileSetup() {
         } finally {
             setSubmitting(false);
         }
-    };
-
-    // --- Common dropdown style ---
-    const selectSx = {
-        borderRadius: '10px',
-        bgcolor: '#fff',
-        '& .MuiOutlinedInput-notchedOutline': {
-            borderColor: 'rgba(25, 118, 210, 0.2)',
-        },
-        '&:hover .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#1976d2',
-        },
-        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#1976d2',
-        },
     };
 
     return (
@@ -306,6 +263,15 @@ export default function ProfileSetup() {
                                 boxShadow: '0 8px 40px rgba(0, 0, 0, 0.06)',
                             }}
                         >
+                            {/* Stepper */}
+                            <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
+                                {steps.map((label) => (
+                                    <Step key={label}>
+                                        <StepLabel>{label}</StepLabel>
+                                    </Step>
+                                ))}
+                            </Stepper>
+
                             {error && (
                                 <Alert
                                     severity="error"
@@ -316,195 +282,71 @@ export default function ProfileSetup() {
                                 </Alert>
                             )}
 
-                            <Stack spacing={2.5}>
-                                {/* 1. Bộ môn */}
-                                <AnimatedField delay={200}>
-                                    <Stack direction="row" spacing={1.5} alignItems="center" mb={1.5}>
-                                        <Box
-                                            sx={{
-                                                display: 'flex',
-                                                p: 0.8,
-                                                borderRadius: '10px',
-                                                bgcolor: '#e3f2fd',
-                                                color: '#1565c0',
-                                            }}
-                                        >
-                                            <BusinessIcon fontSize="small" />
-                                        </Box>
-                                        <Typography variant="subtitle2" fontWeight={600} color="#37474f">
-                                            Bộ môn đang tác nghiệp
-                                        </Typography>
-                                    </Stack>
-                                    <FormControl fullWidth size="small">
-                                        <InputLabel>Chọn bộ môn</InputLabel>
-                                        <Select
-                                            value={departmentId}
-                                            label="Chọn bộ môn"
-                                            onChange={(e: SelectChangeEvent) =>
-                                                setDepartmentId(e.target.value)
-                                            }
-                                            sx={selectSx}
-                                            disabled={loadingDepts}
-                                        >
-                                            {loadingDepts ? (
-                                                <MenuItem disabled>
-                                                    <CircularProgress size={18} sx={{ mr: 1 }} /> Đang tải...
-                                                </MenuItem>
-                                            ) : (
-                                                departments.map((dept) => (
-                                                    <MenuItem key={dept.id} value={dept.id}>
-                                                        {dept.name}
-                                                    </MenuItem>
-                                                ))
-                                            )}
-                                        </Select>
-                                    </FormControl>
-                                </AnimatedField>
+                            {activeStep === 0 && (
+                                <PersonalInfoStep formData={formData} onChange={handleFieldChange} />
+                            )}
+                            {activeStep === 1 && (
+                                <WorkInfoStep
+                                    formData={formData}
+                                    onChange={handleFieldChange}
+                                    departments={departments}
+                                    loadingDepts={loadingDepts}
+                                />
+                            )}
 
-                                {/* 2. Học hàm */}
-                                <AnimatedField delay={400}>
-                                    <Stack direction="row" spacing={1.5} alignItems="center" mb={1.5}>
-                                        <Box
-                                            sx={{
-                                                display: 'flex',
-                                                p: 0.8,
-                                                borderRadius: '10px',
-                                                bgcolor: '#fce4ec',
-                                                color: '#c62828',
-                                            }}
-                                        >
-                                            <WorkspacePremiumIcon fontSize="small" />
-                                        </Box>
-                                        <Typography variant="subtitle2" fontWeight={600} color="#37474f">
-                                            Học hàm
-                                        </Typography>
-                                    </Stack>
-                                    <FormControl fullWidth size="small">
-                                        <InputLabel>Chọn học hàm</InputLabel>
-                                        <Select
-                                            value={academicRank}
-                                            label="Chọn học hàm"
-                                            onChange={(e: SelectChangeEvent) =>
-                                                setAcademicRank(e.target.value)
-                                            }
-                                            sx={selectSx}
-                                        >
-                                            {ACADEMIC_RANKS.map((r) => (
-                                                <MenuItem key={r.value} value={r.value}>
-                                                    {r.label}
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
-                                    </FormControl>
-                                </AnimatedField>
-
-                                {/* 3. Học vị */}
-                                <AnimatedField delay={600}>
-                                    <Stack direction="row" spacing={1.5} alignItems="center" mb={1.5}>
-                                        <Box
-                                            sx={{
-                                                display: 'flex',
-                                                p: 0.8,
-                                                borderRadius: '10px',
-                                                bgcolor: '#e8f5e9',
-                                                color: '#2e7d32',
-                                            }}
-                                        >
-                                            <MenuBookIcon fontSize="small" />
-                                        </Box>
-                                        <Typography variant="subtitle2" fontWeight={600} color="#37474f">
-                                            Học vị hiện tại
-                                        </Typography>
-                                    </Stack>
-                                    <FormControl fullWidth size="small">
-                                        <InputLabel>Chọn học vị</InputLabel>
-                                        <Select
-                                            value={degree}
-                                            label="Chọn học vị"
-                                            onChange={(e: SelectChangeEvent) =>
-                                                setDegree(e.target.value)
-                                            }
-                                            sx={selectSx}
-                                        >
-                                            {DEGREES.map((d) => (
-                                                <MenuItem key={d.value} value={d.value}>
-                                                    {d.label}
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
-                                    </FormControl>
-                                </AnimatedField>
-
-                                {/* 4. Chức vụ */}
-                                <AnimatedField delay={800}>
-                                    <Stack direction="row" spacing={1.5} alignItems="center" mb={1.5}>
-                                        <Box
-                                            sx={{
-                                                display: 'flex',
-                                                p: 0.8,
-                                                borderRadius: '10px',
-                                                bgcolor: '#fff3e0',
-                                                color: '#e65100',
-                                            }}
-                                        >
-                                            <BadgeIcon fontSize="small" />
-                                        </Box>
-                                        <Typography variant="subtitle2" fontWeight={600} color="#37474f">
-                                            Chức vụ
-                                        </Typography>
-                                    </Stack>
-                                    <FormControl fullWidth size="small">
-                                        <InputLabel>Chọn chức vụ</InputLabel>
-                                        <Select
-                                            value={jobTitle}
-                                            label="Chọn chức vụ"
-                                            onChange={(e: SelectChangeEvent) =>
-                                                setJobTitle(e.target.value)
-                                            }
-                                            sx={selectSx}
-                                        >
-                                            {JOB_TITLES.map((j) => (
-                                                <MenuItem key={j.value} value={j.value}>
-                                                    {j.label}
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
-                                    </FormControl>
-                                </AnimatedField>
-                            </Stack>
-
-                            {/* Submit Button */}
-                            <Grow in={isFormComplete} timeout={500}>
-                                <Box sx={{ mt: 4 }}>
+                            {/* Navigation Buttons */}
+                            <Box sx={{ mt: 4, display: 'flex', gap: 2 }}>
+                                {activeStep > 0 && (
                                     <Button
-                                        fullWidth
-                                        variant="contained"
+                                        variant="outlined"
                                         size="large"
-                                        onClick={() => setConfirmOpen(true)}
-                                        disabled={!isFormComplete}
-                                        startIcon={<CheckCircleIcon />}
+                                        onClick={handleBack}
+                                        startIcon={<ArrowBackIcon />}
                                         sx={{
                                             py: 1.6,
                                             borderRadius: '14px',
                                             textTransform: 'none',
                                             fontSize: '1rem',
                                             fontWeight: 600,
-                                            background:
-                                                'linear-gradient(135deg, #1976d2 0%, #00897b 100%)',
-                                            boxShadow: '0 4px 15px rgba(25, 118, 210, 0.3)',
-                                            transition: 'all 0.3s ease',
+                                            flex: 1,
+                                            borderColor: 'rgba(25, 118, 210, 0.5)',
+                                            color: '#1976d2',
                                             '&:hover': {
-                                                transform: 'translateY(-2px)',
-                                                boxShadow: '0 8px 25px rgba(25, 118, 210, 0.4)',
-                                                background:
-                                                    'linear-gradient(135deg, #1565c0 0%, #00796b 100%)',
+                                                borderColor: '#1976d2',
+                                                bgcolor: 'rgba(25, 118, 210, 0.04)',
                                             },
                                         }}
                                     >
-                                        Hoàn tất đăng ký
+                                        Quay lại
                                     </Button>
-                                </Box>
-                            </Grow>
+                                )}
+                                
+                                <Button
+                                    variant="contained"
+                                    size="large"
+                                    onClick={handleNext}
+                                    disabled={activeStep === 0 ? !isStep1Complete : !isStep2Complete}
+                                    endIcon={activeStep === steps.length - 1 ? <CheckCircleIcon /> : <NavigateNextIcon />}
+                                    sx={{
+                                        py: 1.6,
+                                        borderRadius: '14px',
+                                        textTransform: 'none',
+                                        fontSize: '1rem',
+                                        fontWeight: 600,
+                                        flex: activeStep === 0 ? '1 1 auto' : 2,
+                                        background: 'linear-gradient(135deg, #1976d2 0%, #00897b 100%)',
+                                        boxShadow: '0 4px 15px rgba(25, 118, 210, 0.3)',
+                                        transition: 'all 0.3s ease',
+                                        '&:hover': {
+                                            transform: 'translateY(-2px)',
+                                            boxShadow: '0 8px 25px rgba(25, 118, 210, 0.4)',
+                                            background: 'linear-gradient(135deg, #1565c0 0%, #00796b 100%)',
+                                        },
+                                    }}
+                                >
+                                    {activeStep === steps.length - 1 ? 'Hoàn tất đăng ký' : 'Tiếp tục'}
+                                </Button>
+                            </Box>
                         </Paper>
 
                         {/* Footer */}
@@ -520,192 +362,17 @@ export default function ProfileSetup() {
             </Fade>
 
             {/* Confirmation Dialog */}
-            <Dialog
+            <ConfirmationDialog
                 open={confirmOpen}
                 onClose={() => !submitting && setConfirmOpen(false)}
-                maxWidth="sm"
-                fullWidth
-                PaperProps={{
-                    sx: {
-                        borderRadius: '18px',
-                        p: 1,
-                    },
-                }}
-            >
-                <DialogTitle
-                    sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1.5,
-                        fontWeight: 700,
-                        color: '#e65100',
-                    }}
-                >
-                    <WarningIcon sx={{ color: '#ff9800', fontSize: 28 }} />
-                    Xác nhận thông tin
-                </DialogTitle>
-                <DialogContent>
-                    <Typography
-                        variant="body2"
-                        sx={{ color: '#546e7a', mb: 2.5 }}
-                    >
-                        Vui lòng kiểm tra kỹ các thông tin dưới đây trước khi xác nhận.
-                        Thông tin này sẽ được sử dụng để đăng ký nhân sự vào hệ thống.
-                    </Typography>
-
-                    <Stack spacing={2}>
-                        <Box
-                            sx={{
-                                p: 2.5,
-                                borderRadius: '12px',
-                                bgcolor: '#f5f5f5',
-                                border: '1px solid #e0e0e0',
-                            }}
-                        >
-                            <Stack spacing={1.5}>
-                                <Box
-                                    sx={{
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center',
-                                    }}
-                                >
-                                    <Typography
-                                        variant="body2"
-                                        sx={{ color: '#78909c', fontWeight: 500 }}
-                                    >
-                                        📍 Bộ môn
-                                    </Typography>
-                                    <Chip
-                                        label={selectedDeptName}
-                                        size="small"
-                                        color="primary"
-                                        variant="outlined"
-                                        sx={{ fontWeight: 600 }}
-                                    />
-                                </Box>
-                                <Divider />
-                                <Box
-                                    sx={{
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center',
-                                    }}
-                                >
-                                    <Typography
-                                        variant="body2"
-                                        sx={{ color: '#78909c', fontWeight: 500 }}
-                                    >
-                                        🏅 Học hàm
-                                    </Typography>
-                                    <Chip
-                                        label={selectedRankLabel}
-                                        size="small"
-                                        sx={{
-                                            fontWeight: 600,
-                                            bgcolor: '#fce4ec',
-                                            color: '#c62828',
-                                        }}
-                                    />
-                                </Box>
-                                <Divider />
-                                <Box
-                                    sx={{
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center',
-                                    }}
-                                >
-                                    <Typography
-                                        variant="body2"
-                                        sx={{ color: '#78909c', fontWeight: 500 }}
-                                    >
-                                        🎓 Học vị
-                                    </Typography>
-                                    <Chip
-                                        label={selectedDegreeLabel}
-                                        size="small"
-                                        sx={{
-                                            fontWeight: 600,
-                                            bgcolor: '#e8f5e9',
-                                            color: '#2e7d32',
-                                        }}
-                                    />
-                                </Box>
-                                <Divider />
-                                <Box
-                                    sx={{
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center',
-                                    }}
-                                >
-                                    <Typography
-                                        variant="body2"
-                                        sx={{ color: '#78909c', fontWeight: 500 }}
-                                    >
-                                        💼 Chức vụ
-                                    </Typography>
-                                    <Chip
-                                        label={jobTitle}
-                                        size="small"
-                                        sx={{
-                                            fontWeight: 600,
-                                            bgcolor: '#fff3e0',
-                                            color: '#e65100',
-                                        }}
-                                    />
-                                </Box>
-                            </Stack>
-                        </Box>
-
-                        <Alert severity="warning" sx={{ borderRadius: '10px' }}>
-                            Bạn xác nhận các thông tin trên là <strong>chính xác</strong>?
-                            Hệ thống sẽ ghi nhận và phân bổ bạn vào bộ môn tương ứng.
-                        </Alert>
-                    </Stack>
-                </DialogContent>
-                <DialogActions sx={{ px: 3, pb: 2.5, gap: 1 }}>
-                    <Button
-                        onClick={() => setConfirmOpen(false)}
-                        disabled={submitting}
-                        sx={{
-                            borderRadius: '10px',
-                            textTransform: 'none',
-                            px: 3,
-                            color: '#546e7a',
-                        }}
-                    >
-                        Quay lại chỉnh sửa
-                    </Button>
-                    <Button
-                        variant="contained"
-                        onClick={handleSubmit}
-                        disabled={submitting}
-                        startIcon={
-                            submitting ? (
-                                <CircularProgress size={18} color="inherit" />
-                            ) : (
-                                <CheckCircleIcon />
-                            )
-                        }
-                        sx={{
-                            borderRadius: '10px',
-                            textTransform: 'none',
-                            px: 3,
-                            fontWeight: 600,
-                            background:
-                                'linear-gradient(135deg, #1976d2 0%, #00897b 100%)',
-                            '&:hover': {
-                                background:
-                                    'linear-gradient(135deg, #1565c0 0%, #00796b 100%)',
-                            },
-                        }}
-                    >
-                        {submitting ? 'Đang xử lý...' : 'Xác nhận & Hoàn tất'}
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                onSubmit={handleSubmit}
+                submitting={submitting}
+                formData={formData}
+                selectedDeptName={selectedDeptName}
+                selectedRankLabel={selectedRankLabel}
+                selectedDegreeLabel={selectedDegreeLabel}
+                jobTitle={formData.jobTitle}
+            />
         </Box>
     );
 }
