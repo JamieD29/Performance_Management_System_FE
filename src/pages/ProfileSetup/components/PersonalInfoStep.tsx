@@ -16,10 +16,10 @@ export function PersonalInfoStep({ formData, onChange }: PersonalInfoStepProps) 
     if (formData.dob) {
         const birthDate = new Date(formData.dob);
         if (!isNaN(birthDate.getTime())) {
-            birthDate.setFullYear(birthDate.getFullYear() + 25);
-            const dobPlus25Str = `${birthDate.getFullYear()}-${String(birthDate.getMonth() + 1).padStart(2, '0')}-${String(birthDate.getDate()).padStart(2, '0')}`;
-            if (dobPlus25Str > minJoinDateStr) {
-                minJoinDateStr = dobPlus25Str;
+            birthDate.setFullYear(birthDate.getFullYear() + 18);
+            const dobPlus18Str = `${birthDate.getFullYear()}-${String(birthDate.getMonth() + 1).padStart(2, '0')}-${String(birthDate.getDate()).padStart(2, '0')}`;
+            if (dobPlus18Str > minJoinDateStr) {
+                minJoinDateStr = dobPlus18Str;
             }
         }
     }
@@ -62,7 +62,12 @@ export function PersonalInfoStep({ formData, onChange }: PersonalInfoStepProps) 
                     size="small"
                     placeholder="Nhập mã cán bộ"
                     value={formData.employeeId}
-                    onChange={(e) => onChange('employeeId', e.target.value)}
+                    onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === '' || /^\d{1,4}$/.test(val)) {
+                            onChange('employeeId', val);
+                        }
+                    }}
                     sx={{
                         '& .MuiOutlinedInput-root': {
                             backgroundColor: '#fff',

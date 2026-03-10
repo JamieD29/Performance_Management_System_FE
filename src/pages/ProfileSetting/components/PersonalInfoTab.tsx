@@ -12,7 +12,7 @@ import {
   MenuItem,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
-import { Person, Badge, Email, Wc, DateRange } from "@mui/icons-material";
+import { Person, Badge, Email, Wc, DateRange, Event as EventIcon } from "@mui/icons-material";
 import type { UserProfileForm, FormErrors } from "../profile.types";
 import { THEME_COLORS, GENDERS } from "../profile.constants";
 
@@ -156,6 +156,12 @@ export default function PersonalInfoTab({
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
           <ProfileField
+            icon={<EventIcon />}
+            label="Ngày tháng năm sinh"
+            value={formData.dob}
+            color={THEME_COLORS.IDENTITY}
+          />
+          <ProfileField
             icon={<Wc />}
             label="Giới tính"
             value={formData.gender}
@@ -199,7 +205,12 @@ export default function PersonalInfoTab({
           {...commonProps}
           label={<RequiredLabel label="Mã cán bộ" />}
           value={formData.staffCode}
-          onChange={(e) => handleChange("staffCode", e.target.value)}
+          onChange={(e) => {
+            const val = e.target.value;
+            if (val === '' || /^\d{1,4}$/.test(val)) {
+              handleChange("staffCode", val);
+            }
+          }}
           sx={getColorfulInputStyle(THEME_COLORS.IDENTITY)}
           InputProps={{
             startAdornment: (
@@ -222,6 +233,26 @@ export default function PersonalInfoTab({
             startAdornment: (
               <InputAdornment position="start">
                 <Email />
+              </InputAdornment>
+            ),
+          }}
+        />
+      </Grid>
+
+      <Grid size={{ xs: 12, md: 6 }}>
+        <TextField
+          {...commonProps}
+          type="date"
+          label="Ngày tháng năm sinh"
+          InputLabelProps={{ shrink: true }}
+          inputProps={{ max: todayStr }}
+          value={formData.dob || ""}
+          onChange={(e) => handleChange("dob", e.target.value)}
+          sx={getColorfulInputStyle(THEME_COLORS.IDENTITY)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <EventIcon />
               </InputAdornment>
             ),
           }}
