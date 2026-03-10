@@ -11,9 +11,6 @@ export const DEGREES = [
 ];
 
 export const JOB_TITLES = [
-    { value: 'Trưởng khoa', label: 'Trưởng khoa' },
-    { value: 'Phó khoa', label: 'Phó khoa' },
-    { value: 'Trưởng bộ môn', label: 'Trưởng bộ môn' },
     { value: 'Giảng viên chính', label: 'Giảng viên chính' },
     { value: 'Giảng viên', label: 'Giảng viên' },
     { value: 'Trợ giảng', label: 'Trợ giảng' },

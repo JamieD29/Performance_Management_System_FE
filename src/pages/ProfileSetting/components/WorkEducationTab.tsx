@@ -138,17 +138,16 @@ export default function WorkEducationTab({
     return (
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 6 }}>
-          {/* Bổ sung hiển thị Đơn vị / Bộ môn */}
           <ProfileField
             icon={<Business />}
-            label="Đơn vị / Bộ môn"
+            label="Đơn vị công tác"
             value={getDepartmentName(formData.departmentID)}
             color={THEME_COLORS.WORK}
           />
           <ProfileField
-            icon={<Work />}
-            label="Chức vụ"
-            value={formData.jobTitle}
+            icon={<School />}
+            label="Học vị"
+            value={formData.degree}
             color={THEME_COLORS.WORK}
           />
           <ProfileField
@@ -160,9 +159,9 @@ export default function WorkEducationTab({
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
           <ProfileField
-            icon={<School />}
-            label="Học vị"
-            value={formData.degree}
+            icon={<Work />}
+            label="Chức danh nghề nghiệp"
+            value={formData.jobTitle}
             color={THEME_COLORS.WORK}
           />
           <ProfileField
@@ -170,7 +169,7 @@ export default function WorkEducationTab({
             label="Giờ giảng/năm"
             value={
               formData.teachingHours !== undefined &&
-              formData.teachingHours !== ""
+                formData.teachingHours !== ""
                 ? `${formData.teachingHours} Tiết`
                 : ""
             }
@@ -186,13 +185,13 @@ export default function WorkEducationTab({
   // --------------------------------------------------------
   return (
     <Grid container spacing={3} sx={{ mt: 1 }}>
-      {/* ĐƠN VỊ / BỘ MÔN (Bắt buộc) */}
+      {/* ĐƠN VỊ CÔNG TÁC (Bắt buộc) */}
       <Grid size={{ xs: 12, md: 6 }}>
         <FormControl fullWidth sx={getColorfulInputStyle(THEME_COLORS.WORK)}>
-          <InputLabel>Đơn vị / Bộ môn *</InputLabel>
+          <InputLabel>Đơn vị công tác *</InputLabel>
           <Select
             value={formData.departmentID || ""}
-            label="Đơn vị / Bộ môn *"
+            label="Đơn vị công tác *"
             onChange={(e) => handleChange("departmentID", e.target.value)}
             startAdornment={
               <InputAdornment position="start" sx={{ mr: 2, ml: 1 }}>
@@ -215,23 +214,28 @@ export default function WorkEducationTab({
         </FormControl>
       </Grid>
 
-      {/* CHỨC VỤ */}
+      {/* HỌC VỊ */}
       <Grid size={{ xs: 12, md: 6 }}>
         <FormControl fullWidth sx={getColorfulInputStyle(THEME_COLORS.WORK)}>
-          <InputLabel>Chức vụ</InputLabel>
+          <InputLabel>Học vị</InputLabel>
           <Select
-            value={formData.jobTitle || ""}
-            label="Chức vụ"
-            onChange={(e) => handleChange("jobTitle", e.target.value)}
+            value={formData.degree || ""}
+            label="Học vị"
+            onChange={(e) => {
+              handleChange("degree", e.target.value);
+              if (e.target.value !== "Tiến sĩ") {
+                handleChange("academicRank", "Không");
+              }
+            }}
             startAdornment={
               <InputAdornment position="start" sx={{ mr: 2, ml: 1 }}>
-                <Work fontSize="small" />
+                <School fontSize="small" />
               </InputAdornment>
             }
           >
-            {JOB_TITLES.map((jt) => (
-              <MenuItem key={jt} value={jt}>
-                {jt}
+            {DEGREES.map((d) => (
+              <MenuItem key={d} value={d}>
+                {d}
               </MenuItem>
             ))}
           </Select>
@@ -246,6 +250,7 @@ export default function WorkEducationTab({
             value={formData.academicRank || ""}
             label="Học hàm"
             onChange={(e) => handleChange("academicRank", e.target.value)}
+            disabled={formData.degree !== "Tiến sĩ"}
             startAdornment={
               <InputAdornment position="start" sx={{ mr: 2, ml: 1 }}>
                 <Star fontSize="small" />
@@ -261,23 +266,23 @@ export default function WorkEducationTab({
         </FormControl>
       </Grid>
 
-      {/* HỌC VỊ */}
+      {/* CHỨC DANH NGHỀ NGHIỆP */}
       <Grid size={{ xs: 12, md: 4 }}>
         <FormControl fullWidth sx={getColorfulInputStyle(THEME_COLORS.WORK)}>
-          <InputLabel>Học vị</InputLabel>
+          <InputLabel>Chức danh nghề nghiệp</InputLabel>
           <Select
-            value={formData.degree || ""}
-            label="Học vị"
-            onChange={(e) => handleChange("degree", e.target.value)}
+            value={formData.jobTitle || ""}
+            label="Chức danh nghề nghiệp"
+            onChange={(e) => handleChange("jobTitle", e.target.value)}
             startAdornment={
               <InputAdornment position="start" sx={{ mr: 2, ml: 1 }}>
-                <School fontSize="small" />
+                <Work fontSize="small" />
               </InputAdornment>
             }
           >
-            {DEGREES.map((d) => (
-              <MenuItem key={d} value={d}>
-                {d}
+            {JOB_TITLES.map((jt) => (
+              <MenuItem key={jt} value={jt}>
+                {jt}
               </MenuItem>
             ))}
           </Select>

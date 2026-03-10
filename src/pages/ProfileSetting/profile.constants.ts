@@ -1,7 +1,4 @@
 export const JOB_TITLES = [
-  "Trưởng khoa",
-  "Phó khoa",
-  "Trưởng bộ môn",
   "Giảng viên",
   "Giảng viên chính",
   "Trợ giảng",
