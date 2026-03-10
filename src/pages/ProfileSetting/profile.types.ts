@@ -12,6 +12,7 @@ export interface UserRole {
 export interface UserProfileForm {
   name: string; // Họ và tên
   email: string; // Email liên hệ (thường là disabled)
+  dob: string; // Ngày tháng năm sinh (YYYY-MM-DD)
   roles: UserRole[] | any[]; // Danh sách quyền
   jobTitle: string; // Chức vụ (Trưởng khoa, Giảng viên...)
   academicRank: string; // Học hàm (Giáo sư, PGS, Không)

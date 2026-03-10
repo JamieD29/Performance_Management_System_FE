@@ -8,6 +8,7 @@ import type {
   FormErrors,
   NotificationState,
 } from "./profile.types";
+import { useProfileValidation } from "../../hooks/useProfileValidation";
 
 export const useProfileLogic = () => {
   // --------------------------------------------------------
@@ -30,10 +31,9 @@ export const useProfileLogic = () => {
   );
   const [errors, setErrors] = useState<FormErrors>({});
 
-  // Bổ sung State lưu danh sách Đơn vị / Bộ môn
   const [departments, setDepartments] = useState<any[]>([]);
 
-  const minJoinDateStr = "1996-01-01"; // Mốc thời gian hợp lệ cho ngày vào trường
+  const { validateJoinDateStr } = useProfileValidation();
 
   // --------------------------------------------------------
   // 2. FETCH DATA (Gọi API lấy dữ liệu lúc mới vào trang)
@@ -91,17 +91,7 @@ export const useProfileLogic = () => {
 
   // --- LOGIC NGÀY VÀO TRƯỜNG ---
   const validateJoinDate = (dateValue: string): string => {
-    if (!dateValue) return "";
-
-    const selectedDate = new Date(dateValue);
-    const currentDate = new Date();
-    const minimumDate = new Date(minJoinDateStr);
-
-    if (selectedDate > currentDate)
-      return "Ngày vào trường không thể ở tương lai.";
-    if (selectedDate < minimumDate)
-      return `Không hợp lệ (phải từ năm ${minimumDate.getFullYear()}).`;
-    return "";
+    return validateJoinDateStr(dateValue);
   };
 
   const handleJoinDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -185,7 +175,7 @@ export const useProfileLogic = () => {
     // 2. Tiến hành gọi API lưu dữ liệu
     setSaving(true);
     try {
-      await api.put("/users/profile", formData);
+      await api.patch("/users/profile", formData);
 
       setOriginalData(formData); // Cập nhật lại bản gốc bằng data mới
       setIsEditing(false);
