@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -18,7 +18,6 @@ import {
   AdminPanelSettings,
   ArrowBack,
   CalendarToday,
-  BadgeOutlined,
 } from '@mui/icons-material';
 
 // 1. SỬA ĐƯỜNG DẪN: Lùi 2 cấp (Admin -> pages -> src/types)
@@ -29,9 +28,8 @@ import CycleManagement from '../Performance/components/CycleManagement';
 
 // 3. SỬA ĐƯỜNG DẪN: Vì AdminSetting giờ đang ở CÙNG THƯ MỤC CHA với components
 import WhitelistManager from './components/WhitelistManager';
-import UserRoleManager from './components/UserRoleManager';
 import SystemLogs from './components/SystemLogs';
-import ManagementPositionManager from './components/ManagementPositionManager';
+import RoleManagementTab from './components/RoleManagementTab';
 
 export default function AdminSettings() {
   const navigate = useNavigate();
@@ -77,8 +75,7 @@ export default function AdminSettings() {
       icon: <Dns />,
       restricted: false,
     },
-    { id: 'users', label: 'User Roles', icon: <People />, restricted: true },
-    { id: 'positions', label: 'Chức vụ quản lý', icon: <BadgeOutlined />, restricted: true },
+    { id: 'roles', label: 'Quản lý Roles', icon: <People />, restricted: true },
     { id: 'logs', label: 'System Logs', icon: <History />, restricted: true },
   ];
 
@@ -189,8 +186,7 @@ export default function AdminSettings() {
           {/* RENDER COMPONENT TƯƠNG ỨNG TỪ CÁC FILE ĐÃ TÁCH */}
           {activeTab === 'cycles' && <CycleManagement />}
           {activeTab === 'whitelist' && <WhitelistManager />}
-          {activeTab === 'users' && <UserRoleManager />}
-          {activeTab === 'positions' && <ManagementPositionManager />}
+          {activeTab === 'roles' && <RoleManagementTab />}
           {activeTab === 'logs' && <SystemLogs />}
         </Container>
       </Box>

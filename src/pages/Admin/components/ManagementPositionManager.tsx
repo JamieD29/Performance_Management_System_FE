@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Box,
     Typography,
@@ -21,6 +21,10 @@ import {
     CircularProgress,
     Alert,
     Snackbar,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
 } from '@mui/material';
 import {
     Add,
@@ -36,6 +40,7 @@ interface ManagementPosition {
     name: string;
     slug: string;
     description?: string;
+    permissionLevel?: 'SYSTEM' | 'KHOA' | 'DON_VI' | 'NONE';
     createdAt: string;
 }
 
@@ -44,7 +49,7 @@ export default function ManagementPositionManager() {
     const [loading, setLoading] = useState(false);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [editingPosition, setEditingPosition] = useState<ManagementPosition | null>(null);
-    const [formData, setFormData] = useState({ name: '', slug: '', description: '' });
+    const [formData, setFormData] = useState({ name: '', slug: '', description: '', permissionLevel: 'NONE' });
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
     const [submitting, setSubmitting] = useState(false);
 
@@ -78,7 +83,7 @@ export default function ManagementPositionManager() {
 
     const handleOpenCreate = () => {
         setEditingPosition(null);
-        setFormData({ name: '', slug: '', description: '' });
+        setFormData({ name: '', slug: '', description: '', permissionLevel: 'NONE' });
         setDialogOpen(true);
     };
 
@@ -88,6 +93,7 @@ export default function ManagementPositionManager() {
             name: pos.name,
             slug: pos.slug,
             description: pos.description || '',
+            permissionLevel: pos.permissionLevel || 'NONE',
         });
         setDialogOpen(true);
     };
@@ -133,11 +139,29 @@ export default function ManagementPositionManager() {
         }
     };
 
+    const getPermissionLabel = (level?: string) => {
+        switch (level) {
+            case 'SYSTEM': return 'Cấp Hệ Thống / BGH';
+            case 'KHOA': return 'Cấp Khoa';
+            case 'DON_VI': return 'Cấp Đơn vị (Bộ môn/Phòng)';
+            default: return 'Không cấp quyền';
+        }
+    };
+
+    const getPermissionColor = (level?: string) => {
+        switch (level) {
+            case 'SYSTEM': return '#9f1239'; // Cấp cao nhất
+            case 'KHOA': return '#1d4ed8'; // Cấp Khoa
+            case 'DON_VI': return '#047857'; // Cấp Bộ môn
+            default: return '#64748b'; // Không quyền
+        }
+    };
+
     return (
         <Box>
             {/* Header */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                <Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Box sx={{ mr: 2 }}>
                     <Typography variant="body2" color="text.secondary">
                         Định nghĩa các chức vụ quản lý cấp cao cho bộ môn / khoa. Các chức vụ này sẽ được gán cho nhân sự trong tab Nhân sự.
                     </Typography>
@@ -149,7 +173,10 @@ export default function ManagementPositionManager() {
                     sx={{
                         borderRadius: 2,
                         textTransform: 'none',
-                        px: 3,
+                        px: 2,
+                        py: 0.5,
+                        whiteSpace: 'nowrap',
+                        flexShrink: 0,
                         bgcolor: '#1e3a8a',
                         '&:hover': { bgcolor: '#1e40af' },
                     }}
@@ -162,13 +189,14 @@ export default function ManagementPositionManager() {
             <TableContainer
                 component={Paper}
                 elevation={0}
-                sx={{ borderRadius: 3, border: '1px solid #e2e8f0' }}
+                sx={{ borderRadius: 2, border: '1px solid #e2e8f0' }}
             >
-                <Table>
+                <Table size="small">
                     <TableHead sx={{ bgcolor: '#f8fafc' }}>
                         <TableRow>
                             <TableCell sx={{ fontWeight: 'bold', color: '#475569' }}>CHỨC VỤ</TableCell>
                             <TableCell sx={{ fontWeight: 'bold', color: '#475569' }}>SLUG</TableCell>
+                            <TableCell sx={{ fontWeight: 'bold', color: '#475569' }}>MỨC QUYỀN HẠN</TableCell>
                             <TableCell sx={{ fontWeight: 'bold', color: '#475569' }}>MÔ TẢ</TableCell>
                             <TableCell align="right" sx={{ fontWeight: 'bold', color: '#475569' }}>THAO TÁC</TableCell>
                         </TableRow>
@@ -176,22 +204,22 @@ export default function ManagementPositionManager() {
                     <TableBody>
                         {loading ? (
                             <TableRow>
-                                <TableCell colSpan={4} align="center" sx={{ py: 5 }}>
-                                    <CircularProgress size={28} />
+                                <TableCell colSpan={5} align="center" sx={{ py: 3 }}>
+                                    <CircularProgress size={24} />
                                 </TableCell>
                             </TableRow>
                         ) : positions.length > 0 ? (
                             positions.map((pos) => (
                                 <TableRow key={pos.id} hover>
-                                    <TableCell>
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                            <Badge sx={{ color: '#1e3a8a', fontSize: 20 }} />
+                                    <TableCell sx={{ py: 1 }}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <Badge sx={{ color: '#1e3a8a', fontSize: 18 }} />
                                             <Typography variant="body2" fontWeight={600}>
                                                 {pos.name}
                                             </Typography>
                                         </Box>
                                     </TableCell>
-                                    <TableCell>
+                                    <TableCell sx={{ py: 1 }}>
                                         <Chip
                                             label={pos.slug}
                                             size="small"
@@ -204,12 +232,25 @@ export default function ManagementPositionManager() {
                                             }}
                                         />
                                     </TableCell>
-                                    <TableCell>
-                                        <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 300 }}>
+                                    <TableCell sx={{ py: 1 }}>
+                                        <Chip
+                                            label={getPermissionLabel(pos.permissionLevel)}
+                                            size="small"
+                                            variant="outlined"
+                                            sx={{
+                                                color: getPermissionColor(pos.permissionLevel),
+                                                borderColor: getPermissionColor(pos.permissionLevel),
+                                                fontWeight: 600,
+                                                fontSize: 11,
+                                            }}
+                                        />
+                                    </TableCell>
+                                    <TableCell sx={{ py: 1 }}>
+                                        <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 300, fontSize: '0.85rem' }}>
                                             {pos.description || '—'}
                                         </Typography>
                                     </TableCell>
-                                    <TableCell align="right">
+                                    <TableCell align="right" sx={{ py: 1 }}>
                                         <Tooltip title="Chỉnh sửa">
                                             <IconButton size="small" onClick={() => handleOpenEdit(pos)}>
                                                 <Edit fontSize="small" />
@@ -225,9 +266,9 @@ export default function ManagementPositionManager() {
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={4} align="center" sx={{ py: 5, color: 'text.secondary' }}>
-                                    <Groups sx={{ fontSize: 40, mb: 1, opacity: 0.3 }} />
-                                    <Typography>Chưa có chức vụ quản lý nào. Bấm "Thêm chức vụ" để tạo mới.</Typography>
+                                <TableCell colSpan={4} align="center" sx={{ py: 4, color: 'text.secondary' }}>
+                                    <Groups sx={{ fontSize: 32, mb: 1, opacity: 0.3 }} />
+                                    <Typography variant="body2">Chưa có chức vụ quản lý nào. Bấm "Thêm chức vụ" để tạo mới.</Typography>
                                 </TableCell>
                             </TableRow>
                         )}
@@ -271,6 +312,39 @@ export default function ManagementPositionManager() {
                             multiline
                             rows={2}
                         />
+                        <FormControl fullWidth>
+                            <InputLabel>Mức quản lý / Quyền hạn (Permission Level)</InputLabel>
+                            <Select
+                                value={formData.permissionLevel}
+                                label="Mức quản lý / Quyền hạn (Permission Level)"
+                                onChange={(e) => setFormData((prev) => ({ ...prev, permissionLevel: e.target.value }))}
+                            >
+                                <MenuItem value="NONE">
+                                    <Box>
+                                        <Typography variant="body2" fontWeight={600}>Không cấp quyền</Typography>
+                                        <Typography variant="caption" color="text.secondary">Chỉ hiển thị như một nhãn danh dự, không can thiệp hệ thống</Typography>
+                                    </Box>
+                                </MenuItem>
+                                <MenuItem value="DON_VI">
+                                    <Box>
+                                        <Typography variant="body2" fontWeight={600}>Cấp Đơn vị (Bộ môn/Phòng ban)</Typography>
+                                        <Typography variant="caption" color="text.secondary">Được quản lý nhân sự thuộc nội bộ phòng/bộ môn quản lý chức vụ</Typography>
+                                    </Box>
+                                </MenuItem>
+                                <MenuItem value="KHOA">
+                                    <Box>
+                                        <Typography variant="body2" fontWeight={600} color="#1d4ed8">Cấp Khoa (Ban CN Khoa)</Typography>
+                                        <Typography variant="caption" color="text.secondary">Thấy toàn bộ danh sách khoa, không gán quyền</Typography>
+                                    </Box>
+                                </MenuItem>
+                                <MenuItem value="SYSTEM">
+                                    <Box>
+                                        <Typography variant="body2" fontWeight={600} color="error">Cấp Hệ thống (BGH/BGD)</Typography>
+                                        <Typography variant="caption" color="text.secondary">View all</Typography>
+                                    </Box>
+                                </MenuItem>
+                            </Select>
+                        </FormControl>
                     </Box>
                 </DialogContent>
                 <DialogActions sx={{ px: 3, pb: 2 }}>

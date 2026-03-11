@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -71,46 +71,53 @@ export default function UserRoleManager() {
 
   return (
     <Box>
-      <Typography variant="h6" fontWeight={600} gutterBottom>
-        User Role Management
-      </Typography>
-      <Alert severity="warning" sx={{ mb: 3 }}>
+      <Alert severity="warning" sx={{ mb: 2, py: 0.5 }}>
         Only Admin can promote users.
       </Alert>
 
-      <TableContainer component={Paper} variant="outlined">
-        <Table>
+      <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
+        <Table size="small">
           <TableHead sx={{ bgcolor: '#f8fafc' }}>
             <TableRow>
-              <TableCell>User</TableCell>
-              <TableCell>Job</TableCell>
-              <TableCell>Role</TableCell>
-              <TableCell align="right">Action</TableCell>
+              <TableCell>Nhân viên</TableCell>
+              <TableCell>Chức danh</TableCell>
+              <TableCell>Chức vụ</TableCell>
+              <TableCell>Role hệ thống</TableCell>
+              <TableCell align="right">Thao tác</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={4} align="center">
-                  <CircularProgress />
+                <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
+                  <CircularProgress size={24} />
                 </TableCell>
               </TableRow>
             ) : (
               users.map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <Avatar src={user.avatarUrl}>
+                  <TableCell sx={{ py: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                      <Avatar src={user.avatarUrl} sx={{ width: 32, height: 32, fontSize: '0.9rem' }}>
                         {user.name?.charAt(0)}
                       </Avatar>
                       <Box>
-                        <Typography variant="subtitle2">{user.name}</Typography>
-                        <Typography variant="caption">{user.email}</Typography>
+                        <Typography variant="subtitle2" sx={{ fontSize: '0.85rem' }}>{user.name}</Typography>
+                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>{user.email}</Typography>
                       </Box>
                     </Box>
                   </TableCell>
-                  <TableCell>{user.jobTitle || 'N/A'}</TableCell>
-                  <TableCell>
+                  <TableCell sx={{ py: 1, fontSize: '0.85rem' }}>
+                    <Chip label={user.jobTitle || 'N/A'} size="small" />
+                  </TableCell>
+                  <TableCell sx={{ py: 1, fontSize: '0.85rem' }}>
+                    {(user as any).managementPosition ? (
+                      <Chip label={(user as any).managementPosition.name} color="primary" variant="outlined" size="small" />
+                    ) : (
+                      <Typography variant="caption" color="text.disabled">—</Typography>
+                    )}
+                  </TableCell>
+                  <TableCell sx={{ py: 1 }}>
                     {user.roles.map((r: any) => {
                       const roleSlug =
                         typeof r === 'string' ? r : r.slug || r.name;
@@ -125,7 +132,7 @@ export default function UserRoleManager() {
                       );
                     })}
                   </TableCell>
-                  <TableCell align="right">
+                  <TableCell align="right" sx={{ py: 1 }}>
                     <Tooltip title="Edit Role">
                       <IconButton
                         size="small"
