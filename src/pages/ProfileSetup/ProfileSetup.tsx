@@ -130,6 +130,7 @@ export default function ProfileSetup() {
             // Gửi toàn bộ formData lên API (nếu có các trường API chưa hỗ trợ, chúng có thể bị bỏ qua bởi BE, nhưng cứ gửi đầy đủ)
             await api.patch('/users/profile', {
                 ...formData,
+                dateOfBirth: formData.dob,
                 profileCompleted: true,
             });
 

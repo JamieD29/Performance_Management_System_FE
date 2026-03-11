@@ -185,14 +185,13 @@ export default function WorkEducationTab({
   // --------------------------------------------------------
   return (
     <Grid container spacing={3} sx={{ mt: 1 }}>
-      {/* ĐƠN VỊ CÔNG TÁC (Bắt buộc) */}
+      {/* ĐƠN VỊ CÔNG TÁC (Chỉ được chọn ở ProfileSetup) */}
       <Grid size={{ xs: 12, md: 6 }}>
-        <FormControl fullWidth sx={getColorfulInputStyle(THEME_COLORS.WORK)}>
-          <InputLabel>Đơn vị công tác *</InputLabel>
+        <FormControl fullWidth sx={{ ...getColorfulInputStyle("#94a3b8"), bgcolor: "#f1f5f9" }} disabled>
+          <InputLabel>Đơn vị công tác</InputLabel>
           <Select
             value={formData.departmentID || ""}
-            label="Đơn vị công tác *"
-            onChange={(e) => handleChange("departmentID", e.target.value)}
+            label="Đơn vị công tác"
             startAdornment={
               <InputAdornment position="start" sx={{ mr: 2, ml: 1 }}>
                 <Business fontSize="small" />

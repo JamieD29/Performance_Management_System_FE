@@ -1,6 +1,6 @@
 // src/pages/ProfileSetting/index.tsx
 
-import React from "react";
+
 import {
   Box,
   Typography,
@@ -44,6 +44,7 @@ export default function ProfileSetting() {
     departments,
     getDepartmentName, // <-- Đã lấy 2 biến này ra
     handleChange,
+    handleDobChange,
     handleJoinDateChange,
     handleTeachingHoursChange,
     handlePreventInvalidChars,
@@ -125,7 +126,7 @@ export default function ProfileSetting() {
               orientation={isMobile ? "horizontal" : "vertical"}
               variant="scrollable"
               value={activeTab}
-              onChange={(e, v) => setActiveTab(v)}
+              onChange={(_, v) => setActiveTab(v)}
               sx={{
                 borderRight: { md: "1px solid #f1f5f9" },
                 "& .MuiTabs-indicator": { display: "none" }, // Ẩn thanh gạch dưới
@@ -220,6 +221,7 @@ export default function ProfileSetting() {
                       errors={errors}
                       isEditing={isEditing}
                       handleChange={handleChange}
+                      handleDobChange={handleDobChange}
                       handleJoinDateChange={handleJoinDateChange}
                     />
                   )}
