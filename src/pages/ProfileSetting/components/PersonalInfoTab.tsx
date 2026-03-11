@@ -40,7 +40,7 @@ const RequiredLabel = ({ label }: { label: string }) => (
 );
 
 // Component hiển thị thông tin dạng thẻ (View Mode)
-const ProfileField = ({ icon, label, value, color }: any) => (
+const ProfileField = ({ icon, label, value, color, disabled }: any) => (
   <Box sx={{ mb: 3 }}>
     <Typography
       variant="caption"
@@ -104,9 +104,10 @@ const ProfileField = ({ icon, label, value, color }: any) => (
 // --- ĐỊNH NGHĨA PROPS CHO COMPONENT ---
 interface PersonalInfoTabProps {
   formData: UserProfileForm;
-  errors: FormErrors;
   isEditing: boolean;
+  errors: FormErrors;
   handleChange: (field: keyof UserProfileForm, value: any) => void;
+  handleDobChange: (value: string) => void;
   handleJoinDateChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -115,6 +116,7 @@ export default function PersonalInfoTab({
   errors,
   isEditing,
   handleChange,
+  handleDobChange,
   handleJoinDateChange,
 }: PersonalInfoTabProps) {
   // Biến giới hạn ngày tháng
@@ -188,7 +190,12 @@ export default function PersonalInfoTab({
           {...commonProps}
           label={<RequiredLabel label="Họ và tên" />}
           value={formData.name}
-          onChange={(e) => handleChange("name", e.target.value)}
+          onChange={(e) => {
+            const val = e.target.value;
+            if (val === '' || /^[\p{L}\s]+$/u.test(val)) {
+              handleChange("name", val);
+            }
+          }}
           sx={getColorfulInputStyle(THEME_COLORS.IDENTITY)}
           InputProps={{
             startAdornment: (
@@ -203,15 +210,10 @@ export default function PersonalInfoTab({
       <Grid size={{ xs: 12, md: 6 }}>
         <TextField
           {...commonProps}
-          label={<RequiredLabel label="Mã cán bộ" />}
+          disabled
+          label="Mã cán bộ"
           value={formData.staffCode}
-          onChange={(e) => {
-            const val = e.target.value;
-            if (val === '' || /^\d{1,4}$/.test(val)) {
-              handleChange("staffCode", val);
-            }
-          }}
-          sx={getColorfulInputStyle(THEME_COLORS.IDENTITY)}
+          sx={{ ...getColorfulInputStyle("#94a3b8"), bgcolor: "#f1f5f9" }}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
@@ -247,7 +249,9 @@ export default function PersonalInfoTab({
           InputLabelProps={{ shrink: true }}
           inputProps={{ max: todayStr }}
           value={formData.dob || ""}
-          onChange={(e) => handleChange("dob", e.target.value)}
+          onChange={(e) => handleDobChange(e.target.value)}
+          error={!!errors.dob}
+          helperText={errors.dob}
           sx={getColorfulInputStyle(THEME_COLORS.IDENTITY)}
           InputProps={{
             startAdornment: (

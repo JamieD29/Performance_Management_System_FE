@@ -41,6 +41,7 @@ import {
   AccessTime,
   EmojiEvents,
   Lightbulb,
+  Event as EventIcon,
 } from '@mui/icons-material';
 import { api } from '../../../services/api';
 
@@ -130,6 +131,7 @@ export default function ProfileSetting() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    dob: '',
     roles: [] as any[],
     jobTitle: '',
     academicRank: 'Không',
@@ -162,6 +164,7 @@ export default function ProfileSetting() {
         const mappedData = {
           name: u.name || '',
           email: u.email || '',
+          dob: u.dateOfBirth ? u.dateOfBirth.split('T')[0] : (u.dob || ''),
           roles: u.roles || [],
           jobTitle: u.jobTitle || '',
           academicRank: u.academicRank || 'Không',
@@ -230,6 +233,7 @@ export default function ProfileSetting() {
       }
       const payload = {
         name: formData.name,
+        date_of_birth: formData.dob,
         jobTitle: formData.jobTitle,
         academicRank: formData.academicRank,
         degree: formData.degree,
@@ -331,6 +335,11 @@ export default function ProfileSetting() {
                 >
                   Thông tin bổ sung
                 </Typography>
+                <InfoRow
+                  icon={<EventIcon fontSize="small" />}
+                  label="Ngày sinh"
+                  value={formData.dob}
+                />
                 <InfoRow
                   icon={<Wc fontSize="small" />}
                   label="Giới tính"
@@ -449,7 +458,12 @@ export default function ProfileSetting() {
                 {...commonProps}
                 label={<RequiredLabel label="Họ và tên" />}
                 value={formData.name}
-                onChange={(e) => handleChange('name', e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === '' || /^[\p{L}\s]+$/u.test(val)) {
+                    handleChange('name', val);
+                  }
+                }}
                 error={!formData.name}
               />
             </Grid>
@@ -458,7 +472,12 @@ export default function ProfileSetting() {
                 {...commonProps}
                 label={<RequiredLabel label="Mã cán bộ" />}
                 value={formData.staffCode}
-                onChange={(e) => handleChange('staffCode', e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === '' || /^\d{1,4}$/.test(val)) {
+                    handleChange('staffCode', val);
+                  }
+                }}
               />
             </Grid>
             <Grid size={{ xs: 12, md: 6 }}>
@@ -485,6 +504,17 @@ export default function ProfileSetting() {
                   ))}
                 </Select>
               </FormControl>
+            </Grid>
+            <Grid size={{ xs: 12, md: 3 }}>
+              <TextField
+                {...commonProps}
+                type="date"
+                label="Ngày sinh"
+                InputLabelProps={{ shrink: true }}
+                inputProps={{ max: new Date().toISOString().split('T')[0] }}
+                value={formData.dob}
+                onChange={(e) => handleChange('dob', e.target.value)}
+              />
             </Grid>
             <Grid size={{ xs: 12, md: 3 }}>
               <TextField

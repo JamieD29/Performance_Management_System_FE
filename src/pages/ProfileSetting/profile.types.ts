@@ -33,6 +33,7 @@ export interface FormErrors {
   name?: string; // Lỗi khi bỏ trống tên
   staffCode?: string; // Lỗi khi bỏ trống mã cán bộ
   departmentID?: string; // Lỗi khi chưa chọn bộ môn
+  dob?: string; // Lỗi ngày sinh
   joinDate?: string; // Lỗi ngày vào trường (tương lai, quá xa...)
   teachingHours?: string; // Lỗi nhập sai giờ giảng
 }

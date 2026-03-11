@@ -1,3 +1,5 @@
+import { useProfileValidation } from '../../../hooks/useProfileValidation';
+import { useState } from 'react';
 import { Stack, TextField, Box, Typography } from '@mui/material';
 import { Badge as BadgeIcon, Event as EventIcon, Email as EmailIcon, Person as PersonIcon, AssignmentInd as AssignmentIndIcon } from '@mui/icons-material';
 import { AnimatedField } from './AnimatedField';
@@ -9,31 +11,30 @@ interface PersonalInfoStepProps {
 }
 
 export function PersonalInfoStep({ formData, onChange }: PersonalInfoStepProps) {
+    const { validateAgeAtJoinDate } = useProfileValidation();
+    const [localErrors, setLocalErrors] = useState({ dob: '', joinDate: '' });
+
     const now = new Date();
     const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
-    let minJoinDateStr = '1996-01-01';
-    if (formData.dob) {
-        const birthDate = new Date(formData.dob);
-        if (!isNaN(birthDate.getTime())) {
-            birthDate.setFullYear(birthDate.getFullYear() + 18);
-            const dobPlus18Str = `${birthDate.getFullYear()}-${String(birthDate.getMonth() + 1).padStart(2, '0')}-${String(birthDate.getDate()).padStart(2, '0')}`;
-            if (dobPlus18Str > minJoinDateStr) {
-                minJoinDateStr = dobPlus18Str;
-            }
-        }
-    }
 
     const handleJoinDateChange = (val: string) => {
-        if (!val) {
-            onChange('joinDate', val);
-            return;
-        }
-
-        if (val < minJoinDateStr || val > todayStr) {
-            onChange('joinDate', todayStr);
+        onChange('joinDate', val);
+        if (formData.dob && val) {
+            const { joinDateError } = validateAgeAtJoinDate(formData.dob, val);
+            setLocalErrors({ dob: '', joinDate: joinDateError });
         } else {
-            onChange('joinDate', val);
+            setLocalErrors(prev => ({ ...prev, joinDate: '' }));
+        }
+    };
+
+    const handleDobChange = (val: string) => {
+        onChange('dob', val);
+        if (val && formData.joinDate) {
+            const { dobError } = validateAgeAtJoinDate(val, formData.joinDate);
+            setLocalErrors({ dob: dobError, joinDate: '' });
+        } else {
+            setLocalErrors(prev => ({ ...prev, dob: '' }));
         }
     };
 
@@ -100,7 +101,12 @@ export function PersonalInfoStep({ formData, onChange }: PersonalInfoStepProps) 
                     size="small"
                     placeholder="Nhập họ và tên"
                     value={formData.fullName}
-                    onChange={(e) => onChange('fullName', e.target.value)}
+                    onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === '' || /^[\p{L}\s]+$/u.test(val)) {
+                            onChange('fullName', val);
+                        }
+                    }}
                     sx={{
                         '& .MuiOutlinedInput-root': {
                             backgroundColor: '#fff',
@@ -133,9 +139,11 @@ export function PersonalInfoStep({ formData, onChange }: PersonalInfoStepProps) 
                     size="small"
                     type="date"
                     value={formData.dob}
-                    onChange={(e) => onChange('dob', e.target.value)}
+                    onChange={(e) => handleDobChange(e.target.value)}
                     InputLabelProps={{ shrink: true }}
                     inputProps={{ max: todayStr }}
+                    error={!!localErrors.dob}
+                    helperText={localErrors.dob}
                     sx={{
                         '& .MuiOutlinedInput-root': {
                             backgroundColor: '#fff',
@@ -208,7 +216,9 @@ export function PersonalInfoStep({ formData, onChange }: PersonalInfoStepProps) 
                     value={formData.joinDate}
                     onChange={(e) => handleJoinDateChange(e.target.value)}
                     InputLabelProps={{ shrink: true }}
-                    inputProps={{ min: minJoinDateStr, max: todayStr }}
+                    inputProps={{ max: todayStr }}
+                    error={!!localErrors.joinDate}
+                    helperText={localErrors.joinDate}
                     sx={{
                         '& .MuiOutlinedInput-root': {
                             backgroundColor: '#fff',
