@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Card,
@@ -12,6 +12,7 @@ import {
   Breadcrumbs,
   Link,
 } from '@mui/material';
+import { NavigateNext } from '@mui/icons-material';
 import Grid from '@mui/material/Grid'; // 👈 Grid V6 chuẩn
 import {
   ArrowLeft,
@@ -23,16 +24,6 @@ import {
   BarChart3,
   Home,
 } from 'lucide-react';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
 import { api } from '../../services/api'; // Đảm bảo import đúng axios instance
 
 // Interface khớp với DB của bạn
@@ -71,7 +62,7 @@ export default function DepartmentOverview() {
 
   // --- COMPONENT: BREADCRUMBS ---
   const renderBreadcrumbs = () => (
-    <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 3 }}>
+    <Breadcrumbs separator={<NavigateNext fontSize="small" />} aria-label="breadcrumb" sx={{ mb: 3 }}>
       <Link
         underline="hover"
         color="inherit"

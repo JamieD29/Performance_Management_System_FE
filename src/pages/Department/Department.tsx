@@ -5,7 +5,6 @@ import {
   Button,
   Container,
   Breadcrumbs,
-  Link,
   TextField,
   InputAdornment,
   Table,
@@ -67,9 +66,13 @@ interface Department {
 function DepartmentRow({
   row,
   onDelete,
+  isAdmin,
+  isDonVi,
 }: {
   row: Department;
   onDelete: (id: string, name: string) => void;
+  isAdmin: boolean;
+  isDonVi: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
@@ -79,8 +82,8 @@ function DepartmentRow({
   const [assignModalOpen, setAssignModalOpen] = useState(false);
 
   // Hàm load user khi mở row
-  const handleExpandClick = async () => {
-    const newOpenState = !open;
+  const handleExpandClick = async (forceOpen = false) => {
+    const newOpenState = forceOpen ? true : !open;
     setOpen(newOpenState);
 
     // Nếu mở ra và chưa có data thì gọi API
@@ -100,6 +103,12 @@ function DepartmentRow({
       }
     }
   };
+
+  useEffect(() => {
+    if (isDonVi) {
+      handleExpandClick(true);
+    }
+  }, [isDonVi]);
 
   // Load lại danh sách user
   const reloadUsers = async () => {
@@ -127,24 +136,25 @@ function DepartmentRow({
   return (
     <React.Fragment>
       {/* 1. HÀNG MASTER (BỘ MÔN) */}
-      <TableRow
-        sx={{
-          '& > *': { borderBottom: 'unset' },
-          bgcolor: open ? '#f8fafc' : 'white',
-          cursor: 'pointer',
-          transition: 'all 0.2s',
-          '&:hover': { bgcolor: '#f1f5f9' },
-        }}
-        onClick={handleExpandClick} // Bấm vào hàng là mở luôn
-      >
-        <TableCell width="50">
-          <IconButton
-            size="small"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleExpandClick();
-            }}
-          >
+      {!isDonVi && (
+        <TableRow
+          sx={{
+            '& > *': { borderBottom: 'unset' },
+            bgcolor: open ? '#f8fafc' : 'white',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+            '&:hover': { bgcolor: '#f1f5f9' },
+          }}
+          onClick={() => handleExpandClick()} // Bấm vào hàng là mở luôn
+        >
+          <TableCell width="50">
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleExpandClick();
+              }}
+            >
             {open ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
           </IconButton>
         </TableCell>
@@ -171,26 +181,29 @@ function DepartmentRow({
           />
         </TableCell>
 
-        <TableCell align="right" width="120">
-          <Tooltip title="Chỉnh sửa (Sắp có)">
-            <IconButton size="small" onClick={(e) => e.stopPropagation()}>
-              <Edit fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Xóa">
-            <IconButton
-              size="small"
-              color="error"
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete(row.id, row.name);
-              }}
-            >
-              <Delete fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </TableCell>
-      </TableRow>
+        {isAdmin && (
+          <TableCell align="right" width="120">
+            <Tooltip title="Chỉnh sửa (Sắp có)">
+              <IconButton size="small" onClick={(e) => e.stopPropagation()}>
+                <Edit fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Xóa">
+              <IconButton
+                size="small"
+                color="error"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(row.id, row.name);
+                }}
+              >
+                <Delete fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </TableCell>
+        )}
+        </TableRow>
+      )}
 
       {/* 2. HÀNG DETAIL (DANH SÁCH NHÂN VIÊN) */}
       <TableRow>
@@ -198,12 +211,14 @@ function DepartmentRow({
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box
               sx={{
-                margin: 2,
+                margin: isDonVi ? 0 : 2,
                 p: 2,
                 bgcolor: '#fff',
                 borderRadius: 2,
-                border: '1px solid #e2e8f0',
-                boxShadow: 'inset 0 2px 4px 0 rgba(0,0,0, 0.05)',
+                border: isDonVi ? 'none' : '1px solid #e2e8f0',
+                boxShadow: isDonVi ? 'none' : 'inset 0 2px 4px 0 rgba(0,0,0, 0.05)',
+                maxHeight: isDonVi ? 'calc(100vh - 240px)' : 'none',
+                overflowY: isDonVi ? 'auto' : 'visible',
               }}
             >
               {/* Header của phần Detail */}
@@ -263,12 +278,14 @@ function DepartmentRow({
                       <TableCell sx={{ color: '#64748b', fontWeight: 600 }}>
                         Chức vụ quản lý
                       </TableCell>
-                      <TableCell
-                        align="right"
-                        sx={{ color: '#64748b', fontWeight: 600 }}
-                      >
-                        Thao tác
-                      </TableCell>
+                      {isAdmin && (
+                        <TableCell
+                          align="right"
+                          sx={{ color: '#64748b', fontWeight: 600 }}
+                        >
+                          Thao tác
+                        </TableCell>
+                      )}
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -326,26 +343,28 @@ function DepartmentRow({
                               </Typography>
                             )}
                           </TableCell>
-                          <TableCell align="right">
-                            <Tooltip title="Gán chức vụ quản lý">
-                              <IconButton
-                                size="small"
-                                color="primary"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setAssignModalUser(user);
-                                  setAssignModalOpen(true);
-                                }}
-                              >
-                                <BadgeOutlined fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Gỡ khỏi bộ môn">
-                              <IconButton size="small" color="warning">
-                                <PersonRemove fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                          </TableCell>
+                          {isAdmin && (
+                            <TableCell align="right">
+                              <Tooltip title="Gán chức vụ quản lý">
+                                <IconButton
+                                  size="small"
+                                  color="primary"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setAssignModalUser(user);
+                                    setAssignModalOpen(true);
+                                  }}
+                                >
+                                  <BadgeOutlined fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                              <Tooltip title="Gỡ khỏi bộ môn">
+                                <IconButton size="small" color="warning">
+                                  <PersonRemove fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                            </TableCell>
+                          )}
                         </TableRow>
                       ))
                     ) : (
@@ -391,6 +410,18 @@ export default function DepartmentPage() {
   const [openAddModal, setOpenAddModal] = useState(false);
   const [deptSearch, setDeptSearch] = useState('');
 
+  const userStr = sessionStorage.getItem('user');
+  const loggedInUser = userStr ? JSON.parse(userStr) : null;
+  const rawRoles = loggedInUser?.roles || [];
+  const userRoles = Array.isArray(rawRoles)
+    ? rawRoles.map((r: any) => (typeof r === 'string' ? r : r.slug || r.name || '').toString().toUpperCase())
+    : [];
+  const isAdmin = userRoles.includes('ADMIN');
+  const mngLevel = loggedInUser?.managementPosition?.permissionLevel || 'NONE';
+  
+  const isKhoa = ['SYSTEM', 'KHOA'].includes(mngLevel);
+  const isDonVi = mngLevel === 'DON_VI';
+
   const fetchDepartments = async () => {
     setLoading(true);
     try {
@@ -418,30 +449,31 @@ export default function DepartmentPage() {
     }
   };
 
-  const filteredDepartments = departments.filter(
-    (d) =>
+  const filteredDepartments = departments.filter((d) => {
+    const matchSearch =
       d.name.toLowerCase().includes(deptSearch.toLowerCase()) ||
-      d.code.toLowerCase().includes(deptSearch.toLowerCase()),
-  );
+      d.code.toLowerCase().includes(deptSearch.toLowerCase());
+      
+    if (!matchSearch) return false;
+
+    if (isAdmin) return true;
+    if (isKhoa) return true;
+    if (isDonVi) {
+      return d.id === loggedInUser?.department?.id;
+    }
+    return false;
+  });
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
       {/* BREADCRUMBS */}
       <Breadcrumbs separator={<NavigateNext fontSize="small" />} sx={{ mb: 3 }}>
-        <Link
-          underline="hover"
-          color="inherit"
-          href="/dashboard"
-          sx={{ display: 'flex', alignItems: 'center' }}
-        >
-          Dashboard
-        </Link>
-        <Typography
-          color="text.primary"
-          sx={{ display: 'flex', alignItems: 'center' }}
-        >
+        <Typography color="inherit" sx={{ display: 'flex', alignItems: 'center' }}>
           <School sx={{ mr: 0.5 }} fontSize="inherit" />
-          Quản lý Bộ môn
+          Bộ môn
+        </Typography>
+        <Typography color="text.primary">
+          Danh sách nhân sự
         </Typography>
       </Breadcrumbs>
 
@@ -466,28 +498,32 @@ export default function DepartmentPage() {
         </Box>
 
         <Box sx={{ display: 'flex', gap: 2 }}>
-          <TextField
-            size="small"
-            placeholder="Tìm kiếm bộ môn..."
-            value={deptSearch}
-            onChange={(e) => setDeptSearch(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search color="action" />
-                </InputAdornment>
-              ),
-            }}
-            sx={{ bgcolor: 'white', minWidth: 250 }}
-          />
-          <Button
-            variant="contained"
-            startIcon={<Add />}
-            onClick={() => setOpenAddModal(true)}
-            sx={{ borderRadius: 2, textTransform: 'none', px: 3 }}
-          >
-            Thêm bộ môn
-          </Button>
+          {!isDonVi && (
+            <TextField
+              size="small"
+              placeholder="Tìm kiếm bộ môn..."
+              value={deptSearch}
+              onChange={(e) => setDeptSearch(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search color="action" />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{ bgcolor: 'white', minWidth: 250 }}
+            />
+          )}
+          {isAdmin && (
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={() => setOpenAddModal(true)}
+              sx={{ borderRadius: 2, textTransform: 'none', px: 3 }}
+            >
+              Thêm bộ môn
+            </Button>
+          )}
         </Box>
       </Box>
 
@@ -502,26 +538,30 @@ export default function DepartmentPage() {
         }}
       >
         <Table aria-label="collapsible table">
-          <TableHead sx={{ bgcolor: '#f8fafc' }}>
-            <TableRow>
-              <TableCell width="50" />
-              <TableCell sx={{ fontWeight: 'bold', color: '#475569' }}>
-                TÊN BỘ MÔN
-              </TableCell>
-              <TableCell
-                align="right"
-                sx={{ fontWeight: 'bold', color: '#475569' }}
-              >
-                QUY MÔ
-              </TableCell>
-              <TableCell
-                align="right"
-                sx={{ fontWeight: 'bold', color: '#475569' }}
-              >
-                THAO TÁC
-              </TableCell>
-            </TableRow>
-          </TableHead>
+          {!isDonVi && (
+            <TableHead sx={{ bgcolor: '#f8fafc' }}>
+              <TableRow>
+                <TableCell width="50" />
+                <TableCell sx={{ fontWeight: 'bold', color: '#475569' }}>
+                  TÊN BỘ MÔN
+                </TableCell>
+                <TableCell
+                  align="right"
+                  sx={{ fontWeight: 'bold', color: '#475569' }}
+                >
+                  QUY MÔ
+                </TableCell>
+                {isAdmin && (
+                  <TableCell
+                    align="right"
+                    sx={{ fontWeight: 'bold', color: '#475569' }}
+                  >
+                    THAO TÁC
+                  </TableCell>
+                )}
+              </TableRow>
+            </TableHead>
+          )}
           <TableBody>
             {loading ? (
               <TableRow>
@@ -535,6 +575,8 @@ export default function DepartmentPage() {
                   key={dept.id}
                   row={dept}
                   onDelete={handleDelete}
+                  isAdmin={isAdmin}
+                  isDonVi={isDonVi}
                 />
               ))
             ) : (

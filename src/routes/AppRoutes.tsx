@@ -9,14 +9,11 @@ import Department from '../pages/Department/Department';
 import DepartmentOKR from '../pages/DepartmentOKR/departmentOKR';
 import AuthCallback from '../pages/Auth/AuthCallback';
 import PerformancePage from '../pages/Performance/PerformancePage';
-import ProfileSetup from '../pages/ProfileSetup/ProfileSetup';
-import DepartmentReviewPage from '../pages/Performance/DepartmentReviewPage';
-
-// Import Layouts
-import MainLayout from '../layouts/MainLayout';
-import DepartmentOverview from '../pages/DepartmentOverview/DepartmentOverview';
 import NotFoundPage from '../pages/ErrorPage/NotFoundPage';
 import ProfileSetting from '../pages/ProfileSetting/ProfileSettingPage';
+import ProfileSetup from '../pages/ProfileSetup/ProfileSetup';
+import MainLayout from '../layouts/MainLayout';
+import DepartmentOverview from '../pages/DepartmentOverview/DepartmentOverview';
 
 // 1. Hook check đăng nhập
 function useAuth() {
@@ -117,8 +114,6 @@ export default function AppRoutes() {
         {/* OKR Bộ môn */}
         <Route path="/departments/okr" element={<DepartmentOKR />} />
 
-        {/* KPI Bộ môn */}
-        <Route path="/departments/kpi" element={<DepartmentReviewPage />} />
         <Route path="/performance/evaluate" element={<PerformancePage />} />
         {/* 🔥 "NHÂN SỰ" - KẾT NỐI VÀO COMPONENT DEPARTMENT CŨ TẠI ĐÂY */}
         <Route path="/departments/users" element={<Department />} />

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Container,
   Paper,
@@ -19,7 +19,10 @@ import {
   Tabs,
   Tab,
   Chip,
-  Alert, // Import thêm Alert
+  Alert,
+  Grid,
+  Card,
+  CardContent
 } from '@mui/material';
 import {
   Save as SaveIcon,
@@ -28,6 +31,11 @@ import {
   Edit as EditIcon,
   Lock as LockIcon, // Import thêm LockIcon
 } from '@mui/icons-material';
+import {
+  TrendingUp,
+  FileText,
+  Award
+} from 'lucide-react';
 import { performanceService } from '../../services/performanceService';
 
 // --- INTERFACES ---
@@ -146,6 +154,16 @@ const PerformancePage = () => {
     return (qty * basePoint).toFixed(2);
   };
 
+  // Tính tổng điểm số
+  const totalScore = Object.values(inputData).reduce((sum, item) => {
+    const temp = categories.flatMap(c => c.templates).find(t => t.id === Object.keys(inputData).find(key => inputData[key] === item));
+    return sum + (item.quantity * (temp?.basePoint || 0));
+  }, 0);
+
+  // Điểm đã chấm trong lịch sử (nếu có)
+  const historyScore = historyData.reduce((sum, item) => sum + (item.managerScore || item.selfScore), 0);
+  const displayScore = isLocked ? historyScore : totalScore;
+
   const handleSubmit = async () => {
     if (isLocked) return alert('Kỳ đánh giá đã đóng, không thể gửi!');
     if (!selectedCycleId) return alert('Chọn kỳ đánh giá trước!');
@@ -228,6 +246,63 @@ const PerformancePage = () => {
           </Select>
         </FormControl>
       </Box>
+
+      {/* THẺ THỐNG KÊ (DASHBOARD WIDGETS) */}
+      <Grid container spacing={3} className="mb-6">
+        <Grid item xs={12} md={4}>
+          <Card className="bg-blue-50 border border-blue-100 h-full">
+            <CardContent className="flex items-center gap-4">
+              <Box className="p-3 bg-blue-100 rounded-full text-blue-600">
+                <Award size={24} />
+              </Box>
+              <Box>
+                <Typography variant="caption" className="text-gray-500 font-bold uppercase">
+                  Tổng điểm hiện tại
+                </Typography>
+                <Typography variant="h4" className="font-bold text-blue-700">
+                  {displayScore.toFixed(1)}
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <Card className="bg-orange-50 border border-orange-100 h-full">
+            <CardContent className="flex items-center gap-4">
+              <Box className="p-3 bg-orange-100 rounded-full text-orange-600">
+                <FileText size={24} />
+              </Box>
+              <Box>
+                <Typography variant="caption" className="text-gray-500 font-bold uppercase">
+                  Trạng thái hồ sơ
+                </Typography>
+                <Typography variant="h5" className="font-bold text-orange-600">
+                  {isLocked ? 'Đã khoá' : historyData.length > 0 ? 'Đã nộp' : 'Chưa nộp'}
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <Card className="bg-green-50 border border-green-100 h-full">
+            <CardContent className="flex items-center gap-4">
+              <Box className="p-3 bg-green-100 rounded-full text-green-600">
+                <TrendingUp size={24} />
+              </Box>
+              <Box>
+                <Typography variant="caption" className="text-gray-500 font-bold uppercase">
+                  Tiến độ quy đổi
+                </Typography>
+                <Typography variant="h4" className="font-bold text-green-700">
+                  {Math.min((displayScore / 100) * 100, 100).toFixed(0)}%
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
 
       {/* 🔥 THÔNG BÁO NẾU KỲ ĐÃ ĐÓNG */}
       {isLocked && (

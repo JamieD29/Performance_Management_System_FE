@@ -21,13 +21,10 @@ import {
   BookOpen,
   HelpCircle,
   GraduationCap,
-  User,
   Target,
-  BarChart3,
   Users,
   ChevronDown,
   ChevronUp,
-  FileText,
   ClipboardCheck,
 } from 'lucide-react';
 
@@ -37,7 +34,6 @@ import {
 export const DRAWER_WIDTH = 280;
 export const COLLAPSED_DRAWER_WIDTH = 72;
 
-// Smooth transition config
 const TRANSITION_DURATION = '0.35s';
 const TRANSITION_EASING = 'cubic-bezier(0.4, 0, 0.2, 1)';
 const SMOOTH_TRANSITION = `all ${TRANSITION_DURATION} ${TRANSITION_EASING}`;
@@ -58,12 +54,11 @@ export default function Sidebar({
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [openPersonal, setOpenPersonal] = useState(true);
   const [openDept, setOpenDept] = useState(true);
 
   // Popover state for collapsed sub-menus
   const [popoverAnchor, setPopoverAnchor] = useState<HTMLElement | null>(null);
-  const [popoverGroup, setPopoverGroup] = useState<'personal' | 'dept' | null>(null);
+  const [popoverGroup, setPopoverGroup] = useState<'dept' | null>(null);
   const popoverTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ==========================================
@@ -81,6 +76,8 @@ export default function Sidebar({
     : [];
 
   const isManager = userRoles.includes('ADMIN');
+  const mngLevel = user?.managementPosition?.permissionLevel;
+  const canViewUsers = isManager || ['SYSTEM', 'KHOA', 'DON_VI'].includes(mngLevel);
 
   const departmentName = user.department?.name || 'Bộ môn';
 
@@ -93,7 +90,7 @@ export default function Sidebar({
   const isActive = (path: string) => location.pathname === path;
 
   // Popover handlers
-  const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>, group: 'personal' | 'dept') => {
+  const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>, group: 'dept') => {
     if (!collapsed) return;
     if (popoverTimeout.current) clearTimeout(popoverTimeout.current);
     setPopoverAnchor(event.currentTarget);
@@ -228,16 +225,10 @@ export default function Sidebar({
   // ==========================================
   // 4. POPOVER SUB-MENUS (collapsed mode)
   // ==========================================
-  const personalSubItems = [
-    { label: 'Hồ sơ của tôi', path: '/profile', icon: <FileText size={18} /> },
-    { label: 'OKR Của tôi', path: '/performance/evaluate', icon: <ClipboardCheck size={18} /> },
-  ];
-
   const deptSubItems = [
     { label: 'Tổng quan', path: '/departments/overview', icon: <LayoutDashboard size={18} /> },
     { label: 'OKR Bộ môn', path: '/departments/okr', icon: <Target size={18} /> },
-    { label: 'KPI Bộ môn', path: '/departments/kpi', icon: <BarChart3 size={18} /> },
-    ...(isManager
+    ...(canViewUsers
       ? [{ label: 'Nhân sự', path: '/departments/users', icon: <Users size={18} /> }]
       : []),
   ];
@@ -278,10 +269,10 @@ export default function Sidebar({
           letterSpacing: '0.05em',
         }}
       >
-        {popoverGroup === 'personal' ? 'Quản lý cá nhân' : departmentName}
+        {popoverGroup === 'dept' ? departmentName : ''}
       </Typography>
       <List dense sx={{ px: 0.5 }}>
-        {(popoverGroup === 'personal' ? personalSubItems : deptSubItems).map((item) => (
+        {deptSubItems.map((item) => (
           <ListItemButton
             key={item.path}
             onClick={() => handleNavigate(item.path)}
@@ -473,102 +464,55 @@ export default function Sidebar({
             </Tooltip>
           </Box>
 
-          {/* ── NHÓM CÁ NHÂN ── */}
-          <Box sx={{
-            bgcolor: 'rgba(255, 255, 255, 0.03)',
-            borderRadius: '16px',
-            mb: 2,
-            mx: collapsed ? 0.5 : 1,
-            py: 1,
-            border: '1px solid rgba(255, 255, 255, 0.05)'
-          }}>
-            <Typography variant="overline" sx={{ ...sectionLabelSx, px: 1.5, pt: 0, pb: 1, color: colors.accent3 }}>
-              Cá nhân
-            </Typography>
-
-            {collapsed && <Divider sx={{ mx: 1, my: 1, borderColor: colors.divider }} />}
-
-            <Tooltip title={collapsed ? 'Quản lý cá nhân' : ''} placement="right" arrow>
+          {/* ── OKR Của tôi ── */}
+          <Box sx={{ px: collapsed ? 0.5 : 1, mb: 3 }}>
+            <Tooltip title={collapsed ? 'OKR Của tôi' : ''} placement="right" arrow>
               <ListItemButton
-                onClick={(e) => {
-                  if (collapsed) {
-                    handlePopoverOpen(e, 'personal');
-                  } else {
-                    setOpenPersonal(!openPersonal);
-                  }
+                onClick={() => handleNavigate('/performance/evaluate')}
+                sx={{
+                  ...getItemStyles('/performance/evaluate'),
+                  bgcolor: isActive('/performance/evaluate') ? '#BDE8F5' : 'rgba(255, 255, 255, 0.1)',
+                  color: isActive('/performance/evaluate') ? colors.bg : colors.textBright,
+                  boxShadow: isActive('/performance/evaluate') ? '0 4px 12px rgba(0, 0, 0, 0.2)' : 'none',
+                  borderRadius: '16px',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  mb: 0,
+                  mx: 0,
+                  py: 1.2,
+                  zIndex: 1,
+                  '& .MuiListItemIcon-root': {
+                    color: isActive('/performance/evaluate') ? colors.bg : colors.accent2,
+                  },
+                  '&:hover': {
+                    bgcolor: isActive('/performance/evaluate') ? '#BDE8F5' : 'rgba(255, 255, 255, 0.2)',
+                    transform: collapsed ? 'none' : 'translateY(-2px)',
+                    boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)',
+                    '& .MuiListItemIcon-root': {
+                      color: isActive('/performance/evaluate') ? colors.bg : colors.textBright,
+                    },
+                  },
+                  '&::before': { display: 'none' }
                 }}
-                sx={groupHeaderStyles}
               >
-                <ListItemIcon
-                  sx={{
-                    color: colors.accent2,
-                    minWidth: collapsed ? 'unset' : 38,
-                    mr: collapsed ? 0 : 1,
-                    transition: `color ${TRANSITION_DURATION} ease`,
-                  }}
-                >
-                  <User size={21} />
+                <ListItemIcon sx={{ ...getIconStyles('/performance/evaluate'), color: 'inherit' }}>
+                  <ClipboardCheck size={21} />
                 </ListItemIcon>
-                <Box
+                <ListItemText
+                  primary="OKR Của tôi"
                   sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    flex: 1,
                     opacity: collapsed ? 0 : 1,
                     width: collapsed ? 0 : 'auto',
-                    overflow: 'hidden',
                     transition: `opacity 0.2s ease, width ${TRANSITION_DURATION} ${TRANSITION_EASING}`,
+                    overflow: 'hidden',
+                    whiteSpace: 'nowrap',
                   }}
-                >
-                  <ListItemText
-                    primary="Quản lý cá nhân"
-                    primaryTypographyProps={{
-                      fontWeight: 700,
-                      fontSize: '1rem',
-                      color: colors.textBright,
-                      whiteSpace: 'nowrap',
-                    }}
-                  />
-                  {openPersonal ? (
-                    <ChevronUp size={16} color={colors.textMuted} />
-                  ) : (
-                    <ChevronDown size={16} color={colors.textMuted} />
-                  )}
-                </Box>
+                  primaryTypographyProps={{
+                    fontWeight: isActive('/performance/evaluate') ? 700 : 600,
+                    fontSize: '0.95rem',
+                  }}
+                />
               </ListItemButton>
             </Tooltip>
-
-            {!collapsed && (
-              <Collapse in={openPersonal} timeout={300} unmountOnExit>
-                <List component="div" disablePadding>
-                  <ListItemButton
-                    sx={{ ...getItemStyles('/profile'), pl: 4 }}
-                    onClick={() => handleNavigate('/profile')}
-                  >
-                    <ListItemIcon sx={getIconStyles('/profile')}>
-                      <FileText size={18} />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="Hồ sơ của tôi"
-                      primaryTypographyProps={{ fontSize: '0.92rem' }}
-                    />
-                  </ListItemButton>
-
-                  <ListItemButton
-                    sx={{ ...getItemStyles('/performance/evaluate'), pl: 4 }}
-                    onClick={() => handleNavigate('/performance/evaluate')}
-                  >
-                    <ListItemIcon sx={getIconStyles('/performance/evaluate')}>
-                      <ClipboardCheck size={18} />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="OKR Của tôi"
-                      primaryTypographyProps={{ fontSize: '0.92rem' }}
-                    />
-                  </ListItemButton>
-                </List>
-              </Collapse>
-            )}
           </Box>
 
           {/* ── NHÓM BỘ MÔN ── */}
@@ -665,20 +609,7 @@ export default function Sidebar({
                     />
                   </ListItemButton>
 
-                  <ListItemButton
-                    sx={{ ...getItemStyles('/departments/kpi'), pl: 4 }}
-                    onClick={() => handleNavigate('/departments/kpi')}
-                  >
-                    <ListItemIcon sx={getIconStyles('/departments/kpi')}>
-                      <BarChart3 size={18} />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="KPI Bộ môn"
-                      primaryTypographyProps={{ fontSize: '0.92rem' }}
-                    />
-                  </ListItemButton>
-
-                  {isManager && (
+                  {canViewUsers && (
                     <ListItemButton
                       sx={{ ...getItemStyles('/departments/users'), pl: 4 }}
                       onClick={() => handleNavigate('/departments/users')}

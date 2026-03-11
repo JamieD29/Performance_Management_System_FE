@@ -43,9 +43,8 @@ export default function Header({ onToggleSidebar, user, sidebarWidth = 280 }: He
   // 3. Check quyền (Thêm ADMIN vào danh sách VIP)
   const isAdmin = normalizedRoles.includes('ADMIN');
 
-  let displayRole = 'User';
-  if (normalizedRoles.includes('ADMIN')) displayRole = 'Admin';
-  else if (normalizedRoles.length > 0) displayRole = normalizedRoles[0];
+  // Hiển thị chức vụ quản lý hoặc chức danh nghề nghiệp
+  const displayRole = user?.managementPosition?.name || user?.jobTitle || 'User';
 
   const handleLogout = async () => {
     try {
@@ -155,7 +154,7 @@ export default function Header({ onToggleSidebar, user, sidebarWidth = 280 }: He
               variant="caption"
               sx={{ color: '#64748b', fontWeight: 500, fontSize: '0.7rem' }}
             >
-              {displayRole?.toUpperCase() || 'USER'}
+              {displayRole}
             </Typography>
           </Box>
         </Button>

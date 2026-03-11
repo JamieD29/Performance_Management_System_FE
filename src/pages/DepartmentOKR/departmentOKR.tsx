@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react'; // 👈 Bổ sung useEffect ở đây
+import { useState, useEffect } from 'react'; // 👈 Bổ sung useEffect ở đây
 import {
   Box,
   Container,
   Typography,
   Breadcrumbs,
-  Link,
   Button,
   Table,
   TableBody,
@@ -68,9 +67,10 @@ export default function DepartmentOKR() {
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
       <Breadcrumbs separator={<NavigateNext fontSize="small" />} sx={{ mb: 3 }}>
-        <Link underline="hover" color="inherit" href="/departments/overview">
+        <Typography color="inherit" sx={{ display: 'flex', alignItems: 'center' }}>
+          <Business sx={{ mr: 0.5 }} fontSize="inherit" />
           Bộ môn
-        </Link>
+        </Typography>
         <Typography color="text.primary">Quản lý OKR</Typography>
       </Breadcrumbs>
 
@@ -99,7 +99,7 @@ export default function DepartmentOKR() {
       </Box>
 
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-        <Tabs value={tabValue} onChange={(e, v) => setTabValue(v)}>
+        <Tabs value={tabValue} onChange={(_, v) => setTabValue(v)}>
           <Tab
             icon={<Business />}
             iconPosition="start"
