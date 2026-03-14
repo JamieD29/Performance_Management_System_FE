@@ -1,18 +1,17 @@
-import axios from 'axios';
+import { api } from './api';
 
-// Cấu hình URL cơ sở (Nếu mày chưa có file axios config riêng thì dùng tạm cái này)
-const API_URL = 'http://localhost:3000/performance';
+const RESOURCE_PATH = '/performance';
 
 export const performanceService = {
   // 1. Lấy danh sách kỳ đánh giá (Học kỳ)
   getCycles: async () => {
-    const response = await axios.get(`${API_URL}/cycles`);
+    const response = await api.get(`${RESOURCE_PATH}/cycles`);
     return response.data;
   },
 
   // 2. Lấy mẫu KPI (Nhóm A, B và các tiêu chí)
   getTemplates: async () => {
-    const response = await axios.get(`${API_URL}/template`);
+    const response = await api.get(`${RESOURCE_PATH}/template`);
     return response.data;
   },
 
@@ -23,13 +22,13 @@ export const performanceService = {
       userId: userId,
       data: data, // Bao gồm cycleId và items
     };
-    const response = await axios.post(`${API_URL}/kpi/submit`, payload);
+    const response = await api.post(`${RESOURCE_PATH}/kpi/submit`, payload);
     return response.data;
   },
 
   // 4. Xem lịch sử (Optional - dùng sau)
   getMyKpis: async (userId: string, cycleId: string) => {
-    const response = await axios.get(`${API_URL}/kpi/my-kpi`, {
+    const response = await api.get(`${RESOURCE_PATH}/kpi/my-kpi`, {
       params: { userId, cycleId },
     });
     return response.data;
@@ -38,7 +37,7 @@ export const performanceService = {
   //Duyệt
   // 1. Lấy danh sách KPI của một User bất kỳ (Sếp xem nhân viên)
   getUserKpis: async (userId: string, cycleId: string) => {
-    const response = await axios.get(`${API_URL}/kpi/my-kpi`, {
+    const response = await api.get(`${RESOURCE_PATH}/kpi/my-kpi`, {
       params: { userId, cycleId },
     });
     return response.data;
@@ -51,13 +50,13 @@ export const performanceService = {
     status: string;
     managerComment: string;
   }) => {
-    const response = await axios.post(`${API_URL}/manager/review`, payload);
+    const response = await api.post(`${RESOURCE_PATH}/manager/review`, payload);
     return response.data;
   },
 
   // 3. Lấy danh sách nhân viên cần duyệt trong kỳ
   getDepartmentOverview: async (cycleId: string) => {
-    const response = await axios.get(`${API_URL}/manager/overview`, {
+    const response = await api.get(`${RESOURCE_PATH}/manager/overview`, {
       params: { cycleId },
     });
     return response.data;

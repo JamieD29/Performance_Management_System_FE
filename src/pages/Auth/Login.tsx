@@ -56,8 +56,8 @@ export default function Login() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  // URL Backend (Quan trọng: Đảm bảo đúng port backend)
-  const BACKEND_URL = 'http://localhost:3000';
+  // URL Backend
+  const BACKEND_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
   // --- LOGIC BẮT TOKEN & XỬ LÝ LỖI ---
   useEffect(() => {
