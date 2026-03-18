@@ -227,7 +227,7 @@ export default function Sidebar({
   // ==========================================
   const deptSubItems = [
     { label: 'Tổng quan', path: '/departments/overview', icon: <LayoutDashboard size={18} /> },
-    { label: 'OKR Bộ môn', path: '/departments/okr', icon: <Target size={18} /> },
+    { label: 'Quản lý OKR', path: '/departments/okr', icon: <Target size={18} /> },
     ...(canViewUsers
       ? [{ label: 'Nhân sự', path: '/departments/users', icon: <Users size={18} /> }]
       : []),
@@ -468,12 +468,12 @@ export default function Sidebar({
           <Box sx={{ px: collapsed ? 0.5 : 1, mb: 3 }}>
             <Tooltip title={collapsed ? 'OKR Của tôi' : ''} placement="right" arrow>
               <ListItemButton
-                onClick={() => handleNavigate('/performance/evaluate')}
+                onClick={() => handleNavigate('/my-okr')}
                 sx={{
-                  ...getItemStyles('/performance/evaluate'),
-                  bgcolor: isActive('/performance/evaluate') ? '#BDE8F5' : 'rgba(255, 255, 255, 0.1)',
-                  color: isActive('/performance/evaluate') ? colors.bg : colors.textBright,
-                  boxShadow: isActive('/performance/evaluate') ? '0 4px 12px rgba(0, 0, 0, 0.2)' : 'none',
+                  ...getItemStyles('/my-okr'),
+                  bgcolor: isActive('/my-okr') ? '#BDE8F5' : 'rgba(255, 255, 255, 0.1)',
+                  color: isActive('/my-okr') ? colors.bg : colors.textBright,
+                  boxShadow: isActive('/my-okr') ? '0 4px 12px rgba(0, 0, 0, 0.2)' : 'none',
                   borderRadius: '16px',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
                   mb: 0,
@@ -481,20 +481,20 @@ export default function Sidebar({
                   py: 1.2,
                   zIndex: 1,
                   '& .MuiListItemIcon-root': {
-                    color: isActive('/performance/evaluate') ? colors.bg : colors.accent2,
+                    color: isActive('/my-okr') ? colors.bg : colors.accent2,
                   },
                   '&:hover': {
-                    bgcolor: isActive('/performance/evaluate') ? '#BDE8F5' : 'rgba(255, 255, 255, 0.2)',
+                    bgcolor: isActive('/my-okr') ? '#BDE8F5' : 'rgba(255, 255, 255, 0.2)',
                     transform: collapsed ? 'none' : 'translateY(-2px)',
                     boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)',
                     '& .MuiListItemIcon-root': {
-                      color: isActive('/performance/evaluate') ? colors.bg : colors.textBright,
+                      color: isActive('/my-okr') ? colors.bg : colors.textBright,
                     },
                   },
                   '&::before': { display: 'none' }
                 }}
               >
-                <ListItemIcon sx={{ ...getIconStyles('/performance/evaluate'), color: 'inherit' }}>
+                <ListItemIcon sx={{ ...getIconStyles('/my-okr'), color: 'inherit' }}>
                   <ClipboardCheck size={21} />
                 </ListItemIcon>
                 <ListItemText
@@ -604,7 +604,7 @@ export default function Sidebar({
                       <Target size={18} />
                     </ListItemIcon>
                     <ListItemText
-                      primary="OKR Bộ môn"
+                      primary="Quản lý OKR"
                       primaryTypographyProps={{ fontSize: '0.92rem' }}
                     />
                   </ListItemButton>
