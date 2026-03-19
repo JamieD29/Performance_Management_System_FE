@@ -64,11 +64,16 @@ export default function CycleManagement() {
       return;
     }
 
-    setLoading(true);
     try {
       // 2. Gọi API Init của mày
       await api.post(`${RESOURCE_PATH}/init`);
-
+      fetchCycles();
+      alert('Khởi tạo dữ liệu thành công!');
+    } catch (error) {
+      console.error(error);
+      alert('Lỗi khởi tạo dữ liệu!');
+    }
+  };
 
   const handleCreate = async () => {
     try {
@@ -99,6 +104,13 @@ export default function CycleManagement() {
         <h3 className="text-lg font-bold text-gray-800">Quản lý Kỳ Đánh Giá</h3>
 
         <Box className="flex gap-2">
+          <Button
+            variant="outlined"
+            startIcon={<Database size={18} />}
+            onClick={handleInitData}
+          >
+            Khởi tạo Dữ liệu mẫu
+          </Button>
           <Button
             variant="contained"
             startIcon={<Plus size={18} />}
