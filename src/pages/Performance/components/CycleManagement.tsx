@@ -21,10 +21,13 @@ import {
   Play,
   Pause,
   Calendar,
+    RefreshCcw,
+  Database,
 } from 'lucide-react';
 import axios from 'axios';
+import { api } from '../../../services/api';
 
-const API_URL = 'http://localhost:3000/performance';
+const RESOURCE_PATH = '/performance';
 
 export default function CycleManagement() {
   const [cycles, setCycles] = useState<any[]>([]);
@@ -43,18 +46,33 @@ export default function CycleManagement() {
 
   const fetchCycles = async () => {
     try {
-      const res = await axios.get(`${API_URL}/cycles`);
+      const res = await api.get(`${RESOURCE_PATH}/cycles`);
       setCycles(res.data);
     } catch (error) {
       console.error(error);
     }
   };
 
+  // 🔥 HÀM MỚI: GỌI API INIT DATA
+  const handleInitData = async () => {
+    // 1. Hỏi cho chắc, lỡ sếp bấm nhầm
+    if (
+      !window.confirm(
+        '⚠️ CẢNH BÁO: Hành động này sẽ tạo lại dữ liệu mẫu (Kỳ học, Template KPI).\n\nBạn có chắc chắn muốn chạy không?',
+      )
+    ) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // 2. Gọi API Init của mày
+      await api.post(`${RESOURCE_PATH}/init`);
 
 
   const handleCreate = async () => {
     try {
-      await axios.post(`${API_URL}/admin/cycles`, formData);
+      await api.post(`${RESOURCE_PATH}/admin/cycles`, formData);
       setOpen(false);
       fetchCycles();
       alert('Tạo kỳ thành công!');
@@ -66,7 +84,7 @@ export default function CycleManagement() {
   const toggleStatus = async (id: string, currentStatus: string) => {
     const newStatus = currentStatus === 'OPEN' ? 'CLOSED' : 'OPEN';
     try {
-      await axios.put(`${API_URL}/admin/cycles/${id}/status`, {
+      await api.put(`${RESOURCE_PATH}/admin/cycles/${id}/status`, {
         status: newStatus,
       });
       fetchCycles();
