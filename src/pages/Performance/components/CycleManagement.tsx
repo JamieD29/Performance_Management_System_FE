@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -15,17 +15,16 @@ import {
   DialogContent,
   TextField,
   DialogActions,
-  Tooltip,
-  IconButton,
 } from '@mui/material';
 import {
   Plus,
   Play,
   Pause,
   Calendar,
-  RefreshCcw,
+    RefreshCcw,
   Database,
-} from 'lucide-react'; // 👈 Thêm icon Database
+} from 'lucide-react';
+import axios from 'axios';
 import { api } from '../../../services/api';
 
 const RESOURCE_PATH = '/performance';
@@ -33,7 +32,6 @@ const RESOURCE_PATH = '/performance';
 export default function CycleManagement() {
   const [cycles, setCycles] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false); // 👈 Thêm state loading
 
   // Form state
   const [formData, setFormData] = useState({
@@ -71,16 +69,6 @@ export default function CycleManagement() {
       // 2. Gọi API Init của mày
       await api.post(`${RESOURCE_PATH}/init`);
 
-      // 3. Thông báo & Load lại bảng
-      alert('✅ Đã khởi tạo dữ liệu mẫu thành công!');
-      fetchCycles();
-    } catch (error) {
-      console.error(error);
-      alert('❌ Lỗi khi khởi tạo!');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleCreate = async () => {
     try {
@@ -111,17 +99,6 @@ export default function CycleManagement() {
         <h3 className="text-lg font-bold text-gray-800">Quản lý Kỳ Đánh Giá</h3>
 
         <Box className="flex gap-2">
-          {/* 🔥 NÚT BẤM THẦN THÁNH CHO SẾP */}
-          <Button
-            variant="outlined"
-            color="warning"
-            startIcon={<Database size={18} />}
-            onClick={handleInitData}
-            disabled={loading}
-          >
-            {loading ? 'Đang tạo...' : 'Khởi tạo Dữ liệu mẫu'}
-          </Button>
-
           <Button
             variant="contained"
             startIcon={<Plus size={18} />}

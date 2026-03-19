@@ -8,12 +8,12 @@ import AdminSettings from '../pages/Admin/AdminSetting';
 import Department from '../pages/Department/Department';
 import DepartmentOKR from '../pages/DepartmentOKR/departmentOKR';
 import AuthCallback from '../pages/Auth/AuthCallback';
-import PerformancePage from '../pages/Performance/PerformancePage';
 import NotFoundPage from '../pages/ErrorPage/NotFoundPage';
 import ProfileSetting from '../pages/ProfileSetting/ProfileSettingPage';
 import ProfileSetup from '../pages/ProfileSetup/ProfileSetup';
 import MainLayout from '../layouts/MainLayout';
 import DepartmentOverview from '../pages/DepartmentOverview/DepartmentOverview';
+import MyOkrPage from '../pages/MyOkr/MyOkrPage';
 
 // 1. Hook check đăng nhập
 function useAuth() {
@@ -105,7 +105,7 @@ export default function AppRoutes() {
         <Route path="/profile" element={<ProfileSetting />} />
         <Route
           path="/my-okr"
-          element={<div>Trang OKR cá nhân (Coming Soon)</div>}
+          element={<MyOkrPage />}
         />
 
         {/* 3. GROUP BỘ MÔN (Theo Sidebar mới) */}
@@ -114,7 +114,6 @@ export default function AppRoutes() {
         {/* OKR Bộ môn */}
         <Route path="/departments/okr" element={<DepartmentOKR />} />
 
-        <Route path="/performance/evaluate" element={<PerformancePage />} />
         {/* 🔥 "NHÂN SỰ" - KẾT NỐI VÀO COMPONENT DEPARTMENT CŨ TẠI ĐÂY */}
         <Route path="/departments/users" element={<Department />} />
 

@@ -3,7 +3,7 @@ import { api } from './api';
 const RESOURCE_PATH = '/performance';
 
 export const performanceService = {
-  // 1. Lấy danh sách kỳ đánh giá (Học kỳ)
+  // Lấy danh sách kỳ đánh giá (Học kỳ)
   getCycles: async () => {
     const response = await api.get(`${RESOURCE_PATH}/cycles`);
     return response.data;
