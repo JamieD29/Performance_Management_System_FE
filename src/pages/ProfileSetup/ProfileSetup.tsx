@@ -36,7 +36,7 @@ export default function ProfileSetup() {
 
     // Form state
     const [formData, setFormData] = useState<ProfileFormData>({
-        employeeId: '',
+        staffCode: '',
         fullName: '',
         dob: '',
         email: '',
@@ -90,7 +90,7 @@ export default function ProfileSetup() {
     };
 
     const isStep1Complete =
-        formData.employeeId.trim() !== '' &&
+        formData.staffCode.trim() !== '' &&
         formData.fullName.trim() !== '' &&
         formData.dob !== '' &&
         formData.email.trim() !== '' &&
@@ -138,7 +138,7 @@ export default function ProfileSetup() {
             const storedUser = sessionStorage.getItem('user');
             if (storedUser) {
                 const user = JSON.parse(storedUser);
-                user.employeeId = formData.employeeId;
+                user.staffCode = formData.staffCode;
                 user.jobTitle = formData.jobTitle;
                 user.academicRank = formData.academicRank;
                 user.degree = formData.degree;

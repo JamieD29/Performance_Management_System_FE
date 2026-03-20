@@ -95,7 +95,7 @@ export function ConfirmationDialog({
                                     🆔 Mã cán bộ
                                 </Typography>
                                 <Typography variant="body2" fontWeight={600} color="#37474f">
-                                    {formData.employeeId || '---'}
+                                    {formData.staffCode || '---'}
                                 </Typography>
                             </Box>
                             <Divider />

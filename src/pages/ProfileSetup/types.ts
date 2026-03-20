@@ -6,7 +6,7 @@ export interface DepartmentOption {
 
 export interface ProfileFormData {
     // Step 1: Personal Info
-    employeeId: string;
+    staffCode: string;
     fullName: string;
     dob: string;
     email: string;

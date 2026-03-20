@@ -62,11 +62,11 @@ export function PersonalInfoStep({ formData, onChange }: PersonalInfoStepProps) 
                     fullWidth
                     size="small"
                     placeholder="Nhập mã cán bộ"
-                    value={formData.employeeId}
+                    value={formData.staffCode}
                     onChange={(e) => {
                         const val = e.target.value;
                         if (val === '' || /^\d{1,4}$/.test(val)) {
-                            onChange('employeeId', val);
+                            onChange('staffCode', val);
                         }
                     }}
                     sx={{
