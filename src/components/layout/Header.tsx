@@ -34,17 +34,21 @@ export default function Header({ onToggleSidebar, user, sidebarWidth = 280 }: He
 
   const rawRoles = Array.isArray(user.roles) ? user.roles : [];
 
-  // Nếu là Object { slug: 'ADMIN' } -> lấy 'ADMIN'
-  // Nếu là String 'ADMIN' -> giữ nguyên
+  // 2. Chuẩn hóa Role mảng (Hỗ trợ cả String và Object)
   const normalizedRoles = rawRoles.map((r: any) =>
-    (typeof r === 'string' ? r : r?.slug || r?.name || '').toString(),
+    (typeof r === "string" ? r : r?.slug || r?.name || "").toString().toUpperCase()
   );
 
-  // 3. Check quyền (Thêm ADMIN vào danh sách VIP)
-  const isAdmin = normalizedRoles.includes('ADMIN');
+  // 3. Check quyền Admin
+  const isAdmin = normalizedRoles.includes("ADMIN");
 
-  // Hiển thị chức vụ quản lý hoặc chức danh nghề nghiệp
-  const displayRole = user?.managementPosition?.name || user?.jobTitle || 'User';
+  // Hiển thị chức vụ: Ưu tiên ADMIN, sau đó mới đến chức vụ quản lý hoặc chức danh
+  const displayRole = isAdmin
+    ? "Admin"
+    : user?.managementPosition?.name || user?.jobTitle || "User";
+
+  // Fix Avatar: Hỗ trợ cả 2 key 'avatar' (từ session cũ) và 'avatarUrl' (từ API mới)
+  const avatarSrc = user?.avatarUrl || user?.avatar || undefined;
 
   const handleLogout = async () => {
     try {
@@ -129,7 +133,7 @@ export default function Header({ onToggleSidebar, user, sidebarWidth = 280 }: He
           }}
         >
           <Avatar
-            src={user?.avatar}
+            src={avatarSrc}
             sx={{
               width: 38,
               height: 38,

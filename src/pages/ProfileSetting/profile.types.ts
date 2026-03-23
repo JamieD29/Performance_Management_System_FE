@@ -13,7 +13,13 @@ export interface UserProfileForm {
   name: string; // Họ và tên
   email: string; // Email liên hệ (thường là disabled)
   dob: string; // Ngày tháng năm sinh (YYYY-MM-DD)
-  roles: UserRole[] | any[]; // Danh sách quyền
+  roles: any[]; // Danh sách quyền
+  managementPosition?: {
+    id: string;
+    name: string;
+    slug: string;
+    permissionLevel?: string;
+  } | null;
   jobTitle: string; // Chức vụ (Trưởng khoa, Giảng viên...)
   academicRank: string; // Học hàm (Giáo sư, PGS, Không)
   degree: string; // Học vị (Cử nhân, Thạc sĩ, Tiến sĩ...)

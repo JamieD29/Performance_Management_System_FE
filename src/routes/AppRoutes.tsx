@@ -25,11 +25,13 @@ function useAuth() {
 function AdminRoute({ children }: { children: React.ReactNode }) {
   const userStr = sessionStorage.getItem('user');
   const user = userStr ? JSON.parse(userStr) : {};
-  const roles = user.roles || [];
+  const rawRoles = user.roles || [];
 
-  console.log('👮 AdminRoute Check:', { roles });
-
-  const isAdmin = roles.includes('ADMIN');
+  // Chuẩn hóa role linh hoạt (Object/String) và không phân biệt hoa thường
+  const isAdmin = Array.isArray(rawRoles) && rawRoles.some((r: any) => {
+    const val = typeof r === 'string' ? r : r.slug || r.name || '';
+    return val.toString().toUpperCase() === 'ADMIN';
+  });
 
   if (!isAdmin) {
     console.warn('⛔ Access Denied: Not an Admin -> Redirecting to Dashboard');
@@ -46,12 +48,19 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   if (!isAuthenticated)
     return <Navigate to="/login" state={{ from: location }} replace />;
 
-  // Kiểm tra profile đã hoàn tất chưa → redirect nếu chưa
+  // Kiểm tra profile đã hoàn tất chưa
   const userStr = sessionStorage.getItem('user');
   const user = userStr ? JSON.parse(userStr) : null;
-  const isProfileComplete =
-    user?.profileCompleted || (user?.jobTitle && user?.department?.id);
+
+  // Logic kiểm tra hoàn tất: hồ sơ đã đánh dấu xong HOẶC có đủ các thông tin cốt lõi
+  const isProfileComplete = !!(
+    user?.profileCompleted ||
+    (user?.jobTitle && (user?.department?.id || user?.departmentID))
+  );
+
+  // Chỉ redirect nếu user chưa xong profile và ĐANG KHÔNG ở trang profile-setup
   if (user && !isProfileComplete && location.pathname !== '/profile-setup') {
+    console.log('📋 Profile Incomplete -> Redirecting to Setup');
     return <Navigate to="/profile-setup" replace />;
   }
 

@@ -61,6 +61,7 @@ export const useProfileLogic = () => {
 
         setFormData(mappedData);
         setOriginalData(mappedData);
+        syncToSession(mappedData); // Đồng bộ lúc mới fetch xong
       } catch (error) {
         setNotification({
           type: "error",
@@ -77,6 +78,34 @@ export const useProfileLogic = () => {
   // --- Hàm lấy tên phòng ban từ ID ---
   const getDepartmentName = (id: string) => {
     return departments.find((d) => d.id === id)?.name || id || "Chưa cập nhật";
+  };
+
+  // --- Hàm đồng bộ dữ liệu vào sessionStorage (Để Header/Sidebar cập nhật theo) ---
+  const syncToSession = (data: any) => {
+    try {
+      const storedUser = sessionStorage.getItem("user");
+      if (storedUser) {
+        const user = JSON.parse(storedUser);
+        const updatedUser = {
+          ...user,
+          ...data,
+          // Header dùng 'avatar', API entity dùng 'avatarUrl'
+          avatar: data.avatarUrl || data.avatar || user.avatar,
+          name: data.name || user.name,
+          jobTitle: data.jobTitle || user.jobTitle,
+          profileCompleted: true, // Nếu đã vào đây lưu là đã xong profile
+          // Đồng bộ roles về dạng mảng string cho Sidebar/Header dễ check
+          roles: data.roles
+            ? data.roles.map((r: any) =>
+                typeof r === "string" ? r : r.slug || r.name,
+              )
+            : user.roles,
+        };
+        sessionStorage.setItem("user", JSON.stringify(updatedUser));
+      }
+    } catch (e) {
+      console.error("Sync session failed", e);
+    }
   };
 
   // --------------------------------------------------------
@@ -200,6 +229,7 @@ export const useProfileLogic = () => {
 
       setOriginalData(formData); // Cập nhật lại bản gốc bằng data mới
       setIsEditing(false);
+      syncToSession(formData); // Đồng bộ sau khi lưu thành công
       setNotification({
         type: "success",
         message: "Cập nhật thông tin hồ sơ thành công!",
