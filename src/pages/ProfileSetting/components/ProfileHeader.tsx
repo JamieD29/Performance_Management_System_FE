@@ -61,16 +61,29 @@ export default function ProfileHeader({
   };
 
   // --- HÀM HELPER HIỂN THỊ QUYỀN (ROLE) ---
-  const getDisplayRole = (userRoles: any[]) => {
-    if (!userRoles || userRoles.length === 0) return "Giảng viên";
-    const roles = userRoles.map((r: any) =>
-      typeof r === "string" ? r : r.slug || r.name,
-    );
-    if (roles.includes("ADMIN")) return "Admin";
+  const getDisplayRole = (data: UserProfileForm) => {
+    const { roles, managementPosition, jobTitle } = data;
+
+    // 1. Ưu tiên quyền ADMIN (Chuẩn hóa Object/String và Case-insensitive)
+    const rawRoles = Array.isArray(roles) ? roles : [];
+    const isAdmin = rawRoles.some((r: any) => {
+      const val = typeof r === "string" ? r : r.slug || r.name || "";
+      return val.toString().toUpperCase() === "ADMIN";
+    });
+
+    if (isAdmin) return "Admin";
+
+    // 2. Ưu tiên tiếp theo: Chức vụ quản lý (nếu có)
+    if (managementPosition?.name) return managementPosition.name;
+
+    // 3. Tiếp theo: Chức danh công việc (jobTitle)
+    if (jobTitle) return jobTitle;
+
+    // 4. Mặc định
     return "Giảng viên";
   };
 
-  const userRoleStr = getDisplayRole(formData.roles);
+  const userRoleStr = getDisplayRole(formData);
   const departmentName = getDepartmentName(formData.departmentID);
   const mainColor = THEME_COLORS.IDENTITY; // Màu chủ đạo cho header
 
