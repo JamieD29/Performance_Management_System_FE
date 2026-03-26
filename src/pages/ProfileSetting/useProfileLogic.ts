@@ -56,7 +56,7 @@ export const useProfileLogic = () => {
         const mappedData = {
           ...u,
           departmentID: u.department ? u.department.id : u.departmentID || "",
-          dob: u.dateOfBirth ? u.dateOfBirth.split("T")[0] : (u.dob || ""),
+          dob: u.dateOfBirth ? u.dateOfBirth.split("T")[0] : u.dob || "",
         };
 
         setFormData(mappedData);
@@ -121,32 +121,44 @@ export const useProfileLogic = () => {
 
   // --- LOGIC NGÀY VÀO TRƯỜNG ---
   // --- LOGIC NGÀY VÀO TRƯỜNG & NGÀY SINH ---
-  const validateDates = (dob: string, joinDate: string, focusField?: 'dob' | 'joinDate') => {
+  const validateDates = (
+    dob: string,
+    joinDate: string,
+    focusField?: "dob" | "joinDate",
+  ) => {
     const { dobError, joinDateError } = validateAgeAtJoinDate(dob, joinDate);
     const genericJoinDateError = validateJoinDateStr(joinDate);
-    
-    setErrors(prev => ({
+
+    setErrors((prev) => ({
       ...prev,
       // Nếu focus vào DOB, chỉ hiện lỗi DOB, và xóa lỗi age trên JoinDate.
       // Nếu không có focusField (khi Save), hiện lỗi cả 2 nếu có.
-      dob: focusField === 'dob' ? (dobError || undefined) : (focusField === 'joinDate' ? undefined : (dobError || undefined)),
-      
-      joinDate: focusField === 'joinDate' ? (joinDateError || genericJoinDateError || undefined) : 
-                (focusField === 'dob' ? (genericJoinDateError || undefined) : 
-                (joinDateError || genericJoinDateError || undefined))
+      dob:
+        focusField === "dob"
+          ? dobError || undefined
+          : focusField === "joinDate"
+            ? undefined
+            : dobError || undefined,
+
+      joinDate:
+        focusField === "joinDate"
+          ? joinDateError || genericJoinDateError || undefined
+          : focusField === "dob"
+            ? genericJoinDateError || undefined
+            : joinDateError || genericJoinDateError || undefined,
     }));
     return dobError || joinDateError || genericJoinDateError;
   };
 
   const handleDobChange = (value: string) => {
     handleChange("dob", value);
-    validateDates(value, formData.joinDate, 'dob');
+    validateDates(value, formData.joinDate, "dob");
   };
 
   const handleJoinDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     handleChange("joinDate", value);
-    validateDates(formData.dob, value, 'joinDate');
+    validateDates(formData.dob, value, "joinDate");
   };
 
   // --- LOGIC GIỜ GIẢNG/NĂM (Chống spam, số âm, ký tự lạ) ---

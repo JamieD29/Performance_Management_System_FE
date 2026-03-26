@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from "react";
 import {
   Box,
   Typography,
@@ -20,10 +20,10 @@ import {
   Paper,
   Fade,
   Divider,
-} from '@mui/material';
+} from "@mui/material";
 
 // ✅ CHUẨN MUI v7: Import Grid từ đây và dùng prop 'size'
-import Grid from '@mui/material/Grid';
+import Grid from "@mui/material/Grid";
 
 import {
   Save,
@@ -42,23 +42,23 @@ import {
   EmojiEvents,
   Lightbulb,
   Event as EventIcon,
-} from '@mui/icons-material';
-import { api } from '../../../services/api';
+} from "@mui/icons-material";
+import { api } from "../../../services/api";
 
 // --- ENUM DATA ---
 const JOB_TITLES = [
-  'Trưởng khoa',
-  'Phó khoa',
-  'Trưởng bộ môn',
-  'Giảng viên',
-  'Giảng viên chính',
-  'Trợ giảng',
-  'Giáo vụ',
-  'Nghiên cứu viên',
+  "Trưởng khoa",
+  "Phó khoa",
+  "Trưởng bộ môn",
+  "Giảng viên",
+  "Giảng viên chính",
+  "Trợ giảng",
+  "Giáo vụ",
+  "Nghiên cứu viên",
 ];
-const ACADEMIC_RANKS = ['Giáo sư', 'Phó giáo sư', 'Không'];
-const DEGREES = ['Cử nhân', 'Thạc sĩ', 'Tiến sĩ', 'Không'];
-const GENDERS = ['Nam', 'Nữ', 'Khác'];
+const ACADEMIC_RANKS = ["Giáo sư", "Phó giáo sư", "Không"];
+const DEGREES = ["Cử nhân", "Thạc sĩ", "Tiến sĩ", "Không"];
+const GENDERS = ["Nam", "Nữ", "Khác"];
 
 // --- COMPONENT HIỂN THỊ DÒNG THÔNG TIN (VIEW MODE) ---
 // Giúp giao diện sạch sẽ, giống hình reference
@@ -73,24 +73,24 @@ const InfoRow = ({
 }) => (
   <Box
     sx={{
-      display: 'flex',
-      alignItems: 'flex-start', // Căn trên để nếu text dài xuống dòng vẫn đẹp
+      display: "flex",
+      alignItems: "flex-start", // Căn trên để nếu text dài xuống dòng vẫn đẹp
       py: 2,
-      borderBottom: '1px solid #f0f0f0',
-      '&:last-child': { borderBottom: 'none' },
+      borderBottom: "1px solid #f0f0f0",
+      "&:last-child": { borderBottom: "none" },
     }}
   >
     <Box
       sx={{
-        display: 'flex',
-        alignItems: 'center',
+        display: "flex",
+        alignItems: "center",
         minWidth: { xs: 140, sm: 180 },
-        color: 'text.secondary',
+        color: "text.secondary",
       }}
     >
       <Box
         component="span"
-        sx={{ mr: 1.5, display: 'flex', color: 'action.active' }}
+        sx={{ mr: 1.5, display: "flex", color: "action.active" }}
       >
         {icon}
       </Box>
@@ -101,10 +101,10 @@ const InfoRow = ({
     <Typography
       variant="body1"
       fontWeight={500}
-      sx={{ color: '#1e293b', flexGrow: 1, wordBreak: 'break-word' }}
+      sx={{ color: "#1e293b", flexGrow: 1, wordBreak: "break-word" }}
     >
       {value || (
-        <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>
+        <span style={{ color: "#94a3b8", fontStyle: "italic" }}>
           Chưa cập nhật
         </span>
       )}
@@ -119,7 +119,7 @@ export default function ProfileSetting() {
   const [activeTab, setActiveTab] = useState(0);
 
   const [notification, setNotification] = useState<{
-    type: 'success' | 'error' | 'info' | 'warning';
+    type: "success" | "error" | "info" | "warning";
     message: string;
   } | null>(null);
 
@@ -129,21 +129,21 @@ export default function ProfileSetting() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    dob: '',
+    name: "",
+    email: "",
+    dob: "",
     roles: [] as any[],
-    jobTitle: '',
-    academicRank: 'Không',
-    degree: 'Cử nhân',
+    jobTitle: "",
+    academicRank: "Không",
+    degree: "Cử nhân",
     teachingHours: 0,
-    awards: '',
-    intellectualProperty: '',
-    joinDate: '',
-    gender: 'Nam',
-    departmentID: '',
-    staffCode: '',
-    avatarUrl: '',
+    awards: "",
+    intellectualProperty: "",
+    joinDate: "",
+    gender: "Nam",
+    departmentID: "",
+    staffCode: "",
+    avatarUrl: "",
   });
 
   const [originalData, setOriginalData] = useState<any>(null);
@@ -154,35 +154,35 @@ export default function ProfileSetting() {
       setLoading(true);
       try {
         const [deptRes, profileRes] = await Promise.all([
-          api.get('/departments'),
-          api.get('/users/profile'),
+          api.get("/departments"),
+          api.get("/users/profile"),
         ]);
 
         setDepartments(deptRes.data);
         const u = profileRes.data;
 
         const mappedData = {
-          name: u.name || '',
-          email: u.email || '',
-          dob: u.dateOfBirth ? u.dateOfBirth.split('T')[0] : (u.dob || ''),
+          name: u.name || "",
+          email: u.email || "",
+          dob: u.dateOfBirth ? u.dateOfBirth.split("T")[0] : u.dob || "",
           roles: u.roles || [],
-          jobTitle: u.jobTitle || '',
-          academicRank: u.academicRank || 'Không',
-          degree: u.degree || 'Cử nhân',
+          jobTitle: u.jobTitle || "",
+          academicRank: u.academicRank || "Không",
+          degree: u.degree || "Cử nhân",
           teachingHours: u.teachingHours || 0,
-          awards: u.awards || '',
-          intellectualProperty: u.intellectualProperty || '',
-          joinDate: u.joinDate ? u.joinDate.split('T')[0] : '',
-          gender: u.gender || 'Nam',
-          departmentID: u.department ? u.department.id : '',
-          staffCode: u.staffCode || '',
-          avatarUrl: u.avatarUrl || '',
+          awards: u.awards || "",
+          intellectualProperty: u.intellectualProperty || "",
+          joinDate: u.joinDate ? u.joinDate.split("T")[0] : "",
+          gender: u.gender || "Nam",
+          departmentID: u.department ? u.department.id : "",
+          staffCode: u.staffCode || "",
+          avatarUrl: u.avatarUrl || "",
         };
 
         setFormData(mappedData);
         setOriginalData(mappedData);
       } catch (error) {
-        console.error('Lỗi khởi tạo:', error);
+        console.error("Lỗi khởi tạo:", error);
       } finally {
         setLoading(false);
       }
@@ -198,7 +198,7 @@ export default function ProfileSetting() {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        setNotification({ type: 'error', message: 'Ảnh không được quá 5MB' });
+        setNotification({ type: "error", message: "Ảnh không được quá 5MB" });
         return;
       }
       setAvatarFile(file);
@@ -208,7 +208,7 @@ export default function ProfileSetting() {
 
   const handleEdit = () => {
     setIsEditing(true);
-    setNotification({ type: 'info', message: 'Đang chỉnh sửa thông tin...' });
+    setNotification({ type: "info", message: "Đang chỉnh sửa thông tin..." });
   };
 
   const handleCancel = () => {
@@ -221,8 +221,8 @@ export default function ProfileSetting() {
   const handleSave = async () => {
     if (!formData.name || !formData.staffCode || !formData.departmentID) {
       setNotification({
-        type: 'error',
-        message: 'Vui lòng điền các trường bắt buộc (*)',
+        type: "error",
+        message: "Vui lòng điền các trường bắt buộc (*)",
       });
       return;
     }
@@ -247,21 +247,21 @@ export default function ProfileSetting() {
         avatarUrl: formData.avatarUrl,
       };
 
-      await api.patch('/users/profile', payload);
-      setNotification({ type: 'success', message: 'Lưu thành công!' });
+      await api.patch("/users/profile", payload);
+      setNotification({ type: "success", message: "Lưu thành công!" });
       setOriginalData(formData);
       setAvatarFile(null);
       setIsEditing(false);
 
-      const userStr = sessionStorage.getItem('user');
+      const userStr = sessionStorage.getItem("user");
       if (userStr) {
         const user = JSON.parse(userStr);
         user.name = formData.name;
-        sessionStorage.setItem('user', JSON.stringify(user));
+        sessionStorage.setItem("user", JSON.stringify(user));
         setTimeout(() => window.location.reload(), 1000);
       }
     } catch (error: any) {
-      setNotification({ type: 'error', message: 'Lỗi khi lưu' });
+      setNotification({ type: "error", message: "Lỗi khi lưu" });
     } finally {
       setSaving(false);
     }
@@ -269,18 +269,18 @@ export default function ProfileSetting() {
 
   // --- HELPER ---
   const getDisplayRole = (userRoles: any[]) => {
-    if (!userRoles || userRoles.length === 0) return 'User';
+    if (!userRoles || userRoles.length === 0) return "User";
     const roles = userRoles.map((r: any) =>
-      typeof r === 'string' ? r : r.slug || r.name,
+      typeof r === "string" ? r : r.slug || r.name,
     );
-    if (roles.includes('ADMIN')) return 'Admin';
-    if (roles.includes('USER')) return 'Giảng viên';
-    return 'Cán bộ';
+    if (roles.includes("ADMIN")) return "Admin";
+    if (roles.includes("USER")) return "Giảng viên";
+    return "Cán bộ";
   };
 
   const RequiredLabel = ({ label }: { label: string }) => (
     <span>
-      {label} <span style={{ color: '#d32f2f' }}>*</span>
+      {label} <span style={{ color: "#d32f2f" }}>*</span>
     </span>
   );
 
@@ -300,9 +300,9 @@ export default function ProfileSetting() {
                   variant="subtitle2"
                   sx={{
                     mb: 1,
-                    textTransform: 'uppercase',
-                    color: 'text.secondary',
-                    fontWeight: 'bold',
+                    textTransform: "uppercase",
+                    color: "text.secondary",
+                    fontWeight: "bold",
                   }}
                 >
                   Thông tin định danh
@@ -328,9 +328,9 @@ export default function ProfileSetting() {
                   variant="subtitle2"
                   sx={{
                     mb: 1,
-                    textTransform: 'uppercase',
-                    color: 'text.secondary',
-                    fontWeight: 'bold',
+                    textTransform: "uppercase",
+                    color: "text.secondary",
+                    fontWeight: "bold",
                   }}
                 >
                   Thông tin bổ sung
@@ -354,7 +354,7 @@ export default function ProfileSetting() {
                   icon={<AccessTime fontSize="small" />}
                   label="Tham gia lúc"
                   value="29/04/2021"
-                />{' '}
+                />{" "}
                 {/* Ví dụ */}
               </Grid>
             </Grid>
@@ -367,9 +367,9 @@ export default function ProfileSetting() {
                   variant="subtitle2"
                   sx={{
                     mb: 1,
-                    textTransform: 'uppercase',
-                    color: 'text.secondary',
-                    fontWeight: 'bold',
+                    textTransform: "uppercase",
+                    color: "text.secondary",
+                    fontWeight: "bold",
                   }}
                 >
                   Đơn vị & Chức vụ
@@ -395,9 +395,9 @@ export default function ProfileSetting() {
                   variant="subtitle2"
                   sx={{
                     mb: 1,
-                    textTransform: 'uppercase',
-                    color: 'text.secondary',
-                    fontWeight: 'bold',
+                    textTransform: "uppercase",
+                    color: "text.secondary",
+                    fontWeight: "bold",
                   }}
                 >
                   Học vấn
@@ -421,14 +421,14 @@ export default function ProfileSetting() {
               <Grid size={{ xs: 12 }}>
                 <InfoRow
                   icon={
-                    <EmojiEvents fontSize="small" sx={{ color: '#f59e0b' }} />
+                    <EmojiEvents fontSize="small" sx={{ color: "#f59e0b" }} />
                   }
                   label="Khen thưởng"
                   value={formData.awards}
                 />
                 <InfoRow
                   icon={
-                    <Lightbulb fontSize="small" sx={{ color: '#f59e0b' }} />
+                    <Lightbulb fontSize="small" sx={{ color: "#f59e0b" }} />
                   }
                   label="Sở hữu trí tuệ"
                   value={formData.intellectualProperty}
@@ -445,8 +445,8 @@ export default function ProfileSetting() {
     // Form nhập liệu chuẩn, dùng Grid size v7
     const commonProps = {
       fullWidth: true,
-      variant: 'outlined' as const,
-      size: 'medium' as const,
+      variant: "outlined" as const,
+      size: "medium" as const,
     };
 
     switch (activeTab) {
@@ -460,8 +460,8 @@ export default function ProfileSetting() {
                 value={formData.name}
                 onChange={(e) => {
                   const val = e.target.value;
-                  if (val === '' || /^[\p{L}\s]+$/u.test(val)) {
-                    handleChange('name', val);
+                  if (val === "" || /^[\p{L}\s]+$/u.test(val)) {
+                    handleChange("name", val);
                   }
                 }}
                 error={!formData.name}
@@ -474,8 +474,8 @@ export default function ProfileSetting() {
                 value={formData.staffCode}
                 onChange={(e) => {
                   const val = e.target.value;
-                  if (val === '' || /^\d{1,4}$/.test(val)) {
-                    handleChange('staffCode', val);
+                  if (val === "" || /^\d{1,4}$/.test(val)) {
+                    handleChange("staffCode", val);
                   }
                 }}
               />
@@ -486,7 +486,7 @@ export default function ProfileSetting() {
                 label="Email (Cố định)"
                 value={formData.email}
                 disabled
-                sx={{ bgcolor: '#f9fafb' }}
+                sx={{ bgcolor: "#f9fafb" }}
               />
             </Grid>
             <Grid size={{ xs: 12, md: 3 }}>
@@ -495,7 +495,7 @@ export default function ProfileSetting() {
                 <Select
                   value={formData.gender}
                   label="Giới tính"
-                  onChange={(e) => handleChange('gender', e.target.value)}
+                  onChange={(e) => handleChange("gender", e.target.value)}
                 >
                   {GENDERS.map((g) => (
                     <MenuItem key={g} value={g}>
@@ -511,9 +511,9 @@ export default function ProfileSetting() {
                 type="date"
                 label="Ngày sinh"
                 InputLabelProps={{ shrink: true }}
-                inputProps={{ max: new Date().toISOString().split('T')[0] }}
+                inputProps={{ max: new Date().toISOString().split("T")[0] }}
                 value={formData.dob}
-                onChange={(e) => handleChange('dob', e.target.value)}
+                onChange={(e) => handleChange("dob", e.target.value)}
               />
             </Grid>
             <Grid size={{ xs: 12, md: 3 }}>
@@ -523,7 +523,7 @@ export default function ProfileSetting() {
                 label="Ngày gia nhập"
                 InputLabelProps={{ shrink: true }}
                 value={formData.joinDate}
-                onChange={(e) => handleChange('joinDate', e.target.value)}
+                onChange={(e) => handleChange("joinDate", e.target.value)}
               />
             </Grid>
           </Grid>
@@ -537,9 +537,9 @@ export default function ProfileSetting() {
                   <RequiredLabel label="Đơn vị / Bộ môn" />
                 </InputLabel>
                 <Select
-                  value={formData.departmentID || ''}
+                  value={formData.departmentID || ""}
                   label={<RequiredLabel label="Đơn vị / Bộ môn" />}
-                  onChange={(e) => handleChange('departmentID', e.target.value)}
+                  onChange={(e) => handleChange("departmentID", e.target.value)}
                 >
                   {departments.map((dept) => (
                     <MenuItem key={dept.id} value={dept.id}>
@@ -555,7 +555,7 @@ export default function ProfileSetting() {
                 <Select
                   value={formData.jobTitle}
                   label="Chức vụ"
-                  onChange={(e) => handleChange('jobTitle', e.target.value)}
+                  onChange={(e) => handleChange("jobTitle", e.target.value)}
                 >
                   {JOB_TITLES.map((t) => (
                     <MenuItem key={t} value={t}>
@@ -571,7 +571,7 @@ export default function ProfileSetting() {
                 <Select
                   value={formData.degree}
                   label="Học vị"
-                  onChange={(e) => handleChange('degree', e.target.value)}
+                  onChange={(e) => handleChange("degree", e.target.value)}
                 >
                   {DEGREES.map((d) => (
                     <MenuItem key={d} value={d}>
@@ -587,7 +587,7 @@ export default function ProfileSetting() {
                 <Select
                   value={formData.academicRank}
                   label="Học hàm"
-                  onChange={(e) => handleChange('academicRank', e.target.value)}
+                  onChange={(e) => handleChange("academicRank", e.target.value)}
                 >
                   {ACADEMIC_RANKS.map((r) => (
                     <MenuItem key={r} value={r}>
@@ -603,7 +603,7 @@ export default function ProfileSetting() {
                 type="number"
                 label="Tổng giờ giảng"
                 value={formData.teachingHours}
-                onChange={(e) => handleChange('teachingHours', e.target.value)}
+                onChange={(e) => handleChange("teachingHours", e.target.value)}
                 InputProps={{
                   endAdornment: (
                     <Typography variant="caption" sx={{ ml: 1 }}>
@@ -625,7 +625,7 @@ export default function ProfileSetting() {
                 rows={3}
                 label="Khen thưởng"
                 value={formData.awards}
-                onChange={(e) => handleChange('awards', e.target.value)}
+                onChange={(e) => handleChange("awards", e.target.value)}
               />
             </Grid>
             <Grid size={{ xs: 12 }}>
@@ -636,7 +636,7 @@ export default function ProfileSetting() {
                 label="Sở hữu trí tuệ"
                 value={formData.intellectualProperty}
                 onChange={(e) =>
-                  handleChange('intellectualProperty', e.target.value)
+                  handleChange("intellectualProperty", e.target.value)
                 }
               />
             </Grid>
@@ -649,28 +649,28 @@ export default function ProfileSetting() {
 
   if (loading)
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 5 }}>
+      <Box sx={{ display: "flex", justifyContent: "center", p: 5 }}>
         <CircularProgress />
       </Box>
     );
 
   return (
-    <Box sx={{ bgcolor: '#f0f2f5', minHeight: '100vh', pb: 8 }}>
+    <Box sx={{ bgcolor: "#f0f2f5", minHeight: "100vh", pb: 8 }}>
       <Container maxWidth="lg" sx={{ pt: 3 }}>
         {/* HEADER CARD */}
         <Paper
           elevation={0}
           sx={{
             borderRadius: 3,
-            overflow: 'hidden',
+            overflow: "hidden",
             mb: 3,
-            boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+            boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
           }}
         >
           <Box
             sx={{
               height: { xs: 150, md: 250 },
-              background: 'linear-gradient(90deg, #1e3a8a 0%, #3b82f6 100%)',
+              background: "linear-gradient(90deg, #1e3a8a 0%, #3b82f6 100%)",
             }}
           />
 
@@ -678,22 +678,22 @@ export default function ProfileSetting() {
             sx={{
               px: 4,
               pb: 4,
-              display: 'flex',
-              flexDirection: { xs: 'column', md: 'row' },
-              alignItems: { xs: 'center', md: 'flex-end' },
+              display: "flex",
+              flexDirection: { xs: "column", md: "row" },
+              alignItems: { xs: "center", md: "flex-end" },
               mt: { xs: -6, md: -4 },
             }}
           >
             <Box
-              sx={{ position: 'relative', mr: { md: 3 }, mb: { xs: 2, md: 0 } }}
+              sx={{ position: "relative", mr: { md: 3 }, mb: { xs: 2, md: 0 } }}
             >
               <Avatar
                 sx={{
                   width: 160,
                   height: 160,
-                  border: '4px solid white',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                  bgcolor: '#1e3a8a',
+                  border: "4px solid white",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                  bgcolor: "#1e3a8a",
                   fontSize: 60,
                 }}
                 src={previewAvatar || formData.avatarUrl || undefined}
@@ -707,15 +707,15 @@ export default function ProfileSetting() {
                 <Tooltip title="Đổi ảnh đại diện">
                   <IconButton
                     sx={{
-                      position: 'absolute',
+                      position: "absolute",
                       bottom: 10,
                       right: 10,
-                      bgcolor: '#e4e6eb',
-                      '&:hover': { bgcolor: '#d8dadf' },
+                      bgcolor: "#e4e6eb",
+                      "&:hover": { bgcolor: "#d8dadf" },
                     }}
                     onClick={() => fileInputRef.current?.click()}
                   >
-                    <CameraAlt sx={{ color: 'black' }} />
+                    <CameraAlt sx={{ color: "black" }} />
                   </IconButton>
                 </Tooltip>
               )}
@@ -731,23 +731,23 @@ export default function ProfileSetting() {
             <Box
               sx={{
                 flexGrow: 1,
-                textAlign: { xs: 'center', md: 'left' },
+                textAlign: { xs: "center", md: "left" },
                 mb: { xs: 2, md: 1 },
               }}
             >
               <Typography
                 variant="h4"
                 fontWeight="bold"
-                sx={{ color: '#1c1e21' }}
+                sx={{ color: "#1c1e21" }}
               >
                 {formData.name}
               </Typography>
               <Box
                 sx={{
-                  display: 'flex',
+                  display: "flex",
                   gap: 1,
-                  justifyContent: { xs: 'center', md: 'flex-start' },
-                  alignItems: 'center',
+                  justifyContent: { xs: "center", md: "flex-start" },
+                  alignItems: "center",
                   mt: 0.5,
                 }}
               >
@@ -765,18 +765,18 @@ export default function ProfileSetting() {
               </Box>
             </Box>
 
-            <Box sx={{ mb: { xs: 0, md: 2 }, display: 'flex', gap: 1 }}>
+            <Box sx={{ mb: { xs: 0, md: 2 }, display: "flex", gap: 1 }}>
               {!isEditing ? (
                 <Button
                   variant="contained"
                   startIcon={<Edit />}
                   onClick={handleEdit}
                   sx={{
-                    bgcolor: '#e4e6eb',
-                    color: 'black',
-                    fontWeight: 'bold',
-                    textTransform: 'none',
-                    '&:hover': { bgcolor: '#d8dadf' },
+                    bgcolor: "#e4e6eb",
+                    color: "black",
+                    fontWeight: "bold",
+                    textTransform: "none",
+                    "&:hover": { bgcolor: "#d8dadf" },
                   }}
                 >
                   Chỉnh sửa hồ sơ
@@ -789,10 +789,10 @@ export default function ProfileSetting() {
                     startIcon={<Cancel />}
                     onClick={handleCancel}
                     sx={{
-                      textTransform: 'none',
-                      bgcolor: '#e4e6eb',
-                      color: 'black',
-                      '&:hover': { bgcolor: '#d8dadf' },
+                      textTransform: "none",
+                      bgcolor: "#e4e6eb",
+                      color: "black",
+                      "&:hover": { bgcolor: "#d8dadf" },
                     }}
                   >
                     Hủy
@@ -809,7 +809,7 @@ export default function ProfileSetting() {
                     }
                     onClick={handleSave}
                     disabled={saving}
-                    sx={{ textTransform: 'none', fontWeight: 'bold', px: 3 }}
+                    sx={{ textTransform: "none", fontWeight: "bold", px: 3 }}
                   >
                     Lưu thay đổi
                   </Button>
@@ -824,31 +824,31 @@ export default function ProfileSetting() {
           elevation={0}
           sx={{
             borderRadius: 3,
-            boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
-            overflow: 'hidden',
+            boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
+            overflow: "hidden",
           }}
         >
-          <Box sx={{ borderBottom: '1px solid #e0e0e0', px: 2, pt: 1 }}>
+          <Box sx={{ borderBottom: "1px solid #e0e0e0", px: 2, pt: 1 }}>
             <Tabs
               value={activeTab}
               onChange={(e, v) => setActiveTab(v)}
               textColor="primary"
               indicatorColor="primary"
               sx={{
-                '& .MuiTab-root': {
-                  textTransform: 'none',
+                "& .MuiTab-root": {
+                  textTransform: "none",
                   fontWeight: 600,
                   fontSize: 15,
                   minHeight: 50,
                   mr: 1,
-                  color: '#65676b',
-                  '&.Mui-selected': {
-                    color: '#1877f2',
-                    borderBottom: '3px solid #1877f2',
+                  color: "#65676b",
+                  "&.Mui-selected": {
+                    color: "#1877f2",
+                    borderBottom: "3px solid #1877f2",
                     zIndex: 1,
                   },
                 },
-                '& .MuiTabs-indicator': { display: 'none' },
+                "& .MuiTabs-indicator": { display: "none" },
               }}
             >
               <Tab label="Thông tin cá nhân" />
@@ -860,15 +860,15 @@ export default function ProfileSetting() {
           <Fade in={true} key={activeTab}>
             <Box sx={{ p: 4, minHeight: 400 }}>
               <Box
-                sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}
+                sx={{ mb: 3, display: "flex", alignItems: "center", gap: 1 }}
               >
                 {activeTab === 0 && <Person fontSize="large" color="primary" />}
                 {activeTab === 1 && <School fontSize="large" color="primary" />}
                 {activeTab === 2 && <Star fontSize="large" color="primary" />}
                 <Typography variant="h6" fontWeight="bold">
-                  {activeTab === 0 && 'Thông tin cá nhân'}
-                  {activeTab === 1 && 'Công việc và Học vấn'}
-                  {activeTab === 2 && 'Thành tích và Nghiên cứu'}
+                  {activeTab === 0 && "Thông tin cá nhân"}
+                  {activeTab === 1 && "Công việc và Học vấn"}
+                  {activeTab === 2 && "Thành tích và Nghiên cứu"}
                 </Typography>
               </Box>
 
@@ -882,12 +882,12 @@ export default function ProfileSetting() {
         open={!!notification}
         autoHideDuration={4000}
         onClose={() => setNotification(null)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
       >
         <Alert
           severity={notification?.type}
           onClose={() => setNotification(null)}
-          sx={{ width: '100%', boxShadow: 3 }}
+          sx={{ width: "100%", boxShadow: 3 }}
         >
           {notification?.message}
         </Alert>

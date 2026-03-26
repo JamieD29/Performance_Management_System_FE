@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -24,23 +24,23 @@ import {
   MenuItem,
   DialogActions,
   Button,
-} from '@mui/material';
-import type { SelectChangeEvent } from '@mui/material';
-import { Edit } from '@mui/icons-material';
+} from "@mui/material";
+import type { SelectChangeEvent } from "@mui/material";
+import { Edit } from "@mui/icons-material";
 
-import { api } from '../../../services/api';
-import type { User } from '../../../types';
+import { api } from "../../../services/api";
+import type { User } from "../../../types";
 
 export default function UserRoleManager() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [roleDialogOpen, setRoleDialogOpen] = useState(false);
-  const [newRole, setNewRole] = useState('');
+  const [newRole, setNewRole] = useState("");
 
   useEffect(() => {
     api
-      .get('/users')
+      .get("/users")
       .then((res) =>
         setUsers(Array.isArray(res.data) ? res.data : res.data.data || []),
       )
@@ -58,15 +58,15 @@ export default function UserRoleManager() {
         ),
       );
       setRoleDialogOpen(false);
-      alert('Role updated successfully');
+      alert("Role updated successfully");
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed update');
+      alert(err.response?.data?.message || "Failed update");
     }
   };
 
   const getRoleColor = (role: string) => {
-    if (role === 'ADMIN') return 'error';
-    return 'default';
+    if (role === "ADMIN") return "error";
+    return "default";
   };
 
   return (
@@ -75,9 +75,13 @@ export default function UserRoleManager() {
         Only Admin can promote users.
       </Alert>
 
-      <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
+      <TableContainer
+        component={Paper}
+        variant="outlined"
+        sx={{ borderRadius: 2 }}
+      >
         <Table size="small">
-          <TableHead sx={{ bgcolor: '#f8fafc' }}>
+          <TableHead sx={{ bgcolor: "#f8fafc" }}>
             <TableRow>
               <TableCell>Nhân viên</TableCell>
               <TableCell>Chức danh</TableCell>
@@ -97,30 +101,52 @@ export default function UserRoleManager() {
               users.map((user) => (
                 <TableRow key={user.id}>
                   <TableCell sx={{ py: 1 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                      <Avatar src={user.avatarUrl} sx={{ width: 32, height: 32, fontSize: '0.9rem' }}>
+                    <Box
+                      sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
+                    >
+                      <Avatar
+                        src={user.avatarUrl}
+                        sx={{ width: 32, height: 32, fontSize: "0.9rem" }}
+                      >
                         {user.name?.charAt(0)}
                       </Avatar>
                       <Box>
-                        <Typography variant="subtitle2" sx={{ fontSize: '0.85rem' }}>{user.name}</Typography>
-                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>{user.email}</Typography>
+                        <Typography
+                          variant="subtitle2"
+                          sx={{ fontSize: "0.85rem" }}
+                        >
+                          {user.name}
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          sx={{ color: "text.secondary" }}
+                        >
+                          {user.email}
+                        </Typography>
                       </Box>
                     </Box>
                   </TableCell>
-                  <TableCell sx={{ py: 1, fontSize: '0.85rem' }}>
-                    <Chip label={user.jobTitle || 'N/A'} size="small" />
+                  <TableCell sx={{ py: 1, fontSize: "0.85rem" }}>
+                    <Chip label={user.jobTitle || "N/A"} size="small" />
                   </TableCell>
-                  <TableCell sx={{ py: 1, fontSize: '0.85rem' }}>
+                  <TableCell sx={{ py: 1, fontSize: "0.85rem" }}>
                     {(user as any).managementPosition ? (
-                      <Chip label={(user as any).managementPosition.name} color="primary" variant="outlined" size="small" />
+                      <Chip
+                        label={(user as any).managementPosition.name}
+                        color="primary"
+                        variant="outlined"
+                        size="small"
+                      />
                     ) : (
-                      <Typography variant="caption" color="text.disabled">—</Typography>
+                      <Typography variant="caption" color="text.disabled">
+                        —
+                      </Typography>
                     )}
                   </TableCell>
                   <TableCell sx={{ py: 1 }}>
                     {user.roles.map((r: any) => {
                       const roleSlug =
-                        typeof r === 'string' ? r : r.slug || r.name;
+                        typeof r === "string" ? r : r.slug || r.name;
                       return (
                         <Chip
                           key={roleSlug}
@@ -140,9 +166,9 @@ export default function UserRoleManager() {
                           setSelectedUser(user);
                           const firstRole = user.roles[0] as any;
                           setNewRole(
-                            (typeof firstRole === 'string'
+                            (typeof firstRole === "string"
                               ? firstRole
-                              : firstRole?.slug) || 'USER',
+                              : firstRole?.slug) || "USER",
                           );
                           setRoleDialogOpen(true);
                         }}
@@ -169,7 +195,7 @@ export default function UserRoleManager() {
               onChange={(e: SelectChangeEvent) => setNewRole(e.target.value)}
             >
               <MenuItem value="USER">User</MenuItem>
-              <MenuItem value="ADMIN" sx={{ color: 'red' }}>
+              <MenuItem value="ADMIN" sx={{ color: "red" }}>
                 Admin
               </MenuItem>
             </Select>

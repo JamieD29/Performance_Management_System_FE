@@ -1,19 +1,32 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Box, CircularProgress } from '@mui/material';
 
-// Import Pages
-import Login from '../pages/Auth/Login';
-import Dashboard from '../pages/Dashboard/Dashboard';
-import AdminSettings from '../pages/Admin/AdminSetting';
-import Department from '../pages/Department/Department';
-import DepartmentOKR from '../pages/DepartmentOKR/departmentOKR';
-import AuthCallback from '../pages/Auth/AuthCallback';
-import NotFoundPage from '../pages/ErrorPage/NotFoundPage';
-import ProfileSetting from '../pages/ProfileSetting/ProfileSettingPage';
-import ProfileSetup from '../pages/ProfileSetup/ProfileSetup';
+// Lazy-loaded pages (code splitting — load on demand)
+const Login = React.lazy(() => import('../pages/Auth/Login'));
+const Dashboard = React.lazy(() => import('../pages/Dashboard/Dashboard'));
+const AdminSettings = React.lazy(() => import('../pages/Admin/AdminSetting'));
+const Department = React.lazy(() => import('../pages/Department/Department'));
+const DepartmentOKR = React.lazy(
+  () => import('../pages/DepartmentOKR/departmentOKR'),
+);
+const AuthCallback = React.lazy(() => import('../pages/Auth/AuthCallback'));
+const NotFoundPage = React.lazy(
+  () => import('../pages/ErrorPage/NotFoundPage'),
+);
+const ProfileSetting = React.lazy(
+  () => import('../pages/ProfileSetting/ProfileSettingPage'),
+);
+const ProfileSetup = React.lazy(
+  () => import('../pages/ProfileSetup/ProfileSetup'),
+);
+const DepartmentOverview = React.lazy(
+  () => import('../pages/DepartmentOverview/DepartmentOverview'),
+);
+const MyOkrPage = React.lazy(() => import('../pages/MyOkr/MyOkrPage'));
+
+// Non-lazy (always needed for layout)
 import MainLayout from '../layouts/MainLayout';
-import DepartmentOverview from '../pages/DepartmentOverview/DepartmentOverview';
-import MyOkrPage from '../pages/MyOkr/MyOkrPage';
 
 // 1. Hook check đăng nhập
 function useAuth() {
@@ -28,10 +41,12 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
   const rawRoles = user.roles || [];
 
   // Chuẩn hóa role linh hoạt (Object/String) và không phân biệt hoa thường
-  const isAdmin = Array.isArray(rawRoles) && rawRoles.some((r: any) => {
-    const val = typeof r === 'string' ? r : r.slug || r.name || '';
-    return val.toString().toUpperCase() === 'ADMIN';
-  });
+  const isAdmin =
+    Array.isArray(rawRoles) &&
+    rawRoles.some((r: any) => {
+      const val = typeof r === 'string' ? r : r.slug || r.name || '';
+      return val.toString().toUpperCase() === 'ADMIN';
+    });
 
   if (!isAdmin) {
     console.warn('⛔ Access Denied: Not an Admin -> Redirecting to Dashboard');
@@ -74,8 +89,25 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+// Loading fallback for lazy-loaded pages
+function PageLoader() {
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '60vh',
+      }}
+    >
+      <CircularProgress />
+    </Box>
+  );
+}
+
 export default function AppRoutes() {
   return (
+    <Suspense fallback={<PageLoader />}>
     <Routes>
       {/* --- CÁC ROUTE PHỤ --- */}
       <Route path="/auth/microsoft/callback" element={<AuthCallback />} />
@@ -112,10 +144,7 @@ export default function AppRoutes() {
 
         {/* 2. Hồ sơ cá nhân */}
         <Route path="/profile" element={<ProfileSetting />} />
-        <Route
-          path="/my-okr"
-          element={<MyOkrPage />}
-        />
+        <Route path="/my-okr" element={<MyOkrPage />} />
 
         {/* 3. GROUP BỘ MÔN (Theo Sidebar mới) */}
         {/* Tổng quan */}
@@ -144,5 +173,6 @@ export default function AppRoutes() {
       <Route path="/404" element={<NotFoundPage />} />
       <Route path="*" element={<NotFoundPage />} />{' '}
     </Routes>
+    </Suspense>
   );
 }

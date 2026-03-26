@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -10,7 +10,7 @@ import {
   ListItemIcon,
   Container,
   ListItemText,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Dns,
   People,
@@ -18,45 +18,45 @@ import {
   AdminPanelSettings,
   ArrowBack,
   CalendarToday,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 
 // 1. SỬA ĐƯỜNG DẪN: Lùi 2 cấp (Admin -> pages -> src/types)
-import type { User } from '../../types';
+import type { User } from "../../types";
 
 // 2. SỬA ĐƯỜNG DẪN: Lùi 1 cấp ra pages, rồi vào Performance
-import CycleManagement from '../Performance/components/CycleManagement';
+import CycleManagement from "../Performance/components/CycleManagement";
 
 // 3. SỬA ĐƯỜNG DẪN: Vì AdminSetting giờ đang ở CÙNG THƯ MỤC CHA với components
-import WhitelistManager from './components/WhitelistManager';
-import SystemLogs from './components/SystemLogs';
-import RoleManagementTab from './components/RoleManagementTab';
+import WhitelistManager from "./components/WhitelistManager";
+import SystemLogs from "./components/SystemLogs";
+import RoleManagementTab from "./components/RoleManagementTab";
 
 export default function AdminSettings() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('cycles');
+  const [activeTab, setActiveTab] = useState("cycles");
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const userInfo = sessionStorage.getItem('user');
+    const userInfo = sessionStorage.getItem("user");
     if (userInfo) {
       const user: User = JSON.parse(userInfo);
       const rawRoles = Array.isArray(user.roles) ? user.roles : [];
       const normalizedRoles = rawRoles.map((r: any) =>
-        (typeof r === 'string' ? r : r?.slug || r?.name || '').toString(),
+        (typeof r === "string" ? r : r?.slug || r?.name || "").toString(),
       );
 
-      const checkSuper = normalizedRoles.includes('ADMIN');
-      const checkAccess = normalizedRoles.includes('ADMIN');
+      const checkSuper = normalizedRoles.includes("ADMIN");
+      const checkAccess = normalizedRoles.includes("ADMIN");
 
       if (!checkAccess) {
-        navigate('/dashboard');
+        navigate("/dashboard");
         return;
       }
       setIsAdmin(true);
       setIsSuperAdmin(checkSuper);
     } else {
-      navigate('/login');
+      navigate("/login");
     }
   }, [navigate]);
 
@@ -64,19 +64,19 @@ export default function AdminSettings() {
 
   const menuItems = [
     {
-      id: 'cycles',
-      label: 'Evaluation Cycles',
+      id: "cycles",
+      label: "Evaluation Cycles",
       icon: <CalendarToday />,
       restricted: false,
     },
     {
-      id: 'whitelist',
-      label: 'Whitelist Domain',
+      id: "whitelist",
+      label: "Whitelist Domain",
       icon: <Dns />,
       restricted: false,
     },
-    { id: 'roles', label: 'Quản lý Roles', icon: <People />, restricted: true },
-    { id: 'logs', label: 'System Logs', icon: <History />, restricted: true },
+    { id: "roles", label: "Quản lý Roles", icon: <People />, restricted: true },
+    { id: "logs", label: "System Logs", icon: <History />, restricted: true },
   ];
 
   const availableMenuItems = menuItems.filter(
@@ -87,13 +87,13 @@ export default function AdminSettings() {
   return (
     <Box
       sx={{
-        display: 'flex',
-        flexDirection: 'row',
-        width: '100%',
-        minHeight: '85vh',
-        bgcolor: '#f8fafc',
+        display: "flex",
+        flexDirection: "row",
+        width: "100%",
+        minHeight: "85vh",
+        bgcolor: "#f8fafc",
         borderRadius: 2,
-        overflow: 'hidden',
+        overflow: "hidden",
       }}
     >
       {/* SIDEBAR */}
@@ -103,15 +103,15 @@ export default function AdminSettings() {
           sx={{
             width: 260,
             flexShrink: 0,
-            borderRight: '1px solid #e2e8f0',
-            bgcolor: '#fff',
-            display: 'flex',
-            flexDirection: 'column',
+            borderRight: "1px solid #e2e8f0",
+            bgcolor: "#fff",
+            display: "flex",
+            flexDirection: "column",
           }}
         >
           <Box sx={{ p: 3 }}>
             <Box
-              sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5 }}
+              sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 0.5 }}
             >
               <AdminPanelSettings color="primary" />
               <Typography variant="subtitle1" fontWeight="bold" color="#1e3a8a">
@@ -126,21 +126,21 @@ export default function AdminSettings() {
 
           <List sx={{ p: 2, flexGrow: 1 }}>
             <ListItemButton
-              onClick={() => navigate('/dashboard')}
-              sx={{ mb: 2, borderRadius: 2, bgcolor: '#f1f5f9' }}
+              onClick={() => navigate("/dashboard")}
+              sx={{ mb: 2, borderRadius: 2, bgcolor: "#f1f5f9" }}
             >
               <ListItemIcon>
                 <ArrowBack fontSize="small" />
               </ListItemIcon>
               <ListItemText
                 primary="Back Dashboard"
-                primaryTypographyProps={{ fontSize: '0.875rem' }}
+                primaryTypographyProps={{ fontSize: "0.875rem" }}
               />
             </ListItemButton>
 
             <Typography
               variant="overline"
-              sx={{ px: 1, color: 'text.secondary', fontWeight: 'bold' }}
+              sx={{ px: 1, color: "text.secondary", fontWeight: "bold" }}
             >
               Modules
             </Typography>
@@ -153,10 +153,10 @@ export default function AdminSettings() {
                 sx={{
                   borderRadius: 2,
                   mb: 0.5,
-                  '&.Mui-selected': {
-                    bgcolor: '#eff6ff',
-                    color: '#1e3a8a',
-                    '& .MuiListItemIcon-root': { color: '#1e3a8a' },
+                  "&.Mui-selected": {
+                    bgcolor: "#eff6ff",
+                    color: "#1e3a8a",
+                    "& .MuiListItemIcon-root": { color: "#1e3a8a" },
                   },
                 }}
               >
@@ -164,7 +164,7 @@ export default function AdminSettings() {
                 <ListItemText
                   primary={item.label}
                   primaryTypographyProps={{
-                    fontSize: '0.9rem',
+                    fontSize: "0.9rem",
                     fontWeight: 500,
                   }}
                 />
@@ -175,19 +175,19 @@ export default function AdminSettings() {
       )}
 
       {/* CONTENT AREA */}
-      <Box sx={{ flexGrow: 1, p: 4, bgcolor: '#fff', overflow: 'auto' }}>
+      <Box sx={{ flexGrow: 1, p: 4, bgcolor: "#fff", overflow: "auto" }}>
         <Container maxWidth="xl">
-          <Box sx={{ mb: 3, pb: 2, borderBottom: '1px solid #f1f5f9' }}>
+          <Box sx={{ mb: 3, pb: 2, borderBottom: "1px solid #f1f5f9" }}>
             <Typography variant="h5" fontWeight="bold" color="#1e293b">
               {menuItems.find((i) => i.id === activeTab)?.label}
             </Typography>
           </Box>
 
           {/* RENDER COMPONENT TƯƠNG ỨNG TỪ CÁC FILE ĐÃ TÁCH */}
-          {activeTab === 'cycles' && <CycleManagement />}
-          {activeTab === 'whitelist' && <WhitelistManager />}
-          {activeTab === 'roles' && <RoleManagementTab />}
-          {activeTab === 'logs' && <SystemLogs />}
+          {activeTab === "cycles" && <CycleManagement />}
+          {activeTab === "whitelist" && <WhitelistManager />}
+          {activeTab === "roles" && <RoleManagementTab />}
+          {activeTab === "logs" && <SystemLogs />}
         </Container>
       </Box>
     </Box>

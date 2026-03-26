@@ -46,8 +46,14 @@ export default function AuthCallback() {
         if (isFirstUser) {
           console.log("🎉 First user! Redirecting to Admin Settings...");
           navigate("/admin/settings", { replace: true });
-        } else if (!user.profileCompleted && !user.jobTitle && !user.department?.id) {
-          console.log("📋 Profile incomplete → Redirecting to Profile Setup...");
+        } else if (
+          !user.profileCompleted &&
+          !user.jobTitle &&
+          !user.department?.id
+        ) {
+          console.log(
+            "📋 Profile incomplete → Redirecting to Profile Setup...",
+          );
           navigate("/profile-setup", { replace: true });
         } else {
           navigate("/dashboard", { replace: true });

@@ -39,13 +39,8 @@ a:hover {
   color: #535bf2;
 }
 
-/* TAO ĐÃ XÓA 'display: flex' VÀ 'place-items: center' Ở ĐÂY */
 body {
   margin: 0;
-  /* display: flex;  <-- Đã xóa dòng này (thủ phạm) */
-  /* place-items: center; <-- Đã xóa dòng này (thủ phạm) */
-  /* min-width: 320px; <-- Xóa luôn cho đỡ vướng */
-  /* min-height: 100vh; <-- Xóa luôn vì đã set height 100% ở trên */
 }
 
 h1 {

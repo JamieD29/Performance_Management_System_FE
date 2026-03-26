@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   Box,
   Card,
@@ -11,9 +11,9 @@ import {
   Divider,
   Breadcrumbs,
   Link,
-} from '@mui/material';
-import { NavigateNext } from '@mui/icons-material';
-import Grid from '@mui/material/Grid'; // 👈 Grid V6 chuẩn
+} from "@mui/material";
+import { NavigateNext } from "@mui/icons-material";
+import Grid from "@mui/material/Grid"; // 👈 Grid V6 chuẩn
 import {
   ArrowLeft,
   Users,
@@ -23,8 +23,8 @@ import {
   ChevronRight,
   BarChart3,
   Home,
-} from 'lucide-react';
-import { api } from '../../services/api'; // Đảm bảo import đúng axios instance
+} from "lucide-react";
+import { api } from "../../services/api"; // Đảm bảo import đúng axios instance
 
 // Interface khớp với DB của bạn
 interface Department {
@@ -51,10 +51,10 @@ export default function DepartmentOverview() {
     setLoading(true);
     try {
       // Gọi API lấy danh sách
-      const res = await api.get('/departments');
+      const res = await api.get("/departments");
       setDepartments(res.data);
     } catch (error) {
-      console.error('Lỗi tải danh sách bộ môn:', error);
+      console.error("Lỗi tải danh sách bộ môn:", error);
     } finally {
       setLoading(false);
     }
@@ -62,25 +62,29 @@ export default function DepartmentOverview() {
 
   // --- COMPONENT: BREADCRUMBS ---
   const renderBreadcrumbs = () => (
-    <Breadcrumbs separator={<NavigateNext fontSize="small" />} aria-label="breadcrumb" sx={{ mb: 3 }}>
+    <Breadcrumbs
+      separator={<NavigateNext fontSize="small" />}
+      aria-label="breadcrumb"
+      sx={{ mb: 3 }}
+    >
       <Link
         underline="hover"
         color="inherit"
         href="/"
-        sx={{ display: 'flex', alignItems: 'center' }}
+        sx={{ display: "flex", alignItems: "center" }}
       >
         <Home size={16} style={{ marginRight: 4 }} />
         Trang chủ
       </Link>
       <Link
         underline="hover"
-        color={!selectedDept ? 'text.primary' : 'inherit'}
+        color={!selectedDept ? "text.primary" : "inherit"}
         href="#"
         onClick={(e) => {
           e.preventDefault();
           setSelectedDept(null);
         }}
-        aria-current={!selectedDept ? 'page' : undefined}
+        aria-current={!selectedDept ? "page" : undefined}
       >
         Bộ môn
       </Link>
@@ -97,7 +101,7 @@ export default function DepartmentOverview() {
         {renderBreadcrumbs()}
 
         <Box sx={{ mb: 4 }}>
-          <Typography variant="h4" fontWeight="bold" sx={{ color: '#1e293b' }}>
+          <Typography variant="h4" fontWeight="bold" sx={{ color: "#1e293b" }}>
             Tổng quan bộ môn
           </Typography>
           <Typography color="text.secondary">
@@ -106,7 +110,7 @@ export default function DepartmentOverview() {
         </Box>
 
         {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', p: 5 }}>
+          <Box sx={{ display: "flex", justifyContent: "center", p: 5 }}>
             <CircularProgress />
           </Box>
         ) : (
@@ -117,14 +121,14 @@ export default function DepartmentOverview() {
                   <Card
                     elevation={0}
                     sx={{
-                      border: '1px solid #e2e8f0',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                      height: '100%',
-                      '&:hover': {
-                        transform: 'translateY(-4px)',
-                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-                        borderColor: '#3b82f6',
+                      border: "1px solid #e2e8f0",
+                      cursor: "pointer",
+                      transition: "all 0.2s",
+                      height: "100%",
+                      "&:hover": {
+                        transform: "translateY(-4px)",
+                        boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+                        borderColor: "#3b82f6",
                       },
                     }}
                     onClick={() => setSelectedDept(dept)}
@@ -132,18 +136,18 @@ export default function DepartmentOverview() {
                     <CardContent>
                       <Box
                         sx={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'start',
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "start",
                           mb: 2,
                         }}
                       >
                         {/* Hiển thị Mã Bộ Môn (SE, CS...) */}
                         <Avatar
                           sx={{
-                            bgcolor: '#eff6ff',
-                            color: '#3b82f6',
-                            fontWeight: 'bold',
+                            bgcolor: "#eff6ff",
+                            color: "#3b82f6",
+                            fontWeight: "bold",
                           }}
                           variant="rounded"
                         >
@@ -165,18 +169,18 @@ export default function DepartmentOverview() {
 
                       <Box
                         sx={{
-                          display: 'flex',
-                          flexDirection: 'column',
+                          display: "flex",
+                          flexDirection: "column",
                           gap: 1,
                         }}
                       >
                         {/* Nếu Backend chưa trả về count thì ẩn hoặc hiện 0 */}
                         <Box
                           sx={{
-                            display: 'flex',
-                            alignItems: 'center',
+                            display: "flex",
+                            alignItems: "center",
                             gap: 1.5,
-                            color: '#64748b',
+                            color: "#64748b",
                             fontSize: 14,
                           }}
                         >
@@ -185,16 +189,16 @@ export default function DepartmentOverview() {
                         </Box>
                         <Box
                           sx={{
-                            display: 'flex',
-                            alignItems: 'center',
+                            display: "flex",
+                            alignItems: "center",
                             gap: 1.5,
-                            color: '#64748b',
+                            color: "#64748b",
                             fontSize: 14,
                           }}
                         >
                           <Briefcase size={16} />
                           <span className="truncate">
-                            Trưởng BM: {dept.headOfDeptName || 'Chưa cập nhật'}
+                            Trưởng BM: {dept.headOfDeptName || "Chưa cập nhật"}
                           </span>
                         </Box>
                       </Box>
@@ -226,7 +230,7 @@ export default function DepartmentOverview() {
         variant="text"
         startIcon={<ArrowLeft size={18} />}
         onClick={() => setSelectedDept(null)}
-        sx={{ mb: 2, color: '#64748b', display: { xs: 'flex', md: 'none' } }}
+        sx={{ mb: 2, color: "#64748b", display: { xs: "flex", md: "none" } }}
       >
         Quay lại
       </Button>
@@ -234,13 +238,13 @@ export default function DepartmentOverview() {
       <Box
         sx={{
           mb: 4,
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
         }}
       >
         <Box>
-          <Typography variant="h4" fontWeight="bold" sx={{ color: '#1e293b' }}>
+          <Typography variant="h4" fontWeight="bold" sx={{ color: "#1e293b" }}>
             {selectedDept.name}
           </Typography>
           <Typography color="text.secondary">
@@ -248,7 +252,7 @@ export default function DepartmentOverview() {
           </Typography>
         </Box>
         <Avatar
-          sx={{ width: 56, height: 56, bgcolor: '#1e3a8a', fontSize: 20 }}
+          sx={{ width: 56, height: 56, bgcolor: "#1e3a8a", fontSize: 20 }}
         >
           {selectedDept.code}
         </Avatar>
@@ -261,13 +265,13 @@ export default function DepartmentOverview() {
             elevation={0}
             sx={{
               p: 3,
-              bgcolor: '#eff6ff',
+              bgcolor: "#eff6ff",
               borderRadius: 3,
-              border: '1px solid #dbeafe',
+              border: "1px solid #dbeafe",
             }}
           >
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 1 }}>
-              <Box sx={{ p: 1, bgcolor: 'white', borderRadius: 2 }}>
+            <Box sx={{ display: "flex", gap: 2, alignItems: "center", mb: 1 }}>
+              <Box sx={{ p: 1, bgcolor: "white", borderRadius: 2 }}>
                 <Users size={24} color="#3b82f6" />
               </Box>
               <Typography fontWeight="bold" color="#1e3a8a">
@@ -278,7 +282,7 @@ export default function DepartmentOverview() {
             <Typography
               variant="h3"
               fontWeight="bold"
-              sx={{ color: '#1e40af' }}
+              sx={{ color: "#1e40af" }}
             >
               {selectedDept.memberCount || 0}
             </Typography>
@@ -292,13 +296,13 @@ export default function DepartmentOverview() {
             elevation={0}
             sx={{
               p: 3,
-              bgcolor: '#f0fdf4',
+              bgcolor: "#f0fdf4",
               borderRadius: 3,
-              border: '1px solid #dcfce7',
+              border: "1px solid #dcfce7",
             }}
           >
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 1 }}>
-              <Box sx={{ p: 1, bgcolor: 'white', borderRadius: 2 }}>
+            <Box sx={{ display: "flex", gap: 2, alignItems: "center", mb: 1 }}>
+              <Box sx={{ p: 1, bgcolor: "white", borderRadius: 2 }}>
                 <TrendingUp size={24} color="#16a34a" />
               </Box>
               <Typography fontWeight="bold" color="#14532d">
@@ -308,7 +312,7 @@ export default function DepartmentOverview() {
             <Typography
               variant="h3"
               fontWeight="bold"
-              sx={{ color: '#15803d' }}
+              sx={{ color: "#15803d" }}
             >
               --
             </Typography>
@@ -322,13 +326,13 @@ export default function DepartmentOverview() {
             elevation={0}
             sx={{
               p: 3,
-              bgcolor: '#fff7ed',
+              bgcolor: "#fff7ed",
               borderRadius: 3,
-              border: '1px solid #ffedd5',
+              border: "1px solid #ffedd5",
             }}
           >
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 1 }}>
-              <Box sx={{ p: 1, bgcolor: 'white', borderRadius: 2 }}>
+            <Box sx={{ display: "flex", gap: 2, alignItems: "center", mb: 1 }}>
+              <Box sx={{ p: 1, bgcolor: "white", borderRadius: 2 }}>
                 <AlertCircle size={24} color="#ea580c" />
               </Box>
               <Typography fontWeight="bold" color="#7c2d12">
@@ -338,7 +342,7 @@ export default function DepartmentOverview() {
             <Typography
               variant="h3"
               fontWeight="bold"
-              sx={{ color: '#c2410c' }}
+              sx={{ color: "#c2410c" }}
             >
               0
             </Typography>
@@ -352,9 +356,9 @@ export default function DepartmentOverview() {
       {/* Chart (Placeholder cho Recharts) */}
       <Paper
         elevation={0}
-        sx={{ p: 3, borderRadius: 3, border: '1px solid #e2e8f0' }}
+        sx={{ p: 3, borderRadius: 3, border: "1px solid #e2e8f0" }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 3 }}>
           <BarChart3 size={20} className="text-gray-500" />
           <Typography variant="h6" fontWeight="bold">
             Tiến độ (Demo Chart)
@@ -363,16 +367,16 @@ export default function DepartmentOverview() {
         <Box
           sx={{
             height: 350,
-            width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            bgcolor: '#f8fafc',
+            width: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            bgcolor: "#f8fafc",
             borderRadius: 2,
           }}
         >
           <Typography color="text.secondary">
-            Biểu đồ sẽ hiển thị khi có dữ liệu đánh giá chi tiết của{' '}
+            Biểu đồ sẽ hiển thị khi có dữ liệu đánh giá chi tiết của{" "}
             {selectedDept.code}.
           </Typography>
         </Box>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -20,7 +20,7 @@ import {
   Avatar,
   Tooltip,
   CircularProgress,
-} from '@mui/material';
+} from "@mui/material";
 
 import {
   Add,
@@ -34,10 +34,10 @@ import {
   PersonRemove,
   Groups,
   BadgeOutlined,
-} from '@mui/icons-material';
-import { api } from '../../services/api';
-import AddDepartmentModal from './components/AddDepartmentModal';
-import AssignPositionModal from './components/AssignPositionModal';
+} from "@mui/icons-material";
+import { api } from "../../services/api";
+import AddDepartmentModal from "./components/AddDepartmentModal";
+import AssignPositionModal from "./components/AssignPositionModal";
 
 // --- INTERFACES ---
 interface User {
@@ -77,7 +77,7 @@ function DepartmentRow({
   const [open, setOpen] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
-  const [userSearch, setUserSearch] = useState('');
+  const [userSearch, setUserSearch] = useState("");
   const [assignModalUser, setAssignModalUser] = useState<User | null>(null);
   const [assignModalOpen, setAssignModalOpen] = useState(false);
 
@@ -91,13 +91,13 @@ function DepartmentRow({
       setLoadingUsers(true);
       try {
         // Gọi API lấy user theo departmentId
-        const res = await api.get('/users', {
+        const res = await api.get("/users", {
           params: { departmentId: row.id },
         });
         const data = Array.isArray(res.data) ? res.data : res.data.data || [];
         setUsers(data);
       } catch (error) {
-        console.error('Lỗi tải user', error);
+        console.error("Lỗi tải user", error);
       } finally {
         setLoadingUsers(false);
       }
@@ -114,11 +114,11 @@ function DepartmentRow({
   const reloadUsers = async () => {
     setLoadingUsers(true);
     try {
-      const res = await api.get('/users', { params: { departmentId: row.id } });
+      const res = await api.get("/users", { params: { departmentId: row.id } });
       const data = Array.isArray(res.data) ? res.data : res.data.data || [];
       setUsers(data);
     } catch (error) {
-      console.error('Lỗi tải user', error);
+      console.error("Lỗi tải user", error);
     } finally {
       setLoadingUsers(false);
     }
@@ -139,11 +139,11 @@ function DepartmentRow({
       {!isDonVi && (
         <TableRow
           sx={{
-            '& > *': { borderBottom: 'unset' },
-            bgcolor: open ? '#f8fafc' : 'white',
-            cursor: 'pointer',
-            transition: 'all 0.2s',
-            '&:hover': { bgcolor: '#f1f5f9' },
+            "& > *": { borderBottom: "unset" },
+            bgcolor: open ? "#f8fafc" : "white",
+            cursor: "pointer",
+            transition: "all 0.2s",
+            "&:hover": { bgcolor: "#f1f5f9" },
           }}
           onClick={() => handleExpandClick()} // Bấm vào hàng là mở luôn
         >
@@ -155,53 +155,53 @@ function DepartmentRow({
                 handleExpandClick();
               }}
             >
-            {open ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
-          </IconButton>
-        </TableCell>
-
-        <TableCell component="th" scope="row">
-          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            {/* Tên bộ môn BỰ như yêu cầu */}
-            <Typography variant="h6" fontWeight="bold" color="#1e3a8a">
-              {row.name}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              {row.code} • {row.description || 'Chưa có mô tả'}
-            </Typography>
-          </Box>
-        </TableCell>
-
-        <TableCell align="right">
-          <Chip
-            icon={<Groups style={{ fontSize: 16 }} />}
-            label={`${row.memberCount || 0} nhân sự`}
-            size="small"
-            variant={open ? 'filled' : 'outlined'}
-            color={open ? 'primary' : 'default'}
-          />
-        </TableCell>
-
-        {isAdmin && (
-          <TableCell align="right" width="120">
-            <Tooltip title="Chỉnh sửa (Sắp có)">
-              <IconButton size="small" onClick={(e) => e.stopPropagation()}>
-                <Edit fontSize="small" />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Xóa">
-              <IconButton
-                size="small"
-                color="error"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete(row.id, row.name);
-                }}
-              >
-                <Delete fontSize="small" />
-              </IconButton>
-            </Tooltip>
+              {open ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+            </IconButton>
           </TableCell>
-        )}
+
+          <TableCell component="th" scope="row">
+            <Box sx={{ display: "flex", flexDirection: "column" }}>
+              {/* Tên bộ môn BỰ như yêu cầu */}
+              <Typography variant="h6" fontWeight="bold" color="#1e3a8a">
+                {row.name}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {row.code} • {row.description || "Chưa có mô tả"}
+              </Typography>
+            </Box>
+          </TableCell>
+
+          <TableCell align="right">
+            <Chip
+              icon={<Groups style={{ fontSize: 16 }} />}
+              label={`${row.memberCount || 0} nhân sự`}
+              size="small"
+              variant={open ? "filled" : "outlined"}
+              color={open ? "primary" : "default"}
+            />
+          </TableCell>
+
+          {isAdmin && (
+            <TableCell align="right" width="120">
+              <Tooltip title="Chỉnh sửa (Sắp có)">
+                <IconButton size="small" onClick={(e) => e.stopPropagation()}>
+                  <Edit fontSize="small" />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Xóa">
+                <IconButton
+                  size="small"
+                  color="error"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(row.id, row.name);
+                  }}
+                >
+                  <Delete fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </TableCell>
+          )}
         </TableRow>
       )}
 
@@ -213,20 +213,22 @@ function DepartmentRow({
               sx={{
                 margin: isDonVi ? 0 : 2,
                 p: 2,
-                bgcolor: '#fff',
+                bgcolor: "#fff",
                 borderRadius: 2,
-                border: isDonVi ? 'none' : '1px solid #e2e8f0',
-                boxShadow: isDonVi ? 'none' : 'inset 0 2px 4px 0 rgba(0,0,0, 0.05)',
-                maxHeight: isDonVi ? 'calc(100vh - 240px)' : 'none',
-                overflowY: isDonVi ? 'auto' : 'visible',
+                border: isDonVi ? "none" : "1px solid #e2e8f0",
+                boxShadow: isDonVi
+                  ? "none"
+                  : "inset 0 2px 4px 0 rgba(0,0,0, 0.05)",
+                maxHeight: isDonVi ? "calc(100vh - 240px)" : "none",
+                overflowY: isDonVi ? "auto" : "visible",
               }}
             >
               {/* Header của phần Detail */}
               <Box
                 sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
                   mb: 2,
                 }}
               >
@@ -251,7 +253,7 @@ function DepartmentRow({
                         <Search fontSize="small" />
                       </InputAdornment>
                     ),
-                    style: { fontSize: 14, backgroundColor: 'white' },
+                    style: { fontSize: 14, backgroundColor: "white" },
                   }}
                   sx={{ width: 300 }}
                 />
@@ -259,29 +261,29 @@ function DepartmentRow({
 
               {/* Bảng Nhân viên con */}
               {loadingUsers ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+                <Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
                   <CircularProgress size={24} />
                 </Box>
               ) : (
                 <Table size="small" aria-label="purchases">
                   <TableHead>
                     <TableRow>
-                      <TableCell sx={{ color: '#64748b', fontWeight: 600 }}>
+                      <TableCell sx={{ color: "#64748b", fontWeight: 600 }}>
                         Nhân viên
                       </TableCell>
-                      <TableCell sx={{ color: '#64748b', fontWeight: 600 }}>
+                      <TableCell sx={{ color: "#64748b", fontWeight: 600 }}>
                         Email
                       </TableCell>
-                      <TableCell sx={{ color: '#64748b', fontWeight: 600 }}>
+                      <TableCell sx={{ color: "#64748b", fontWeight: 600 }}>
                         Chức danh
                       </TableCell>
-                      <TableCell sx={{ color: '#64748b', fontWeight: 600 }}>
+                      <TableCell sx={{ color: "#64748b", fontWeight: 600 }}>
                         Chức vụ quản lý
                       </TableCell>
                       {isAdmin && (
                         <TableCell
                           align="right"
-                          sx={{ color: '#64748b', fontWeight: 600 }}
+                          sx={{ color: "#64748b", fontWeight: 600 }}
                         >
                           Thao tác
                         </TableCell>
@@ -295,8 +297,8 @@ function DepartmentRow({
                           <TableCell component="th" scope="row">
                             <Box
                               sx={{
-                                display: 'flex',
-                                alignItems: 'center',
+                                display: "flex",
+                                alignItems: "center",
                                 gap: 1.5,
                               }}
                             >
@@ -322,7 +324,7 @@ function DepartmentRow({
                           <TableCell>{user.email}</TableCell>
                           <TableCell>
                             <Chip
-                              label={user.jobTitle || 'N/A'}
+                              label={user.jobTitle || "N/A"}
                               size="small"
                               style={{ height: 24, fontSize: 11 }}
                             />
@@ -330,7 +332,9 @@ function DepartmentRow({
                           <TableCell>
                             {user.managementPosition ? (
                               <Chip
-                                icon={<BadgeOutlined style={{ fontSize: 14 }} />}
+                                icon={
+                                  <BadgeOutlined style={{ fontSize: 14 }} />
+                                }
                                 label={user.managementPosition.name}
                                 size="small"
                                 color="primary"
@@ -338,7 +342,10 @@ function DepartmentRow({
                                 sx={{ fontWeight: 600, fontSize: 11 }}
                               />
                             ) : (
-                              <Typography variant="caption" color="text.disabled">
+                              <Typography
+                                variant="caption"
+                                color="text.disabled"
+                              >
                                 —
                               </Typography>
                             )}
@@ -374,13 +381,13 @@ function DepartmentRow({
                           align="center"
                           sx={{
                             py: 3,
-                            color: 'text.secondary',
-                            fontStyle: 'italic',
+                            color: "text.secondary",
+                            fontStyle: "italic",
                           }}
                         >
                           {userSearch
-                            ? 'Không tìm thấy nhân viên nào.'
-                            : 'Chưa có nhân sự trong bộ môn này.'}
+                            ? "Không tìm thấy nhân viên nào."
+                            : "Chưa có nhân sự trong bộ môn này."}
                         </TableCell>
                       </TableRow>
                     )}
@@ -408,27 +415,31 @@ export default function DepartmentPage() {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(false);
   const [openAddModal, setOpenAddModal] = useState(false);
-  const [deptSearch, setDeptSearch] = useState('');
+  const [deptSearch, setDeptSearch] = useState("");
 
-  const userStr = sessionStorage.getItem('user');
+  const userStr = sessionStorage.getItem("user");
   const loggedInUser = userStr ? JSON.parse(userStr) : null;
   const rawRoles = loggedInUser?.roles || [];
   const userRoles = Array.isArray(rawRoles)
-    ? rawRoles.map((r: any) => (typeof r === 'string' ? r : r.slug || r.name || '').toString().toUpperCase())
+    ? rawRoles.map((r: any) =>
+        (typeof r === "string" ? r : r.slug || r.name || "")
+          .toString()
+          .toUpperCase(),
+      )
     : [];
-  const isAdmin = userRoles.includes('ADMIN');
-  const mngLevel = loggedInUser?.managementPosition?.permissionLevel || 'NONE';
-  
-  const isKhoa = ['SYSTEM', 'KHOA'].includes(mngLevel);
-  const isDonVi = mngLevel === 'DON_VI';
+  const isAdmin = userRoles.includes("ADMIN");
+  const mngLevel = loggedInUser?.managementPosition?.permissionLevel || "NONE";
+
+  const isKhoa = ["SYSTEM", "KHOA"].includes(mngLevel);
+  const isDonVi = mngLevel === "DON_VI";
 
   const fetchDepartments = async () => {
     setLoading(true);
     try {
-      const res = await api.get('/departments');
+      const res = await api.get("/departments");
       setDepartments(res.data);
     } catch (error) {
-      console.error('Lỗi tải danh sách:', error);
+      console.error("Lỗi tải danh sách:", error);
     } finally {
       setLoading(false);
     }
@@ -444,7 +455,7 @@ export default function DepartmentPage() {
         await api.delete(`/departments/${id}`);
         fetchDepartments();
       } catch (error) {
-        alert('Xóa thất bại');
+        alert("Xóa thất bại");
       }
     }
   };
@@ -453,7 +464,7 @@ export default function DepartmentPage() {
     const matchSearch =
       d.name.toLowerCase().includes(deptSearch.toLowerCase()) ||
       d.code.toLowerCase().includes(deptSearch.toLowerCase());
-      
+
     if (!matchSearch) return false;
 
     if (isAdmin) return true;
@@ -468,23 +479,24 @@ export default function DepartmentPage() {
     <Container maxWidth="xl" sx={{ py: 4 }}>
       {/* BREADCRUMBS */}
       <Breadcrumbs separator={<NavigateNext fontSize="small" />} sx={{ mb: 3 }}>
-        <Typography color="inherit" sx={{ display: 'flex', alignItems: 'center' }}>
+        <Typography
+          color="inherit"
+          sx={{ display: "flex", alignItems: "center" }}
+        >
           <School sx={{ mr: 0.5 }} fontSize="inherit" />
           Bộ môn
         </Typography>
-        <Typography color="text.primary">
-          Danh sách nhân sự
-        </Typography>
+        <Typography color="text.primary">Danh sách nhân sự</Typography>
       </Breadcrumbs>
 
       {/* HEADER & SEARCH */}
       <Box
         sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
+          display: "flex",
+          justifyContent: "space-between",
           mb: 4,
-          alignItems: 'center',
-          flexWrap: 'wrap',
+          alignItems: "center",
+          flexWrap: "wrap",
           gap: 2,
         }}
       >
@@ -497,7 +509,7 @@ export default function DepartmentPage() {
           </Typography>
         </Box>
 
-        <Box sx={{ display: 'flex', gap: 2 }}>
+        <Box sx={{ display: "flex", gap: 2 }}>
           {!isDonVi && (
             <TextField
               size="small"
@@ -511,7 +523,7 @@ export default function DepartmentPage() {
                   </InputAdornment>
                 ),
               }}
-              sx={{ bgcolor: 'white', minWidth: 250 }}
+              sx={{ bgcolor: "white", minWidth: 250 }}
             />
           )}
           {isAdmin && (
@@ -519,7 +531,7 @@ export default function DepartmentPage() {
               variant="contained"
               startIcon={<Add />}
               onClick={() => setOpenAddModal(true)}
-              sx={{ borderRadius: 2, textTransform: 'none', px: 3 }}
+              sx={{ borderRadius: 2, textTransform: "none", px: 3 }}
             >
               Thêm bộ môn
             </Button>
@@ -533,28 +545,28 @@ export default function DepartmentPage() {
         elevation={0}
         sx={{
           borderRadius: 4,
-          border: '1px solid #e2e8f0',
-          overflow: 'hidden', // Để border radius bo tròn đẹp
+          border: "1px solid #e2e8f0",
+          overflow: "hidden", // Để border radius bo tròn đẹp
         }}
       >
         <Table aria-label="collapsible table">
           {!isDonVi && (
-            <TableHead sx={{ bgcolor: '#f8fafc' }}>
+            <TableHead sx={{ bgcolor: "#f8fafc" }}>
               <TableRow>
                 <TableCell width="50" />
-                <TableCell sx={{ fontWeight: 'bold', color: '#475569' }}>
+                <TableCell sx={{ fontWeight: "bold", color: "#475569" }}>
                   TÊN BỘ MÔN
                 </TableCell>
                 <TableCell
                   align="right"
-                  sx={{ fontWeight: 'bold', color: '#475569' }}
+                  sx={{ fontWeight: "bold", color: "#475569" }}
                 >
                   QUY MÔ
                 </TableCell>
                 {isAdmin && (
                   <TableCell
                     align="right"
-                    sx={{ fontWeight: 'bold', color: '#475569' }}
+                    sx={{ fontWeight: "bold", color: "#475569" }}
                   >
                     THAO TÁC
                   </TableCell>
@@ -584,7 +596,7 @@ export default function DepartmentPage() {
                 <TableCell
                   colSpan={6}
                   align="center"
-                  sx={{ py: 5, color: 'text.secondary' }}
+                  sx={{ py: 5, color: "text.secondary" }}
                 >
                   Không tìm thấy bộ môn nào.
                 </TableCell>

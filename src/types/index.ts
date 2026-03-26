@@ -68,4 +68,3 @@ export interface Domain {
   domain: string;
   addedAt: string;
 }
-
