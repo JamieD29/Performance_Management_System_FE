@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -10,8 +10,8 @@ import {
   LinearProgress,
   Card,
   CardContent,
-} from '@mui/material';
-import Grid from '@mui/material/Grid'; // 👈 Dùng Grid v6 mới nhất
+} from "@mui/material";
+import Grid from "@mui/material/Grid"; // 👈 Dùng Grid v6 mới nhất
 import {
   Target,
   TrendingUp,
@@ -20,9 +20,9 @@ import {
   ArrowRight,
   FileText,
   Award,
-} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { performanceService } from '../../services/performanceService';
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { performanceService } from "../../services/performanceService";
 
 // --- INTERFACES ---
 interface DashboardStats {
@@ -40,31 +40,31 @@ export default function Dashboard() {
   // State lưu dữ liệu tổng hợp
   const [stats, setStats] = useState<DashboardStats>({
     myKpiScore: 0,
-    myKpiStatus: 'DRAFT',
+    myKpiStatus: "DRAFT",
     pendingReviews: 0,
-    currentCycleName: '...',
+    currentCycleName: "...",
     hasData: false,
   });
 
   // Lấy User từ Session
-  const userStr = sessionStorage.getItem('user');
+  const userStr = sessionStorage.getItem("user");
   const user = userStr ? JSON.parse(userStr) : {};
 
   // Check quyền Manager (Trưởng khoa / Admin / Dean)
   const roles = user.roles || [];
   // Chuẩn hóa role về mảng string để check cho dễ
   const normalizedRoles = Array.isArray(roles)
-    ? roles.map((r: any) => (typeof r === 'string' ? r : r.slug))
+    ? roles.map((r: any) => (typeof r === "string" ? r : r.slug))
     : [];
 
-  const isManager = normalizedRoles.includes('ADMIN');
+  const isManager = normalizedRoles.includes("ADMIN");
 
   useEffect(() => {
     loadDashboardData();
   }, []);
 
   const loadDashboardData = async () => {
-    const token = sessionStorage.getItem('accessToken');
+    const token = sessionStorage.getItem("accessToken");
     if (!token || !user.id) {
       setLoading(false);
       return;
@@ -78,13 +78,13 @@ export default function Dashboard() {
         setLoading(false);
         setStats((prev) => ({
           ...prev,
-          currentCycleName: 'Chưa có kỳ đánh giá',
+          currentCycleName: "Chưa có kỳ đánh giá",
         }));
         return;
       }
       // Giả sử kỳ đầu tiên là mới nhất (hoặc filter status OPEN)
       const currentCycle =
-        cycles.find((c: any) => c.status === 'OPEN') || cycles[0];
+        cycles.find((c: any) => c.status === "OPEN") || cycles[0];
 
       // 2. Lấy KPI Cá nhân trong kỳ đó
       const myKpis = await performanceService.getMyKpis(
@@ -93,7 +93,7 @@ export default function Dashboard() {
       );
 
       let totalScore = 0;
-      let status = 'DRAFT';
+      let status = "DRAFT";
       let hasData = false;
 
       if (myKpis && myKpis.length > 0) {
@@ -116,11 +116,11 @@ export default function Dashboard() {
           );
           if (Array.isArray(overview)) {
             pendingCount = overview.filter(
-              (m: any) => m.status === 'PENDING',
+              (m: any) => m.status === "PENDING",
             ).length;
           }
         } catch (e) {
-          console.warn('Chưa tải được dữ liệu Manager:', e);
+          console.warn("Chưa tải được dữ liệu Manager:", e);
         }
       }
 
@@ -132,7 +132,7 @@ export default function Dashboard() {
         hasData,
       });
     } catch (error) {
-      console.error('Lỗi tải Dashboard:', error);
+      console.error("Lỗi tải Dashboard:", error);
     } finally {
       setLoading(false);
     }
@@ -141,36 +141,36 @@ export default function Dashboard() {
   // Helper: Chọn màu cho Status
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'APPROVED':
-        return 'success';
-      case 'PENDING':
-        return 'warning';
-      case 'REJECTED':
-        return 'error';
+      case "APPROVED":
+        return "success";
+      case "PENDING":
+        return "warning";
+      case "REJECTED":
+        return "error";
       default:
-        return 'default';
+        return "default";
     }
   };
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'APPROVED':
-        return 'Đã Duyệt';
-      case 'PENDING':
-        return 'Chờ Duyệt';
-      case 'REJECTED':
-        return 'Từ Chối';
+      case "APPROVED":
+        return "Đã Duyệt";
+      case "PENDING":
+        return "Chờ Duyệt";
+      case "REJECTED":
+        return "Từ Chối";
       default:
-        return 'Chưa Nộp';
+        return "Chưa Nộp";
     }
   };
 
   // Helper: Lời chào theo giờ
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Chào buổi sáng';
-    if (hour < 18) return 'Chào buổi chiều';
-    return 'Chào buổi tối';
+    if (hour < 12) return "Chào buổi sáng";
+    if (hour < 18) return "Chào buổi chiều";
+    return "Chào buổi tối";
   };
 
   if (loading)
@@ -186,30 +186,30 @@ export default function Dashboard() {
       <Box
         sx={{
           mb: 4,
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
         }}
       >
         <Box>
-          <Typography variant="h4" fontWeight="bold" sx={{ color: '#1e293b' }}>
-            {getGreeting()}, {user.name || 'Thầy/Cô'}! 👋
+          <Typography variant="h4" fontWeight="bold" sx={{ color: "#1e293b" }}>
+            {getGreeting()}, {user.name || "Thầy/Cô"}! 👋
           </Typography>
           <Typography color="text.secondary" sx={{ mt: 0.5 }}>
-            Đây là tổng quan hiệu suất trong{' '}
+            Đây là tổng quan hiệu suất trong{" "}
             <strong>{stats.currentCycleName}</strong>
           </Typography>
         </Box>
-        <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+        <Box sx={{ display: { xs: "none", md: "block" } }}>
           <Typography
             variant="subtitle2"
-            sx={{ textAlign: 'right', color: '#64748b' }}
+            sx={{ textAlign: "right", color: "#64748b" }}
           >
-            {new Date().toLocaleDateString('vi-VN', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
+            {new Date().toLocaleDateString("vi-VN", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
             })}
           </Typography>
         </Box>
@@ -223,12 +223,12 @@ export default function Dashboard() {
             elevation={0}
             sx={{
               p: 3,
-              bgcolor: '#eff6ff', // Xanh nhạt
+              bgcolor: "#eff6ff", // Xanh nhạt
               borderRadius: 4,
-              height: '100%',
-              position: 'relative',
-              overflow: 'hidden',
-              border: '1px solid #dbeafe',
+              height: "100%",
+              position: "relative",
+              overflow: "hidden",
+              border: "1px solid #dbeafe",
             }}
           >
             {/* Background Icon Decoration */}
@@ -236,7 +236,7 @@ export default function Dashboard() {
               size={120}
               color="#3b82f6"
               style={{
-                position: 'absolute',
+                position: "absolute",
                 right: -20,
                 bottom: -20,
                 opacity: 0.1,
@@ -245,14 +245,14 @@ export default function Dashboard() {
 
             <Box
               sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
                 mb: 2,
               }}
             >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <Avatar sx={{ bgcolor: '#3b82f6' }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                <Avatar sx={{ bgcolor: "#3b82f6" }}>
                   <Award size={20} />
                 </Avatar>
                 <Typography variant="h6" fontWeight="bold" color="#1e3a8a">
@@ -272,13 +272,13 @@ export default function Dashboard() {
                 <Typography
                   variant="h2"
                   fontWeight="800"
-                  sx={{ color: '#1e3a8a', mb: 1 }}
+                  sx={{ color: "#1e3a8a", mb: 1 }}
                 >
                   {stats.myKpiScore.toFixed(1)}
                   <Typography
                     component="span"
                     variant="h6"
-                    sx={{ color: '#64748b', ml: 1 }}
+                    sx={{ color: "#64748b", ml: 1 }}
                   >
                     điểm
                   </Typography>
@@ -288,8 +288,8 @@ export default function Dashboard() {
                 <Box sx={{ mt: 2, mb: 3 }}>
                   <Box
                     sx={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
+                      display: "flex",
+                      justifyContent: "space-between",
                       mb: 0.5,
                     }}
                   >
@@ -310,11 +310,11 @@ export default function Dashboard() {
                 <Button
                   variant="contained"
                   endIcon={<ArrowRight size={18} />}
-                  onClick={() => navigate('/performance/evaluate')}
+                  onClick={() => navigate("/performance/evaluate")}
                   sx={{
                     borderRadius: 2,
-                    textTransform: 'none',
-                    fontWeight: 'bold',
+                    textTransform: "none",
+                    fontWeight: "bold",
                   }}
                 >
                   Xem chi tiết kết quả
@@ -332,7 +332,7 @@ export default function Dashboard() {
                 <Button
                   variant="contained"
                   color="primary"
-                  onClick={() => navigate('/performance/evaluate')}
+                  onClick={() => navigate("/performance/evaluate")}
                   startIcon={<FileText size={18} />}
                 >
                   Bắt đầu nhập liệu ngay
@@ -349,19 +349,19 @@ export default function Dashboard() {
               elevation={0}
               sx={{
                 p: 3,
-                bgcolor: stats.pendingReviews > 0 ? '#fff7ed' : '#f0fdf4', // Cam nếu có việc, Xanh nếu rảnh
+                bgcolor: stats.pendingReviews > 0 ? "#fff7ed" : "#f0fdf4", // Cam nếu có việc, Xanh nếu rảnh
                 borderRadius: 4,
-                height: '100%',
-                border: '1px solid',
-                borderColor: stats.pendingReviews > 0 ? '#ffedd5' : '#dcfce7',
+                height: "100%",
+                border: "1px solid",
+                borderColor: stats.pendingReviews > 0 ? "#ffedd5" : "#dcfce7",
               }}
             >
               <Box
-                sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}
+                sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}
               >
                 <Avatar
                   sx={{
-                    bgcolor: stats.pendingReviews > 0 ? '#ea580c' : '#16a34a',
+                    bgcolor: stats.pendingReviews > 0 ? "#ea580c" : "#16a34a",
                   }}
                 >
                   <Users size={20} />
@@ -370,7 +370,7 @@ export default function Dashboard() {
                   variant="h6"
                   fontWeight="bold"
                   sx={{
-                    color: stats.pendingReviews > 0 ? '#9a3412' : '#166534',
+                    color: stats.pendingReviews > 0 ? "#9a3412" : "#166534",
                   }}
                 >
                   Khu Vực Quản Lý
@@ -382,13 +382,13 @@ export default function Dashboard() {
                   <Typography
                     variant="h2"
                     fontWeight="800"
-                    sx={{ color: '#c2410c' }}
+                    sx={{ color: "#c2410c" }}
                   >
                     {stats.pendingReviews}
                   </Typography>
                   <Typography
                     variant="body1"
-                    sx={{ color: '#9a3412', mb: 3, fontWeight: 500 }}
+                    sx={{ color: "#9a3412", mb: 3, fontWeight: 500 }}
                   >
                     hồ sơ nhân sự đang chờ bạn phê duyệt.
                   </Typography>
@@ -396,11 +396,11 @@ export default function Dashboard() {
                     variant="contained"
                     color="warning"
                     endIcon={<ArrowRight size={18} />}
-                    onClick={() => navigate('/departments/kpi')}
+                    onClick={() => navigate("/departments/kpi")}
                     sx={{
                       borderRadius: 2,
-                      textTransform: 'none',
-                      fontWeight: 'bold',
+                      textTransform: "none",
+                      fontWeight: "bold",
                     }}
                   >
                     Vào duyệt ngay
@@ -409,7 +409,7 @@ export default function Dashboard() {
               ) : (
                 <Box sx={{ py: 2 }}>
                   <Box
-                    sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}
+                    sx={{ display: "flex", justifyContent: "center", mb: 2 }}
                   >
                     <CheckCircle
                       size={48}
@@ -420,14 +420,14 @@ export default function Dashboard() {
                   <Typography
                     variant="h6"
                     align="center"
-                    sx={{ color: '#166534', mb: 1 }}
+                    sx={{ color: "#166534", mb: 1 }}
                   >
                     Tuyệt vời!
                   </Typography>
                   <Typography
                     variant="body2"
                     align="center"
-                    sx={{ color: '#166534' }}
+                    sx={{ color: "#166534" }}
                   >
                     Bạn đã hoàn thành tất cả các yêu cầu phê duyệt.
                   </Typography>
@@ -439,23 +439,23 @@ export default function Dashboard() {
 
         {/* --- WIDGET 3: QUICK STATS / INFORMATION --- */}
         <Grid size={{ xs: 12, md: 4 }}>
-          <Card variant="outlined" sx={{ height: '100%', borderRadius: 3 }}>
+          <Card variant="outlined" sx={{ height: "100%", borderRadius: 3 }}>
             <CardContent>
               <Box
-                sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}
+                sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}
               >
                 <TrendingUp size={20} className="text-gray-500" />
                 <Typography variant="subtitle1" fontWeight="bold">
                   Thống kê nhanh
                 </Typography>
               </Box>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 <Box
                   sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
+                    display: "flex",
+                    justifyContent: "space-between",
                     p: 1.5,
-                    bgcolor: '#f8fafc',
+                    bgcolor: "#f8fafc",
                     borderRadius: 2,
                   }}
                 >
@@ -468,10 +468,10 @@ export default function Dashboard() {
                 </Box>
                 <Box
                   sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
+                    display: "flex",
+                    justifyContent: "space-between",
                     p: 1.5,
-                    bgcolor: '#f8fafc',
+                    bgcolor: "#f8fafc",
                     borderRadius: 2,
                   }}
                 >
@@ -481,17 +481,17 @@ export default function Dashboard() {
                   <Typography
                     variant="body2"
                     fontWeight="bold"
-                    color={getStatusColor(stats.myKpiStatus) + '.main'}
+                    color={getStatusColor(stats.myKpiStatus) + ".main"}
                   >
                     {getStatusLabel(stats.myKpiStatus)}
                   </Typography>
                 </Box>
                 <Box
                   sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
+                    display: "flex",
+                    justifyContent: "space-between",
                     p: 1.5,
-                    bgcolor: '#f8fafc',
+                    bgcolor: "#f8fafc",
                     borderRadius: 2,
                   }}
                 >

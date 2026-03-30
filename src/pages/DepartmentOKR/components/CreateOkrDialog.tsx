@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { api } from '../../../services/api';
-import { performanceService } from '../../../services/performanceService';
+import React, { useState, useEffect } from "react";
+import { api } from "../../../services/api";
+import { performanceService } from "../../../services/performanceService";
 import {
   Dialog,
   DialogTitle,
@@ -17,8 +17,8 @@ import {
   Select,
   MenuItem,
   Divider,
-} from '@mui/material';
-import { Add, Delete, Flag } from '@mui/icons-material';
+} from "@mui/material";
+import { Add, Delete, Flag } from "@mui/icons-material";
 
 interface CreateOkrDialogProps {
   open: boolean;
@@ -32,11 +32,11 @@ export default function CreateOkrDialog({
   onSave,
 }: CreateOkrDialogProps) {
   // 1. State lưu dữ liệu Form
-  const [title, setTitle] = useState('');
-  const [cycleId, setCycleId] = useState('');
-  const [departmentId, setDepartmentId] = useState('');
+  const [title, setTitle] = useState("");
+  const [cycleId, setCycleId] = useState("");
+  const [departmentId, setDepartmentId] = useState("");
   const [keyResults, setKeyResults] = useState([
-    { id: Date.now().toString(), title: '', target: 0, unit: '' },
+    { id: Date.now().toString(), title: "", target: 0, unit: "" },
   ]);
 
   // 2. State lưu dữ liệu Động từ Backend (Data thật)
@@ -60,7 +60,7 @@ export default function CreateOkrDialog({
       }
 
       // Gọi API lấy danh sách Bộ môn
-      const deptRes = await api.get('/departments');
+      const deptRes = await api.get("/departments");
       // Xử lý tùy theo format API của mày (thường là .data hoặc .data.data)
       const deptList = deptRes.data?.data || deptRes.data || [];
       setDepartments(deptList);
@@ -68,7 +68,7 @@ export default function CreateOkrDialog({
         setDepartmentId(deptList[0].id); // Tự động chọn Bộ môn đầu tiên
       }
     } catch (error) {
-      console.error('❌ Lỗi khi tải dữ liệu Bộ môn / Học kỳ:', error);
+      console.error("❌ Lỗi khi tải dữ liệu Bộ môn / Học kỳ:", error);
     }
   };
 
@@ -76,7 +76,7 @@ export default function CreateOkrDialog({
   const handleAddKR = () =>
     setKeyResults([
       ...keyResults,
-      { id: Date.now().toString(), title: '', target: 0, unit: '' },
+      { id: Date.now().toString(), title: "", target: 0, unit: "" },
     ]);
   const handleRemoveKR = (id: string) =>
     setKeyResults(keyResults.filter((kr) => kr.id !== id));
@@ -92,11 +92,11 @@ export default function CreateOkrDialog({
       title,
       cycleId,
       departmentId,
-      type: 'DEPARTMENT',
+      type: "DEPARTMENT",
 
       // 👇 ĐOẠN SỬA LÀ Ở ĐÂY: Lọc bỏ dòng trống, sau đó vứt luôn cái ID ảo đi, chỉ gửi ruột lên thôi
       keyResults: keyResults
-        .filter((kr) => kr.title.trim() !== '')
+        .filter((kr) => kr.title.trim() !== "")
         .map((kr) => ({
           title: kr.title,
           target: kr.target,
@@ -108,9 +108,9 @@ export default function CreateOkrDialog({
     onSave(payload);
 
     // Reset form sau khi gửi
-    setTitle('');
+    setTitle("");
     setKeyResults([
-      { id: Date.now().toString(), title: '', target: 0, unit: '' },
+      { id: Date.now().toString(), title: "", target: 0, unit: "" },
     ]);
   };
 
@@ -118,11 +118,11 @@ export default function CreateOkrDialog({
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle
         sx={{
-          display: 'flex',
-          alignItems: 'center',
+          display: "flex",
+          alignItems: "center",
           gap: 1,
-          color: '#1e3a8a',
-          fontWeight: 'bold',
+          color: "#1e3a8a",
+          fontWeight: "bold",
         }}
       >
         <Flag /> Tạo Mục Tiêu (OKR) Bộ Môn
@@ -183,9 +183,9 @@ export default function CreateOkrDialog({
         <Box
           sx={{
             mb: 2,
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
           }}
         >
           <Typography
@@ -207,17 +207,17 @@ export default function CreateOkrDialog({
 
         <Box
           sx={{
-            bgcolor: '#f8fafc',
+            bgcolor: "#f8fafc",
             p: 2,
             borderRadius: 2,
-            border: '1px solid #e2e8f0',
+            border: "1px solid #e2e8f0",
           }}
         >
           {keyResults.map((kr, index) => (
             <Grid
               container
               spacing={2}
-              sx={{ mb: 2, alignItems: 'center' }}
+              sx={{ mb: 2, alignItems: "center" }}
               key={kr.id}
             >
               <Grid size={{ xs: 1 }}>
@@ -237,7 +237,7 @@ export default function CreateOkrDialog({
                   label="Nội dung kết quả"
                   value={kr.title}
                   onChange={(e) =>
-                    handleKRChange(kr.id, 'title', e.target.value)
+                    handleKRChange(kr.id, "title", e.target.value)
                   }
                 />
               </Grid>
@@ -249,7 +249,7 @@ export default function CreateOkrDialog({
                   label="Mục tiêu số"
                   value={kr.target}
                   onChange={(e) =>
-                    handleKRChange(kr.id, 'target', Number(e.target.value))
+                    handleKRChange(kr.id, "target", Number(e.target.value))
                   }
                 />
               </Grid>
@@ -260,7 +260,7 @@ export default function CreateOkrDialog({
                   label="Đơn vị (%, Bài...)"
                   value={kr.unit}
                   onChange={(e) =>
-                    handleKRChange(kr.id, 'unit', e.target.value)
+                    handleKRChange(kr.id, "unit", e.target.value)
                   }
                 />
               </Grid>

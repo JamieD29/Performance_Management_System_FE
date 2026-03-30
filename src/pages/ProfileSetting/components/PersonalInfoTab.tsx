@@ -12,7 +12,14 @@ import {
   MenuItem,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
-import { Person, Badge, Email, Wc, DateRange, Event as EventIcon } from "@mui/icons-material";
+import {
+  Person,
+  Badge,
+  Email,
+  Wc,
+  DateRange,
+  Event as EventIcon,
+} from "@mui/icons-material";
 import type { UserProfileForm, FormErrors } from "../profile.types";
 import { THEME_COLORS, GENDERS } from "../profile.constants";
 
@@ -192,7 +199,7 @@ export default function PersonalInfoTab({
           value={formData.name}
           onChange={(e) => {
             const val = e.target.value;
-            if (val === '' || /^[\p{L}\s]+$/u.test(val)) {
+            if (val === "" || /^[\p{L}\s]+$/u.test(val)) {
               handleChange("name", val);
             }
           }}

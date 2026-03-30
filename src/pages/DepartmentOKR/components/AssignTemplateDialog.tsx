@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -23,10 +23,10 @@ import {
   Chip,
   Avatar,
   Radio,
-} from '@mui/material';
-import { Send, PersonSearch } from '@mui/icons-material';
-import { api } from '../../../services/api';
-import { performanceService } from '../../../services/performanceService';
+} from "@mui/material";
+import { Send, PersonSearch } from "@mui/icons-material";
+import { api } from "../../../services/api";
+import { performanceService } from "../../../services/performanceService";
 
 interface AssignTemplateDialogProps {
   open: boolean;
@@ -41,10 +41,10 @@ export default function AssignTemplateDialog({
 }: AssignTemplateDialogProps) {
   const [users, setUsers] = useState<any[]>([]);
   const [cycles, setCycles] = useState<any[]>([]);
-  const [selectedUserId, setSelectedUserId] = useState('');
-  const [selectedCycleId, setSelectedCycleId] = useState('');
-  const [deadline, setDeadline] = useState('');
-  const [filterDept, setFilterDept] = useState('');
+  const [selectedUserId, setSelectedUserId] = useState("");
+  const [selectedCycleId, setSelectedCycleId] = useState("");
+  const [deadline, setDeadline] = useState("");
+  const [filterDept, setFilterDept] = useState("");
   const [departments, setDepartments] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -57,18 +57,18 @@ export default function AssignTemplateDialog({
   const loadData = async () => {
     try {
       // Fetch all users with details
-      const usersRes = await api.get('/users');
+      const usersRes = await api.get("/users");
       setUsers(usersRes.data || []);
 
       // Fetch departments
-      const deptRes = await api.get('/departments');
+      const deptRes = await api.get("/departments");
       setDepartments(deptRes.data?.data || deptRes.data || []);
 
       // Fetch evaluation cycles
       const cyclesData = await performanceService.getCycles();
       setCycles(cyclesData || []);
     } catch (error) {
-      console.error('Error loading data for assignment', error);
+      console.error("Error loading data for assignment", error);
     }
   };
 
@@ -78,7 +78,7 @@ export default function AssignTemplateDialog({
 
   const handleAssign = async () => {
     if (!selectedUserId || !selectedCycleId) {
-      alert('Vui lòng chọn User và Kỳ đánh giá!');
+      alert("Vui lòng chọn User và Kỳ đánh giá!");
       return;
     }
     setLoading(true);
@@ -88,11 +88,13 @@ export default function AssignTemplateDialog({
         cycleId: selectedCycleId,
         deadline: deadline || undefined,
       });
-      alert('✅ Đã giao OKR Template cho User thành công! User sẽ nhận được OKR ở trạng thái chờ duyệt.');
+      alert(
+        "✅ Đã giao OKR Template cho User thành công! User sẽ nhận được OKR ở trạng thái chờ duyệt.",
+      );
       onClose();
     } catch (error) {
-      console.error('Error assigning template', error);
-      alert('❌ Có lỗi xảy ra khi giao template.');
+      console.error("Error assigning template", error);
+      alert("❌ Có lỗi xảy ra khi giao template.");
     } finally {
       setLoading(false);
     }
@@ -100,7 +102,15 @@ export default function AssignTemplateDialog({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
-      <DialogTitle sx={{ color: '#1e3a8a', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 1 }}>
+      <DialogTitle
+        sx={{
+          color: "#1e3a8a",
+          fontWeight: "bold",
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+        }}
+      >
         <Send />
         Giao Template OKR cho Nhân sự
       </DialogTitle>
@@ -108,14 +118,33 @@ export default function AssignTemplateDialog({
 
       <DialogContent sx={{ mt: 1 }}>
         {/* Template Info */}
-        <Box sx={{ mb: 3, p: 2, bgcolor: '#eff6ff', borderRadius: 2, border: '1px solid #bfdbfe' }}>
-          <Typography variant="subtitle2" color="text.secondary">Template được chọn:</Typography>
-          <Typography variant="h6" fontWeight="bold" color="#1e3a8a">{template?.title}</Typography>
-          {template?.jobTitle && <Chip label={template.jobTitle} size="small" color="primary" sx={{ mt: 0.5, mr: 1 }} />}
+        <Box
+          sx={{
+            mb: 3,
+            p: 2,
+            bgcolor: "#eff6ff",
+            borderRadius: 2,
+            border: "1px solid #bfdbfe",
+          }}
+        >
+          <Typography variant="subtitle2" color="text.secondary">
+            Template được chọn:
+          </Typography>
+          <Typography variant="h6" fontWeight="bold" color="#1e3a8a">
+            {template?.title}
+          </Typography>
+          {template?.jobTitle && (
+            <Chip
+              label={template.jobTitle}
+              size="small"
+              color="primary"
+              sx={{ mt: 0.5, mr: 1 }}
+            />
+          )}
         </Box>
 
         {/* Cycle & Deadline Selection */}
-        <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+        <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
           <FormControl fullWidth>
             <InputLabel>Kỳ đánh giá *</InputLabel>
             <Select
@@ -141,10 +170,12 @@ export default function AssignTemplateDialog({
         </Box>
 
         {/* User Selection */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
           <PersonSearch color="primary" />
-          <Typography variant="h6" fontWeight="bold">Chọn Nhân sự để giao</Typography>
-          <FormControl sx={{ minWidth: 200, ml: 'auto' }}>
+          <Typography variant="h6" fontWeight="bold">
+            Chọn Nhân sự để giao
+          </Typography>
+          <FormControl sx={{ minWidth: 200, ml: "auto" }}>
             <InputLabel>Lọc theo Bộ môn</InputLabel>
             <Select
               value={filterDept}
@@ -154,16 +185,24 @@ export default function AssignTemplateDialog({
             >
               <MenuItem value="">-- Tất cả --</MenuItem>
               {departments.map((d: any) => (
-                <MenuItem key={d.id} value={d.id}>{d.name}</MenuItem>
+                <MenuItem key={d.id} value={d.id}>
+                  {d.name}
+                </MenuItem>
               ))}
             </Select>
           </FormControl>
         </Box>
 
-        <TableContainer component={Paper} elevation={0} sx={{ border: '1px solid #e2e8f0', maxHeight: 400 }}>
+        <TableContainer
+          component={Paper}
+          elevation={0}
+          sx={{ border: "1px solid #e2e8f0", maxHeight: 400 }}
+        >
           <Table stickyHeader size="small">
             <TableHead>
-              <TableRow sx={{ '& th': { bgcolor: '#f1f5f9', fontWeight: 'bold' } }}>
+              <TableRow
+                sx={{ "& th": { bgcolor: "#f1f5f9", fontWeight: "bold" } }}
+              >
                 <TableCell width={50}></TableCell>
                 <TableCell>Họ tên</TableCell>
                 <TableCell>Email</TableCell>
@@ -175,7 +214,11 @@ export default function AssignTemplateDialog({
             <TableBody>
               {filteredUsers.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} align="center" sx={{ py: 3, color: 'text.secondary' }}>
+                  <TableCell
+                    colSpan={6}
+                    align="center"
+                    sx={{ py: 3, color: "text.secondary" }}
+                  >
                     Không tìm thấy nhân sự nào.
                   </TableCell>
                 </TableRow>
@@ -186,7 +229,7 @@ export default function AssignTemplateDialog({
                     hover
                     selected={selectedUserId === user.id}
                     onClick={() => setSelectedUserId(user.id)}
-                    sx={{ cursor: 'pointer' }}
+                    sx={{ cursor: "pointer" }}
                   >
                     <TableCell>
                       <Radio
@@ -196,30 +239,53 @@ export default function AssignTemplateDialog({
                       />
                     </TableCell>
                     <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Avatar src={user.avatarUrl} sx={{ width: 28, height: 28 }}>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
+                        <Avatar
+                          src={user.avatarUrl}
+                          sx={{ width: 28, height: 28 }}
+                        >
                           {(user.name || user.email)?.[0]?.toUpperCase()}
                         </Avatar>
-                        {user.name || '(Chưa đặt tên)'}
+                        {user.name || "(Chưa đặt tên)"}
                       </Box>
                     </TableCell>
-                    <TableCell sx={{ fontSize: '0.85rem' }}>{user.email}</TableCell>
+                    <TableCell sx={{ fontSize: "0.85rem" }}>
+                      {user.email}
+                    </TableCell>
                     <TableCell>
                       {user.department?.name ? (
-                        <Chip label={user.department.name} size="small" variant="outlined" />
+                        <Chip
+                          label={user.department.name}
+                          size="small"
+                          variant="outlined"
+                        />
                       ) : (
-                        <Typography variant="caption" color="text.secondary">—</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          —
+                        </Typography>
                       )}
                     </TableCell>
                     <TableCell>
                       {user.managementPosition?.name ? (
-                        <Chip label={user.managementPosition.name} size="small" color="secondary" />
+                        <Chip
+                          label={user.managementPosition.name}
+                          size="small"
+                          color="secondary"
+                        />
                       ) : (
-                        <Typography variant="caption" color="text.secondary">—</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          —
+                        </Typography>
                       )}
                     </TableCell>
                     <TableCell>
-                      {user.jobTitle || <Typography variant="caption" color="text.secondary">—</Typography>}
+                      {user.jobTitle || (
+                        <Typography variant="caption" color="text.secondary">
+                          —
+                        </Typography>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))
@@ -229,23 +295,37 @@ export default function AssignTemplateDialog({
         </TableContainer>
 
         {selectedUserId && (
-          <Box sx={{ mt: 2, p: 1.5, bgcolor: '#f0fdf4', borderRadius: 1, border: '1px solid #bbf7d0' }}>
+          <Box
+            sx={{
+              mt: 2,
+              p: 1.5,
+              bgcolor: "#f0fdf4",
+              borderRadius: 1,
+              border: "1px solid #bbf7d0",
+            }}
+          >
             <Typography variant="body2" color="success.main">
-              ✅ Đã chọn: <strong>{filteredUsers.find(u => u.id === selectedUserId)?.name || filteredUsers.find(u => u.id === selectedUserId)?.email}</strong>
+              ✅ Đã chọn:{" "}
+              <strong>
+                {filteredUsers.find((u) => u.id === selectedUserId)?.name ||
+                  filteredUsers.find((u) => u.id === selectedUserId)?.email}
+              </strong>
             </Typography>
           </Box>
         )}
       </DialogContent>
 
       <DialogActions sx={{ p: 3 }}>
-        <Button onClick={onClose} color="inherit">Hủy</Button>
+        <Button onClick={onClose} color="inherit">
+          Hủy
+        </Button>
         <Button
           variant="contained"
           onClick={handleAssign}
           disabled={!selectedUserId || !selectedCycleId || loading}
           startIcon={<Send />}
         >
-          {loading ? 'Đang giao...' : 'Giao OKR cho Nhân sự'}
+          {loading ? "Đang giao..." : "Giao OKR cho Nhân sự"}
         </Button>
       </DialogActions>
     </Dialog>

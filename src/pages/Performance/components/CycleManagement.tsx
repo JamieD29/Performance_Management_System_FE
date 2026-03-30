@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -15,19 +15,19 @@ import {
   DialogContent,
   TextField,
   DialogActions,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Plus,
   Play,
   Pause,
   Calendar,
-    RefreshCcw,
+  RefreshCcw,
   Database,
-} from 'lucide-react';
-import axios from 'axios';
-import { api } from '../../../services/api';
+} from "lucide-react";
+import axios from "axios";
+import { api } from "../../../services/api";
 
-const RESOURCE_PATH = '/performance';
+const RESOURCE_PATH = "/performance";
 
 export default function CycleManagement() {
   const [cycles, setCycles] = useState<any[]>([]);
@@ -35,9 +35,9 @@ export default function CycleManagement() {
 
   // Form state
   const [formData, setFormData] = useState({
-    name: '',
-    startDate: '',
-    endDate: '',
+    name: "",
+    startDate: "",
+    endDate: "",
   });
 
   useEffect(() => {
@@ -58,7 +58,7 @@ export default function CycleManagement() {
     // 1. Hỏi cho chắc, lỡ sếp bấm nhầm
     if (
       !window.confirm(
-        '⚠️ CẢNH BÁO: Hành động này sẽ tạo lại dữ liệu mẫu (Kỳ học, Template KPI).\n\nBạn có chắc chắn muốn chạy không?',
+        "⚠️ CẢNH BÁO: Hành động này sẽ tạo lại dữ liệu mẫu (Kỳ học, Template KPI).\n\nBạn có chắc chắn muốn chạy không?",
       )
     ) {
       return;
@@ -68,10 +68,10 @@ export default function CycleManagement() {
       // 2. Gọi API Init của mày
       await api.post(`${RESOURCE_PATH}/init`);
       fetchCycles();
-      alert('Khởi tạo dữ liệu thành công!');
+      alert("Khởi tạo dữ liệu thành công!");
     } catch (error) {
       console.error(error);
-      alert('Lỗi khởi tạo dữ liệu!');
+      alert("Lỗi khởi tạo dữ liệu!");
     }
   };
 
@@ -80,21 +80,21 @@ export default function CycleManagement() {
       await api.post(`${RESOURCE_PATH}/admin/cycles`, formData);
       setOpen(false);
       fetchCycles();
-      alert('Tạo kỳ thành công!');
+      alert("Tạo kỳ thành công!");
     } catch (error) {
-      alert('Lỗi khi tạo kỳ!');
+      alert("Lỗi khi tạo kỳ!");
     }
   };
 
   const toggleStatus = async (id: string, currentStatus: string) => {
-    const newStatus = currentStatus === 'OPEN' ? 'CLOSED' : 'OPEN';
+    const newStatus = currentStatus === "OPEN" ? "CLOSED" : "OPEN";
     try {
       await api.put(`${RESOURCE_PATH}/admin/cycles/${id}/status`, {
         status: newStatus,
       });
       fetchCycles();
     } catch (error) {
-      alert('Lỗi cập nhật trạng thái');
+      alert("Lỗi cập nhật trạng thái");
     }
   };
 
@@ -141,23 +141,23 @@ export default function CycleManagement() {
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                       <Calendar size={14} />
                       {cycle.startDate
-                        ? new Date(cycle.startDate).toLocaleDateString('vi-VN')
-                        : '...'}
+                        ? new Date(cycle.startDate).toLocaleDateString("vi-VN")
+                        : "..."}
                     </div>
                   </TableCell>
                   <TableCell align="center">
                     <Chip
-                      label={cycle.status === 'OPEN' ? 'Đang mở' : 'Đã đóng'}
-                      color={cycle.status === 'OPEN' ? 'success' : 'default'}
+                      label={cycle.status === "OPEN" ? "Đang mở" : "Đã đóng"}
+                      color={cycle.status === "OPEN" ? "success" : "default"}
                       size="small"
                     />
                   </TableCell>
                   <TableCell align="center">
                     <Button
                       size="small"
-                      color={cycle.status === 'OPEN' ? 'error' : 'success'}
+                      color={cycle.status === "OPEN" ? "error" : "success"}
                       startIcon={
-                        cycle.status === 'OPEN' ? (
+                        cycle.status === "OPEN" ? (
                           <Pause size={14} />
                         ) : (
                           <Play size={14} />
@@ -165,7 +165,7 @@ export default function CycleManagement() {
                       }
                       onClick={() => toggleStatus(cycle.id, cycle.status)}
                     >
-                      {cycle.status === 'OPEN' ? 'Đóng kỳ' : 'Mở lại'}
+                      {cycle.status === "OPEN" ? "Đóng kỳ" : "Mở lại"}
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -177,7 +177,7 @@ export default function CycleManagement() {
                   align="center"
                   className="py-8 text-gray-400"
                 >
-                  Chưa có kỳ đánh giá nào. Bấm nút{' '}
+                  Chưa có kỳ đánh giá nào. Bấm nút{" "}
                   <strong>"Khởi tạo Dữ liệu mẫu"</strong> ở trên để bắt đầu!
                 </TableCell>
               </TableRow>

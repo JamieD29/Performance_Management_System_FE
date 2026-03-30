@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Card,
@@ -14,12 +14,12 @@ import {
   ListItemSecondaryAction,
   CircularProgress,
   Chip,
-} from '@mui/material';
-import { Add, Delete, Info } from '@mui/icons-material';
+} from "@mui/material";
+import { Add, Delete, Info } from "@mui/icons-material";
 
-import { api } from '../../../services/api';
-import type { Domain } from '../../../types';
-import { ConfirmDialog } from '../../../components/common/ConfirmDialog';
+import { api } from "../../../services/api";
+import type { Domain } from "../../../types";
+import { ConfirmDialog } from "../../../components/common/ConfirmDialog";
 
 export default function WhitelistManager() {
   const [confirmDelete, setConfirmDelete] = useState<{
@@ -27,11 +27,11 @@ export default function WhitelistManager() {
     id: string | null;
   }>({ open: false, id: null });
   const [domains, setDomains] = useState<Domain[]>([]);
-  const [domainInput, setDomainInput] = useState('');
+  const [domainInput, setDomainInput] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<{
-    type: 'success' | 'error';
+    type: "success" | "error";
     text: string;
   } | null>(null);
 
@@ -41,7 +41,7 @@ export default function WhitelistManager() {
 
   const fetchDomains = async () => {
     try {
-      const response = await api.get('/admin/domains');
+      const response = await api.get("/admin/domains");
       const data = response.data?.domains || response.data || [];
       setDomains(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -51,33 +51,33 @@ export default function WhitelistManager() {
     }
   };
 
-  const showMessage = (type: 'success' | 'error', text: string) => {
+  const showMessage = (type: "success" | "error", text: string) => {
     setMessage({ type, text });
     setTimeout(() => setMessage(null), 5000);
   };
 
   const handleAddDomain = async () => {
     const rawDomain = domainInput.trim().toLowerCase();
-    if (!rawDomain) return showMessage('error', 'Please enter a domain');
+    if (!rawDomain) return showMessage("error", "Please enter a domain");
 
     const domainRegex =
       /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/;
     if (!domainRegex.test(rawDomain))
-      return showMessage('error', 'Invalid domain format');
+      return showMessage("error", "Invalid domain format");
 
     if (domains.some((d) => d.domain.toLowerCase() === rawDomain)) {
-      return showMessage('error', 'Domain already exists');
+      return showMessage("error", "Domain already exists");
     }
 
     setIsSaving(true);
     try {
-      const response = await api.post('/admin/domains', { domain: rawDomain });
+      const response = await api.post("/admin/domains", { domain: rawDomain });
       const newDomain = response.data?.domain || response.data;
       setDomains([...domains, newDomain]);
-      setDomainInput('');
-      showMessage('success', `Added @${rawDomain}`);
+      setDomainInput("");
+      showMessage("success", `Added @${rawDomain}`);
     } catch (err: any) {
-      showMessage('error', err.response?.data?.message || 'Failed to add');
+      showMessage("error", err.response?.data?.message || "Failed to add");
     } finally {
       setIsSaving(false);
     }
@@ -95,10 +95,10 @@ export default function WhitelistManager() {
     try {
       await api.delete(`/admin/domains/${id}`);
       setDomains(domains.filter((d) => d.id !== id));
-      showMessage('success', 'Domain removed');
+      showMessage("success", "Domain removed");
       setConfirmDelete({ open: false, id: null });
     } catch (err: any) {
-      showMessage('error', err.response?.data?.message || 'Failed to delete');
+      showMessage("error", err.response?.data?.message || "Failed to delete");
     } finally {
       setIsSaving(false);
     }
@@ -106,7 +106,7 @@ export default function WhitelistManager() {
 
   if (isLoading)
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 5 }}>
+      <Box sx={{ display: "flex", justifyContent: "center", p: 5 }}>
         <CircularProgress />
       </Box>
     );
@@ -123,7 +123,7 @@ export default function WhitelistManager() {
         </Alert>
       )}
 
-      <Card sx={{ mb: 3, boxShadow: 'none', border: '1px solid #e2e8f0' }}>
+      <Card sx={{ mb: 3, boxShadow: "none", border: "1px solid #e2e8f0" }}>
         <CardContent sx={{ p: 3 }}>
           <Typography variant="h6" fontWeight={600} gutterBottom>
             Allowed Email Domains
@@ -133,7 +133,7 @@ export default function WhitelistManager() {
           </Typography>
 
           <Box
-            sx={{ mb: 3, display: 'flex', gap: 2, alignItems: 'flex-start' }}
+            sx={{ mb: 3, display: "flex", gap: 2, alignItems: "flex-start" }}
           >
             <TextField
               fullWidth
@@ -144,7 +144,7 @@ export default function WhitelistManager() {
               helperText="Only lowercase letters, numbers, hyphens allowed"
               disabled={isSaving}
               sx={{
-                '& .MuiFormHelperText-root': { marginLeft: 0, marginTop: 1 },
+                "& .MuiFormHelperText-root": { marginLeft: 0, marginTop: 1 },
               }}
             />
             <Button
@@ -156,23 +156,23 @@ export default function WhitelistManager() {
               sx={{
                 minWidth: 100,
                 height: 40,
-                whiteSpace: 'nowrap',
-                mt: '1px',
+                whiteSpace: "nowrap",
+                mt: "1px",
               }}
             >
               {isSaving ? (
                 <CircularProgress size={20} color="inherit" />
               ) : (
-                'ADD'
+                "ADD"
               )}
             </Button>
           </Box>
 
           <List
             sx={{
-              bgcolor: 'grey.50',
+              bgcolor: "grey.50",
               borderRadius: 1,
-              border: '1px solid #f1f5f9',
+              border: "1px solid #f1f5f9",
             }}
           >
             {domains.map((d) => (
@@ -195,7 +195,7 @@ export default function WhitelistManager() {
             ))}
             {domains.length === 0 && (
               <Typography
-                sx={{ p: 2, textAlign: 'center', color: 'text.secondary' }}
+                sx={{ p: 2, textAlign: "center", color: "text.secondary" }}
               >
                 No domains configured.
               </Typography>

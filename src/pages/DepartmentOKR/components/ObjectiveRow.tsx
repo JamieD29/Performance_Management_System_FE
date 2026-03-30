@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Box,
   Typography,
@@ -11,28 +11,28 @@ import {
   LinearProgress,
   Chip,
   Avatar,
-} from '@mui/material';
+} from "@mui/material";
 import {
   KeyboardArrowDown,
   KeyboardArrowUp,
   Business,
   CheckCircle,
   RadioButtonUnchecked,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 
 export default function ObjectiveRow({ row }: { row: any }) {
   const [open, setOpen] = useState(false);
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'ON_TRACK':
-        return 'success';
-      case 'AT_RISK':
-        return 'warning';
-      case 'BEHIND':
-        return 'error';
+      case "ON_TRACK":
+        return "success";
+      case "AT_RISK":
+        return "warning";
+      case "BEHIND":
+        return "error";
       default:
-        return 'primary';
+        return "primary";
     }
   };
 
@@ -40,9 +40,9 @@ export default function ObjectiveRow({ row }: { row: any }) {
     <React.Fragment>
       <TableRow
         sx={{
-          '& > *': { borderBottom: 'unset' },
-          bgcolor: open ? '#f8fafc' : 'white',
-          cursor: 'pointer',
+          "& > *": { borderBottom: "unset" },
+          bgcolor: open ? "#f8fafc" : "white",
+          cursor: "pointer",
         }}
         onClick={() => setOpen(!open)}
       >
@@ -58,15 +58,15 @@ export default function ObjectiveRow({ row }: { row: any }) {
           </IconButton>
         </TableCell>
         <TableCell>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <Avatar
               sx={{
-                bgcolor: row.type === 'DEPARTMENT' ? '#e0f2fe' : '#f3e8ff',
-                color: row.type === 'DEPARTMENT' ? '#0284c7' : '#9333ea',
+                bgcolor: row.type === "DEPARTMENT" ? "#e0f2fe" : "#f3e8ff",
+                color: row.type === "DEPARTMENT" ? "#0284c7" : "#9333ea",
               }}
               variant="rounded"
             >
-              {row.type === 'DEPARTMENT' ? (
+              {row.type === "DEPARTMENT" ? (
                 <Business />
               ) : (
                 row.owner?.name?.charAt(0)
@@ -77,8 +77,8 @@ export default function ObjectiveRow({ row }: { row: any }) {
                 {row.title}
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                {row.type === 'DEPARTMENT'
-                  ? 'Mục tiêu Bộ môn'
+                {row.type === "DEPARTMENT"
+                  ? "Mục tiêu Bộ môn"
                   : `Chủ sở hữu: ${row.owner?.name}`}
               </Typography>
             </Box>
@@ -86,9 +86,9 @@ export default function ObjectiveRow({ row }: { row: any }) {
         </TableCell>
         <TableCell align="center" width="25%">
           <Box
-            sx={{ display: 'flex', alignItems: 'center', width: '100%', mr: 1 }}
+            sx={{ display: "flex", alignItems: "center", width: "100%", mr: 1 }}
           >
-            <Box sx={{ width: '100%', mr: 1 }}>
+            <Box sx={{ width: "100%", mr: 1 }}>
               <LinearProgress
                 variant="determinate"
                 value={row.progress || 0}
@@ -105,11 +105,11 @@ export default function ObjectiveRow({ row }: { row: any }) {
         <TableCell align="center" width="120">
           <Chip
             label={
-              row.status === 'ON_TRACK'
-                ? 'Đúng hạn'
-                : row.status === 'AT_RISK'
-                  ? 'Rủi ro'
-                  : 'Trễ'
+              row.status === "ON_TRACK"
+                ? "Đúng hạn"
+                : row.status === "AT_RISK"
+                  ? "Rủi ro"
+                  : "Trễ"
             }
             color={getStatusColor(row.status) as any}
             size="small"
@@ -125,15 +125,15 @@ export default function ObjectiveRow({ row }: { row: any }) {
               sx={{
                 margin: 2,
                 ml: 8,
-                bgcolor: '#fff',
+                bgcolor: "#fff",
                 borderRadius: 2,
-                border: '1px solid #e2e8f0',
+                border: "1px solid #e2e8f0",
                 p: 2,
               }}
             >
               <Typography
                 variant="subtitle2"
-                sx={{ mb: 1, fontWeight: 'bold', color: '#64748b' }}
+                sx={{ mb: 1, fontWeight: "bold", color: "#64748b" }}
               >
                 KẾT QUẢ THEN CHỐT (KRs)
               </Typography>
@@ -149,8 +149,8 @@ export default function ObjectiveRow({ row }: { row: any }) {
                         <TableCell>
                           <Box
                             sx={{
-                              display: 'flex',
-                              alignItems: 'center',
+                              display: "flex",
+                              alignItems: "center",
                               gap: 1,
                             }}
                           >

@@ -18,7 +18,10 @@ export const useProfileValidation = () => {
 
     let age = target.getFullYear() - birth.getFullYear();
     const monthDiff = target.getMonth() - birth.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && target.getDate() < birth.getDate())) {
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && target.getDate() < birth.getDate())
+    ) {
       age--;
     }
     return age;
@@ -34,21 +37,24 @@ export const useProfileValidation = () => {
     if (isNaN(birthDate.getTime())) return minJoinDateStr;
 
     birthDate.setFullYear(birthDate.getFullYear() + 23);
-    const dobPlus23Str = `${birthDate.getFullYear()}-${String(birthDate.getMonth() + 1).padStart(2, '0')}-${String(birthDate.getDate()).padStart(2, '0')}`;
-    
+    const dobPlus23Str = `${birthDate.getFullYear()}-${String(birthDate.getMonth() + 1).padStart(2, "0")}-${String(birthDate.getDate()).padStart(2, "0")}`;
+
     return dobPlus23Str > minJoinDateStr ? dobPlus23Str : minJoinDateStr;
   };
 
   /**
    * Validates if age is at least 23 at the time of join date
    */
-  const validateAgeAtJoinDate = (dob: string, joinDate: string): { dobError: string, joinDateError: string } => {
+  const validateAgeAtJoinDate = (
+    dob: string,
+    joinDate: string,
+  ): { dobError: string; joinDateError: string } => {
     if (!dob || !joinDate) return { dobError: "", joinDateError: "" };
     const age = calculateAgeAtDate(dob, joinDate);
     if (age < 23) {
       return {
         dobError: "Ngày tháng năm sinh không hợp lệ với ngày vào trường.",
-        joinDateError: "Ngày vào trường không hợp lệ với ngày tháng năm sinh."
+        joinDateError: "Ngày vào trường không hợp lệ với ngày tháng năm sinh.",
       };
     }
     return { dobError: "", joinDateError: "" };
@@ -57,7 +63,10 @@ export const useProfileValidation = () => {
   /**
    * Validates if a join date is valid (not in future, and >= minimum allowed date)
    */
-  const validateJoinDateStr = (dateValue: string, minDateStr: string = minJoinDateStr): string => {
+  const validateJoinDateStr = (
+    dateValue: string,
+    minDateStr: string = minJoinDateStr,
+  ): string => {
     if (!dateValue) return "";
 
     const selectedDate = new Date(dateValue);
@@ -78,6 +87,6 @@ export const useProfileValidation = () => {
     getMinJoinDateStr,
     validateJoinDateStr,
     validateAgeAtJoinDate,
-    calculateAgeAtDate
+    calculateAgeAtDate,
   };
 };

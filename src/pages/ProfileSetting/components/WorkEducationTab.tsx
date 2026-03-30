@@ -169,7 +169,7 @@ export default function WorkEducationTab({
             label="Giờ giảng/năm"
             value={
               formData.teachingHours !== undefined &&
-                formData.teachingHours !== ""
+              formData.teachingHours !== ""
                 ? `${formData.teachingHours} Tiết`
                 : ""
             }
@@ -187,7 +187,11 @@ export default function WorkEducationTab({
     <Grid container spacing={3} sx={{ mt: 1 }}>
       {/* ĐƠN VỊ CÔNG TÁC (Chỉ được chọn ở ProfileSetup) */}
       <Grid size={{ xs: 12, md: 6 }}>
-        <FormControl fullWidth sx={{ ...getColorfulInputStyle("#94a3b8"), bgcolor: "#f1f5f9" }} disabled>
+        <FormControl
+          fullWidth
+          sx={{ ...getColorfulInputStyle("#94a3b8"), bgcolor: "#f1f5f9" }}
+          disabled
+        >
           <InputLabel>Đơn vị công tác</InputLabel>
           <Select
             value={formData.departmentID || ""}

@@ -1,6 +1,6 @@
-import { api } from './api';
+import { api } from "./api";
 
-const RESOURCE_PATH = '/performance';
+const RESOURCE_PATH = "/performance";
 
 export const performanceService = {
   // Lấy danh sách kỳ đánh giá (Học kỳ)

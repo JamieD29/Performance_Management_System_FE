@@ -1,6 +1,6 @@
 // src/pages/Login/Login.tsx - FIXED & TESTED
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -12,10 +12,10 @@ import {
   Paper,
   Stack,
   Fade,
-} from '@mui/material';
-import { School as SchoolIcon } from '@mui/icons-material';
-import { api } from '../../services/api';
-import loginBg from '../../assets/images/login-bg2.jpg';
+} from "@mui/material";
+import { School as SchoolIcon } from "@mui/icons-material";
+import { api } from "../../services/api";
+import loginBg from "../../assets/images/login-bg2.jpg";
 
 // --- CUSTOM ICONS (Giữ nguyên như cũ) ---
 const GoogleLogo = () => (
@@ -49,7 +49,7 @@ const MicrosoftLogo = () => (
 );
 
 export default function Login() {
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isMsLoading, setIsMsLoading] = useState(false);
   const [allowedDomains, setAllowedDomains] = useState<string[]>([]);
@@ -57,7 +57,8 @@ export default function Login() {
   const [searchParams] = useSearchParams();
 
   // URL Backend
-  const BACKEND_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+  const BACKEND_URL =
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
   // --- LOGIC BẮT TOKEN & XỬ LÝ LỖI ---
   useEffect(() => {
@@ -82,7 +83,8 @@ export default function Login() {
       }
 
       // Kiểm tra profile đã hoàn tất chưa
-      const profileCompleted = parsedUser?.jobTitle || parsedUser?.profileCompleted;
+      const profileCompleted =
+        parsedUser?.jobTitle || parsedUser?.profileCompleted;
       const destination = profileCompleted ? "/dashboard" : "/profile-setup";
 
       window.history.replaceState({}, document.title, destination);
@@ -131,25 +133,25 @@ export default function Login() {
   const fetchAllowedDomains = async () => {
     try {
       // Gọi API whitelist (Nhớ là Backend đã mở CORS main.ts chưa nhé)
-      const response = await api.get('/auth/allowed-domains');
-      setAllowedDomains(response.data.domains || ['itec.hcmus.edu.vn']);
+      const response = await api.get("/auth/allowed-domains");
+      setAllowedDomains(response.data.domains || ["itec.hcmus.edu.vn"]);
     } catch (err) {
-      console.error('Allowed domains fetch error:', err);
+      console.error("Allowed domains fetch error:", err);
       // Fallback nếu lỗi mạng
-      setAllowedDomains(['itec.hcmus.edu.vn']);
+      setAllowedDomains(["itec.hcmus.edu.vn"]);
     }
   };
 
   // --- HÀM LOGIN: CHUYỂN HƯỚNG SANG BACKEND ---
   const handleGoogleSignIn = () => {
-    setError('');
+    setError("");
     setIsLoading(true);
     // Chuyển hướng trình duyệt sang Backend để bắt đầu quy trình OAuth
     window.location.href = `${BACKEND_URL}/auth/google`;
   };
 
   const handleMicrosoftSignIn = () => {
-    setError('');
+    setError("");
     setIsMsLoading(true);
     window.location.href = `${BACKEND_URL}/auth/microsoft`;
   };
@@ -157,41 +159,41 @@ export default function Login() {
   return (
     <Box
       sx={{
-        width: '100vw',
-        height: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        width: "100vw",
+        height: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
         backgroundImage: `url(${loginBg})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        '&::before': {
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        "&::before": {
           content: '""',
-          position: 'absolute',
+          position: "absolute",
           top: 0,
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(255, 255, 255, 0.4)',
+          backgroundColor: "rgba(255, 255, 255, 0.4)",
           zIndex: 0,
         },
         fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
-        overflow: 'hidden',
+        overflow: "hidden",
       }}
     >
       <Fade in={true} timeout={800}>
-        <Container maxWidth="sm" sx={{ position: 'relative', zIndex: 1 }}>
+        <Container maxWidth="sm" sx={{ position: "relative", zIndex: 1 }}>
           <Stack spacing={3} alignItems="center">
             {/* LOGO AREA */}
-            <Box sx={{ textAlign: 'center' }}>
+            <Box sx={{ textAlign: "center" }}>
               <Box
                 sx={{
-                  display: 'inline-flex',
+                  display: "inline-flex",
                   p: 1.5,
-                  borderRadius: '16px',
-                  bgcolor: 'rgba(25, 118, 210, 0.1)',
-                  color: '#1976d2',
+                  borderRadius: "16px",
+                  bgcolor: "rgba(25, 118, 210, 0.1)",
+                  color: "#1976d2",
                   mb: 2,
                 }}
               >
@@ -199,13 +201,13 @@ export default function Login() {
               </Box>
               <Typography
                 variant="h4"
-                sx={{ fontWeight: 600, color: '#1a1a1a', mb: 0.5 }}
+                sx={{ fontWeight: 600, color: "#1a1a1a", mb: 0.5 }}
               >
                 OKR & KPI Management
               </Typography>
               <Typography
                 variant="body1"
-                sx={{ color: '#080808', fontWeight: 500, fontSize: '20px' }}
+                sx={{ color: "#080808", fontWeight: 500, fontSize: "20px" }}
               >
                 University of Science - VNUHCM
               </Typography>
@@ -215,34 +217,34 @@ export default function Login() {
             <Paper
               elevation={3}
               sx={{
-                width: '100%',
+                width: "100%",
                 p: { xs: 3, sm: 4 },
-                borderRadius: '16px',
-                bgcolor: '#ffffff',
-                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+                borderRadius: "16px",
+                bgcolor: "#ffffff",
+                boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
               }}
             >
               <Typography
                 variant="h5"
                 sx={{
                   fontWeight: 600,
-                  textAlign: 'center',
+                  textAlign: "center",
                   mb: 1,
-                  color: '#1a1a1a',
+                  color: "#1a1a1a",
                 }}
               >
                 Welcome Back
               </Typography>
               <Typography
                 variant="body2"
-                sx={{ color: '#666', textAlign: 'center', mb: 3 }}
+                sx={{ color: "#666", textAlign: "center", mb: 3 }}
               >
                 Please sign in with your authorized institutional account
               </Typography>
 
               {/* Error Alert */}
               {error && (
-                <Alert severity="error" sx={{ mb: 3, borderRadius: '8px' }}>
+                <Alert severity="error" sx={{ mb: 3, borderRadius: "8px" }}>
                   {error}
                 </Alert>
               )}
@@ -259,26 +261,26 @@ export default function Login() {
                   }
                   sx={{
                     py: 1.5,
-                    borderRadius: '10px',
-                    borderColor: '#d1d5db',
-                    color: '#374151',
-                    textTransform: 'none',
-                    fontSize: '0.95rem',
+                    borderRadius: "10px",
+                    borderColor: "#d1d5db",
+                    color: "#374151",
+                    textTransform: "none",
+                    fontSize: "0.95rem",
                     fontWeight: 500,
-                    bgcolor: '#fff',
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      borderColor: '#9ca3af',
-                      bgcolor: '#f9fafb',
-                      transform: 'translateY(-2px)',
-                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                    bgcolor: "#fff",
+                    transition: "all 0.3s ease",
+                    "&:hover": {
+                      borderColor: "#9ca3af",
+                      bgcolor: "#f9fafb",
+                      transform: "translateY(-2px)",
+                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
                     },
                   }}
                 >
-                  {isLoading ? 'Connecting...' : 'Sign in with Google'}
+                  {isLoading ? "Connecting..." : "Sign in with Google"}
                 </Button>
 
-                <Divider sx={{ color: '#9ca3af', fontSize: '0.85rem', my: 1 }}>
+                <Divider sx={{ color: "#9ca3af", fontSize: "0.85rem", my: 1 }}>
                   or
                 </Divider>
 
@@ -297,23 +299,23 @@ export default function Login() {
                   }
                   sx={{
                     py: 1.5,
-                    borderRadius: '10px',
-                    borderColor: '#d1d5db',
-                    color: '#374151',
-                    textTransform: 'none',
-                    fontSize: '0.95rem',
+                    borderRadius: "10px",
+                    borderColor: "#d1d5db",
+                    color: "#374151",
+                    textTransform: "none",
+                    fontSize: "0.95rem",
                     fontWeight: 500,
-                    bgcolor: '#fff',
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      borderColor: '#9ca3af',
-                      bgcolor: '#f9fafb',
-                      transform: 'translateY(-2px)',
-                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                    bgcolor: "#fff",
+                    transition: "all 0.3s ease",
+                    "&:hover": {
+                      borderColor: "#9ca3af",
+                      bgcolor: "#f9fafb",
+                      transform: "translateY(-2px)",
+                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
                     },
                   }}
                 >
-                  {isMsLoading ? 'Connecting...' : 'Sign in with Microsoft'}
+                  {isMsLoading ? "Connecting..." : "Sign in with Microsoft"}
                 </Button>
               </Stack>
 
@@ -322,18 +324,18 @@ export default function Login() {
                 sx={{
                   mt: 3,
                   p: 2,
-                  bgcolor: '#f0f9ff',
-                  borderRadius: '10px',
-                  border: '1px solid #e0f2fe',
+                  bgcolor: "#f0f9ff",
+                  borderRadius: "10px",
+                  border: "1px solid #e0f2fe",
                 }}
               >
                 <Typography
                   variant="subtitle2"
                   sx={{
-                    color: '#0369a1',
+                    color: "#0369a1",
                     fontWeight: 600,
                     mb: 0.5,
-                    textAlign: 'center',
+                    textAlign: "center",
                   }}
                 >
                   🔒 Access Requirement
@@ -341,15 +343,15 @@ export default function Login() {
                 <Typography
                   variant="caption"
                   sx={{
-                    color: '#64748b',
-                    display: 'block',
+                    color: "#64748b",
+                    display: "block",
                     lineHeight: 1.6,
-                    textAlign: 'center',
+                    textAlign: "center",
                   }}
                 >
                   {allowedDomains.length > 0
-                    ? `Only accounts ending in ${allowedDomains.map((d) => `@${d}`).join(', ')} are authorized.`
-                    : 'System is restricted to authorized personnel.'}
+                    ? `Only accounts ending in ${allowedDomains.map((d) => `@${d}`).join(", ")} are authorized.`
+                    : "System is restricted to authorized personnel."}
                 </Typography>
               </Box>
             </Paper>
@@ -357,7 +359,7 @@ export default function Login() {
             {/* FOOTER */}
             <Typography
               variant="caption"
-              sx={{ color: '#070707', fontSize: '20px' }}
+              sx={{ color: "#070707", fontSize: "20px" }}
             >
               © {new Date().getFullYear()} University of Science - VNUHCM
             </Typography>

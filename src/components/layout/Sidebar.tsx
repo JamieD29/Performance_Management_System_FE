@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useState, useRef } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Box,
   Drawer,
@@ -14,7 +14,7 @@ import {
   Collapse,
   Tooltip,
   Popover,
-} from '@mui/material';
+} from "@mui/material";
 import {
   LayoutDashboard,
   Building2,
@@ -26,7 +26,7 @@ import {
   ChevronDown,
   ChevronUp,
   ClipboardCheck,
-} from 'lucide-react';
+} from "lucide-react";
 
 // ==========================================
 // CONSTANTS
@@ -34,8 +34,8 @@ import {
 export const DRAWER_WIDTH = 280;
 export const COLLAPSED_DRAWER_WIDTH = 72;
 
-const TRANSITION_DURATION = '0.35s';
-const TRANSITION_EASING = 'cubic-bezier(0.4, 0, 0.2, 1)';
+const TRANSITION_DURATION = "0.35s";
+const TRANSITION_EASING = "cubic-bezier(0.4, 0, 0.2, 1)";
 const SMOOTH_TRANSITION = `all ${TRANSITION_DURATION} ${TRANSITION_EASING}`;
 
 interface SidebarProps {
@@ -58,28 +58,29 @@ export default function Sidebar({
 
   // Popover state for collapsed sub-menus
   const [popoverAnchor, setPopoverAnchor] = useState<HTMLElement | null>(null);
-  const [popoverGroup, setPopoverGroup] = useState<'dept' | null>(null);
+  const [popoverGroup, setPopoverGroup] = useState<"dept" | null>(null);
   const popoverTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ==========================================
   // 1. USER & ROLE
   // ==========================================
-  const userStr = sessionStorage.getItem('user');
+  const userStr = sessionStorage.getItem("user");
   const user = userStr ? JSON.parse(userStr) : {};
   const rawRoles = user.roles || [];
 
   const userRoles = Array.isArray(rawRoles)
     ? rawRoles.map((r: any) => {
-      const val = typeof r === 'string' ? r : r.slug || r.name || '';
-      return val.toString().toUpperCase();
-    })
+        const val = typeof r === "string" ? r : r.slug || r.name || "";
+        return val.toString().toUpperCase();
+      })
     : [];
 
-  const isManager = userRoles.includes('ADMIN');
+  const isManager = userRoles.includes("ADMIN");
   const mngLevel = user?.managementPosition?.permissionLevel;
-  const canViewUsers = isManager || ['SYSTEM', 'KHOA', 'DON_VI'].includes(mngLevel);
+  const canViewUsers =
+    isManager || ["SYSTEM", "KHOA", "DON_VI"].includes(mngLevel);
 
-  const departmentName = user.department?.name || 'Bộ môn';
+  const departmentName = user.department?.name || "Bộ môn";
 
   const handleNavigate = (path: string) => {
     navigate(path);
@@ -90,7 +91,10 @@ export default function Sidebar({
   const isActive = (path: string) => location.pathname === path;
 
   // Popover handlers
-  const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>, group: 'dept') => {
+  const handlePopoverOpen = (
+    event: React.MouseEvent<HTMLElement>,
+    group: "dept",
+  ) => {
     if (!collapsed) return;
     if (popoverTimeout.current) clearTimeout(popoverTimeout.current);
     setPopoverAnchor(event.currentTarget);
@@ -112,20 +116,20 @@ export default function Sidebar({
   // 2. COLOR PALETTE
   // ==========================================
   const colors = {
-    bg: '#0F2854',
-    bgLight: '#1C4D8D',
-    bgDark: '#081736',
-    accent1: '#1C4D8D',
-    accent2: '#BDE8F5',
-    accent3: '#BDE8F5',
-    accent4: '#FFD60A',
-    text: 'rgba(255, 255, 255, 0.88)',
-    textMuted: 'rgba(255, 255, 255, 0.55)',
-    textBright: '#ffffff',
-    divider: 'rgba(255, 255, 255, 0.15)',
-    hoverBg: 'rgba(255, 255, 255, 0.12)',
-    activeBg: 'rgba(255, 255, 255, 0.2)',
-    activeGlow: '0 2px 12px rgba(0, 0, 0, 0.15)',
+    bg: "#0F2854",
+    bgLight: "#1C4D8D",
+    bgDark: "#081736",
+    accent1: "#1C4D8D",
+    accent2: "#BDE8F5",
+    accent3: "#BDE8F5",
+    accent4: "#FFD60A",
+    text: "rgba(255, 255, 255, 0.88)",
+    textMuted: "rgba(255, 255, 255, 0.55)",
+    textBright: "#ffffff",
+    divider: "rgba(255, 255, 255, 0.15)",
+    hoverBg: "rgba(255, 255, 255, 0.12)",
+    activeBg: "rgba(255, 255, 255, 0.2)",
+    activeGlow: "0 2px 12px rgba(0, 0, 0, 0.15)",
   };
 
   // ==========================================
@@ -134,91 +138,91 @@ export default function Sidebar({
   const currentWidth = collapsed ? COLLAPSED_DRAWER_WIDTH : DRAWER_WIDTH;
 
   const getItemStyles = (path: string) => ({
-    borderRadius: '12px',
+    borderRadius: "12px",
     minHeight: 46,
     mb: 0.5,
     mx: 0.5,
     px: collapsed ? 1.5 : 2,
-    justifyContent: collapsed ? 'center' : 'flex-start',
+    justifyContent: collapsed ? "center" : "flex-start",
     color: isActive(path) ? colors.textBright : colors.text,
-    bgcolor: isActive(path) ? colors.activeBg : 'transparent',
-    boxShadow: isActive(path) ? colors.activeGlow : 'none',
+    bgcolor: isActive(path) ? colors.activeBg : "transparent",
+    boxShadow: isActive(path) ? colors.activeGlow : "none",
     fontWeight: isActive(path) ? 600 : 400,
     transition: SMOOTH_TRANSITION,
-    position: 'relative' as const,
-    overflow: 'hidden',
-    '&:hover': {
+    position: "relative" as const,
+    overflow: "hidden",
+    "&:hover": {
       bgcolor: isActive(path) ? colors.activeBg : colors.hoverBg,
       color: colors.textBright,
-      transform: collapsed ? 'none' : 'translateX(3px)',
-      '& .MuiListItemIcon-root': {
+      transform: collapsed ? "none" : "translateX(3px)",
+      "& .MuiListItemIcon-root": {
         color: colors.textBright,
       },
     },
-    '&::before': isActive(path)
+    "&::before": isActive(path)
       ? {
-        content: '""',
-        position: 'absolute',
-        left: 0,
-        top: '15%',
-        bottom: '15%',
-        width: '3px',
-        borderRadius: '0 4px 4px 0',
-        bgcolor: colors.accent3,
-        boxShadow: `0 0 8px ${colors.accent3}`,
-      }
+          content: '""',
+          position: "absolute",
+          left: 0,
+          top: "15%",
+          bottom: "15%",
+          width: "3px",
+          borderRadius: "0 4px 4px 0",
+          bgcolor: colors.accent3,
+          boxShadow: `0 0 8px ${colors.accent3}`,
+        }
       : {},
   });
 
   const getIconStyles = (path: string) => ({
-    color: isActive(path) ? '#0F2854' : colors.accent2,
-    minWidth: collapsed ? 'unset' : 38,
+    color: isActive(path) ? "#0F2854" : colors.accent2,
+    minWidth: collapsed ? "unset" : 38,
     mr: collapsed ? 0 : 1,
     transition: `color ${TRANSITION_DURATION} ease`,
   });
 
   const groupHeaderStyles = {
-    borderRadius: '12px',
+    borderRadius: "12px",
     mb: 0.5,
     mx: 0.5,
     px: collapsed ? 1.5 : 2,
-    justifyContent: collapsed ? 'center' : 'flex-start',
+    justifyContent: collapsed ? "center" : "flex-start",
     color: colors.textBright,
     transition: SMOOTH_TRANSITION,
-    '&:hover': {
+    "&:hover": {
       bgcolor: colors.hoverBg,
     },
   };
 
   const sectionLabelSx = {
-    display: collapsed ? 'none' : 'block',
+    display: collapsed ? "none" : "block",
     px: 2,
     pt: 2.5,
     pb: 0.5,
-    fontSize: '0.78rem',
+    fontSize: "0.78rem",
     fontWeight: 800,
-    letterSpacing: '0.12em',
-    textTransform: 'uppercase' as const,
+    letterSpacing: "0.12em",
+    textTransform: "uppercase" as const,
     color: colors.accent2,
   };
 
   const sidebarBg = {
     bgcolor: colors.bg,
-    borderRight: 'none',
+    borderRight: "none",
   };
 
   // Popover item styles
   const popoverItemSx = (path: string) => ({
-    borderRadius: '8px',
+    borderRadius: "8px",
     mx: 0.5,
     mb: 0.3,
-    color: isActive(path) ? '#1C4D8D' : '#334155',
-    bgcolor: isActive(path) ? '#e8f0fe' : 'transparent',
+    color: isActive(path) ? "#1C4D8D" : "#334155",
+    bgcolor: isActive(path) ? "#e8f0fe" : "transparent",
     fontWeight: isActive(path) ? 600 : 400,
-    transition: 'all 0.2s ease',
-    '&:hover': {
-      bgcolor: '#f1f5f9',
-      color: '#1C4D8D',
+    transition: "all 0.2s ease",
+    "&:hover": {
+      bgcolor: "#f1f5f9",
+      color: "#1C4D8D",
     },
   });
 
@@ -226,10 +230,24 @@ export default function Sidebar({
   // 4. POPOVER SUB-MENUS (collapsed mode)
   // ==========================================
   const deptSubItems = [
-    { label: 'Tổng quan', path: '/departments/overview', icon: <LayoutDashboard size={18} /> },
-    { label: 'Quản lý OKR', path: '/departments/okr', icon: <Target size={18} /> },
+    {
+      label: "Tổng quan",
+      path: "/departments/overview",
+      icon: <LayoutDashboard size={18} />,
+    },
+    {
+      label: "Quản lý OKR",
+      path: "/departments/okr",
+      icon: <Target size={18} />,
+    },
     ...(canViewUsers
-      ? [{ label: 'Nhân sự', path: '/departments/users', icon: <Users size={18} /> }]
+      ? [
+          {
+            label: "Nhân sự",
+            path: "/departments/users",
+            icon: <Users size={18} />,
+          },
+        ]
       : []),
   ];
 
@@ -238,8 +256,8 @@ export default function Sidebar({
       open={Boolean(popoverAnchor) && Boolean(popoverGroup)}
       anchorEl={popoverAnchor}
       onClose={handlePopoverClose}
-      anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-      transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+      anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      transformOrigin={{ vertical: "top", horizontal: "left" }}
       disableRestoreFocus
       slotProps={{
         paper: {
@@ -247,9 +265,9 @@ export default function Sidebar({
           onMouseLeave: handlePopoverClose,
           sx: {
             ml: 1,
-            borderRadius: '12px',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
-            border: '1px solid #e2e8f0',
+            borderRadius: "12px",
+            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)",
+            border: "1px solid #e2e8f0",
             minWidth: 200,
             py: 0.5,
           },
@@ -262,14 +280,14 @@ export default function Sidebar({
           px: 2,
           pt: 1,
           pb: 0.5,
-          display: 'block',
-          color: '#0F2854',
+          display: "block",
+          color: "#0F2854",
           fontWeight: 700,
-          fontSize: '0.75rem',
-          letterSpacing: '0.05em',
+          fontSize: "0.75rem",
+          letterSpacing: "0.05em",
         }}
       >
-        {popoverGroup === 'dept' ? departmentName : ''}
+        {popoverGroup === "dept" ? departmentName : ""}
       </Typography>
       <List dense sx={{ px: 0.5 }}>
         {deptSubItems.map((item) => (
@@ -278,12 +296,20 @@ export default function Sidebar({
             onClick={() => handleNavigate(item.path)}
             sx={popoverItemSx(item.path)}
           >
-            <ListItemIcon sx={{ color: isActive(item.path) ? '#1C4D8D' : '#94a3b8', minWidth: 32 }}>
+            <ListItemIcon
+              sx={{
+                color: isActive(item.path) ? "#1C4D8D" : "#94a3b8",
+                minWidth: 32,
+              }}
+            >
               {item.icon}
             </ListItemIcon>
             <ListItemText
               primary={item.label}
-              primaryTypographyProps={{ fontSize: '0.88rem', fontWeight: isActive(item.path) ? 600 : 400 }}
+              primaryTypographyProps={{
+                fontSize: "0.88rem",
+                fontWeight: isActive(item.path) ? 600 : 400,
+              }}
             />
           </ListItemButton>
         ))}
@@ -297,20 +323,20 @@ export default function Sidebar({
   const drawerContent = (
     <Box
       sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
         bgcolor: colors.bg,
         transition: `width ${TRANSITION_DURATION} ${TRANSITION_EASING}`,
-        overflow: 'hidden',
+        overflow: "hidden",
       }}
     >
       {/* ─── HEADER ─── */}
       <Toolbar
         sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
           py: collapsed ? 2 : 3,
           flexShrink: 0,
         }}
@@ -326,22 +352,22 @@ export default function Sidebar({
             sx={{
               width: collapsed ? 44 : 60,
               height: collapsed ? 44 : 60,
-              bgcolor: 'rgba(255, 255, 255, 0.2)',
-              backdropFilter: 'blur(8px)',
-              borderRadius: collapsed ? '12px' : '16px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              bgcolor: "rgba(255, 255, 255, 0.2)",
+              backdropFilter: "blur(8px)",
+              borderRadius: collapsed ? "12px" : "16px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
               mb: collapsed ? 0 : 1.5,
-              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.15)',
-              cursor: 'pointer',
+              boxShadow: "0 4px 16px rgba(0, 0, 0, 0.15)",
+              cursor: "pointer",
               transition: SMOOTH_TRANSITION,
-              '&:hover': {
-                bgcolor: 'rgba(255, 255, 255, 0.28)',
-                transform: 'scale(1.05)',
+              "&:hover": {
+                bgcolor: "rgba(255, 255, 255, 0.28)",
+                transform: "scale(1.05)",
               },
-              '&:active': {
-                transform: 'scale(0.97)',
+              "&:active": {
+                transform: "scale(0.97)",
               },
             }}
           >
@@ -352,11 +378,11 @@ export default function Sidebar({
         {/* Text with fade transition */}
         <Box
           sx={{
-            overflow: 'hidden',
+            overflow: "hidden",
             maxHeight: collapsed ? 0 : 50,
             opacity: collapsed ? 0 : 1,
             transition: `max-height ${TRANSITION_DURATION} ${TRANSITION_EASING}, opacity 0.25s ease`,
-            textAlign: 'center',
+            textAlign: "center",
           }}
         >
           <Typography
@@ -364,9 +390,9 @@ export default function Sidebar({
             sx={{
               fontWeight: 700,
               color: colors.textBright,
-              letterSpacing: '-0.01em',
-              fontSize: '1.05rem',
-              whiteSpace: 'nowrap',
+              letterSpacing: "-0.01em",
+              fontSize: "1.05rem",
+              whiteSpace: "nowrap",
             }}
           >
             VNU-HCMUS
@@ -375,10 +401,10 @@ export default function Sidebar({
             variant="caption"
             sx={{
               color: colors.accent3,
-              fontSize: '0.72rem',
+              fontSize: "0.72rem",
               fontWeight: 600,
-              letterSpacing: '0.05em',
-              whiteSpace: 'nowrap',
+              letterSpacing: "0.05em",
+              whiteSpace: "nowrap",
             }}
           >
             Performance Management
@@ -398,66 +424,80 @@ export default function Sidebar({
       <Box
         sx={{
           flexGrow: 1,
-          overflowY: 'auto',
-          overflowX: 'hidden',
+          overflowY: "auto",
+          overflowX: "hidden",
           px: collapsed ? 0.5 : 1.5,
           pt: 2,
           transition: `padding ${TRANSITION_DURATION} ${TRANSITION_EASING}`,
-          '&::-webkit-scrollbar': { width: 3 },
-          '&::-webkit-scrollbar-track': { bgcolor: 'transparent' },
-          '&::-webkit-scrollbar-thumb': {
-            bgcolor: 'rgba(255, 255, 255, 0.2)',
+          "&::-webkit-scrollbar": { width: 3 },
+          "&::-webkit-scrollbar-track": { bgcolor: "transparent" },
+          "&::-webkit-scrollbar-thumb": {
+            bgcolor: "rgba(255, 255, 255, 0.2)",
             borderRadius: 2,
-            '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.35)' },
+            "&:hover": { bgcolor: "rgba(255, 255, 255, 0.35)" },
           },
         }}
       >
         <List component="nav" sx={{ px: 0 }}>
           {/* ── Dashboard ── */}
           <Box sx={{ px: collapsed ? 0.5 : 1, mb: 3 }}>
-            <Tooltip title={collapsed ? 'Dashboard' : ''} placement="right" arrow>
+            <Tooltip
+              title={collapsed ? "Dashboard" : ""}
+              placement="right"
+              arrow
+            >
               <ListItemButton
-                onClick={() => handleNavigate('/dashboard')}
+                onClick={() => handleNavigate("/dashboard")}
                 sx={{
-                  ...getItemStyles('/dashboard'),
-                  bgcolor: isActive('/dashboard') ? '#BDE8F5' : 'rgba(255, 255, 255, 0.1)',
-                  color: isActive('/dashboard') ? colors.bg : colors.textBright,
-                  boxShadow: isActive('/dashboard') ? '0 4px 12px rgba(0, 0, 0, 0.2)' : 'none',
-                  borderRadius: '16px',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  ...getItemStyles("/dashboard"),
+                  bgcolor: isActive("/dashboard")
+                    ? "#BDE8F5"
+                    : "rgba(255, 255, 255, 0.1)",
+                  color: isActive("/dashboard") ? colors.bg : colors.textBright,
+                  boxShadow: isActive("/dashboard")
+                    ? "0 4px 12px rgba(0, 0, 0, 0.2)"
+                    : "none",
+                  borderRadius: "16px",
+                  border: "1px solid rgba(255, 255, 255, 0.2)",
                   mb: 0,
                   mx: 0,
                   py: 1.2,
                   zIndex: 1,
-                  '& .MuiListItemIcon-root': {
-                    color: isActive('/dashboard') ? colors.bg : colors.accent2,
+                  "& .MuiListItemIcon-root": {
+                    color: isActive("/dashboard") ? colors.bg : colors.accent2,
                   },
-                  '&:hover': {
-                    bgcolor: isActive('/dashboard') ? '#BDE8F5' : 'rgba(255, 255, 255, 0.2)',
-                    transform: collapsed ? 'none' : 'translateY(-2px)',
-                    boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)',
-                    '& .MuiListItemIcon-root': {
-                      color: isActive('/dashboard') ? colors.bg : colors.textBright,
+                  "&:hover": {
+                    bgcolor: isActive("/dashboard")
+                      ? "#BDE8F5"
+                      : "rgba(255, 255, 255, 0.2)",
+                    transform: collapsed ? "none" : "translateY(-2px)",
+                    boxShadow: "0 8px 16px rgba(0, 0, 0, 0.2)",
+                    "& .MuiListItemIcon-root": {
+                      color: isActive("/dashboard")
+                        ? colors.bg
+                        : colors.textBright,
                     },
                   },
-                  '&::before': { display: 'none' }
+                  "&::before": { display: "none" },
                 }}
               >
-                <ListItemIcon sx={{ ...getIconStyles('/dashboard'), color: 'inherit' }}>
+                <ListItemIcon
+                  sx={{ ...getIconStyles("/dashboard"), color: "inherit" }}
+                >
                   <LayoutDashboard size={21} />
                 </ListItemIcon>
                 <ListItemText
                   primary="Dashboard"
                   sx={{
                     opacity: collapsed ? 0 : 1,
-                    width: collapsed ? 0 : 'auto',
+                    width: collapsed ? 0 : "auto",
                     transition: `opacity 0.2s ease, width ${TRANSITION_DURATION} ${TRANSITION_EASING}`,
-                    overflow: 'hidden',
-                    whiteSpace: 'nowrap',
+                    overflow: "hidden",
+                    whiteSpace: "nowrap",
                   }}
                   primaryTypographyProps={{
-                    fontWeight: isActive('/dashboard') ? 700 : 600,
-                    fontSize: '0.95rem',
+                    fontWeight: isActive("/dashboard") ? 700 : 600,
+                    fontSize: "0.95rem",
                   }}
                 />
               </ListItemButton>
@@ -466,49 +506,63 @@ export default function Sidebar({
 
           {/* ── OKR Của tôi ── */}
           <Box sx={{ px: collapsed ? 0.5 : 1, mb: 3 }}>
-            <Tooltip title={collapsed ? 'OKR Của tôi' : ''} placement="right" arrow>
+            <Tooltip
+              title={collapsed ? "OKR Của tôi" : ""}
+              placement="right"
+              arrow
+            >
               <ListItemButton
-                onClick={() => handleNavigate('/my-okr')}
+                onClick={() => handleNavigate("/my-okr")}
                 sx={{
-                  ...getItemStyles('/my-okr'),
-                  bgcolor: isActive('/my-okr') ? '#BDE8F5' : 'rgba(255, 255, 255, 0.1)',
-                  color: isActive('/my-okr') ? colors.bg : colors.textBright,
-                  boxShadow: isActive('/my-okr') ? '0 4px 12px rgba(0, 0, 0, 0.2)' : 'none',
-                  borderRadius: '16px',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  ...getItemStyles("/my-okr"),
+                  bgcolor: isActive("/my-okr")
+                    ? "#BDE8F5"
+                    : "rgba(255, 255, 255, 0.1)",
+                  color: isActive("/my-okr") ? colors.bg : colors.textBright,
+                  boxShadow: isActive("/my-okr")
+                    ? "0 4px 12px rgba(0, 0, 0, 0.2)"
+                    : "none",
+                  borderRadius: "16px",
+                  border: "1px solid rgba(255, 255, 255, 0.2)",
                   mb: 0,
                   mx: 0,
                   py: 1.2,
                   zIndex: 1,
-                  '& .MuiListItemIcon-root': {
-                    color: isActive('/my-okr') ? colors.bg : colors.accent2,
+                  "& .MuiListItemIcon-root": {
+                    color: isActive("/my-okr") ? colors.bg : colors.accent2,
                   },
-                  '&:hover': {
-                    bgcolor: isActive('/my-okr') ? '#BDE8F5' : 'rgba(255, 255, 255, 0.2)',
-                    transform: collapsed ? 'none' : 'translateY(-2px)',
-                    boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)',
-                    '& .MuiListItemIcon-root': {
-                      color: isActive('/my-okr') ? colors.bg : colors.textBright,
+                  "&:hover": {
+                    bgcolor: isActive("/my-okr")
+                      ? "#BDE8F5"
+                      : "rgba(255, 255, 255, 0.2)",
+                    transform: collapsed ? "none" : "translateY(-2px)",
+                    boxShadow: "0 8px 16px rgba(0, 0, 0, 0.2)",
+                    "& .MuiListItemIcon-root": {
+                      color: isActive("/my-okr")
+                        ? colors.bg
+                        : colors.textBright,
                     },
                   },
-                  '&::before': { display: 'none' }
+                  "&::before": { display: "none" },
                 }}
               >
-                <ListItemIcon sx={{ ...getIconStyles('/my-okr'), color: 'inherit' }}>
+                <ListItemIcon
+                  sx={{ ...getIconStyles("/my-okr"), color: "inherit" }}
+                >
                   <ClipboardCheck size={21} />
                 </ListItemIcon>
                 <ListItemText
                   primary="OKR Của tôi"
                   sx={{
                     opacity: collapsed ? 0 : 1,
-                    width: collapsed ? 0 : 'auto',
+                    width: collapsed ? 0 : "auto",
                     transition: `opacity 0.2s ease, width ${TRANSITION_DURATION} ${TRANSITION_EASING}`,
-                    overflow: 'hidden',
-                    whiteSpace: 'nowrap',
+                    overflow: "hidden",
+                    whiteSpace: "nowrap",
                   }}
                   primaryTypographyProps={{
-                    fontWeight: isActive('/performance/evaluate') ? 700 : 600,
-                    fontSize: '0.95rem',
+                    fontWeight: isActive("/performance/evaluate") ? 700 : 600,
+                    fontSize: "0.95rem",
                   }}
                 />
               </ListItemButton>
@@ -516,25 +570,42 @@ export default function Sidebar({
           </Box>
 
           {/* ── NHÓM BỘ MÔN ── */}
-          <Box sx={{
-            bgcolor: 'rgba(255, 255, 255, 0.03)',
-            borderRadius: '16px',
-            mb: 2,
-            mx: collapsed ? 0.5 : 1,
-            py: 1,
-            border: '1px solid rgba(255, 255, 255, 0.05)'
-          }}>
-            <Typography variant="overline" sx={{ ...sectionLabelSx, px: 1.5, pt: 0, pb: 1, color: colors.accent2 }}>
+          <Box
+            sx={{
+              bgcolor: "rgba(255, 255, 255, 0.03)",
+              borderRadius: "16px",
+              mb: 2,
+              mx: collapsed ? 0.5 : 1,
+              py: 1,
+              border: "1px solid rgba(255, 255, 255, 0.05)",
+            }}
+          >
+            <Typography
+              variant="overline"
+              sx={{
+                ...sectionLabelSx,
+                px: 1.5,
+                pt: 0,
+                pb: 1,
+                color: colors.accent2,
+              }}
+            >
               Bộ môn
             </Typography>
 
-            {collapsed && <Divider sx={{ mx: 1, my: 1, borderColor: colors.divider }} />}
+            {collapsed && (
+              <Divider sx={{ mx: 1, my: 1, borderColor: colors.divider }} />
+            )}
 
-            <Tooltip title={collapsed ? departmentName : ''} placement="right" arrow>
+            <Tooltip
+              title={collapsed ? departmentName : ""}
+              placement="right"
+              arrow
+            >
               <ListItemButton
                 onClick={(e) => {
                   if (collapsed) {
-                    handlePopoverOpen(e, 'dept');
+                    handlePopoverOpen(e, "dept");
                   } else {
                     setOpenDept(!openDept);
                   }
@@ -544,7 +615,7 @@ export default function Sidebar({
                 <ListItemIcon
                   sx={{
                     color: colors.accent2,
-                    minWidth: collapsed ? 'unset' : 38,
+                    minWidth: collapsed ? "unset" : 38,
                     mr: collapsed ? 0 : 1,
                     transition: `color ${TRANSITION_DURATION} ease`,
                   }}
@@ -553,12 +624,12 @@ export default function Sidebar({
                 </ListItemIcon>
                 <Box
                   sx={{
-                    display: 'flex',
-                    alignItems: 'center',
+                    display: "flex",
+                    alignItems: "center",
                     flex: 1,
                     opacity: collapsed ? 0 : 1,
-                    width: collapsed ? 0 : 'auto',
-                    overflow: 'hidden',
+                    width: collapsed ? 0 : "auto",
+                    overflow: "hidden",
                     transition: `opacity 0.2s ease, width ${TRANSITION_DURATION} ${TRANSITION_EASING}`,
                   }}
                 >
@@ -566,7 +637,7 @@ export default function Sidebar({
                     primary={departmentName}
                     primaryTypographyProps={{
                       fontWeight: 700,
-                      fontSize: '1rem',
+                      fontSize: "1rem",
                       color: colors.textBright,
                       noWrap: true,
                     }}
@@ -584,42 +655,42 @@ export default function Sidebar({
               <Collapse in={openDept} timeout={300} unmountOnExit>
                 <List component="div" disablePadding>
                   <ListItemButton
-                    sx={{ ...getItemStyles('/departments/overview'), pl: 4 }}
-                    onClick={() => handleNavigate('/departments/overview')}
+                    sx={{ ...getItemStyles("/departments/overview"), pl: 4 }}
+                    onClick={() => handleNavigate("/departments/overview")}
                   >
-                    <ListItemIcon sx={getIconStyles('/departments/overview')}>
+                    <ListItemIcon sx={getIconStyles("/departments/overview")}>
                       <LayoutDashboard size={18} />
                     </ListItemIcon>
                     <ListItemText
                       primary="Tổng quan"
-                      primaryTypographyProps={{ fontSize: '0.92rem' }}
+                      primaryTypographyProps={{ fontSize: "0.92rem" }}
                     />
                   </ListItemButton>
 
                   <ListItemButton
-                    sx={{ ...getItemStyles('/departments/okr'), pl: 4 }}
-                    onClick={() => handleNavigate('/departments/okr')}
+                    sx={{ ...getItemStyles("/departments/okr"), pl: 4 }}
+                    onClick={() => handleNavigate("/departments/okr")}
                   >
-                    <ListItemIcon sx={getIconStyles('/departments/okr')}>
+                    <ListItemIcon sx={getIconStyles("/departments/okr")}>
                       <Target size={18} />
                     </ListItemIcon>
                     <ListItemText
                       primary="Quản lý OKR"
-                      primaryTypographyProps={{ fontSize: '0.92rem' }}
+                      primaryTypographyProps={{ fontSize: "0.92rem" }}
                     />
                   </ListItemButton>
 
                   {canViewUsers && (
                     <ListItemButton
-                      sx={{ ...getItemStyles('/departments/users'), pl: 4 }}
-                      onClick={() => handleNavigate('/departments/users')}
+                      sx={{ ...getItemStyles("/departments/users"), pl: 4 }}
+                      onClick={() => handleNavigate("/departments/users")}
                     >
-                      <ListItemIcon sx={getIconStyles('/departments/users')}>
+                      <ListItemIcon sx={getIconStyles("/departments/users")}>
                         <Users size={18} />
                       </ListItemIcon>
                       <ListItemText
                         primary="Nhân sự"
-                        primaryTypographyProps={{ fontSize: '0.92rem' }}
+                        primaryTypographyProps={{ fontSize: "0.92rem" }}
                       />
                     </ListItemButton>
                   )}
@@ -629,35 +700,41 @@ export default function Sidebar({
           </Box>
 
           {/* ── DOCS ── */}
-          <Box sx={{
-            bgcolor: 'rgba(255, 255, 255, 0.03)',
-            borderRadius: '16px',
-            mb: 2,
-            mx: collapsed ? 0.5 : 1,
-            py: 1,
-            border: '1px solid rgba(255, 255, 255, 0.05)'
-          }}>
-            <ListItem disablePadding sx={{ display: 'block' }}>
-              <Tooltip title={collapsed ? 'Research & Docs' : ''} placement="right" arrow>
+          <Box
+            sx={{
+              bgcolor: "rgba(255, 255, 255, 0.03)",
+              borderRadius: "16px",
+              mb: 2,
+              mx: collapsed ? 0.5 : 1,
+              py: 1,
+              border: "1px solid rgba(255, 255, 255, 0.05)",
+            }}
+          >
+            <ListItem disablePadding sx={{ display: "block" }}>
+              <Tooltip
+                title={collapsed ? "Research & Docs" : ""}
+                placement="right"
+                arrow
+              >
                 <ListItemButton
-                  onClick={() => handleNavigate('/docs')}
-                  sx={getItemStyles('/docs')}
+                  onClick={() => handleNavigate("/docs")}
+                  sx={getItemStyles("/docs")}
                 >
-                  <ListItemIcon sx={getIconStyles('/docs')}>
+                  <ListItemIcon sx={getIconStyles("/docs")}>
                     <BookOpen size={21} />
                   </ListItemIcon>
                   <ListItemText
                     primary="Research & Docs"
                     sx={{
                       opacity: collapsed ? 0 : 1,
-                      width: collapsed ? 0 : 'auto',
+                      width: collapsed ? 0 : "auto",
                       transition: `opacity 0.2s ease, width ${TRANSITION_DURATION} ${TRANSITION_EASING}`,
-                      overflow: 'hidden',
-                      whiteSpace: 'nowrap',
+                      overflow: "hidden",
+                      whiteSpace: "nowrap",
                     }}
                     primaryTypographyProps={{
-                      fontWeight: isActive('/docs') ? 600 : 500,
-                      fontSize: '0.95rem',
+                      fontWeight: isActive("/docs") ? 600 : 500,
+                      fontSize: "0.95rem",
                     }}
                   />
                 </ListItemButton>
@@ -668,17 +745,23 @@ export default function Sidebar({
       </Box>
 
       {/* ─── FOOTER ─── */}
-      <Box sx={{ p: collapsed ? 1 : 2, mt: 'auto', transition: `padding ${TRANSITION_DURATION} ${TRANSITION_EASING}` }}>
+      <Box
+        sx={{
+          p: collapsed ? 1 : 2,
+          mt: "auto",
+          transition: `padding ${TRANSITION_DURATION} ${TRANSITION_EASING}`,
+        }}
+      >
         <Divider sx={{ borderColor: colors.divider, mb: 1.5 }} />
-        <Tooltip title={collapsed ? 'IT Support' : ''} placement="right" arrow>
+        <Tooltip title={collapsed ? "IT Support" : ""} placement="right" arrow>
           <ListItemButton
             sx={{
-              borderRadius: '12px',
+              borderRadius: "12px",
               color: colors.textMuted,
-              justifyContent: collapsed ? 'center' : 'flex-start',
+              justifyContent: collapsed ? "center" : "flex-start",
               px: collapsed ? 1.5 : 2,
               transition: SMOOTH_TRANSITION,
-              '&:hover': {
+              "&:hover": {
                 bgcolor: colors.hoverBg,
                 color: colors.textBright,
               },
@@ -686,8 +769,8 @@ export default function Sidebar({
           >
             <ListItemIcon
               sx={{
-                color: 'inherit',
-                minWidth: collapsed ? 'unset' : 38,
+                color: "inherit",
+                minWidth: collapsed ? "unset" : 38,
                 mr: collapsed ? 0 : 1,
               }}
             >
@@ -697,12 +780,12 @@ export default function Sidebar({
               primary="IT Support"
               sx={{
                 opacity: collapsed ? 0 : 1,
-                width: collapsed ? 0 : 'auto',
+                width: collapsed ? 0 : "auto",
                 transition: `opacity 0.2s ease, width ${TRANSITION_DURATION} ${TRANSITION_EASING}`,
-                overflow: 'hidden',
-                whiteSpace: 'nowrap',
+                overflow: "hidden",
+                whiteSpace: "nowrap",
               }}
-              primaryTypographyProps={{ fontSize: '0.92rem' }}
+              primaryTypographyProps={{ fontSize: "0.92rem" }}
             />
           </ListItemButton>
         </Tooltip>
@@ -727,12 +810,12 @@ export default function Sidebar({
           onClose={onClose}
           ModalProps={{ keepMounted: true }}
           sx={{
-            display: { xs: 'block', sm: 'none' },
-            '& .MuiDrawer-paper': {
-              boxSizing: 'border-box',
+            display: { xs: "block", sm: "none" },
+            "& .MuiDrawer-paper": {
+              boxSizing: "border-box",
               width: DRAWER_WIDTH,
               ...sidebarBg,
-              border: 'none',
+              border: "none",
             },
           }}
         >
@@ -744,14 +827,14 @@ export default function Sidebar({
           variant="permanent"
           open
           sx={{
-            display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': {
-              boxSizing: 'border-box',
+            display: { xs: "none", sm: "block" },
+            "& .MuiDrawer-paper": {
+              boxSizing: "border-box",
               width: currentWidth,
               transition: `width ${TRANSITION_DURATION} ${TRANSITION_EASING}`,
               ...sidebarBg,
-              border: 'none',
-              overflowX: 'hidden',
+              border: "none",
+              overflowX: "hidden",
             },
           }}
         >
