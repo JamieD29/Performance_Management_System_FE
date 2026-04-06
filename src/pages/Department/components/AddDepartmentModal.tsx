@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -15,12 +15,14 @@ interface AddDepartmentModalProps {
   open: boolean;
   onClose: () => void;
   onSuccess: () => void; // Hàm gọi lại khi thêm thành công để reload list
+  initialData?: any;
 }
 
 export default function AddDepartmentModal({
   open,
   onClose,
   onSuccess,
+  initialData,
 }: AddDepartmentModalProps) {
   const [formData, setFormData] = useState({
     name: "",
@@ -29,6 +31,18 @@ export default function AddDepartmentModal({
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        name: initialData.name || "",
+        code: initialData.code || "",
+        description: initialData.description || "",
+      });
+    } else {
+      setFormData({ name: "", code: "", description: "" });
+    }
+  }, [initialData, open]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -44,8 +58,14 @@ export default function AddDepartmentModal({
     setLoading(true);
     setError("");
     try {
-      await api.post("/departments", formData);
-      setFormData({ name: "", code: "", description: "" }); // Reset form
+      if (initialData?.id) {
+        await api.put(`/departments/${initialData.id}`, formData);
+      } else {
+        await api.post("/departments", formData);
+      }
+      if (!initialData) {
+        setFormData({ name: "", code: "", description: "" }); // Reset form only when adding
+      }
       onSuccess(); // Báo cho cha biết là xong rồi
       onClose(); // Đóng modal
     } catch (err: any) {
@@ -66,8 +86,8 @@ export default function AddDepartmentModal({
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ fontWeight: "bold", color: "#1e3a8a" }}>
-        Thêm Bộ Môn Mới
+      <DialogTitle sx={{ fontWeight: "bold", color: "#1e293b" }}>
+        {initialData ? "Chỉnh Sửa Bộ Môn" : "Thêm Bộ Môn Mới"}
       </DialogTitle>
       <DialogContent dividers>
         <Stack spacing={2} sx={{ mt: 1 }}>
@@ -120,7 +140,7 @@ export default function AddDepartmentModal({
           Hủy
         </Button>
         <Button onClick={handleSubmit} variant="contained" disabled={loading}>
-          {loading ? "Đang tạo..." : "Tạo mới"}
+          {loading ? "Đang lưu..." : initialData ? "Lưu Thay Đổi" : "Tạo mới"}
         </Button>
       </DialogActions>
     </Dialog>
