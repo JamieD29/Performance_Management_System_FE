@@ -351,6 +351,8 @@ export default function TemplateEditorDialog({
   // ============================================================
   // Render Helpers
   // ============================================================
+  const inputClass = "w-full border border-slate-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500 bg-white placeholder-slate-400 transition-colors";
+  const objInputClass = "w-full border border-blue-400/50 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-300 bg-white/10 text-white placeholder-white/60 transition-colors";
 
   // Render sub-sub-KR rows (level 4: a, b, c...)
   const renderSubSubKRRows = (
@@ -369,67 +371,41 @@ export default function TemplateEditorDialog({
           {ssKr.id}
         </TableCell>
         <TableCell>
-          <TextField
-            fullWidth
-            size="small"
+          <input
+            className={inputClass}
             placeholder="Mô tả chi tiết..."
             value={ssKr.title}
             onChange={(e) =>
-              updateItem(
-                oIndex,
-                "title",
-                e.target.value,
-                kIndex,
-                sIndex,
-                ssIndex,
-              )
+              updateItem(oIndex, "title", e.target.value, kIndex, sIndex, ssIndex)
             }
-            sx={{ "& .MuiInputBase-root": { fontSize: "0.85rem" } }}
           />
         </TableCell>
         <TableCell>
-          <TextField
-            fullWidth
-            size="small"
+          <input
             type="number"
+            min="0"
+            className={inputClass}
             value={ssKr.maxScore}
             onChange={(e) =>
-              updateItem(
-                oIndex,
-                "maxScore",
-                setNonNeg(e.target.value),
-                kIndex,
-                sIndex,
-                ssIndex,
-              )
+              updateItem(oIndex, "maxScore", setNonNeg(e.target.value), kIndex, sIndex, ssIndex)
             }
-            inputProps={{ min: 0 }}
           />
         </TableCell>
         <TableCell>
-          <TextField
-            fullWidth
-            size="small"
+          <input
             type="number"
+            min="0"
+            className={inputClass}
             placeholder="+1"
             value={ssKr.unitScore || ""}
             onChange={(e) =>
-              updateItem(
-                oIndex,
-                "unitScore",
-                setNonNeg(e.target.value),
-                kIndex,
-                sIndex,
-                ssIndex,
-              )
+              updateItem(oIndex, "unitScore", setNonNeg(e.target.value), kIndex, sIndex, ssIndex)
             }
-            inputProps={{ min: 0 }}
           />
         </TableCell>
         <TableCell>
-          <TextField
-            fullWidth
-            size="small"
+          <input
+            className={inputClass}
             placeholder="đơn vị"
             value={ssKr.unit || ""}
             onChange={(e) =>
@@ -438,31 +414,21 @@ export default function TemplateEditorDialog({
           />
         </TableCell>
         <TableCell>
-          <TextField
-            fullWidth
-            size="small"
+          <input
             type="number"
+            min="0"
+            className={inputClass}
             value={ssKr.target || ""}
             onChange={(e) =>
-              updateItem(
-                oIndex,
-                "target",
-                setNonNeg(e.target.value),
-                kIndex,
-                sIndex,
-                ssIndex,
-              )
+              updateItem(oIndex, "target", setNonNeg(e.target.value), kIndex, sIndex, ssIndex)
             }
-            inputProps={{ min: 0 }}
           />
         </TableCell>
         <TableCell>
           <IconButton
             size="small"
             color="error"
-            onClick={() =>
-              handleDeleteSubSubKR(oIndex, kIndex, sIndex, ssIndex)
-            }
+            onClick={() => handleDeleteSubSubKR(oIndex, kIndex, sIndex, ssIndex)}
           >
             <Delete fontSize="small" />
           </IconButton>
@@ -637,45 +603,20 @@ export default function TemplateEditorDialog({
                       {obj.id}
                     </TableCell>
                     <TableCell>
-                      <TextField
-                        fullWidth
-                        size="small"
+                      <input
+                        className={objInputClass}
                         placeholder="Tên mục tiêu lớn..."
                         value={obj.title}
-                        onChange={(e) =>
-                          updateItem(oIndex, "title", e.target.value)
-                        }
-                        sx={{
-                          "& .MuiInputBase-root": {
-                            bgcolor: "rgba(255,255,255,0.15)",
-                            color: "white",
-                          },
-                          "& .MuiInputBase-input::placeholder": {
-                            color: "rgba(255,255,255,0.6)",
-                          },
-                        }}
+                        onChange={(e) => updateItem(oIndex, "title", e.target.value)}
                       />
                     </TableCell>
                     <TableCell>
-                      <TextField
-                        fullWidth
-                        size="small"
+                      <input
                         type="number"
+                        min="0"
+                        className={objInputClass}
                         value={obj.maxScore}
-                        onChange={(e) =>
-                          updateItem(
-                            oIndex,
-                            "maxScore",
-                            setNonNeg(e.target.value),
-                          )
-                        }
-                        inputProps={{ min: 0 }}
-                        sx={{
-                          "& .MuiInputBase-root": {
-                            bgcolor: "rgba(255,255,255,0.15)",
-                            color: "white",
-                          },
-                        }}
+                        onChange={(e) => updateItem(oIndex, "maxScore", setNonNeg(e.target.value))}
                       />
                     </TableCell>
                     <TableCell></TableCell>
@@ -708,88 +649,48 @@ export default function TemplateEditorDialog({
                           {kr.id}
                         </TableCell>
                         <TableCell>
-                          <TextField
-                            fullWidth
-                            size="small"
+                          <input
+                            className={inputClass}
                             placeholder="Kết quả then chốt..."
                             value={kr.title}
-                            onChange={(e) =>
-                              updateItem(
-                                oIndex,
-                                "title",
-                                e.target.value,
-                                kIndex,
-                              )
-                            }
+                            onChange={(e) => updateItem(oIndex, "title", e.target.value, kIndex)}
                           />
                         </TableCell>
                         <TableCell>
-                          <TextField
-                            fullWidth
-                            size="small"
+                          <input
                             type="number"
+                            min="0"
+                            className={inputClass}
                             value={kr.maxScore}
-                            onChange={(e) =>
-                              updateItem(
-                                oIndex,
-                                "maxScore",
-                                setNonNeg(e.target.value),
-                                kIndex,
-                              )
-                            }
-                            inputProps={{ min: 0 }}
+                            onChange={(e) => updateItem(oIndex, "maxScore", setNonNeg(e.target.value), kIndex)}
                           />
                         </TableCell>
                         <TableCell>
-                          <TextField
-                            fullWidth
-                            size="small"
+                          <input
                             type="number"
+                            min="0"
+                            className={inputClass}
                             placeholder="+2"
                             value={kr.unitScore || ""}
-                            onChange={(e) =>
-                              updateItem(
-                                oIndex,
-                                "unitScore",
-                                setNonNeg(e.target.value),
-                                kIndex,
-                              )
-                            }
-                            inputProps={{ min: 0 }}
+                            onChange={(e) => updateItem(oIndex, "unitScore", setNonNeg(e.target.value), kIndex)}
                           />
                         </TableCell>
                         <TableCell>
-                          <TextField
-                            fullWidth
-                            size="small"
+                          <input
+                            className={inputClass}
                             placeholder="học phần"
                             value={kr.unit || ""}
-                            onChange={(e) =>
-                              updateItem(
-                                oIndex,
-                                "unit",
-                                e.target.value,
-                                kIndex,
-                              )
-                            }
+                            onChange={(e) => updateItem(oIndex, "unit", e.target.value, kIndex)}
                           />
                         </TableCell>
                         <TableCell>
-                          <TextField
-                            fullWidth
-                            size="small"
+                          <input
                             type="number"
+                            min="0"
+                            className={inputClass}
                             placeholder="Target"
                             value={kr.target || ""}
-                            onChange={(e) =>
-                              updateItem(
-                                oIndex,
-                                "target",
-                                setNonNeg(e.target.value),
-                                kIndex,
-                              )
-                            }
-                            inputProps={{ min: 0 }}
+                            onChange={(e) => updateItem(oIndex, "target", setNonNeg(e.target.value), kIndex)}
                           />
                         </TableCell>
                         <TableCell>
@@ -821,92 +722,47 @@ export default function TemplateEditorDialog({
                                 {subKr.id}
                               </TableCell>
                               <TableCell>
-                                <TextField
-                                  fullWidth
-                                  size="small"
+                                <input
+                                  className={inputClass}
                                   placeholder="Tiêu chí chi tiết..."
                                   value={subKr.title}
-                                  onChange={(e) =>
-                                    updateItem(
-                                      oIndex,
-                                      "title",
-                                      e.target.value,
-                                      kIndex,
-                                      sIndex,
-                                    )
-                                  }
+                                  onChange={(e) => updateItem(oIndex, "title", e.target.value, kIndex, sIndex)}
                                 />
                               </TableCell>
                               <TableCell>
-                                <TextField
-                                  fullWidth
-                                  size="small"
+                                <input
                                   type="number"
+                                  min="0"
+                                  className={inputClass}
                                   value={subKr.maxScore}
-                                  onChange={(e) =>
-                                    updateItem(
-                                      oIndex,
-                                      "maxScore",
-                                      setNonNeg(e.target.value),
-                                      kIndex,
-                                      sIndex,
-                                    )
-                                  }
-                                  inputProps={{ min: 0 }}
+                                  onChange={(e) => updateItem(oIndex, "maxScore", setNonNeg(e.target.value), kIndex, sIndex)}
                                 />
                               </TableCell>
                               <TableCell>
-                                <TextField
-                                  fullWidth
-                                  size="small"
+                                <input
                                   type="number"
+                                  min="0"
+                                  className={inputClass}
                                   placeholder="+1"
                                   value={subKr.unitScore || ""}
-                                  onChange={(e) =>
-                                    updateItem(
-                                      oIndex,
-                                      "unitScore",
-                                      setNonNeg(e.target.value),
-                                      kIndex,
-                                      sIndex,
-                                    )
-                                  }
-                                  inputProps={{ min: 0 }}
+                                  onChange={(e) => updateItem(oIndex, "unitScore", setNonNeg(e.target.value), kIndex, sIndex)}
                                 />
                               </TableCell>
                               <TableCell>
-                                <TextField
-                                  fullWidth
-                                  size="small"
+                                <input
+                                  className={inputClass}
                                   placeholder="đề cương"
                                   value={subKr.unit || ""}
-                                  onChange={(e) =>
-                                    updateItem(
-                                      oIndex,
-                                      "unit",
-                                      e.target.value,
-                                      kIndex,
-                                      sIndex,
-                                    )
-                                  }
+                                  onChange={(e) => updateItem(oIndex, "unit", e.target.value, kIndex, sIndex)}
                                 />
                               </TableCell>
                               <TableCell>
-                                <TextField
-                                  fullWidth
-                                  size="small"
+                                <input
                                   type="number"
+                                  min="0"
+                                  className={inputClass}
                                   value={subKr.target || ""}
-                                  onChange={(e) =>
-                                    updateItem(
-                                      oIndex,
-                                      "target",
-                                      setNonNeg(e.target.value),
-                                      kIndex,
-                                      sIndex,
-                                    )
-                                  }
-                                  inputProps={{ min: 0 }}
+                                  onChange={(e) => updateItem(oIndex, "target", setNonNeg(e.target.value), kIndex, sIndex)}
                                 />
                               </TableCell>
                               <TableCell>

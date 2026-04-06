@@ -16,7 +16,7 @@ export default function DepartmentOKR() {
   const [tabValue, setTabValue] = useState(0);
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
+    <Container maxWidth="xl" sx={{ py: 2 }}>
       <Breadcrumbs separator={<NavigateNext fontSize="small" />} sx={{ mb: 3 }}>
         <Typography
           color="inherit"

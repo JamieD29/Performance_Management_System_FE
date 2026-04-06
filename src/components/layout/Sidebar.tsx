@@ -76,9 +76,9 @@ export default function Sidebar({
     : [];
 
   const isManager = userRoles.includes("ADMIN");
-  const mngLevel = user?.managementPosition?.permissionLevel;
+  // Admin, hoặc bất kỳ user nào có chức vụ quản lý đều thấy tab Nhân sự
   const canViewUsers =
-    isManager || ["SYSTEM", "KHOA", "DON_VI"].includes(mngLevel);
+    isManager || !!user?.managementPosition;
 
   const departmentName = user.department?.name || "Bộ môn";
 

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   Box,
   Card,
@@ -40,7 +41,22 @@ interface Department {
 export default function DepartmentOverview() {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedDept, setSelectedDept] = useState<Department | null>(null);
+  
+  const [searchParams, setSearchParams] = useSearchParams();
+  const deptId = searchParams.get("deptId");
+
+  const selectedDept = departments.find((d) => d.id === deptId) || null;
+
+  const handleSelectDept = (dept: Department | null) => {
+    setSearchParams(prev => {
+      if (dept) {
+        prev.set("deptId", dept.id);
+      } else {
+        prev.delete("deptId");
+      }
+      return prev;
+    });
+  };
 
   // Load danh sách bộ môn thật từ DB
   useEffect(() => {
@@ -82,7 +98,7 @@ export default function DepartmentOverview() {
         href="#"
         onClick={(e) => {
           e.preventDefault();
-          setSelectedDept(null);
+          handleSelectDept(null);
         }}
         aria-current={!selectedDept ? "page" : undefined}
       >
@@ -131,7 +147,7 @@ export default function DepartmentOverview() {
                         borderColor: "#3b82f6",
                       },
                     }}
-                    onClick={() => setSelectedDept(dept)}
+                    onClick={() => handleSelectDept(dept)}
                   >
                     <CardContent>
                       <Box
@@ -229,7 +245,7 @@ export default function DepartmentOverview() {
       <Button
         variant="text"
         startIcon={<ArrowLeft size={18} />}
-        onClick={() => setSelectedDept(null)}
+        onClick={() => handleSelectDept(null)}
         sx={{ mb: 2, color: "#64748b", display: { xs: "flex", md: "none" } }}
       >
         Quay lại

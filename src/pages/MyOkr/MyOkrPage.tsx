@@ -745,7 +745,7 @@ export default function MyOkrPage() {
   const acceptedCount = okrs.filter((o) => o.status === "ACCEPTED").length;
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
+    <Container maxWidth="xl" sx={{ py: 2 }}>
       <Box sx={{ mb: 3 }}>
         <Typography
           variant="h4"
