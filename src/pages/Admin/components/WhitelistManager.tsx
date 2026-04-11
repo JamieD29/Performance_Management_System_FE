@@ -20,13 +20,14 @@ import { Add, Delete, Info } from "@mui/icons-material";
 import { api } from "../../../services/api";
 import type { Domain } from "../../../types";
 import { ConfirmDialog } from "../../../components/common/ConfirmDialog";
+import { Tooltip } from "@mui/material";
 
 export default function WhitelistManager() {
   const [confirmDelete, setConfirmDelete] = useState<{
     open: boolean;
     id: string | null;
   }>({ open: false, id: null });
-  const [domains, setDomains] = useState<Domain[]>([]);
+  const [domains, setDomains] = useState<(Domain & { userCount?: number })[]>([]);
   const [domainInput, setDomainInput] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -179,17 +180,41 @@ export default function WhitelistManager() {
               <ListItem key={d.id}>
                 <ListItemText
                   primary={
-                    <Chip label={`@${d.domain}`} color="primary" size="small" />
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Chip label={`@${d.domain}`} color="primary" size="small" />
+                      {typeof d.userCount === 'number' && (
+                        <Typography variant="caption" color={d.userCount > 0 ? "error.main" : "text.secondary"} sx={{ fontWeight: 500 }}>
+                          ({d.userCount} users)
+                        </Typography>
+                      )}
+                    </Box>
                   }
                   secondary={`Added: ${new Date(d.addedAt).toLocaleDateString()}`}
                 />
                 <ListItemSecondaryAction>
-                  <IconButton
-                    onClick={() => handleOpenDelete(d.id)}
-                    color="error"
-                  >
-                    <Delete />
-                  </IconButton>
+                  {d.userCount && d.userCount > 0 ? (
+                    <Tooltip title={`Không thể xóa vì đang có ${d.userCount} người dùng`}>
+                      <span>
+                        <IconButton disabled color="error">
+                          <Delete />
+                        </IconButton>
+                      </span>
+                    </Tooltip>
+                  ) : domains.length <= 1 ? (
+                    <Tooltip title="Hệ thống phải có ít nhất 1 tên miền hoạt động">
+                      <span>
+                        <IconButton disabled color="error">
+                          <Delete />
+                        </IconButton>
+                      </span>
+                    </Tooltip>
+                  ) : (
+                    <Tooltip title="Xóa tên miền">
+                      <IconButton onClick={() => handleOpenDelete(d.id)} color="error">
+                        <Delete />
+                      </IconButton>
+                    </Tooltip>
+                  )}
                 </ListItemSecondaryAction>
               </ListItem>
             ))}
