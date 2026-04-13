@@ -7,10 +7,11 @@ import {
   Tabs,
   Tab,
 } from "@mui/material";
-import { NavigateNext, Business, Flag, Gavel } from "@mui/icons-material";
+import { NavigateNext, Business, Flag, Gavel, Assessment } from "@mui/icons-material";
 
 import TemplateListTab from "./components/TemplateListTab";
 import DeanApprovalTab from "./components/DeanApprovalTab";
+import EvaluationListTab from "./components/EvaluationListTab";
 
 export default function DepartmentOKR() {
   const [tabValue, setTabValue] = useState(0);
@@ -38,11 +39,13 @@ export default function DepartmentOKR() {
         <Tabs value={tabValue} onChange={(_, v) => setTabValue(v)}>
           <Tab icon={<Flag />} iconPosition="start" label="Templates OKR" />
           <Tab icon={<Gavel />} iconPosition="start" label="Duyệt đề xuất" />
+          <Tab icon={<Assessment />} iconPosition="start" label="Báo cáo & Đánh giá" />
         </Tabs>
       </Box>
 
       {tabValue === 0 && <TemplateListTab />}
       {tabValue === 1 && <DeanApprovalTab />}
+      {tabValue === 2 && <EvaluationListTab />}
     </Container>
   );
 }
