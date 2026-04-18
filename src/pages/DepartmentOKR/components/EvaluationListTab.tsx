@@ -36,21 +36,20 @@ export default function EvaluationListTab() {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   // Filters
-  const [tabValue, setTabValue] = useState(0); // 0: PENDING_EVALUATION, 1: EVALUATED
+  const [tabValue, setTabValue] = useState(0); // 0: SUBMITTED, 1: COMPLETED
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("ALL");
   const [selectedRowIds, setSelectedRowIds] = useState<string[]>([]);
 
   useEffect(() => {
     fetchEvaluations();
-  }, []);
+  }, [tabValue]);
 
   const fetchEvaluations = async () => {
     setLoading(true);
     try {
-      // Gọi API Sync để tạo dummy record cho user nếu họ chưa có. Xóa dòng này ở Prod.
-      await api.post("/okrs/evaluations/sync");
-      const res = await api.get("/okrs/evaluations/submitted");
+      const endpoint = tabValue === 0 ? "/okrs/submitted" : "/okrs/completed";
+      const res = await api.get(endpoint);
       setReports(res.data || []);
     } catch (error) {
       console.error("Error fetching evaluations", error);
@@ -68,21 +67,16 @@ export default function EvaluationListTab() {
   // Lọc dữ liệu
   const filteredReports = useMemo(() => {
     return reports.filter((report) => {
-      // 1. Lọc theo Tab Trạng Thái
-      const matchesStatus = tabValue === 0 
-        ? report.status === "PENDING_EVALUATION" 
-        : report.status === "EVALUATED";
-      
-      // 2. Lọc theo Phím tìm kiếm (Tên / Email)
+      // 1. Lọc theo Phím tìm kiếm (Tên / Email)
       const matchesSearch = report.user?.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             report.user?.email?.toLowerCase().includes(searchQuery.toLowerCase());
       
-      // 3. Lọc theo Department
+      // 2. Lọc theo Department
       const matchesDept = selectedDepartment === "ALL" || report.user?.department?.name === selectedDepartment;
 
-      return matchesStatus && matchesSearch && matchesDept;
+      return matchesSearch && matchesDept;
     });
-  }, [reports, tabValue, searchQuery, selectedDepartment]);
+  }, [reports, searchQuery, selectedDepartment]);
 
   // Handle Selection
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -117,35 +111,14 @@ export default function EvaluationListTab() {
 
   // Handle API Submissions
   const handleTickAllSelected = async () => {
-    if (selectedRowIds.length === 0) return;
-    if (!window.confirm(`Bạn có chắc đánh giá Max điểm cho ${selectedRowIds.length} nhân viên đã chọn?`)) return;
-
-    try {
-      const updates = selectedRowIds.map(id => {
-        const report = reports.find(r => r.id === id);
-        const maxTasks = report.evaluationData.map((t: any) => ({ ...t, principalScore: t.maxScore }));
-        const maxScoreTotal = maxTasks.reduce((sum: number, t: any) => sum + t.principalScore, 0);
-        return { evaluationId: id, tasks: maxTasks, principalScoreTotal: maxScoreTotal };
-      });
-
-      await api.put("/okrs/evaluations/bulk-review", { updates });
-      alert("Đã cập nhật hàng loạt thành công!");
-      setSelectedRowIds([]);
-      fetchEvaluations();
-    } catch (e) {
-      console.error(e);
-      alert("Đã xảy ra lỗi khi duyệt hàng loạt");
-    }
+    // Để an toàn, bulk review manager có thể lấy data selfReportData để lưu luôn
+    alert("Chức năng Duyệt hàng loạt hiện đang được bảo trì cho quy trình tính điểm phức hợp.");
   };
 
   const handleQuickApproveSingle = async (report: any) => {
     try {
-      const maxTasks = report.evaluationData.map((t: any) => ({ ...t, principalScore: t.maxScore }));
-      const maxScoreTotal = maxTasks.reduce((sum: number, t: any) => sum + t.principalScore, 0);
-      
-      await api.put(`/okrs/evaluations/${report.id}/review`, {
-        tasks: maxTasks,
-        principalScoreTotal: maxScoreTotal
+      await api.put(`/okrs/${report.id}/manager-review`, {
+        managerReportData: report.selfReportData // Đồng ý toàn bộ điểm của nhân sự
       });
       fetchEvaluations();
     } catch (e) {
@@ -157,9 +130,8 @@ export default function EvaluationListTab() {
   const handleSaveEvaluation = async (updatedReport: any) => {
     setDialogOpen(false);
     try {
-      await api.put(`/okrs/evaluations/${updatedReport.id}/review`, {
-        tasks: updatedReport.evaluationData,
-        principalScoreTotal: updatedReport.principalScoreTotal
+      await api.put(`/okrs/${updatedReport.id}/manager-review`, {
+        managerReportData: updatedReport.managerReportData
       });
       fetchEvaluations();
     } catch (e) {
@@ -246,8 +218,8 @@ export default function EvaluationListTab() {
                 <TableCell sx={{ fontWeight: "bold", color: "#1e293b" }}>Nhân sự</TableCell>
                 <TableCell sx={{ fontWeight: "bold", color: "#1e293b" }}>Bộ môn</TableCell>
                 <TableCell sx={{ fontWeight: "bold", color: "#1e293b", textAlign: "center" }}>% OKR Hoàn thành</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#1e293b", textAlign: "center" }}>Điểm Cá nhân (Tổng)</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#1e293b", textAlign: "center" }}>Điểm Hiệu trưởng (Tổng)</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#1e293b", textAlign: "center" }}>Điểm Tự Khai (Tổng)</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#1e293b", textAlign: "center" }}>Điểm Q.Lý Duyệt (Tổng)</TableCell>
                 <TableCell sx={{ fontWeight: "bold", color: "#1e293b", textAlign: "center" }}>Trạng thái</TableCell>
                 <TableCell align="right" sx={{ fontWeight: "bold", color: "#1e293b" }}>Thao tác</TableCell>
               </TableRow>
@@ -298,27 +270,27 @@ export default function EvaluationListTab() {
                       </TableCell>
                       <TableCell align="center">
                         <Box sx={{ display: "inline-flex", alignItems: "center", bgcolor: "#ecfdf5", color: "#059669", px: 1.5, py: 0.5, borderRadius: 2, fontWeight: "bold" }}>
-                          {report.completionPercent}%
+                          {report.managerScore != null ? report.managerScore : report.totalScore}%
                         </Box>
                       </TableCell>
                       <TableCell align="center">
                         <Typography fontWeight={600} color="text.secondary">
-                          {report.selfScoreTotal}
+                          {report.totalScore?.toFixed(1) || 0}
                         </Typography>
                       </TableCell>
                       <TableCell align="center">
-                        {report.principalScoreTotal !== null && report.status === "EVALUATED" ? (
+                        {report.status === "COMPLETED" ? (
                           <Typography fontWeight={700} color="#1C4D8D">
-                            {report.principalScoreTotal}
+                            {report.managerScore?.toFixed(1) || 0}
                           </Typography>
                         ) : (
                           <Typography variant="body2" color="text.secondary" fontStyle="italic">
-                            Chưa có
+                            Chưa chấm
                           </Typography>
                         )}
                       </TableCell>
                       <TableCell align="center">
-                        {report.status === "EVALUATED" ? (
+                        {report.status === "COMPLETED" ? (
                           <Chip label="Đã đánh giá" color="success" size="small" sx={{ fontWeight: 500 }} />
                         ) : (
                           <Chip label="Chờ đánh giá" color="warning" size="small" sx={{ fontWeight: 500 }} />
@@ -330,8 +302,8 @@ export default function EvaluationListTab() {
                             <Description />
                           </IconButton>
                         </Tooltip>
-                        {report.status === "PENDING_EVALUATION" && (
-                          <Tooltip title="Tick All Đạt Tối Đa">
+                        {report.status === "SUBMITTED" && (
+                          <Tooltip title="Chấp nhận điểm tự khai">
                             <IconButton color="success" onClick={() => handleQuickApproveSingle(report)}>
                               <CheckCircle />
                             </IconButton>
