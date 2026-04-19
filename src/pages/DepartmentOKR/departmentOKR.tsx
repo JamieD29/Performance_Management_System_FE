@@ -12,6 +12,7 @@ import { NavigateNext, Business, Flag, Gavel, Assessment } from "@mui/icons-mate
 import TemplateListTab from "./components/TemplateListTab";
 import DeanApprovalTab from "./components/DeanApprovalTab";
 import EvaluationListTab from "./components/EvaluationListTab";
+import EvaluationFormManagerTab from "./components/EvaluationFormManagerTab";
 
 export default function DepartmentOKR() {
   const [tabValue, setTabValue] = useState(0);
@@ -39,13 +40,15 @@ export default function DepartmentOKR() {
         <Tabs value={tabValue} onChange={(_, v) => setTabValue(v)}>
           <Tab icon={<Flag />} iconPosition="start" label="Templates OKR" />
           <Tab icon={<Gavel />} iconPosition="start" label="Duyệt đề xuất" />
-          <Tab icon={<Assessment />} iconPosition="start" label="Báo cáo & Đánh giá" />
+          <Tab icon={<Assessment />} iconPosition="start" label="Báo cáo OKR (Thô)" />
+          <Tab icon={<Assessment />} iconPosition="start" label="Xét duyệt Phiếu (Hoàn thành)" />
         </Tabs>
       </Box>
 
       {tabValue === 0 && <TemplateListTab />}
       {tabValue === 1 && <DeanApprovalTab />}
       {tabValue === 2 && <EvaluationListTab />}
+      {tabValue === 3 && <EvaluationFormManagerTab />}
     </Container>
   );
 }

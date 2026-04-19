@@ -26,6 +26,7 @@ import {
   ChevronDown,
   ChevronUp,
   ClipboardCheck,
+  FileCheck2,
 } from "lucide-react";
 
 // ==========================================
@@ -565,6 +566,93 @@ export default function Sidebar({
                     fontSize: "0.95rem",
                   }}
                 />
+              </ListItemButton>
+            </Tooltip>
+          </Box>
+
+          {/* ── Phiếu Đánh Giá ── */}
+          <Box sx={{ px: collapsed ? 0.5 : 1, mb: 3 }}>
+            <Tooltip
+              title={collapsed ? "Phiếu Đánh Giá" : ""}
+              placement="right"
+              arrow
+            >
+              <ListItemButton
+                onClick={() => handleNavigate("/my-evaluation")}
+                sx={{
+                  ...getItemStyles("/my-evaluation"),
+                  bgcolor: isActive("/my-evaluation")
+                    ? "#BDE8F5"
+                    : "rgba(255, 255, 255, 0.1)",
+                  color: isActive("/my-evaluation") ? colors.bg : colors.textBright,
+                  boxShadow: isActive("/my-evaluation")
+                    ? "0 4px 12px rgba(0, 0, 0, 0.2)"
+                    : "none",
+                  borderRadius: "16px",
+                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  mb: 0,
+                  mx: 0,
+                  py: 1.2,
+                  zIndex: 1,
+                  "& .MuiListItemIcon-root": {
+                    color: isActive("/my-evaluation") ? colors.bg : colors.accent2,
+                  },
+                  "&:hover": {
+                    bgcolor: isActive("/my-evaluation")
+                      ? "#BDE8F5"
+                      : "rgba(255, 255, 255, 0.2)",
+                    transform: collapsed ? "none" : "translateY(-2px)",
+                    boxShadow: "0 8px 16px rgba(0, 0, 0, 0.2)",
+                    "& .MuiListItemIcon-root": {
+                      color: isActive("/my-evaluation")
+                        ? colors.bg
+                        : colors.textBright,
+                    },
+                  },
+                  "&::before": { display: "none" },
+                }}
+              >
+                <ListItemIcon
+                  sx={{ ...getIconStyles("/my-evaluation"), color: "inherit" }}
+                >
+                  <FileCheck2 size={21} />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Phiếu Đánh Giá"
+                  sx={{
+                    opacity: collapsed ? 0 : 1,
+                    width: collapsed ? 0 : "auto",
+                    transition: `opacity 0.2s ease, width ${TRANSITION_DURATION} ${TRANSITION_EASING}`,
+                    overflow: "hidden",
+                    whiteSpace: "nowrap",
+                  }}
+                  primaryTypographyProps={{
+                    fontWeight: isActive("/my-evaluation") ? 700 : 600,
+                    fontSize: "0.95rem",
+                  }}
+                />
+                {/* Beta badge */}
+                <Box
+                  component="span"
+                  sx={{
+                    position: "absolute",
+                    top: 4,
+                    right: 8,
+                    bgcolor: "#ef4444",
+                    color: "#fff",
+                    fontSize: "0.58rem",
+                    fontWeight: 800,
+                    px: 0.6,
+                    py: 0.1,
+                    borderRadius: "4px",
+                    lineHeight: 1.4,
+                    letterSpacing: "0.5px",
+                    opacity: collapsed ? 0 : 1,
+                    transition: "opacity 0.2s ease",
+                  }}
+                >
+                  BETA
+                </Box>
               </ListItemButton>
             </Tooltip>
           </Box>

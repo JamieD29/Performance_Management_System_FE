@@ -24,6 +24,7 @@ const DepartmentOverview = React.lazy(
   () => import('../pages/DepartmentOverview/DepartmentOverview'),
 );
 const MyOkrPage = React.lazy(() => import('../pages/MyOkr/MyOkrPage'));
+const MyEvaluationPage = React.lazy(() => import('../pages/MyEvaluation/MyEvaluationPage'));
 
 // Non-lazy (always needed for layout)
 import MainLayout from '../layouts/MainLayout';
@@ -145,6 +146,7 @@ export default function AppRoutes() {
         {/* 2. Hồ sơ cá nhân */}
         <Route path="/profile" element={<ProfileSetting />} />
         <Route path="/my-okr" element={<MyOkrPage />} />
+        <Route path="/my-evaluation" element={<MyEvaluationPage />} />
 
         {/* 3. GROUP BỘ MÔN (Theo Sidebar mới) */}
         {/* Tổng quan */}
