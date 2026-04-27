@@ -181,7 +181,7 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
               </Tooltip>
               <Tooltip title="Cho điểm số lượng đạt trần max score">
                 <Button variant="contained" color="success" size="small" startIcon={<CheckCircle />} onClick={handleTickAll}>
-                  Tick All (Đạt Trần)
+                  Tick All
                 </Button>
               </Tooltip>
             </Box>
