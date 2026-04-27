@@ -15,6 +15,13 @@ import {
   DialogContent,
   TextField,
   DialogActions,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
 } from "@mui/material";
 import {
   Plus,
@@ -22,20 +29,44 @@ import {
   Pause,
   Calendar,
   RefreshCcw,
-  Database,
 } from "lucide-react";
 import axios from "axios";
 import { api } from "../../../services/api";
 
 const RESOURCE_PATH = "/performance";
 
+// Hàm chuẩn hóa chuỗi tiếng Việt (loại bỏ dấu)
+const removeVietnameseTones = (str: string) => {
+  str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
+  str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
+  str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
+  str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
+  str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
+  str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
+  str = str.replace(/đ/g, "d");
+  str = str.replace(/À|Á|Ạ|Ả|Ã|Â|Ầ|Ấ|Ậ|Ẩ|Ẫ|Ă|Ằ|Ắ|Ặ|Ẳ|Ẵ/g, "A");
+  str = str.replace(/È|É|Ẹ|Ẻ|Ẽ|Ê|Ề|Ế|Ệ|Ể|Ễ/g, "E");
+  str = str.replace(/Ì|Í|Ị|Ỉ|Ĩ/g, "I");
+  str = str.replace(/Ò|Ó|Ọ|Ỏ|Õ|Ô|Ồ|Ố|Ộ|Ổ|Ỗ|Ơ|Ờ|Ớ|Ợ|Ở|Ỡ/g, "O");
+  str = str.replace(/Ù|Ú|Ụ|Ủ|Ũ|Ư|Ừ|Ứ|Ự|Ử|Ữ/g, "U");
+  str = str.replace(/Ỳ|Ý|Ỵ|Ỷ|Ỹ/g, "Y");
+  str = str.replace(/Đ/g, "D");
+  return str.toLowerCase();
+};
+
 export default function CycleManagement() {
   const [cycles, setCycles] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
 
+  // States for filtering
+  const [filterName, setFilterName] = useState("");
+  const [filterYear, setFilterYear] = useState("ALL");
+  const [filterType, setFilterType] = useState("ALL"); // 'ALL', 'SEMESTER', 'QUARTER', 'OTHER'
+
   // Form state
   const [formData, setFormData] = useState({
     name: "",
+    type: "SEMESTER", // Mặc định là Học kỳ
     startDate: "",
     endDate: "",
   });
@@ -50,28 +81,6 @@ export default function CycleManagement() {
       setCycles(res.data);
     } catch (error) {
       console.error(error);
-    }
-  };
-
-  // 🔥 HÀM MỚI: GỌI API INIT DATA
-  const handleInitData = async () => {
-    // 1. Hỏi cho chắc, lỡ sếp bấm nhầm
-    if (
-      !window.confirm(
-        "⚠️ CẢNH BÁO: Hành động này sẽ tạo lại dữ liệu mẫu (Kỳ học, Template KPI).\n\nBạn có chắc chắn muốn chạy không?",
-      )
-    ) {
-      return;
-    }
-
-    try {
-      // 2. Gọi API Init của mày
-      await api.post(`${RESOURCE_PATH}/init`);
-      fetchCycles();
-      alert("Khởi tạo dữ liệu thành công!");
-    } catch (error) {
-      console.error(error);
-      alert("Lỗi khởi tạo dữ liệu!");
     }
   };
 
@@ -98,19 +107,57 @@ export default function CycleManagement() {
     }
   };
 
+  // Trích xuất danh sách năm học từ dữ liệu
+  const availableYears = Array.from(
+    new Set(
+      cycles.map((c) => {
+        const match = c.name.match(/\d{4}(?:-\d{4})?/);
+        if (match) return match[0];
+        if (c.startDate) return new Date(c.startDate).getFullYear().toString();
+        return "N/A";
+      }).filter((y) => y !== "N/A")
+    )
+  ).sort().reverse();
+
+  // Logic lọc dữ liệu
+  const filteredCycles = cycles.filter((c) => {
+    const normalizedName = removeVietnameseTones(c.name);
+
+    // 1. Lọc theo tên (cũng bỏ dấu khi tìm kiếm)
+    if (filterName) {
+      const normalizedSearch = removeVietnameseTones(filterName);
+      if (!normalizedName.includes(normalizedSearch)) {
+        return false;
+      }
+    }
+    
+    // 2. Lọc theo loại (Học kỳ / Quý / Khác)
+    if (filterType !== "ALL") {
+      if (c.type !== filterType) {
+        // Cần đảm bảo data cũ (chưa có type) sẽ không bị mất bằng cách gán type tạm
+        // Nhưng nếu DB đã có type thì nó sẽ có. Để cho an toàn:
+        const cycleType = c.type || "OTHER";
+        if (cycleType !== filterType) return false;
+      }
+    }
+    
+    // 3. Lọc theo năm
+    if (filterYear !== "ALL") {
+      const match = c.name.match(/\d{4}(?:-\d{4})?/);
+      const cycleYear = match ? match[0] : (c.startDate ? new Date(c.startDate).getFullYear().toString() : "");
+      if (cycleYear !== filterYear) {
+        return false;
+      }
+    }
+    return true;
+  });
+
   return (
     <Box>
       <Box className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-bold text-gray-800">Quản lý Kỳ Đánh Giá</h3>
 
         <Box className="flex gap-2">
-          <Button
-            variant="outlined"
-            startIcon={<Database size={18} />}
-            onClick={handleInitData}
-          >
-            Khởi tạo Dữ liệu mẫu
-          </Button>
           <Button
             variant="contained"
             startIcon={<Plus size={18} />}
@@ -121,7 +168,46 @@ export default function CycleManagement() {
         </Box>
       </Box>
 
-      {/* ... (Phần Table bên dưới giữ nguyên không đổi) ... */}
+      {/* FILTER SECTION */}
+      <Paper variant="outlined" className="p-4 mb-4 flex flex-wrap gap-4 items-center bg-white">
+        <TextField
+          label="Tìm kiếm tên kỳ..."
+          size="small"
+          value={filterName}
+          onChange={(e) => setFilterName(e.target.value)}
+          className="min-w-[200px]"
+        />
+
+        <FormControl size="small" className="min-w-[150px]">
+          <InputLabel>Năm học</InputLabel>
+          <Select
+            value={filterYear}
+            label="Năm học"
+            onChange={(e) => setFilterYear(e.target.value)}
+          >
+            <MenuItem value="ALL">Tất cả các năm</MenuItem>
+            {availableYears.map((year) => (
+              <MenuItem key={year} value={year}>
+                {year}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl component="fieldset" className="ml-4">
+          <RadioGroup
+            row
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value)}
+          >
+            <FormControlLabel value="ALL" control={<Radio size="small" />} label="Tất cả" />
+            <FormControlLabel value="SEMESTER" control={<Radio size="small" />} label="Học kỳ" />
+            <FormControlLabel value="QUARTER" control={<Radio size="small" />} label="Quý" />
+            <FormControlLabel value="OTHER" control={<Radio size="small" />} label="Khác" />
+          </RadioGroup>
+        </FormControl>
+      </Paper>
+
       <TableContainer component={Paper} variant="outlined">
         <Table>
           <TableHead className="bg-gray-50">
@@ -133,8 +219,8 @@ export default function CycleManagement() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {cycles.length > 0 ? (
-              cycles.map((cycle) => (
+            {filteredCycles.length > 0 ? (
+              filteredCycles.map((cycle) => (
                 <TableRow key={cycle.id}>
                   <TableCell className="font-medium">{cycle.name}</TableCell>
                   <TableCell>
@@ -177,8 +263,8 @@ export default function CycleManagement() {
                   align="center"
                   className="py-8 text-gray-400"
                 >
-                  Chưa có kỳ đánh giá nào. Bấm nút{" "}
-                  <strong>"Khởi tạo Dữ liệu mẫu"</strong> ở trên để bắt đầu!
+                  Chưa có kỳ đánh giá nào. Vui lòng bấm nút{" "}
+                  <strong>'Tạo kỳ mới'</strong> để bắt đầu!
                 </TableCell>
               </TableRow>
             )}
@@ -200,6 +286,19 @@ export default function CycleManagement() {
             fullWidth
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
           />
+          
+          <FormControl component="fieldset">
+            <RadioGroup
+              row
+              value={formData.type}
+              onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+            >
+              <FormControlLabel value="SEMESTER" control={<Radio size="small" />} label="Theo Học kỳ" />
+              <FormControlLabel value="QUARTER" control={<Radio size="small" />} label="Theo Quý" />
+              <FormControlLabel value="OTHER" control={<Radio size="small" />} label="Khác (Linh hoạt)" />
+            </RadioGroup>
+          </FormControl>
+
           <div className="flex gap-4">
             <TextField
               type="date"

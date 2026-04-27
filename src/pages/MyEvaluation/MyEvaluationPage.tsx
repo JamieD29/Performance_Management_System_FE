@@ -155,17 +155,27 @@ export default function MyEvaluationPage() {
         <Typography variant="h6" fontWeight="bold" color="#1e3a8a" sx={{ mb: 1 }}>
           II. KẾT QUẢ TỰ ĐÁNH GIÁ LUỒNG OKR
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
           Kết quả thực hiện chức trách, nhiệm vụ được giao (Đồng bộ tự động từ Bài Tự Khai OKR).
         </Typography>
+        {form.okrObjectiveName && (
+          <Typography variant="body2" fontWeight={600} color="#2563eb" sx={{ mb: 2 }}>
+            📋 OKR Template: {form.okrObjectiveName}
+            {form.okrStatus === "COMPLETED" && (
+              <Box component="span" sx={{ ml: 1, color: "#16a34a", fontWeight: 700 }}>✓ Đã chốt điểm</Box>
+            )}
+          </Typography>
+        )}
 
         <TableContainer component={Paper} elevation={0} sx={{ mb: 4, border: "1px solid #cbd5e1" }}>
           <Table size="small">
             <TableHead sx={{ bgcolor: "#f1f5f9" }}>
               <TableRow>
-                <TableCell sx={{ fontWeight: "bold", width: "10%", textAlign: "center" }}>STT</TableCell>
-                <TableCell sx={{ fontWeight: "bold", width: "50%" }}>Tiêu chí / Nhiệm vụ</TableCell>
-                <TableCell sx={{ fontWeight: "bold", textAlign: "center" }}>Điểm Đánh Giá</TableCell>
+                <TableCell sx={{ fontWeight: "bold", width: "8%", textAlign: "center" }}>STT</TableCell>
+                <TableCell sx={{ fontWeight: "bold", width: "40%" }}>Tiêu chí / Nhiệm vụ</TableCell>
+                <TableCell sx={{ fontWeight: "bold", textAlign: "center" }}>Điểm Tối Đa</TableCell>
+                <TableCell sx={{ fontWeight: "bold", textAlign: "center", color: "#64748b" }}>Điểm Tự Khai</TableCell>
+                <TableCell sx={{ fontWeight: "bold", textAlign: "center", color: "#1C4D8D" }}>Điểm QL Duyệt</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -174,14 +184,26 @@ export default function MyEvaluationPage() {
                   <TableCell align="center" sx={{ fontWeight: "bold" }}>{row.id}</TableCell>
                   <TableCell>{row.name}</TableCell>
                   <TableCell align="center">
-                    <Typography fontWeight={600} color="#2563eb">{row.selfScore?.toFixed(1) || 0} / {row.maxScore || 0}</Typography>
+                    <Typography fontWeight={500} color="text.secondary">{row.maxScore || 0}</Typography>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Typography fontWeight={600} color="#64748b">{row.selfScore?.toFixed(1) || 0}</Typography>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Typography fontWeight={700} color="#1C4D8D">
+                      {row.principalScore != null ? row.principalScore.toFixed(1) : "—"}
+                    </Typography>
                   </TableCell>
                 </TableRow>
               ))}
               <TableRow sx={{ bgcolor: "#f0fdf4" }}>
-                <TableCell colSpan={2} align="center" sx={{ fontWeight: "bold", color: "#166534" }}>TỔNG ĐIỂM CHẤM TỪ OKR</TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold", color: "#166534", fontSize: "1.1rem" }}>
+                <TableCell colSpan={2} align="center" sx={{ fontWeight: "bold", color: "#166534" }}>TỔNG ĐIỂM</TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold", color: "#166534" }}>100</TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold", color: "#64748b", fontSize: "1.1rem" }}>
                   {form.selfScoreTotal?.toFixed(1) || 0}
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold", color: "#1C4D8D", fontSize: "1.1rem" }}>
+                  {form.principalScoreTotal != null ? form.principalScoreTotal.toFixed(1) : "—"}
                 </TableCell>
               </TableRow>
             </TableBody>

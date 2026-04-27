@@ -22,9 +22,10 @@ import {
   Paper,
   Chip,
   Avatar,
-  Radio,
+  Checkbox,
+  Alert,
 } from "@mui/material";
-import { Send, PersonSearch } from "@mui/icons-material";
+import { Send, PersonSearch, SelectAll, Deselect } from "@mui/icons-material";
 import { api } from "../../../services/api";
 import { performanceService } from "../../../services/performanceService";
 
@@ -41,55 +42,75 @@ export default function AssignTemplateDialog({
 }: AssignTemplateDialogProps) {
   const [users, setUsers] = useState<any[]>([]);
   const [cycles, setCycles] = useState<any[]>([]);
-  const [selectedUserId, setSelectedUserId] = useState("");
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [selectedCycleId, setSelectedCycleId] = useState("");
   const [deadline, setDeadline] = useState("");
-  const [filterDept, setFilterDept] = useState("");
-  const [departments, setDepartments] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+
+  const [filterDepartmentId, setFilterDepartmentId] = useState("");
+  const [filterPositionId, setFilterPositionId] = useState("");
+  const [filterJobTitle, setFilterJobTitle] = useState("");
 
   useEffect(() => {
     if (open) {
+      setFilterPositionId(template?.positionId || "");
+      setFilterJobTitle(template?.jobTitle || "");
+      setFilterDepartmentId("");
       loadData();
     }
-  }, [open]);
+  }, [open, template]);
 
   const loadData = async () => {
     try {
-      // Fetch all users with details
-      const usersRes = await api.get("/users");
-      setUsers(usersRes.data || []);
+      setLoadingUsers(true);
 
-      // Fetch departments
-      const deptRes = await api.get("/departments");
-      setDepartments(deptRes.data?.data || deptRes.data || []);
+      // Fetch all users to support client-side filtering
+      const usersRes = await api.get("/users/filter-by-role");
+      setUsers(usersRes.data || []);
 
       // Fetch evaluation cycles
       const cyclesData = await performanceService.getCycles();
       setCycles(cyclesData || []);
     } catch (error) {
       console.error("Error loading data for assignment", error);
+    } finally {
+      setLoadingUsers(false);
     }
   };
 
-  const filteredUsers = filterDept
-    ? users.filter((u: any) => u.department?.id === filterDept)
-    : users;
+  // Toggle chọn 1 user
+  const handleToggleUser = (userId: string) => {
+    setSelectedUserIds((prev) =>
+      prev.includes(userId)
+        ? prev.filter((id) => id !== userId)
+        : [...prev, userId],
+    );
+  };
+
+  // Chọn tất cả / Bỏ chọn tất cả
+  const handleSelectAll = () => {
+    if (selectedUserIds.length === filteredUsers.length && filteredUsers.length > 0) {
+      setSelectedUserIds([]);
+    } else {
+      setSelectedUserIds(filteredUsers.map((u) => u.id));
+    }
+  };
 
   const handleAssign = async () => {
-    if (!selectedUserId || !selectedCycleId) {
-      alert("Vui lòng chọn User và Kỳ đánh giá!");
+    if (selectedUserIds.length === 0 || !selectedCycleId) {
+      alert("Vui lòng chọn ít nhất 1 User và Kỳ đánh giá!");
       return;
     }
     setLoading(true);
     try {
       await api.post(`/okr-templates/${template.id}/apply`, {
-        userId: selectedUserId,
+        userIds: selectedUserIds,
         cycleId: selectedCycleId,
         deadline: deadline || undefined,
       });
       alert(
-        "✅ Đã giao OKR Template cho User thành công! User sẽ nhận được OKR ở trạng thái chờ duyệt.",
+        `✅ Đã giao OKR Template cho ${selectedUserIds.length} nhân sự thành công! Mỗi người sẽ nhận được OKR ở trạng thái chờ duyệt.`,
       );
       onClose();
     } catch (error) {
@@ -99,6 +120,19 @@ export default function AssignTemplateDialog({
       setLoading(false);
     }
   };
+
+  // Filtered users based on selected filters
+  const filteredUsers = users.filter((user) => {
+    if (filterDepartmentId && user.department?.id !== filterDepartmentId) return false;
+    if (filterPositionId && user.managementPosition?.id !== filterPositionId) return false;
+    if (filterJobTitle && user.jobTitle !== filterJobTitle) return false;
+    return true;
+  });
+
+  // Unique options for filters
+  const departments = Array.from(new Set(users.map((u) => u.department?.id))).filter(Boolean).map((id) => users.find((u) => u.department?.id === id)?.department);
+  const positions = Array.from(new Set(users.map((u) => u.managementPosition?.id))).filter(Boolean).map((id) => users.find((u) => u.managementPosition?.id === id)?.managementPosition);
+  const jobTitles = Array.from(new Set(users.map((u) => u.jobTitle))).filter(Boolean);
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
@@ -112,7 +146,7 @@ export default function AssignTemplateDialog({
         }}
       >
         <Send />
-        Giao Template OKR cho Nhân sự
+        Giao OKR cho Nhân sự
       </DialogTitle>
       <Divider />
 
@@ -133,14 +167,78 @@ export default function AssignTemplateDialog({
           <Typography variant="h6" fontWeight="bold" color="#1e3a8a">
             {template?.title}
           </Typography>
-          {template?.jobTitle && (
-            <Chip
-              label={template.jobTitle}
-              size="small"
-              color="primary"
-              sx={{ mt: 0.5, mr: 1 }}
-            />
-          )}
+          <Box sx={{ mt: 0.5, display: "flex", gap: 0.5, flexWrap: "wrap" }}>
+            {template?.positionName && (
+              <Chip
+                label={`Chức vụ: ${template.positionName}`}
+                size="small"
+                color="secondary"
+              />
+            )}
+            {template?.jobTitle && (
+              <Chip
+                label={`Chức danh: ${template.jobTitle}`}
+                size="small"
+                color="primary"
+              />
+            )}
+          </Box>
+        </Box>
+
+        {/* Bộ lọc mở rộng */}
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: "bold", color: "text.secondary" }}>
+            Lọc nhân sự để giao OKR:
+          </Typography>
+          <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+            <FormControl size="small" sx={{ minWidth: 200, flex: 1 }}>
+              <InputLabel>Bộ môn</InputLabel>
+              <Select
+                value={filterDepartmentId}
+                label="Bộ môn"
+                onChange={(e) => setFilterDepartmentId(e.target.value)}
+              >
+                <MenuItem value="">-- Tất cả --</MenuItem>
+                {departments.map((dept: any) => (
+                  <MenuItem key={dept.id} value={dept.id}>
+                    {dept.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <FormControl size="small" sx={{ minWidth: 200, flex: 1 }}>
+              <InputLabel>Chức vụ quản lý</InputLabel>
+              <Select
+                value={filterPositionId}
+                label="Chức vụ quản lý"
+                onChange={(e) => setFilterPositionId(e.target.value)}
+              >
+                <MenuItem value="">-- Tất cả --</MenuItem>
+                {positions.map((pos: any) => (
+                  <MenuItem key={pos.id} value={pos.id}>
+                    {pos.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <FormControl size="small" sx={{ minWidth: 200, flex: 1 }}>
+              <InputLabel>Chức danh nghề nghiệp</InputLabel>
+              <Select
+                value={filterJobTitle}
+                label="Chức danh nghề nghiệp"
+                onChange={(e) => setFilterJobTitle(e.target.value)}
+              >
+                <MenuItem value="">-- Tất cả --</MenuItem>
+                {jobTitles.map((title: any) => (
+                  <MenuItem key={title} value={title}>
+                    {title}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
         </Box>
 
         {/* Cycle & Deadline Selection */}
@@ -169,28 +267,31 @@ export default function AssignTemplateDialog({
           />
         </Box>
 
-        {/* User Selection */}
+        {/* User Selection Header */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
           <PersonSearch color="primary" />
           <Typography variant="h6" fontWeight="bold">
             Chọn Nhân sự để giao
           </Typography>
-          <FormControl sx={{ minWidth: 200, ml: "auto" }}>
-            <InputLabel>Lọc theo Bộ môn</InputLabel>
-            <Select
-              value={filterDept}
-              label="Lọc theo Bộ môn"
-              onChange={(e) => setFilterDept(e.target.value)}
+          <Box sx={{ ml: "auto", display: "flex", gap: 1 }}>
+            <Button
               size="small"
+              variant="outlined"
+              startIcon={
+                selectedUserIds.length === filteredUsers.length && filteredUsers.length > 0 ? (
+                  <Deselect />
+                ) : (
+                  <SelectAll />
+                )
+              }
+              onClick={handleSelectAll}
+              disabled={filteredUsers.length === 0}
             >
-              <MenuItem value="">-- Tất cả --</MenuItem>
-              {departments.map((d: any) => (
-                <MenuItem key={d.id} value={d.id}>
-                  {d.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+              {selectedUserIds.length === filteredUsers.length && filteredUsers.length > 0
+                ? "Bỏ chọn tất cả"
+                : "Chọn tất cả"}
+            </Button>
+          </Box>
         </Box>
 
         <TableContainer
@@ -203,7 +304,20 @@ export default function AssignTemplateDialog({
               <TableRow
                 sx={{ "& th": { bgcolor: "#f1f5f9", fontWeight: "bold" } }}
               >
-                <TableCell width={50}></TableCell>
+                <TableCell width={50}>
+                  <Checkbox
+                    checked={
+                      selectedUserIds.length === filteredUsers.length &&
+                      filteredUsers.length > 0
+                    }
+                    indeterminate={
+                      selectedUserIds.length > 0 &&
+                      selectedUserIds.length < filteredUsers.length
+                    }
+                    onChange={handleSelectAll}
+                    size="small"
+                  />
+                </TableCell>
                 <TableCell>Họ tên</TableCell>
                 <TableCell>Email</TableCell>
                 <TableCell>Bộ môn</TableCell>
@@ -212,14 +326,25 @@ export default function AssignTemplateDialog({
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredUsers.length === 0 ? (
+              {loadingUsers ? (
                 <TableRow>
                   <TableCell
                     colSpan={6}
                     align="center"
                     sx={{ py: 3, color: "text.secondary" }}
                   >
-                    Không tìm thấy nhân sự nào.
+                    Đang tải danh sách nhân sự...
+                  </TableCell>
+                </TableRow>
+              ) : filteredUsers.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={6}
+                    align="center"
+                    sx={{ py: 3, color: "text.secondary" }}
+                  >
+                    Không tìm thấy nhân sự nào phù hợp với tiêu chí của
+                    template.
                   </TableCell>
                 </TableRow>
               ) : (
@@ -227,14 +352,14 @@ export default function AssignTemplateDialog({
                   <TableRow
                     key={user.id}
                     hover
-                    selected={selectedUserId === user.id}
-                    onClick={() => setSelectedUserId(user.id)}
+                    selected={selectedUserIds.includes(user.id)}
+                    onClick={() => handleToggleUser(user.id)}
                     sx={{ cursor: "pointer" }}
                   >
                     <TableCell>
-                      <Radio
-                        checked={selectedUserId === user.id}
-                        onChange={() => setSelectedUserId(user.id)}
+                      <Checkbox
+                        checked={selectedUserIds.includes(user.id)}
+                        onChange={() => handleToggleUser(user.id)}
                         size="small"
                       />
                     </TableCell>
@@ -294,7 +419,8 @@ export default function AssignTemplateDialog({
           </Table>
         </TableContainer>
 
-        {selectedUserId && (
+        {/* Selection Summary */}
+        {selectedUserIds.length > 0 && (
           <Box
             sx={{
               mt: 2,
@@ -305,12 +431,32 @@ export default function AssignTemplateDialog({
             }}
           >
             <Typography variant="body2" color="success.main">
-              ✅ Đã chọn:{" "}
-              <strong>
-                {filteredUsers.find((u) => u.id === selectedUserId)?.name ||
-                  filteredUsers.find((u) => u.id === selectedUserId)?.email}
-              </strong>
+              ✅ Đã chọn <strong>{selectedUserIds.length}</strong> nhân sự:
             </Typography>
+            <Box
+              sx={{ display: "flex", gap: 0.5, flexWrap: "wrap", mt: 0.5 }}
+            >
+              {selectedUserIds.slice(0, 10).map((id) => {
+                const user = users.find((u) => u.id === id);
+                return (
+                  <Chip
+                    key={id}
+                    label={user?.name || user?.email || id}
+                    size="small"
+                    color="success"
+                    variant="outlined"
+                    onDelete={() => handleToggleUser(id)}
+                  />
+                );
+              })}
+              {selectedUserIds.length > 10 && (
+                <Chip
+                  label={`+${selectedUserIds.length - 10} người khác`}
+                  size="small"
+                  color="default"
+                />
+              )}
+            </Box>
           </Box>
         )}
       </DialogContent>
@@ -322,10 +468,12 @@ export default function AssignTemplateDialog({
         <Button
           variant="contained"
           onClick={handleAssign}
-          disabled={!selectedUserId || !selectedCycleId || loading}
+          disabled={selectedUserIds.length === 0 || !selectedCycleId || loading}
           startIcon={<Send />}
         >
-          {loading ? "Đang giao..." : "Giao OKR cho Nhân sự"}
+          {loading
+            ? "Đang giao..."
+            : `Giao OKR cho ${selectedUserIds.length || ""} Nhân sự`}
         </Button>
       </DialogActions>
     </Dialog>

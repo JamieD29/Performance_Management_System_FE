@@ -49,14 +49,13 @@ export default function TemplateEditorDialog({
   initialData,
 }: TemplateEditorDialogProps) {
   const [title, setTitle] = useState("");
-  const [departmentId, setDepartmentId] = useState("");
   const [positionId, setPositionId] = useState("");
   const [positionName, setPositionName] = useState("");
   const [jobTitle, setJobTitle] = useState("");
 
   const [structure, setStructure] = useState<any[]>([]);
-  const [departments, setDepartments] = useState<any[]>([]);
   const [positions, setPositions] = useState<any[]>([]);
+  const [jobTitles, setJobTitles] = useState<any[]>([]);
 
   // Snackbar state for import feedback
   const [snackbar, setSnackbar] = useState<{
@@ -72,14 +71,12 @@ export default function TemplateEditorDialog({
       loadData();
       if (initialData) {
         setTitle(initialData.title);
-        setDepartmentId(initialData.departmentId || "");
         setPositionId(initialData.positionId || "");
         setPositionName(initialData.positionName || "");
         setJobTitle(initialData.jobTitle || "");
         setStructure(initialData.structure || []);
       } else {
         setTitle("");
-        setDepartmentId("");
         setPositionId("");
         setPositionName("");
         setJobTitle("");
@@ -90,11 +87,12 @@ export default function TemplateEditorDialog({
 
   const loadData = async () => {
     try {
-      const deptRes = await api.get("/departments");
-      setDepartments(deptRes.data?.data || deptRes.data || []);
-
       const posRes = await api.get("/management-positions");
       setPositions(posRes.data?.data || posRes.data || []);
+
+      // Fetch danh sách Chức danh nghề nghiệp từ DB enum
+      const jtRes = await api.get("/okr-templates/job-titles");
+      setJobTitles(jtRes.data || []);
     } catch (error) {
       console.error("Lỗi load data", error);
     }
@@ -336,7 +334,6 @@ export default function TemplateEditorDialog({
 
     onSave({
       title,
-      departmentId,
       positionId,
       positionName,
       jobTitle,
@@ -346,7 +343,6 @@ export default function TemplateEditorDialog({
     });
   };
 
-  const jobTitles = ["Giảng viên", "Chuyên viên", "Nghiên cứu viên", "Khác"];
 
   // ============================================================
   // Render Helpers
@@ -456,20 +452,6 @@ export default function TemplateEditorDialog({
             required
           />
           <FormControl sx={{ flex: 1, minWidth: 180 }}>
-            <InputLabel>Bộ môn</InputLabel>
-            <Select
-              value={departmentId}
-              label="Bộ môn"
-              onChange={(e) => setDepartmentId(e.target.value)}
-            >
-              {departments.map((d: any) => (
-                <MenuItem key={d.id} value={d.id}>
-                  {d.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <FormControl sx={{ flex: 1, minWidth: 180 }}>
             <InputLabel>Chức vụ</InputLabel>
             <Select
               value={positionId}
@@ -485,16 +467,16 @@ export default function TemplateEditorDialog({
             </Select>
           </FormControl>
           <FormControl sx={{ flex: 1, minWidth: 180 }}>
-            <InputLabel>Chức danh</InputLabel>
+            <InputLabel>Chức danh nghề nghiệp</InputLabel>
             <Select
               value={jobTitle}
-              label="Chức danh"
+              label="Chức danh nghề nghiệp"
               onChange={(e) => setJobTitle(e.target.value)}
             >
               <MenuItem value="">-- Không chọn --</MenuItem>
-              {jobTitles.map((jt) => (
-                <MenuItem key={jt} value={jt}>
-                  {jt}
+              {jobTitles.map((jt: any) => (
+                <MenuItem key={jt.key} value={jt.value}>
+                  {jt.label}
                 </MenuItem>
               ))}
             </Select>

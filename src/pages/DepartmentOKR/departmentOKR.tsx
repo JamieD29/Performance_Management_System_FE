@@ -40,7 +40,7 @@ export default function DepartmentOKR() {
         <Tabs value={tabValue} onChange={(_, v) => setTabValue(v)}>
           <Tab icon={<Flag />} iconPosition="start" label="Templates OKR" />
           <Tab icon={<Gavel />} iconPosition="start" label="Duyệt đề xuất" />
-          <Tab icon={<Assessment />} iconPosition="start" label="Báo cáo OKR (Thô)" />
+          <Tab icon={<Assessment />} iconPosition="start" label="Báo cáo OKR" />
           <Tab icon={<Assessment />} iconPosition="start" label="Xét duyệt Phiếu (Hoàn thành)" />
         </Tabs>
       </Box>

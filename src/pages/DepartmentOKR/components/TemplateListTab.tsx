@@ -156,7 +156,7 @@ export default function TemplateListTab() {
                       onClick={() => handleEdit(t)}
                       sx={{ mr: 1 }}
                     >
-                      Sửa
+                      Chỉnh sửa
                     </Button>
                     <Button
                       size="small"
@@ -165,7 +165,7 @@ export default function TemplateListTab() {
                       startIcon={<Send />}
                       onClick={() => handleAssign(t)}
                     >
-                      Giao cho Nhân sự
+                      Gán
                     </Button>
                   </TableCell>
                 </TableRow>
