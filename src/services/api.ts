@@ -30,7 +30,7 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response: AxiosResponse) => response,
   (error: AxiosError) => {
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 || (error.response?.status === 404 && error.response?.data?.message?.includes("User with ID"))) {
       sessionStorage.removeItem("authToken");
       sessionStorage.removeItem("user");
       window.location.href = "/login";

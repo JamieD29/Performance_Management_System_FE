@@ -23,6 +23,7 @@ import {
   TableRow,
   Alert,
   Snackbar,
+  Tooltip,
 } from "@mui/material";
 import {
   Add,
@@ -31,6 +32,7 @@ import {
   Save,
   UploadFile,
   CheckCircle,
+  HelpOutline,
 } from "@mui/icons-material";
 import { api } from "../../../services/api";
 import { parseExcelToStructure } from "../../../utils/excelParser";
@@ -402,7 +404,7 @@ export default function TemplateEditorDialog({
         <TableCell>
           <input
             className={inputClass}
-            placeholder="đơn vị"
+            placeholder="N/A"
             value={ssKr.unit || ""}
             onChange={(e) =>
               updateItem(oIndex, "unit", e.target.value, kIndex, sIndex, ssIndex)
@@ -554,7 +556,19 @@ export default function TemplateEditorDialog({
                 <TableCell
                   sx={{ color: "white", fontWeight: "bold", width: "12%" }}
                 >
-                  Đơn vị tính
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    Đơn vị tính
+                    <Tooltip 
+                      title={
+                        <span style={{ whiteSpace: 'pre-line' }}>
+                          Đơn vị tính sẽ được đặt linh hoạt dựa trên chi tiết các nhiệm vụ được giao.{"\n"}Ví dụ: học phần, đề cương, buổi, chương trình, ....
+                        </span>
+                      }
+                      placement="top"
+                    >
+                      <HelpOutline sx={{ fontSize: 16, cursor: 'help', opacity: 0.8 }} />
+                    </Tooltip>
+                  </Box>
                 </TableCell>
                 <TableCell
                   sx={{ color: "white", fontWeight: "bold", width: "12%" }}
@@ -660,7 +674,7 @@ export default function TemplateEditorDialog({
                         <TableCell>
                           <input
                             className={inputClass}
-                            placeholder="học phần"
+                            placeholder="N/A"
                             value={kr.unit || ""}
                             onChange={(e) => updateItem(oIndex, "unit", e.target.value, kIndex)}
                           />
@@ -733,7 +747,7 @@ export default function TemplateEditorDialog({
                               <TableCell>
                                 <input
                                   className={inputClass}
-                                  placeholder="đề cương"
+                                  placeholder="N/A"
                                   value={subKr.unit || ""}
                                   onChange={(e) => updateItem(oIndex, "unit", e.target.value, kIndex, sIndex)}
                                 />
