@@ -18,6 +18,7 @@ import {
   AdminPanelSettings,
   ArrowBack,
   CalendarToday,
+  Settings,
 } from "@mui/icons-material";
 
 // 1. SỬA ĐƯỜNG DẪN: Lùi 2 cấp (Admin -> pages -> src/types)
@@ -30,6 +31,7 @@ import CycleManagement from "../Performance/components/CycleManagement";
 import WhitelistManager from "./components/WhitelistManager";
 import SystemLogs from "./components/SystemLogs";
 import RoleManagementTab from "./components/RoleManagementTab";
+import SystemResetTab from "./components/SystemResetTab";
 
 export default function AdminSettings() {
   const navigate = useNavigate();
@@ -77,6 +79,7 @@ export default function AdminSettings() {
     },
     { id: "roles", label: "Quản lý Roles", icon: <People />, restricted: true },
     { id: "logs", label: "System Logs", icon: <History />, restricted: true },
+    { id: "system", label: "Factory Reset", icon: <Settings />, restricted: true },
   ];
 
   const availableMenuItems = menuItems.filter(
@@ -188,6 +191,7 @@ export default function AdminSettings() {
           {activeTab === "whitelist" && <WhitelistManager />}
           {activeTab === "roles" && <RoleManagementTab />}
           {activeTab === "logs" && <SystemLogs />}
+          {activeTab === "system" && <SystemResetTab />}
         </Container>
       </Box>
     </Box>
