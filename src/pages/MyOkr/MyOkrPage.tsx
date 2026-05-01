@@ -53,10 +53,9 @@ const statusConfig: Record<
 // ============================
 function OkrCard({ okr, onRefresh }: { okr: any; onRefresh: () => void }) {
   const [expanded, setExpanded] = useState(false);
-  const [negotiateDialog, setNegotiateDialog] = useState(false);
-  const [commentsByObj, setCommentsByObj] = useState<Record<string, string>>(
-    {},
-  );
+  const [activeChatId, setActiveChatId] = useState<string | null>(null);
+  const [chatMessage, setChatMessage] = useState("");
+  const [chatLoading, setChatLoading] = useState(false);
 
   // Self-report state: { "A-1": { quantity: 3, evidence: "link..." } }
   const [reportData, setReportData] = useState<
@@ -69,7 +68,12 @@ function OkrCard({ okr, onRefresh }: { okr: any; onRefresh: () => void }) {
   const isSubmitted = okr.status === "SUBMITTED";
   const isCompleted = okr.status === "COMPLETED";
   const isPending = okr.status === "PENDING";
-  const canReport = isAccepted; // Chỉ tự khai khi đã ACCEPTED
+  
+  const isCycleStarted = okr.cycle?.startDate 
+    ? new Date(new Date().setHours(0, 0, 0, 0)) >= new Date(new Date(okr.cycle.startDate).setHours(0, 0, 0, 0))
+    : true; // Nếu không có startDate (lỗi data), mặc định cho phép
+
+  const canReport = isAccepted && isCycleStarted; // Chỉ tự khai khi đã ACCEPTED và kỳ đã bắt đầu
 
   // Load existing self-report data if any
   useEffect(() => {
@@ -128,37 +132,64 @@ function OkrCard({ okr, onRefresh }: { okr: any; onRefresh: () => void }) {
     }
   };
 
-  const openNegotiate = () => {
-    const initial: Record<string, string> = {};
-    structure.forEach((obj: any) => {
-      initial[obj.id] = "";
-    });
-    setCommentsByObj(initial);
-    setNegotiateDialog(true);
-  };
-
-  const handleNegotiate = async () => {
-    const hasComment = Object.values(commentsByObj).some(
-      (c) => c.trim() !== "",
-    );
-    if (!hasComment) {
-      alert("Vui lòng nhập ít nhất 1 nhận xét.");
-      return;
-    }
+  const handleSendChat = async (itemId: string) => {
+    if (!chatMessage.trim()) return;
+    setChatLoading(true);
     try {
-      await api.put(`/okrs/${okr.id}/negotiate`, {
-        proposedChanges: {
-          comments: commentsByObj,
-          originalKeyResults: okr.keyResults,
-        },
+      await api.post(`/okrs/${okr.id}/chat`, {
+        itemId,
+        message: chatMessage,
+        sender: "USER",
       });
-      alert("✅ Đề xuất đã gửi cho Trưởng khoa!");
-      setNegotiateDialog(false);
+      setChatMessage("");
       onRefresh();
     } catch (error) {
-      console.error(error);
-      alert("Có lỗi xảy ra.");
+      alert("Lỗi khi gửi nhận xét");
+    } finally {
+      setChatLoading(false);
     }
+  };
+
+  const renderChatRow = (itemId: string, colSpan: number) => {
+    if (activeChatId !== itemId) return null;
+    const history = okr.proposedChanges?.[itemId] || [];
+    return (
+      <TableRow>
+        <TableCell colSpan={colSpan} sx={{ p: 0, bgcolor: "#f1f5f9" }}>
+          <Box sx={{ p: 2, borderLeft: "3px solid #3b82f6", ml: 2, bgcolor: "#fff", mb: 2, mt: 1, borderRadius: 1, boxShadow: 1 }}>
+            <Typography variant="subtitle2" sx={{ mb: 1, color: "#1e3a8a" }}>Đàm phán mục: {itemId}</Typography>
+            {history.length > 0 ? (
+              <Box sx={{ mb: 2, maxHeight: 150, overflowY: "auto" }}>
+                {history.map((msg: any, idx: number) => (
+                  <Box key={idx} sx={{ mb: 1, p: 1, bgcolor: msg.sender === 'USER' ? '#eff6ff' : '#fff7ed', borderRadius: 1, maxWidth: "80%" }}>
+                    <Typography variant="caption" fontWeight="bold" color={msg.sender === 'USER' ? 'primary' : 'warning.main'}>
+                      {msg.sender === 'USER' ? 'Bạn' : 'Trưởng khoa'} - {new Date(msg.createdAt).toLocaleString('vi-VN')}
+                    </Typography>
+                    <Typography variant="body2">{msg.message}</Typography>
+                  </Box>
+                ))}
+              </Box>
+            ) : (
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>Chưa có trao đổi nào. Bạn có thể đề xuất chỉnh sửa chỉ tiêu/điểm tại đây.</Typography>
+            )}
+            
+            {(isPending || okr.status === 'NEGOTIATING') && (
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <TextField 
+                  size="small" 
+                  fullWidth 
+                  placeholder="Nhập đề xuất điều chỉnh..." 
+                  value={chatMessage} 
+                  onChange={(e) => setChatMessage(e.target.value)} 
+                  onKeyDown={(e) => { if(e.key === 'Enter') handleSendChat(itemId); }}
+                />
+                <Button variant="contained" disabled={chatLoading || !chatMessage.trim()} onClick={() => handleSendChat(itemId)} startIcon={<Send />}>Gửi</Button>
+              </Box>
+            )}
+          </Box>
+        </TableCell>
+      </TableRow>
+    );
   };
 
   const updateReport = (
@@ -251,22 +282,16 @@ function OkrCard({ okr, onRefresh }: { okr: any; onRefresh: () => void }) {
           alignItems: "center",
           p: 2,
           bgcolor: "#f8fafc",
-          cursor: "pointer",
-          "&:hover": { bgcolor: "#f1f5f9" },
         }}
-        onClick={() => setExpanded(!expanded)}
       >
-        <IconButton size="small" sx={{ mr: 1 }}>
-          {expanded ? <ExpandLess /> : <ExpandMore />}
-        </IconButton>
         <Box sx={{ flex: 1 }}>
           <Typography variant="h6" fontWeight="bold" color="#1e3a8a">
             {okr.objective}
           </Typography>
           <Box sx={{ display: "flex", gap: 1, mt: 0.5, flexWrap: "wrap" }}>
             <Chip
-              label={statusConfig[okr.status]?.label || okr.status}
-              color={statusConfig[okr.status]?.color || "default"}
+              label={isAccepted && !isCycleStarted ? "Chờ kỳ bắt đầu" : (statusConfig[okr.status]?.label || okr.status)}
+              color={isAccepted && !isCycleStarted ? "warning" : (statusConfig[okr.status]?.color || "default")}
               size="small"
             />
             {okr.deadline && (
@@ -286,31 +311,17 @@ function OkrCard({ okr, onRefresh }: { okr: any; onRefresh: () => void }) {
             )}
           </Box>
         </Box>
-        {isPending && (
-          <Box
-            sx={{ display: "flex", gap: 1 }}
-            onClick={(e) => e.stopPropagation()}
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <Button
+            size="small"
+            variant="outlined"
+            color="primary"
+            onClick={() => setExpanded(!expanded)}
+            endIcon={expanded ? <ExpandLess /> : <ExpandMore />}
           >
-            <Button
-              size="small"
-              variant="contained"
-              color="success"
-              startIcon={<Check />}
-              onClick={handleAccept}
-            >
-              Chấp nhận
-            </Button>
-            <Button
-              size="small"
-              variant="outlined"
-              color="warning"
-              startIcon={<Comment />}
-              onClick={openNegotiate}
-            >
-              Đề xuất
-            </Button>
-          </Box>
-        )}
+            {expanded ? "Thu gọn" : "Xem chi tiết"}
+          </Button>
+        </Box>
       </Box>
 
       {/* Progress bar for ACCEPTED */}
@@ -329,6 +340,13 @@ function OkrCard({ okr, onRefresh }: { okr: any; onRefresh: () => void }) {
 
       {/* Expanded content */}
       <Collapse in={expanded}>
+        {isAccepted && !isCycleStarted && (
+          <Box sx={{ p: 2, bgcolor: "#fffbeb" }}>
+            <Alert severity="warning">
+              Kỳ đánh giá chưa bắt đầu (Dự kiến bắt đầu từ <strong>{new Date(okr.cycle.startDate).toLocaleDateString('vi-VN')}</strong>). Bạn chưa thể tự khai điểm lúc này.
+            </Alert>
+          </Box>
+        )}
         <Divider />
         <TableContainer>
           <Table size="small">
@@ -396,6 +414,13 @@ function OkrCard({ okr, onRefresh }: { okr: any; onRefresh: () => void }) {
                     Tổng điểm nhiệm vụ
                   </TableCell>
                 )}
+                {(isPending || okr.status === 'NEGOTIATING') && (
+                  <TableCell
+                    sx={{ color: "white", fontWeight: "bold", width: "10%", textAlign: "center" }}
+                  >
+                    Đàm phán
+                  </TableCell>
+                )}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -429,7 +454,15 @@ function OkrCard({ okr, onRefresh }: { okr: any; onRefresh: () => void }) {
                         {calcObjectiveScore(obj)} / {obj.maxScore || 0}
                       </TableCell>
                     )}
+                    {(isPending || okr.status === 'NEGOTIATING') && (
+                      <TableCell align="center">
+                        <IconButton size="small" onClick={() => setActiveChatId(activeChatId === obj.id ? null : obj.id)}>
+                          <Comment fontSize="small" color={okr.proposedChanges?.[obj.id]?.length > 0 ? "primary" : "inherit"} />
+                        </IconButton>
+                      </TableCell>
+                    )}
                   </TableRow>
+                  {renderChatRow(obj.id, 10)}
 
                   {/* KR rows */}
                   {obj.items?.map((kr: any, kIndex: number) => {
@@ -516,7 +549,15 @@ function OkrCard({ okr, onRefresh }: { okr: any; onRefresh: () => void }) {
                             </TableCell>
                           )}
                           {(isSubmitted || isCompleted) && <TableCell></TableCell>}
+                          {(isPending || okr.status === 'NEGOTIATING') && (
+                            <TableCell align="center">
+                              <IconButton size="small" onClick={() => setActiveChatId(activeChatId === kr.id ? null : kr.id)}>
+                                <Comment fontSize="small" color={okr.proposedChanges?.[kr.id]?.length > 0 ? "primary" : "inherit"} />
+                              </IconButton>
+                            </TableCell>
+                          )}
                         </TableRow>
+                        {renderChatRow(kr.id, 10)}
 
                         {/* Sub-KR rows */}
                         {kr.items?.map((sub: any, sIndex: number) => {
@@ -528,7 +569,8 @@ function OkrCard({ okr, onRefresh }: { okr: any; onRefresh: () => void }) {
                           const existingSub = okr.selfReportData?.[subKey];
 
                           return (
-                            <TableRow key={`${oIndex}-${kIndex}-${sIndex}`}>
+                            <React.Fragment key={`${oIndex}-${kIndex}-${sIndex}`}>
+                              <TableRow>
                               <TableCell sx={{ pl: 6, fontSize: "0.85rem" }}>
                                 {sub.id}
                               </TableCell>
@@ -601,7 +643,16 @@ function OkrCard({ okr, onRefresh }: { okr: any; onRefresh: () => void }) {
                                 </TableCell>
                               )}
                               {(isSubmitted || isCompleted) && <TableCell></TableCell>}
+                              {(isPending || okr.status === 'NEGOTIATING') && (
+                                <TableCell align="center">
+                                  <IconButton size="small" onClick={() => setActiveChatId(activeChatId === sub.id ? null : sub.id)}>
+                                    <Comment fontSize="small" color={okr.proposedChanges?.[sub.id]?.length > 0 ? "primary" : "inherit"} />
+                                  </IconButton>
+                                </TableCell>
+                              )}
                             </TableRow>
+                            {renderChatRow(sub.id, 10)}
+                            </React.Fragment>
                           );
                         })}
                       </React.Fragment>
@@ -612,6 +663,27 @@ function OkrCard({ okr, onRefresh }: { okr: any; onRefresh: () => void }) {
             </TableBody>
           </Table>
         </TableContainer>
+
+        {/* Chấp nhận OKR */}
+        {(isPending || okr.status === 'NEGOTIATING') && (
+          <Box
+            sx={{
+              p: 2,
+              display: "flex",
+              justifyContent: "flex-end",
+              bgcolor: "#f1f5f9",
+            }}
+          >
+            <Button
+              variant="contained"
+              color="success"
+              startIcon={<Check />}
+              onClick={handleAccept}
+            >
+              Tôi đồng ý Chấp nhận OKR này
+            </Button>
+          </Box>
+        )}
 
         {/* Submit button for self-report */}
         {canReport && (
@@ -648,72 +720,6 @@ function OkrCard({ okr, onRefresh }: { okr: any; onRefresh: () => void }) {
           </Box>
         )}
       </Collapse>
-
-      {/* Negotiate Dialog */}
-      <Dialog
-        open={negotiateDialog}
-        onClose={() => setNegotiateDialog(false)}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle sx={{ fontWeight: "bold", color: "#1e3a8a" }}>
-          <Comment sx={{ mr: 1, verticalAlign: "middle" }} /> Đề xuất điều chỉnh
-        </DialogTitle>
-        <Divider />
-        <DialogContent sx={{ mt: 2 }}>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Nhập nhận xét cho từng mục tiêu bạn muốn điều chỉnh:
-          </Typography>
-          {structure.map((obj: any) => (
-            <Paper
-              key={obj.id}
-              sx={{ p: 2, mb: 2, border: "1px solid #e2e8f0" }}
-            >
-              <Typography
-                variant="subtitle1"
-                fontWeight="bold"
-                color="#1e3a8a"
-                sx={{ mb: 1 }}
-              >
-                {obj.id}. {obj.title}
-                {obj.maxScore > 0 && (
-                  <Chip
-                    label={`Tối đa: ${obj.maxScore} điểm`}
-                    size="small"
-                    sx={{ ml: 1 }}
-                  />
-                )}
-              </Typography>
-              <TextField
-                fullWidth
-                multiline
-                rows={2}
-                size="small"
-                placeholder={`Nhận xét cho mục ${obj.id}... (để trống nếu không có ý kiến)`}
-                value={commentsByObj[obj.id] || ""}
-                onChange={(e) =>
-                  setCommentsByObj((prev) => ({
-                    ...prev,
-                    [obj.id]: e.target.value,
-                  }))
-                }
-              />
-            </Paper>
-          ))}
-        </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setNegotiateDialog(false)} color="inherit">
-            Hủy
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleNegotiate}
-            startIcon={<Send />}
-          >
-            Gửi đề xuất
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Paper>
   );
 }
