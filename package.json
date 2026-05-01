@@ -11,6 +11,8 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,css,json}\""
   },
   "dependencies": {
+    "@azure/msal-browser": "^5.8.0",
+    "@azure/msal-react": "^5.3.1",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^7.3.4",
@@ -20,7 +22,7 @@
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.555.0",
     "react": "^19.1.1",
-    "react-dom": "^19.1.1",
+    "react-dom": "^19.2.5",
     "react-router-dom": "^7.9.5",
     "recharts": "^3.7.0",
     "xlsx": "^0.18.5"
