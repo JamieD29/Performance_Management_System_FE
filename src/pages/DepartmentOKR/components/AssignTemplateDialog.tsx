@@ -250,20 +250,29 @@ export default function AssignTemplateDialog({
               label="Kỳ đánh giá *"
               onChange={(e) => setSelectedCycleId(e.target.value)}
             >
-              {cycles.map((c: any) => (
-                <MenuItem key={c.id} value={c.id}>
-                  {c.name} ({c.status})
-                </MenuItem>
-              ))}
+              {cycles.map((c: any) => {
+                const isStarted = c.startDate && new Date(new Date().setHours(0, 0, 0, 0)) >= new Date(new Date(c.startDate).setHours(0, 0, 0, 0));
+                return (
+                  <MenuItem key={c.id} value={c.id} disabled={isStarted}>
+                    {c.name} ({c.status}) {isStarted ? " - Đang diễn ra (Không thể giao mới)" : ""}
+                  </MenuItem>
+                );
+              })}
             </Select>
           </FormControl>
           <TextField
             fullWidth
-            label="Deadline (tùy chọn)"
+            label="Hạn chót thương lượng & chốt OKR"
             type="date"
             value={deadline}
             onChange={(e) => setDeadline(e.target.value)}
             InputLabelProps={{ shrink: true }}
+            helperText="Thời gian để nhân sự điều chỉnh và chốt OKR trước khi kỳ bắt đầu."
+            inputProps={{
+              max: cycles.find(c => c.id === selectedCycleId)?.startDate 
+                ? new Date(cycles.find(c => c.id === selectedCycleId).startDate).toISOString().split('T')[0] 
+                : undefined
+            }}
           />
         </Box>
 

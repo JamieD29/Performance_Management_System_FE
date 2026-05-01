@@ -22,6 +22,7 @@ import {
 } from "@mui/material";
 import { Check, Close, Visibility } from "@mui/icons-material";
 import { api } from "../../../services/api";
+import OkrManagerTree from "./OkrManagerTree";
 
 export default function DeanApprovalTab() {
   const [pendingOkrs, setPendingOkrs] = useState<any[]>([]);
@@ -81,49 +82,7 @@ export default function DeanApprovalTab() {
     setViewDialog(true);
   };
 
-  // Parse comments from proposedChanges
-  const renderComments = (proposedChanges: any) => {
-    if (!proposedChanges?.comments)
-      return (
-        <Typography variant="body2" color="text.secondary">
-          Không có ghi chú.
-        </Typography>
-      );
-    const comments = proposedChanges.comments;
-    const entries = Object.entries(comments).filter(
-      ([_, v]) => (v as string).trim() !== "",
-    );
-    if (entries.length === 0)
-      return (
-        <Typography variant="body2" color="text.secondary">
-          Không có ghi chú chi tiết.
-        </Typography>
-      );
-    return (
-      <Box>
-        {entries.map(([objId, comment]) => (
-          <Paper
-            key={objId}
-            sx={{
-              p: 1.5,
-              mb: 1,
-              bgcolor: "#fff7ed",
-              border: "1px solid #fed7aa",
-            }}
-          >
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              fontWeight="bold"
-            >
-              Mục {objId}:
-            </Typography>
-            <Typography variant="body2">{comment as string}</Typography>
-          </Paper>
-        ))}
-      </Box>
-    );
-  };
+  // Remove old renderComments function
 
   return (
     <Box>
@@ -194,8 +153,8 @@ export default function DeanApprovalTab() {
                         whiteSpace: "nowrap",
                       }}
                     >
-                      {okr.proposedChanges?.comments
-                        ? `${Object.values(okr.proposedChanges.comments).filter((v: any) => v.trim()).length} nhận xét`
+                      {okr.proposedChanges
+                        ? `${Object.keys(okr.proposedChanges).length} mục có trao đổi`
                         : "Xem chi tiết..."}
                     </Typography>
                   </TableCell>
@@ -206,7 +165,7 @@ export default function DeanApprovalTab() {
                       onClick={() => viewDetails(okr)}
                       sx={{ mr: 1 }}
                     >
-                      Xem
+                      Chi tiết & Sửa
                     </Button>
                     <Button
                       size="small"
@@ -247,24 +206,35 @@ export default function DeanApprovalTab() {
         </DialogTitle>
         <Divider />
         <DialogContent sx={{ mt: 2 }}>
-          <Typography variant="subtitle2" color="text.secondary">
-            Nhân sự:
-          </Typography>
-          <Typography variant="body1" fontWeight={500} sx={{ mb: 1 }}>
-            {selectedOkr?.user?.name || selectedOkr?.user?.email || "—"}
-          </Typography>
-
-          <Typography variant="subtitle2" color="text.secondary">
-            Mục tiêu OKR:
-          </Typography>
-          <Typography variant="body1" fontWeight={500} sx={{ mb: 2 }}>
-            {selectedOkr?.objective}
-          </Typography>
-
+          <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between' }}>
+            <Box>
+              <Typography variant="subtitle2" color="text.secondary">
+                Nhân sự:
+              </Typography>
+              <Typography variant="body1" fontWeight={500}>
+                {selectedOkr?.user?.name || selectedOkr?.user?.email || "—"}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="subtitle2" color="text.secondary">
+                Mục tiêu OKR:
+              </Typography>
+              <Typography variant="body1" fontWeight={500}>
+                {selectedOkr?.objective}
+              </Typography>
+            </Box>
+          </Box>
           <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
-            Nhận xét theo từng mục tiêu:
+            Chi tiết cấu trúc và đàm phán:
           </Typography>
-          {renderComments(selectedOkr?.proposedChanges)}
+          {selectedOkr && (
+            <OkrManagerTree okr={selectedOkr} onRefresh={() => {
+              fetchPending();
+              // Auto refresh current selected okr might be tricky,
+              // For now, let's close the dialog to force them to reopen or handle it better
+              // Actually we can just let it be, but they have to close/reopen to see changes if we don't re-fetch selectedOkr
+            }} />
+          )}
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
           <Button onClick={() => setViewDialog(false)}>Đóng</Button>
