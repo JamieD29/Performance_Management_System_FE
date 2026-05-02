@@ -35,6 +35,7 @@ import {
   Save,
 } from "@mui/icons-material";
 import { api } from "../../services/api";
+import { confirmAction, showSuccess, showError } from "../../utils/swal";
 
 const statusConfig: Record<
   string,
@@ -117,18 +118,20 @@ function OkrCard({ okr, onRefresh }: { okr: any; onRefresh: () => void }) {
   };
 
   const handleAccept = async () => {
-    if (
-      !confirm(
-        "Bạn xác nhận chấp nhận OKR này? Sau khi chấp nhận, bạn sẽ bắt đầu tự khai điểm.",
-      )
-    )
-      return;
+    const ok = await confirmAction({
+      title: "Chấp nhận OKR?",
+      text: "Sau khi chấp nhận, bạn sẽ bắt đầu tự khai điểm.",
+      icon: "question",
+      confirmText: "Đồng ý chấp nhận",
+      confirmColor: "#16a34a",
+    });
+    if (!ok) return;
     try {
       await api.put(`/okrs/${okr.id}/accept`);
       onRefresh();
     } catch (error) {
       console.error(error);
-      alert("Có lỗi xảy ra.");
+      showError("Lỗi", "Có lỗi xảy ra khi chấp nhận OKR.");
     }
   };
 
@@ -144,7 +147,7 @@ function OkrCard({ okr, onRefresh }: { okr: any; onRefresh: () => void }) {
       setChatMessage("");
       onRefresh();
     } catch (error) {
-      alert("Lỗi khi gửi nhận xét");
+      showError("Lỗi", "Không thể gửi nhận xét. Vui lòng thử lại.");
     } finally {
       setChatLoading(false);
     }
@@ -207,12 +210,14 @@ function OkrCard({ okr, onRefresh }: { okr: any; onRefresh: () => void }) {
   };
 
   const handleSubmitReport = async () => {
-    if (
-      !confirm(
-        "Bạn xác nhận nộp bài tự khai? Sau khi nộp sẽ chờ Trưởng khoa duyệt.",
-      )
-    )
-      return;
+    const ok = await confirmAction({
+      title: "Nộp bài tự khai?",
+      text: "Sau khi nộp, bài sẽ được gửi cho Trưởng khoa duyệt. Bạn chắc chắn chứ?",
+      icon: "question",
+      confirmText: "Nộp bài",
+      confirmColor: "#1976d2",
+    });
+    if (!ok) return;
     setSaving(true);
 
     // Build report with calculated scores
@@ -251,11 +256,11 @@ function OkrCard({ okr, onRefresh }: { okr: any; onRefresh: () => void }) {
       await api.put(`/okrs/${okr.id}/self-report`, {
         selfReportData: enrichedReport,
       });
-      alert("✅ Đã nộp bài tự khai thành công!");
+      showSuccess("Thành công!", "Đã nộp bài tự khai thành công.");
       onRefresh();
     } catch (error) {
       console.error(error);
-      alert("Có lỗi xảy ra.");
+      showError("Lỗi", "Có lỗi xảy ra khi nộp bài.");
     } finally {
       setSaving(false);
     }

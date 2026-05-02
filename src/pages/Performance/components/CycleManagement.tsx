@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import { api } from "../../../services/api";
+import { showSuccess, showError } from "../../../utils/swal";
 
 const RESOURCE_PATH = "/performance";
 
@@ -89,9 +90,9 @@ export default function CycleManagement() {
       await api.post(`${RESOURCE_PATH}/admin/cycles`, formData);
       setOpen(false);
       fetchCycles();
-      alert("Tạo kỳ thành công!");
+      showSuccess("Thành công!", "Tạo kỳ đánh giá thành công.");
     } catch (error) {
-      alert("Lỗi khi tạo kỳ!");
+      showError("Lỗi", "Không thể tạo kỳ đánh giá. Vui lòng thử lại.");
     }
   };
 
@@ -103,7 +104,7 @@ export default function CycleManagement() {
       });
       fetchCycles();
     } catch (error) {
-      alert("Lỗi cập nhật trạng thái");
+      showError("Lỗi", "Không thể cập nhật trạng thái.");
     }
   };
 

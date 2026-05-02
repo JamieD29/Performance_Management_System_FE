@@ -1,6 +1,6 @@
 // src/services/api.ts
 import axios from "axios";
-import type { AxiosError, AxiosResponse } from "axios";
+import type { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from "axios";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
@@ -12,9 +12,15 @@ export const api = axios.create({
   },
 });
 
+// Interface for API error response body
+interface ApiErrorData {
+  message?: string;
+  [key: string]: any;
+}
+
 // Request Interceptor
 api.interceptors.request.use(
-  (config) => {
+  (config: InternalAxiosRequestConfig) => {
     const token = sessionStorage.getItem("authToken");
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -29,8 +35,14 @@ api.interceptors.request.use(
 // Response Interceptor
 api.interceptors.response.use(
   (response: AxiosResponse) => response,
-  (error: AxiosError) => {
-    if (error.response?.status === 401 || (error.response?.status === 404 && error.response?.data?.message?.includes("User with ID"))) {
+  (error: AxiosError<ApiErrorData>) => {
+    const status = error.response?.status;
+    const message = error.response?.data?.message;
+
+    if (
+      status === 401 ||
+      (status === 404 && message?.includes("User with ID"))
+    ) {
       sessionStorage.removeItem("authToken");
       sessionStorage.removeItem("user");
       window.location.href = "/login";
@@ -38,3 +50,4 @@ api.interceptors.response.use(
     return Promise.reject(error);
   },
 );
+

@@ -22,6 +22,7 @@ import {
 } from "@mui/material";
 import { Send, FactCheck } from "@mui/icons-material";
 import { api } from "../../services/api";
+import { confirmAction, showSuccess, showError, showWarning } from "../../utils/swal";
 
 export default function MyEvaluationPage() {
   const [form, setForm] = useState<any>(null);
@@ -55,10 +56,17 @@ export default function MyEvaluationPage() {
 
   const handleSubmit = async () => {
     if (!selfRating) {
-      window.alert("Vui lòng chọn mức Tự xếp loại chất lượng trước khi nộp!");
+      showWarning("Thiếu thông tin", "Vui lòng chọn mức Tự xếp loại chất lượng trước khi nộp!");
       return;
     }
-    if (!window.confirm("Bạn có chắc chắn muốn nộp Phiếu Đánh Giá không?")) return;
+    const ok = await confirmAction({
+      title: "Nộp Phiếu Đánh Giá?",
+      text: "Bạn có chắc chắn muốn nộp Phiếu Đánh Giá không?",
+      icon: "question",
+      confirmText: "Nộp phiếu",
+      confirmColor: "#1976d2",
+    });
+    if (!ok) return;
 
     setSaving(true);
     try {
@@ -66,11 +74,11 @@ export default function MyEvaluationPage() {
         selfComment,
         selfRating,
       });
-      window.alert("Nộp Phiếu Đánh Giá thành công!");
+      showSuccess("Thành công!", "Nộp Phiếu Đánh Giá thành công.");
       fetchForm();
     } catch (e) {
       console.error(e);
-      window.alert("Lỗi khi nộp phiếu.");
+      showError("Lỗi", "Lỗi khi nộp phiếu. Vui lòng thử lại.");
     } finally {
       setSaving(false);
     }

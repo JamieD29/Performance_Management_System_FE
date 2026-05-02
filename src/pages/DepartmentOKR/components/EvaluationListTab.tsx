@@ -35,6 +35,7 @@ import {
 } from "@mui/icons-material";
 import EvaluationDetailsDialog from "./EvaluationDetailsDialog";
 import { api } from "../../../services/api";
+import { showInfo, showError } from "../../../utils/swal";
 
 export default function EvaluationListTab() {
   const [reports, setReports] = useState<any[]>([]);
@@ -124,7 +125,8 @@ export default function EvaluationListTab() {
   // Handle API Submissions
   const handleTickAllSelected = async () => {
     // Để an toàn, bulk review manager có thể lấy data selfReportData để lưu luôn
-    alert(
+    showInfo(
+      "Thông báo",
       "Chức năng Duyệt hàng loạt hiện đang được bảo trì cho quy trình tính điểm phức hợp.",
     );
   };
@@ -137,7 +139,7 @@ export default function EvaluationListTab() {
       fetchEvaluations();
     } catch (e) {
       console.error(e);
-      alert("Lỗi cập nhật");
+      showError("Lỗi", "Không thể cập nhật đánh giá.");
     }
   };
 
@@ -150,7 +152,7 @@ export default function EvaluationListTab() {
       fetchEvaluations();
     } catch (e) {
       console.error(e);
-      alert("Lỗi cập nhật");
+      showError("Lỗi", "Không thể cập nhật đánh giá.");
     }
   };
 

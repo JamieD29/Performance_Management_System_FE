@@ -16,9 +16,9 @@ import { Work, School, Star, AccessTime, Business } from "@mui/icons-material";
 import type { UserProfileForm } from "../profile.types";
 import {
   THEME_COLORS,
-  JOB_TITLES,
-  ACADEMIC_RANKS,
-  DEGREES,
+  FALLBACK_JOB_TITLES,
+  FALLBACK_ACADEMIC_RANKS,
+  FALLBACK_DEGREES,
 } from "../profile.constants";
 
 // --- HÀM STYLE & COMPONENT PHỤ DÙNG CHUNG ---
@@ -112,6 +112,11 @@ interface WorkEducationTabProps {
   // Bổ sung props cho Đơn vị / Bộ môn
   departments: any[];
   getDepartmentName: (id: string) => string;
+
+  // 📌 Enum options từ BE (Single Source of Truth)
+  jobTitles?: string[];
+  academicRanks?: string[];
+  degrees?: string[];
 }
 
 export default function WorkEducationTab({
@@ -123,7 +128,14 @@ export default function WorkEducationTab({
   handleSmartPaste,
   departments,
   getDepartmentName,
+  jobTitles,
+  academicRanks,
+  degrees,
 }: WorkEducationTabProps) {
+  // Dùng dữ liệu từ BE nếu có, nếu không fallback
+  const _jobTitles = jobTitles && jobTitles.length > 0 ? jobTitles : FALLBACK_JOB_TITLES;
+  const _academicRanks = academicRanks && academicRanks.length > 0 ? academicRanks : FALLBACK_ACADEMIC_RANKS;
+  const _degrees = degrees && degrees.length > 0 ? degrees : FALLBACK_DEGREES;
   // Các props mặc định cho Form Control / TextField
   const commonProps = {
     fullWidth: true,
@@ -236,7 +248,7 @@ export default function WorkEducationTab({
               </InputAdornment>
             }
           >
-            {DEGREES.map((d) => (
+            {_degrees.map((d) => (
               <MenuItem key={d} value={d}>
                 {d}
               </MenuItem>
@@ -260,7 +272,7 @@ export default function WorkEducationTab({
               </InputAdornment>
             }
           >
-            {ACADEMIC_RANKS.map((ar) => (
+            {_academicRanks.map((ar) => (
               <MenuItem key={ar} value={ar}>
                 {ar}
               </MenuItem>
@@ -283,7 +295,7 @@ export default function WorkEducationTab({
               </InputAdornment>
             }
           >
-            {JOB_TITLES.map((jt) => (
+            {_jobTitles.map((jt) => (
               <MenuItem key={jt} value={jt}>
                 {jt}
               </MenuItem>

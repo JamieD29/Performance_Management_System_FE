@@ -22,6 +22,7 @@ import {
 } from "@mui/material";
 import { Check, Close, Visibility } from "@mui/icons-material";
 import { api } from "../../../services/api";
+import { confirmAction, showSuccess, showError } from "../../../utils/swal";
 import OkrManagerTree from "./OkrManagerTree";
 
 export default function DeanApprovalTab() {
@@ -45,14 +46,21 @@ export default function DeanApprovalTab() {
   };
 
   const handleApprove = async (okrId: string) => {
-    if (!confirm("Bạn xác nhận duyệt đề xuất điều chỉnh này?")) return;
+    const ok = await confirmAction({
+      title: "Duyệt đề xuất?",
+      text: "Bạn xác nhận duyệt đề xuất điều chỉnh này?",
+      icon: "question",
+      confirmText: "Duyệt",
+      confirmColor: "#16a34a",
+    });
+    if (!ok) return;
     try {
       await api.put(`/okrs/${okrId}/dean-approve`);
-      alert("✅ Đã duyệt đề xuất!");
+      showSuccess("Thành công!", "Đã duyệt đề xuất.");
       fetchPending();
     } catch (error) {
       console.error("Error approving", error);
-      alert("Có lỗi xảy ra.");
+      showError("Lỗi", "Có lỗi xảy ra khi duyệt.");
     }
   };
 
@@ -68,12 +76,12 @@ export default function DeanApprovalTab() {
       await api.put(`/okrs/${selectedOkr.id}/dean-reject`, {
         reason: rejectReason,
       });
-      alert("Đã từ chối đề xuất.");
+      showSuccess("Đã từ chối", "Đề xuất đã bị từ chối.");
       setRejectDialog(false);
       fetchPending();
     } catch (error) {
       console.error("Error rejecting", error);
-      alert("Có lỗi xảy ra.");
+      showError("Lỗi", "Có lỗi xảy ra khi từ chối.");
     }
   };
 

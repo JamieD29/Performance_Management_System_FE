@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import { Add, Edit, Send } from "@mui/icons-material";
 import { api } from "../../../services/api";
+import { showError } from "../../../utils/swal";
 import TemplateEditorDialog from "./TemplateEditorDialog";
 import AssignTemplateDialog from "./AssignTemplateDialog";
 
@@ -58,7 +59,7 @@ export default function TemplateListTab() {
       fetchTemplates();
     } catch (error) {
       console.error("Error saving template", error);
-      alert("Có lỗi xảy ra khi lưu template");
+      showError("Lỗi", "Có lỗi xảy ra khi lưu template.");
     }
   };
 

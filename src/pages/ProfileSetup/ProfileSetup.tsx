@@ -22,7 +22,8 @@ import {
 import { api } from "../../services/api";
 
 import type { DepartmentOption, ProfileFormData } from "./types";
-import { ACADEMIC_RANKS, DEGREES } from "./constants";
+import { FALLBACK_ACADEMIC_RANKS, FALLBACK_DEGREES, FALLBACK_JOB_TITLES } from "./constants";
+import { useProfileOptions } from "../../hooks/useProfileOptions";
 import { PersonalInfoStep } from "./components/PersonalInfoStep";
 import { WorkInfoStep } from "./components/WorkInfoStep";
 import { ConfirmationDialog } from "./components/ConfirmationDialog";
@@ -53,6 +54,12 @@ export default function ProfileSetup() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+
+  // 📌 Single Source of Truth: Fetch enum options từ BE
+  const { options: profileOptions, loading: loadingOptions } = useProfileOptions();
+  const academicRanks = profileOptions.academicRanks.length > 0 ? profileOptions.academicRanks : FALLBACK_ACADEMIC_RANKS;
+  const degrees = profileOptions.degrees.length > 0 ? profileOptions.degrees : FALLBACK_DEGREES;
+  const jobTitles = profileOptions.jobTitles.length > 0 ? profileOptions.jobTitles : FALLBACK_JOB_TITLES;
 
   // Fetch departments and set initial user data on mount
   useEffect(() => {
@@ -118,9 +125,9 @@ export default function ProfileSetup() {
   const selectedDeptName =
     departments.find((d) => d.id === formData.departmentId)?.name || "";
   const selectedRankLabel =
-    ACADEMIC_RANKS.find((r) => r.value === formData.academicRank)?.label || "";
+    academicRanks.find((r) => r.value === formData.academicRank)?.label || "";
   const selectedDegreeLabel =
-    DEGREES.find((d) => d.value === formData.degree)?.label || "";
+    degrees.find((d) => d.value === formData.degree)?.label || "";
 
   const handleSubmit = async () => {
     setSubmitting(true);
@@ -294,7 +301,10 @@ export default function ProfileSetup() {
                   formData={formData}
                   onChange={handleFieldChange}
                   departments={departments}
-                  loadingDepts={loadingDepts}
+                  loadingDepts={loadingDepts || loadingOptions}
+                  academicRanks={academicRanks}
+                  degrees={degrees}
+                  jobTitles={jobTitles}
                 />
               )}
 

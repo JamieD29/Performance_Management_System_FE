@@ -19,6 +19,7 @@ import { Person, School, Star } from "@mui/icons-material";
 // Import Logic và Components con
 import { useProfileLogic } from "./useProfileLogic";
 import { THEME_COLORS } from "./profile.constants";
+import { useProfileOptions } from "../../hooks/useProfileOptions";
 import ProfileHeader from "./components/ProfileHeader";
 import PersonalInfoTab from "./components/PersonalInfoTab";
 import WorkEducationTab from "./components/WorkEducationTab";
@@ -52,6 +53,13 @@ export default function ProfileSetting() {
     handleCancel,
     handleSave,
   } = useProfileLogic();
+
+  // 📌 Single Source of Truth: Fetch enum options từ BE
+  const { options: profileOptions } = useProfileOptions();
+  const beJobTitles = profileOptions.jobTitles.map((o) => o.value);
+  const beAcademicRanks = profileOptions.academicRanks.map((o) => o.value);
+  const beDegrees = profileOptions.degrees.map((o) => o.value);
+  const beGenders = profileOptions.genders.map((o) => o.value);
 
   // 2. HIỂN THỊ LOADING LÚC MỚI VÀO
   if (loading) {
@@ -222,6 +230,7 @@ export default function ProfileSetting() {
                       handleChange={handleChange}
                       handleDobChange={handleDobChange}
                       handleJoinDateChange={handleJoinDateChange}
+                      genders={beGenders}
                     />
                   )}
 
@@ -236,6 +245,9 @@ export default function ProfileSetting() {
                       handleSmartPaste={handleSmartPaste}
                       departments={departments} // <-- TRUYỀN XUỐNG ĐÂY
                       getDepartmentName={getDepartmentName} // <-- TRUYỀN XUỐNG ĐÂY
+                      jobTitles={beJobTitles}
+                      academicRanks={beAcademicRanks}
+                      degrees={beDegrees}
                     />
                   )}
 
