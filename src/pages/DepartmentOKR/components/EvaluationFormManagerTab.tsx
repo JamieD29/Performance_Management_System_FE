@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import { CheckCircle } from "@mui/icons-material";
 import { api } from "../../../services/api";
+import { showError } from "../../../utils/swal";
 import EvaluationFormManagerDialog from "./EvaluationFormManagerDialog";
 
 export default function EvaluationFormManagerTab() {
@@ -73,7 +74,7 @@ export default function EvaluationFormManagerTab() {
       fetchEvaluations();
     } catch (e) {
       console.error(e);
-      window.alert("Lỗi cập nhật Phiếu");
+      showError("Lỗi", "Không thể cập nhật Phiếu Đánh Giá.");
     }
   };
 

@@ -1,6 +1,7 @@
 import React from "react";
 import { Users, Edit, Trash2, GraduationCap } from "lucide-react";
 import type { User } from "../../../types/index";
+import { showInfo } from "../../../utils/swal";
 
 interface MemberTableProps {
   members: User[]; // Đổi từ Member[] thành User[]
@@ -107,7 +108,7 @@ export const MemberTable: React.FC<MemberTableProps> = ({
                       className="text-indigo-600 hover:text-indigo-900 mx-1 p-2 hover:bg-indigo-50 rounded-full transition-colors"
                       onClick={(e) => {
                         e.stopPropagation();
-                        alert("Sửa");
+                        showInfo("Thông báo", "Tính năng chỉnh sửa đang được phát triển.");
                       }}
                     >
                       <Edit size={18} />
@@ -116,7 +117,7 @@ export const MemberTable: React.FC<MemberTableProps> = ({
                       className="text-red-600 hover:text-red-900 mx-1 p-2 hover:bg-red-50 rounded-full transition-colors"
                       onClick={(e) => {
                         e.stopPropagation();
-                        alert("Xóa");
+                        showInfo("Thông báo", "Tính năng xóa đang được phát triển.");
                       }}
                     >
                       <Trash2 size={18} />

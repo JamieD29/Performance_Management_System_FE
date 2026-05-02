@@ -64,8 +64,9 @@ export default function Dashboard() {
   }, []);
 
   const loadDashboardData = async () => {
-    const token = sessionStorage.getItem("accessToken");
+    const token = sessionStorage.getItem("authToken");
     if (!token || !user.id) {
+
       setLoading(false);
       return;
     }

@@ -28,6 +28,7 @@ import {
 } from "@mui/material";
 import { Add, Edit, Delete, Badge, Groups } from "@mui/icons-material";
 import { api } from "../../../services/api";
+import { confirmAction } from "../../../utils/swal";
 
 interface ManagementPosition {
   id: string;
@@ -148,12 +149,14 @@ export default function ManagementPositionManager() {
   };
 
   const handleDelete = async (pos: ManagementPosition) => {
-    if (
-      !window.confirm(
-        `Xóa chức vụ "${pos.name}"?\n\nTất cả nhân sự đang giữ chức vụ này sẽ bị gỡ chức vụ.`,
-      )
-    )
-      return;
+    const ok = await confirmAction({
+      title: `Xóa chức vụ "${pos.name}"?`,
+      text: "Tất cả nhân sự đang giữ chức vụ này sẽ bị gỡ chức vụ. Hành động này không thể hoàn tác.",
+      icon: "warning",
+      confirmText: "Xóa",
+      confirmColor: "#dc2626",
+    });
+    if (!ok) return;
     try {
       await api.delete(`/management-positions/${pos.id}`);
       setSnackbar({

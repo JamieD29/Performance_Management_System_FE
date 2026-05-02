@@ -16,14 +16,18 @@ import {
   Badge as BadgeIcon,
 } from "@mui/icons-material";
 import { AnimatedField } from "./AnimatedField";
-import { ACADEMIC_RANKS, DEGREES, JOB_TITLES } from "../constants";
 import type { DepartmentOption, ProfileFormData } from "../types";
+import type { EnumOption } from "../../../hooks/useProfileOptions";
 
 interface WorkInfoStepProps {
   formData: ProfileFormData;
   onChange: (field: keyof ProfileFormData, value: string) => void;
   departments: DepartmentOption[];
   loadingDepts: boolean;
+  // 📌 Enum options từ BE (Single Source of Truth)
+  academicRanks: EnumOption[];
+  degrees: EnumOption[];
+  jobTitles: EnumOption[];
 }
 
 export function WorkInfoStep({
@@ -31,6 +35,9 @@ export function WorkInfoStep({
   onChange,
   departments,
   loadingDepts,
+  academicRanks,
+  degrees,
+  jobTitles,
 }: WorkInfoStepProps) {
   const selectSx = {
     borderRadius: "10px",
@@ -123,7 +130,7 @@ export function WorkInfoStep({
             }}
             sx={selectSx}
           >
-            {DEGREES.map((d) => (
+            {degrees.map((d) => (
               <MenuItem key={d.value} value={d.value}>
                 {d.label}
               </MenuItem>
@@ -161,7 +168,7 @@ export function WorkInfoStep({
             sx={selectSx}
             disabled={formData.degree !== "Tiến sĩ"}
           >
-            {ACADEMIC_RANKS.map((r) => (
+            {academicRanks.map((r) => (
               <MenuItem key={r.value} value={r.value}>
                 {r.label}
               </MenuItem>
@@ -198,7 +205,7 @@ export function WorkInfoStep({
             }
             sx={selectSx}
           >
-            {JOB_TITLES.map((j) => (
+            {jobTitles.map((j) => (
               <MenuItem key={j.value} value={j.value}>
                 {j.label}
               </MenuItem>

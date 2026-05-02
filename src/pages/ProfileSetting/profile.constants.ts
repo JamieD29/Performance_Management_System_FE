@@ -1,16 +1,22 @@
-export const JOB_TITLES = [
+// ⚠️ FALLBACK VALUES — Chỉ sử dụng khi API /users/profile-options không khả dụng.
+// 📌 Nguồn chính thức (Single Source of Truth): Backend → user.entity.ts
+
+export const FALLBACK_JOB_TITLES = [
   "Giảng viên",
   "Giảng viên chính",
   "Trợ giảng",
   "Giáo vụ",
   "Nghiên cứu viên",
+  "Chuyên viên",
+  "Kỹ thuật viên",
+  "Nhân viên hỗ trợ",
 ];
 
-export const ACADEMIC_RANKS = ["Giáo sư", "Phó giáo sư", "Không"];
+export const FALLBACK_ACADEMIC_RANKS = ["Giáo sư", "Phó giáo sư", "Không"];
 
-export const DEGREES = ["Cử nhân", "Thạc sĩ", "Tiến sĩ", "Không"];
+export const FALLBACK_DEGREES = ["Cử nhân", "Thạc sĩ", "Tiến sĩ", "Không"];
 
-export const GENDERS = ["Nam", "Nữ", "Khác"];
+export const FALLBACK_GENDERS = ["Nam", "Nữ", "Khác"];
 
 // --- MÀU SẮC THEME DÙNG CHUNG (UI) ---
 

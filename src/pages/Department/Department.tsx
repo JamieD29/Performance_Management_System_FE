@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { api } from "../../services/api";
+import { confirmDelete, showError } from "../../utils/swal";
 import DepartmentMasterView from "./components/DepartmentMasterView";
 import DepartmentDetailView from "./components/DepartmentDetailView";
 import type { Department } from "./department.types";
@@ -74,12 +75,13 @@ export default function DepartmentPage() {
   }, [isDonVi, isAdmin, isKhoa, departments, selectedDept, loggedInUser?.department?.id]);
 
   const handleDeleteDept = async (id: string, name: string) => {
-    if (window.confirm(`Bạn có chắc muốn xóa bộ môn "${name}"?`)) {
+    const ok = await confirmDelete(name);
+    if (ok) {
       try {
         await api.delete(`/departments/${id}`);
         fetchDepartments();
       } catch (error) {
-        alert("Xóa thất bại");
+        showError("Xóa thất bại", "Không thể xóa bộ môn này.");
       }
     }
   };

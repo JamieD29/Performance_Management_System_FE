@@ -29,6 +29,7 @@ import type { SelectChangeEvent } from "@mui/material";
 import { Edit } from "@mui/icons-material";
 
 import { api } from "../../../services/api";
+import { showSuccess, showError } from "../../../utils/swal";
 import type { User } from "../../../types";
 
 export default function UserRoleManager() {
@@ -58,9 +59,9 @@ export default function UserRoleManager() {
         ),
       );
       setRoleDialogOpen(false);
-      alert("Role updated successfully");
+      showSuccess("Thành công", "Cập nhật role thành công.");
     } catch (err: any) {
-      alert(err.response?.data?.message || "Failed update");
+      showError("Lỗi", err.response?.data?.message || "Cập nhật thất bại.");
     }
   };
 

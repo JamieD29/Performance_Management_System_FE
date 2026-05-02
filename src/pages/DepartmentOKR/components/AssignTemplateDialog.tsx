@@ -27,6 +27,7 @@ import {
 } from "@mui/material";
 import { Send, PersonSearch, SelectAll, Deselect } from "@mui/icons-material";
 import { api } from "../../../services/api";
+import { showWarning, showSuccess, showError } from "../../../utils/swal";
 import { performanceService } from "../../../services/performanceService";
 
 interface AssignTemplateDialogProps {
@@ -99,7 +100,7 @@ export default function AssignTemplateDialog({
 
   const handleAssign = async () => {
     if (selectedUserIds.length === 0 || !selectedCycleId) {
-      alert("Vui lòng chọn ít nhất 1 User và Kỳ đánh giá!");
+      showWarning("Thiếu thông tin", "Vui lòng chọn ít nhất 1 User và Kỳ đánh giá!");
       return;
     }
     setLoading(true);
@@ -109,13 +110,14 @@ export default function AssignTemplateDialog({
         cycleId: selectedCycleId,
         deadline: deadline || undefined,
       });
-      alert(
-        `✅ Đã giao OKR Template cho ${selectedUserIds.length} nhân sự thành công! Mỗi người sẽ nhận được OKR ở trạng thái chờ duyệt.`,
+      showSuccess(
+        "Thành công!",
+        `Đã giao OKR Template cho ${selectedUserIds.length} nhân sự. Mỗi người sẽ nhận được OKR ở trạng thái chờ duyệt.`,
       );
       onClose();
     } catch (error) {
       console.error("Error assigning template", error);
-      alert("❌ Có lỗi xảy ra khi giao template.");
+      showError("Lỗi", "Có lỗi xảy ra khi giao template.");
     } finally {
       setLoading(false);
     }

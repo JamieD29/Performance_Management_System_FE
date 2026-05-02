@@ -17,6 +17,7 @@ import {
 } from "@mui/material";
 import { Badge } from "@mui/icons-material";
 import { api } from "../../../services/api";
+import { confirmAction } from "../../../utils/swal";
 
 interface ManagementPosition {
   id: string;
@@ -88,7 +89,14 @@ export default function AssignPositionModal({
 
   const handleRemovePosition = async () => {
     if (!user) return;
-    if (!window.confirm(`Gỡ chức vụ quản lý của "${user.name}"?`)) return;
+    const ok = await confirmAction({
+      title: "Gỡ chức vụ?",
+      text: `Gỡ chức vụ quản lý của "${user.name}"?`,
+      icon: "warning",
+      confirmText: "Gỡ chức vụ",
+      confirmColor: "#dc2626",
+    });
+    if (!ok) return;
     setSubmitting(true);
     setError("");
     try {

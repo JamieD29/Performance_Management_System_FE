@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import { Comment, Send } from "@mui/icons-material";
 import { api } from "../../../services/api";
+import { showError } from "../../../utils/swal";
 
 export default function OkrManagerTree({ okr, onRefresh }: { okr: any; onRefresh: () => void }) {
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
@@ -35,7 +36,7 @@ export default function OkrManagerTree({ okr, onRefresh }: { okr: any; onRefresh
       setChatMessage("");
       onRefresh();
     } catch (error) {
-      alert("Lỗi khi gửi nhận xét");
+      showError("Lỗi", "Không thể gửi nhận xét. Vui lòng thử lại.");
     } finally {
       setChatLoading(false);
     }
@@ -51,7 +52,7 @@ export default function OkrManagerTree({ okr, onRefresh }: { okr: any; onRefresh
       });
       onRefresh();
     } catch (error) {
-      alert("Lỗi cập nhật điểm");
+      showError("Lỗi", "Không thể cập nhật điểm.");
     }
   };
 

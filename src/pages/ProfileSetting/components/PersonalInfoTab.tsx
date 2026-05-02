@@ -21,7 +21,7 @@ import {
   Event as EventIcon,
 } from "@mui/icons-material";
 import type { UserProfileForm, FormErrors } from "../profile.types";
-import { THEME_COLORS, GENDERS } from "../profile.constants";
+import { THEME_COLORS, FALLBACK_GENDERS } from "../profile.constants";
 
 // --- HÀM STYLE & COMPONENT PHỤ DÙNG CHUNG CHO TAB NÀY ---
 const getColorfulInputStyle = (color: string) => ({
@@ -116,6 +116,8 @@ interface PersonalInfoTabProps {
   handleChange: (field: keyof UserProfileForm, value: any) => void;
   handleDobChange: (value: string) => void;
   handleJoinDateChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  // 📌 Enum options từ BE (Single Source of Truth)
+  genders?: string[];
 }
 
 export default function PersonalInfoTab({
@@ -125,7 +127,9 @@ export default function PersonalInfoTab({
   handleChange,
   handleDobChange,
   handleJoinDateChange,
+  genders,
 }: PersonalInfoTabProps) {
+  const _genders = genders && genders.length > 0 ? genders : FALLBACK_GENDERS;
   // Biến giới hạn ngày tháng
   const todayStr = new Date().toISOString().split("T")[0];
   const minJoinDateStr = "1996-01-01";
@@ -286,7 +290,7 @@ export default function PersonalInfoTab({
               </InputAdornment>
             }
           >
-            {GENDERS.map((g) => (
+            {_genders.map((g) => (
               <MenuItem key={g} value={g}>
                 {g}
               </MenuItem>

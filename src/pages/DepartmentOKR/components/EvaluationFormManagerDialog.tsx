@@ -24,6 +24,7 @@ import {
   IconButton,
 } from "@mui/material";
 import { Close, Save } from "@mui/icons-material";
+import { showWarning } from "../../../utils/swal";
 
 interface EvaluationFormManagerDialogProps {
   open: boolean;
@@ -45,7 +46,7 @@ export default function EvaluationFormManagerDialog({ open, reportData, onClose,
 
   const handleSave = () => {
     if (!managerRating) {
-      window.alert("Vui lòng xếp loại viên chức trước khi lưu!");
+      showWarning("Thiếu thông tin", "Vui lòng xếp loại viên chức trước khi lưu!");
       return;
     }
     const updatedReport = {
