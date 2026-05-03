@@ -169,11 +169,19 @@ export default function CreateOkrDialog({
                 onChange={(e) => setCycleId(e.target.value)}
               >
                 {/* 🔄 Lặp data Học kỳ thật từ DB */}
-                {cycles.map((cycle) => (
-                  <MenuItem key={cycle.id} value={cycle.id}>
-                    {cycle.name}
-                  </MenuItem>
-                ))}
+                {cycles.map((cycle) => {
+                  const start = cycle.startDate
+                    ? new Date(cycle.startDate).toLocaleDateString("vi-VN")
+                    : "N/A";
+                  const end = cycle.endDate
+                    ? new Date(cycle.endDate).toLocaleDateString("vi-VN")
+                    : "N/A";
+                  return (
+                    <MenuItem key={cycle.id} value={cycle.id}>
+                      {cycle.name} ({start} → {end})
+                    </MenuItem>
+                  );
+                })}
               </Select>
             </FormControl>
           </Grid>
