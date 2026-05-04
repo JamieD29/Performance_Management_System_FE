@@ -22,17 +22,22 @@ import {
   RadioGroup,
   FormControlLabel,
   Radio,
+  Typography,
 } from "@mui/material";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs, { Dayjs } from "dayjs";
+import "dayjs/locale/vi";
+import { motion, AnimatePresence, type Variants } from "framer-motion";
 import {
   Plus,
   Play,
   Pause,
   Calendar,
-  RefreshCcw,
+  ArrowRight,
 } from "lucide-react";
-import axios from "axios";
 import { api } from "../../../services/api";
-import { showSuccess, showError } from "../../../utils/swal";
+import { showSuccess, showError, showWarning, confirmAction } from "../../../utils/swal";
 
 const RESOURCE_PATH = "/performance";
 
@@ -55,6 +60,23 @@ const removeVietnameseTones = (str: string) => {
   return str.toLowerCase();
 };
 
+// Framer Motion variants — typed explicitly to fix TS error
+const rowVariants: Variants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.05, duration: 0.3, ease: "easeOut" },
+  }),
+  exit: { opacity: 0, x: -20, transition: { duration: 0.2 } },
+};
+
+const dialogContentVariants: Variants = {
+  hidden: { opacity: 0, y: 20, scale: 0.97 },
+  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.35, ease: "easeOut" } },
+  exit: { opacity: 0, y: -10, scale: 0.97, transition: { duration: 0.2 } },
+};
+
 export default function CycleManagement() {
   const [cycles, setCycles] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
@@ -62,15 +84,13 @@ export default function CycleManagement() {
   // States for filtering
   const [filterName, setFilterName] = useState("");
   const [filterYear, setFilterYear] = useState("ALL");
-  const [filterType, setFilterType] = useState("ALL"); // 'ALL', 'SEMESTER', 'QUARTER', 'OTHER'
+  const [filterType, setFilterType] = useState("ALL");
 
-  // Form state
-  const [formData, setFormData] = useState({
-    name: "",
-    type: "SEMESTER", // Mặc định là Học kỳ
-    startDate: "",
-    endDate: "",
-  });
+  // Form state — dùng Dayjs cho DatePicker
+  const [formName, setFormName] = useState("");
+  const [formType, setFormType] = useState("SEMESTER");
+  const [formStartDate, setFormStartDate] = useState<Dayjs | null>(null);
+  const [formEndDate, setFormEndDate] = useState<Dayjs | null>(null);
 
   useEffect(() => {
     fetchCycles();
@@ -85,24 +105,77 @@ export default function CycleManagement() {
     }
   };
 
+  const resetForm = () => {
+    setFormName("");
+    setFormType("SEMESTER");
+    setFormStartDate(null);
+    setFormEndDate(null);
+  };
+
   const handleCreate = async () => {
+    // Frontend validation
+    if (!formName.trim()) {
+      showWarning("Thiếu thông tin", "Vui lòng nhập tên kỳ đánh giá.");
+      return;
+    }
+    if (!formStartDate || !formEndDate) {
+      showWarning("Thiếu thông tin", "Vui lòng chọn ngày bắt đầu và ngày kết thúc.");
+      return;
+    }
+    if (formStartDate.isBefore(dayjs().startOf("day"))) {
+      showWarning("Ngày không hợp lệ", "Ngày bắt đầu không được ở quá khứ. Vui lòng chọn từ hôm nay trở đi.");
+      return;
+    }
+    if (formEndDate.isBefore(formStartDate) || formEndDate.isSame(formStartDate)) {
+      showWarning("Ngày không hợp lệ", "Ngày kết thúc phải sau ngày bắt đầu.");
+      return;
+    }
+
     try {
-      await api.post(`${RESOURCE_PATH}/admin/cycles`, formData);
+      await api.post(`${RESOURCE_PATH}/admin/cycles`, {
+        name: formName,
+        type: formType,
+        startDate: formStartDate.format("YYYY-MM-DD"),
+        endDate: formEndDate.format("YYYY-MM-DD"),
+      });
       setOpen(false);
+      resetForm();
       fetchCycles();
-      showSuccess("Thành công!", "Tạo kỳ đánh giá thành công.");
-    } catch (error) {
-      showError("Lỗi", "Không thể tạo kỳ đánh giá. Vui lòng thử lại.");
+      showSuccess("Thành công!", "Tạo kỳ đánh giá thành công. Kỳ mới ở trạng thái Đã đóng.");
+    } catch (error: any) {
+      const msg = error?.response?.data?.message || "Không thể tạo kỳ đánh giá. Vui lòng thử lại.";
+      showError("Lỗi", msg);
     }
   };
 
-  const toggleStatus = async (id: string, currentStatus: string) => {
+  const toggleStatus = async (id: string, currentStatus: string, cycle: any) => {
     const newStatus = currentStatus === "OPEN" ? "CLOSED" : "OPEN";
+
+    // Nếu đang mở kỳ đã kết thúc (quá khứ) → cảnh báo
+    if (newStatus === "OPEN" && cycle.endDate) {
+      const endDate = dayjs(cycle.endDate);
+      if (endDate.isBefore(dayjs().startOf("day"))) {
+        const confirmed = await confirmAction({
+          title: "⚠️ Kỳ đã kết thúc!",
+          text: `Kỳ "${cycle.name}" đã kết thúc vào ${endDate.format("DD/MM/YYYY")}. Mở lại kỳ này có thể cho phép chỉnh sửa dữ liệu cũ. Bạn có chắc chắn muốn tiếp tục?`,
+          icon: "warning",
+          confirmText: "Vẫn mở kỳ",
+          cancelText: "Hủy bỏ",
+          confirmColor: "#f59e0b",
+        });
+        if (!confirmed) return;
+      }
+    }
+
     try {
-      await api.put(`${RESOURCE_PATH}/admin/cycles/${id}/status`, {
+      const res = await api.put(`${RESOURCE_PATH}/admin/cycles/${id}/status`, {
         status: newStatus,
       });
       fetchCycles();
+
+      if (res.data?.isPast && newStatus === "OPEN") {
+        showWarning("Lưu ý", "Kỳ này đã kết thúc. Dữ liệu có thể bị ảnh hưởng khi mở lại.");
+      }
     } catch (error) {
       showError("Lỗi", "Không thể cập nhật trạng thái.");
     }
@@ -123,211 +196,288 @@ export default function CycleManagement() {
   // Logic lọc dữ liệu
   const filteredCycles = cycles.filter((c) => {
     const normalizedName = removeVietnameseTones(c.name);
-
-    // 1. Lọc theo tên (cũng bỏ dấu khi tìm kiếm)
     if (filterName) {
       const normalizedSearch = removeVietnameseTones(filterName);
-      if (!normalizedName.includes(normalizedSearch)) {
-        return false;
-      }
+      if (!normalizedName.includes(normalizedSearch)) return false;
     }
-    
-    // 2. Lọc theo loại (Học kỳ / Quý / Khác)
     if (filterType !== "ALL") {
-      if (c.type !== filterType) {
-        // Cần đảm bảo data cũ (chưa có type) sẽ không bị mất bằng cách gán type tạm
-        // Nhưng nếu DB đã có type thì nó sẽ có. Để cho an toàn:
-        const cycleType = c.type || "OTHER";
-        if (cycleType !== filterType) return false;
-      }
+      const cycleType = c.type || "OTHER";
+      if (cycleType !== filterType) return false;
     }
-    
-    // 3. Lọc theo năm
     if (filterYear !== "ALL") {
       const match = c.name.match(/\d{4}(?:-\d{4})?/);
       const cycleYear = match ? match[0] : (c.startDate ? new Date(c.startDate).getFullYear().toString() : "");
-      if (cycleYear !== filterYear) {
-        return false;
-      }
+      if (cycleYear !== filterYear) return false;
     }
     return true;
   });
 
+  // Xác định trạng thái thời gian cho Chip
+  const getTimeStatus = (cycle: any) => {
+    if (!cycle.startDate || !cycle.endDate) return null;
+    const today = dayjs().startOf("day");
+    const start = dayjs(cycle.startDate);
+    const end = dayjs(cycle.endDate);
+    if (today.isBefore(start)) return { label: "Chưa bắt đầu", color: "info" as const };
+    if (today.isAfter(end)) return { label: "Đã kết thúc", color: "default" as const };
+    return { label: "Đang diễn ra", color: "warning" as const };
+  };
+
   return (
-    <Box>
-      <Box className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-bold text-gray-800">Quản lý Kỳ Đánh Giá</h3>
-
-        <Box className="flex gap-2">
-          <Button
-            variant="contained"
-            startIcon={<Plus size={18} />}
-            onClick={() => setOpen(true)}
-          >
-            Tạo kỳ mới
-          </Button>
-        </Box>
-      </Box>
-
-      {/* FILTER SECTION */}
-      <Paper variant="outlined" className="p-4 mb-4 flex flex-wrap gap-4 items-center bg-white">
-        <TextField
-          label="Tìm kiếm tên kỳ..."
-          size="small"
-          value={filterName}
-          onChange={(e) => setFilterName(e.target.value)}
-          className="min-w-[200px]"
-        />
-
-        <FormControl size="small" className="min-w-[150px]">
-          <InputLabel>Năm học</InputLabel>
-          <Select
-            value={filterYear}
-            label="Năm học"
-            onChange={(e) => setFilterYear(e.target.value)}
-          >
-            <MenuItem value="ALL">Tất cả các năm</MenuItem>
-            {availableYears.map((year) => (
-              <MenuItem key={year} value={year}>
-                {year}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        <FormControl component="fieldset" className="ml-4">
-          <RadioGroup
-            row
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-          >
-            <FormControlLabel value="ALL" control={<Radio size="small" />} label="Tất cả" />
-            <FormControlLabel value="SEMESTER" control={<Radio size="small" />} label="Học kỳ" />
-            <FormControlLabel value="QUARTER" control={<Radio size="small" />} label="Quý" />
-            <FormControlLabel value="OTHER" control={<Radio size="small" />} label="Khác" />
-          </RadioGroup>
-        </FormControl>
-      </Paper>
-
-      <TableContainer component={Paper} variant="outlined">
-        <Table>
-          <TableHead className="bg-gray-50">
-            <TableRow>
-              <TableCell>Tên Kỳ</TableCell>
-              <TableCell>Thời gian</TableCell>
-              <TableCell align="center">Trạng thái</TableCell>
-              <TableCell align="center">Thao tác</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredCycles.length > 0 ? (
-              filteredCycles.map((cycle) => (
-                <TableRow key={cycle.id}>
-                  <TableCell className="font-medium">{cycle.name}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Calendar size={14} />
-                      {cycle.startDate
-                        ? new Date(cycle.startDate).toLocaleDateString("vi-VN")
-                        : "..."}
-                    </div>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Chip
-                      label={cycle.status === "OPEN" ? "Đang mở" : "Đã đóng"}
-                      color={cycle.status === "OPEN" ? "success" : "default"}
-                      size="small"
-                    />
-                  </TableCell>
-                  <TableCell align="center">
-                    <Button
-                      size="small"
-                      color={cycle.status === "OPEN" ? "error" : "success"}
-                      startIcon={
-                        cycle.status === "OPEN" ? (
-                          <Pause size={14} />
-                        ) : (
-                          <Play size={14} />
-                        )
-                      }
-                      onClick={() => toggleStatus(cycle.id, cycle.status)}
-                    >
-                      {cycle.status === "OPEN" ? "Đóng kỳ" : "Mở lại"}
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={4}
-                  align="center"
-                  className="py-8 text-gray-400"
-                >
-                  Chưa có kỳ đánh giá nào. Vui lòng bấm nút{" "}
-                  <strong>'Tạo kỳ mới'</strong> để bắt đầu!
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
-
-      {/* MODAL TẠO MỚI (Giữ nguyên) */}
-      <Dialog
-        open={open}
-        onClose={() => setOpen(false)}
-        fullWidth
-        maxWidth="sm"
-      >
-        <DialogTitle>Tạo Kỳ Đánh Giá Mới</DialogTitle>
-        <DialogContent className="flex flex-col gap-4 py-4">
-          <TextField
-            label="Tên kỳ (VD: Học kỳ 2 - 2026)"
-            fullWidth
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          />
-          
-          <FormControl component="fieldset">
-            <RadioGroup
-              row
-              value={formData.type}
-              onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="vi">
+      <Box>
+        <Box className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-bold text-gray-800">Quản lý Kỳ Đánh Giá</h3>
+          <Box className="flex gap-2">
+            <Button
+              variant="contained"
+              startIcon={<Plus size={18} />}
+              onClick={() => setOpen(true)}
             >
-              <FormControlLabel value="SEMESTER" control={<Radio size="small" />} label="Theo Học kỳ" />
-              <FormControlLabel value="QUARTER" control={<Radio size="small" />} label="Theo Quý" />
-              <FormControlLabel value="OTHER" control={<Radio size="small" />} label="Khác (Linh hoạt)" />
+              Tạo kỳ mới
+            </Button>
+          </Box>
+        </Box>
+
+        {/* FILTER SECTION */}
+        <Paper variant="outlined" className="p-4 mb-4 flex flex-wrap gap-4 items-center bg-white">
+          <TextField
+            label="Tìm kiếm tên kỳ..."
+            size="small"
+            value={filterName}
+            onChange={(e) => setFilterName(e.target.value)}
+            className="min-w-[200px]"
+          />
+          <FormControl size="small" className="min-w-[150px]">
+            <InputLabel>Năm học</InputLabel>
+            <Select value={filterYear} label="Năm học" onChange={(e) => setFilterYear(e.target.value)}>
+              <MenuItem value="ALL">Tất cả các năm</MenuItem>
+              {availableYears.map((year) => (
+                <MenuItem key={year} value={year}>{year}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl component="fieldset" className="ml-4">
+            <RadioGroup row value={filterType} onChange={(e) => setFilterType(e.target.value)}>
+              <FormControlLabel value="ALL" control={<Radio size="small" />} label="Tất cả" />
+              <FormControlLabel value="SEMESTER" control={<Radio size="small" />} label="Học kỳ" />
+              <FormControlLabel value="QUARTER" control={<Radio size="small" />} label="Quý" />
+              <FormControlLabel value="OTHER" control={<Radio size="small" />} label="Khác" />
             </RadioGroup>
           </FormControl>
+        </Paper>
 
-          <div className="flex gap-4">
-            <TextField
-              type="date"
-              label="Ngày bắt đầu"
-              fullWidth
-              InputLabelProps={{ shrink: true }}
-              onChange={(e) =>
-                setFormData({ ...formData, startDate: e.target.value })
-              }
-            />
-            <TextField
-              type="date"
-              label="Ngày kết thúc"
-              fullWidth
-              InputLabelProps={{ shrink: true }}
-              onChange={(e) =>
-                setFormData({ ...formData, endDate: e.target.value })
-              }
-            />
-          </div>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpen(false)}>Hủy</Button>
-          <Button variant="contained" onClick={handleCreate}>
-            Lưu lại
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
+        <TableContainer component={Paper} variant="outlined">
+          <Table>
+            <TableHead className="bg-gray-50">
+              <TableRow>
+                <TableCell>Tên Kỳ</TableCell>
+                <TableCell>Thời gian</TableCell>
+                <TableCell align="center">Tiến trình</TableCell>
+                <TableCell align="center">Trạng thái</TableCell>
+                <TableCell align="center">Thao tác</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              <AnimatePresence mode="popLayout">
+                {filteredCycles.length > 0 ? (
+                  filteredCycles.map((cycle, index) => {
+                    const timeStatus = getTimeStatus(cycle);
+                    return (
+                      <motion.tr
+                        key={cycle.id}
+                        custom={index}
+                        variants={rowVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                        layout
+                        style={{ display: "table-row" }}
+                      >
+                        <TableCell className="font-medium">{cycle.name}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <Calendar size={14} />
+                            <span>
+                              {cycle.startDate
+                                ? dayjs(cycle.startDate).format("DD/MM/YYYY")
+                                : "..."}
+                            </span>
+                            <ArrowRight size={14} className="text-gray-400" />
+                            <span>
+                              {cycle.endDate
+                                ? dayjs(cycle.endDate).format("DD/MM/YYYY")
+                                : "..."}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell align="center">
+                          {timeStatus && (
+                            <Chip
+                              label={timeStatus.label}
+                              color={timeStatus.color}
+                              size="small"
+                              variant="outlined"
+                            />
+                          )}
+                        </TableCell>
+                        <TableCell align="center">
+                          <Chip
+                            label={cycle.status === "OPEN" ? "Đang mở" : "Đã đóng"}
+                            color={cycle.status === "OPEN" ? "success" : "default"}
+                            size="small"
+                          />
+                        </TableCell>
+                        <TableCell align="center">
+                          <Button
+                            size="small"
+                            color={cycle.status === "OPEN" ? "error" : "success"}
+                            startIcon={
+                              cycle.status === "OPEN" ? <Pause size={14} /> : <Play size={14} />
+                            }
+                            onClick={() => toggleStatus(cycle.id, cycle.status, cycle)}
+                          >
+                            {cycle.status === "OPEN" ? "Đóng kỳ" : "Mở kỳ"}
+                          </Button>
+                        </TableCell>
+                      </motion.tr>
+                    );
+                  })
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={5} align="center" className="py-8 text-gray-400">
+                      Chưa có kỳ đánh giá nào. Vui lòng bấm nút{" "}
+                      <strong>'Tạo kỳ mới'</strong> để bắt đầu!
+                    </TableCell>
+                  </TableRow>
+                )}
+              </AnimatePresence>
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+        {/* MODAL TẠO MỚI — MUI DatePicker + Framer Motion */}
+        <Dialog
+          open={open}
+          onClose={() => { setOpen(false); resetForm(); }}
+          fullWidth
+          maxWidth="sm"
+          PaperProps={{ sx: { borderRadius: 3, overflow: "hidden" } }}
+        >
+          <DialogTitle sx={{
+            background: "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)",
+            color: "white",
+            fontWeight: "bold",
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+          }}>
+            <Calendar size={22} />
+            Tạo Kỳ Đánh Giá Mới
+          </DialogTitle>
+          <DialogContent sx={{ pt: 3, pb: 2, px: 3, display: "flex", flexDirection: "column", gap: 2.5 }}>
+            <Box sx={{ mt: 1 }}>
+              <TextField
+                label="Tên kỳ (VD: Học kỳ 2 - 2026)"
+                fullWidth
+                value={formName}
+                onChange={(e) => setFormName(e.target.value)}
+              />
+            </Box>
+
+            <FormControl component="fieldset">
+              <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5 }}>
+                Loại kỳ đánh giá
+              </Typography>
+              <RadioGroup
+                row
+                value={formType}
+                onChange={(e) => setFormType(e.target.value)}
+              >
+                <FormControlLabel value="SEMESTER" control={<Radio size="small" />} label="Theo Học kỳ" />
+                <FormControlLabel value="QUARTER" control={<Radio size="small" />} label="Theo Quý" />
+                <FormControlLabel value="OTHER" control={<Radio size="small" />} label="Khác (Linh hoạt)" />
+              </RadioGroup>
+            </FormControl>
+
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <DatePicker
+                label="Ngày bắt đầu"
+                value={formStartDate}
+                onChange={(val) => setFormStartDate(val)}
+                minDate={dayjs()}
+                format="DD/MM/YYYY"
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    helperText: "Không được chọn ngày quá khứ",
+                  },
+                }}
+              />
+              <DatePicker
+                label="Ngày kết thúc"
+                value={formEndDate}
+                onChange={(val) => setFormEndDate(val)}
+                minDate={formStartDate ? formStartDate.add(1, "day") : dayjs().add(1, "day")}
+                format="DD/MM/YYYY"
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    helperText: "Phải sau ngày bắt đầu",
+                  },
+                }}
+              />
+            </Box>
+
+            {/* Preview thông tin — giữ animation mượt khi hiện */}
+            <AnimatePresence>
+              {formStartDate && formEndDate && formEndDate.isAfter(formStartDate) && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Paper
+                    variant="outlined"
+                    sx={{
+                      p: 2,
+                      bgcolor: "#f0fdf4",
+                      borderColor: "#86efac",
+                      borderRadius: 2,
+                    }}
+                  >
+                    <Typography variant="body2" color="success.main" fontWeight="bold" sx={{ mb: 0.5 }}>
+                      📋 Tóm tắt kỳ đánh giá
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Thời lượng: <strong>{formEndDate.diff(formStartDate, "day")} ngày</strong>
+                      {" "}({formStartDate.format("DD/MM/YYYY")} → {formEndDate.format("DD/MM/YYYY")})
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Trạng thái mặc định: <Chip label="Đã đóng" size="small" sx={{ ml: 0.5 }} />
+                    </Typography>
+                  </Paper>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </DialogContent>
+          <DialogActions sx={{ px: 3, pb: 2 }}>
+            <Button onClick={() => { setOpen(false); resetForm(); }} color="inherit">Hủy</Button>
+            <Button
+              variant="contained"
+              onClick={handleCreate}
+              disabled={!formName.trim() || !formStartDate || !formEndDate}
+              sx={{
+                background: "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)",
+                "&:hover": { background: "linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)" },
+              }}
+            >
+              Lưu lại
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Box>
+    </LocalizationProvider>
   );
 }

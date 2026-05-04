@@ -152,15 +152,16 @@ export default function AssignTemplateDialog({
       </DialogTitle>
       <Divider />
 
-      <DialogContent sx={{ mt: 1 }}>
-        {/* Template Info */}
+      <DialogContent sx={{ mt: 0, p: 0 }}>
+        {/* Template Info — Sticky khi scroll */}
         <Box
           sx={{
-            mb: 3,
+            position: "sticky",
+            top: 0,
+            zIndex: 10,
             p: 2,
             bgcolor: "#eff6ff",
-            borderRadius: 2,
-            border: "1px solid #bfdbfe",
+            borderBottom: "1px solid #bfdbfe",
           }}
         >
           <Typography variant="subtitle2" color="text.secondary">
@@ -187,289 +188,316 @@ export default function AssignTemplateDialog({
           </Box>
         </Box>
 
-        {/* Bộ lọc mở rộng */}
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: "bold", color: "text.secondary" }}>
-            Lọc nhân sự để giao OKR:
-          </Typography>
-          <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-            <FormControl size="small" sx={{ minWidth: 200, flex: 1 }}>
-              <InputLabel>Bộ môn</InputLabel>
-              <Select
-                value={filterDepartmentId}
-                label="Bộ môn"
-                onChange={(e) => setFilterDepartmentId(e.target.value)}
-              >
-                <MenuItem value="">-- Tất cả --</MenuItem>
-                {departments.map((dept: any) => (
-                  <MenuItem key={dept.id} value={dept.id}>
-                    {dept.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <FormControl size="small" sx={{ minWidth: 200, flex: 1 }}>
-              <InputLabel>Chức vụ quản lý</InputLabel>
-              <Select
-                value={filterPositionId}
-                label="Chức vụ quản lý"
-                onChange={(e) => setFilterPositionId(e.target.value)}
-              >
-                <MenuItem value="">-- Tất cả --</MenuItem>
-                {positions.map((pos: any) => (
-                  <MenuItem key={pos.id} value={pos.id}>
-                    {pos.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <FormControl size="small" sx={{ minWidth: 200, flex: 1 }}>
-              <InputLabel>Chức danh nghề nghiệp</InputLabel>
-              <Select
-                value={filterJobTitle}
-                label="Chức danh nghề nghiệp"
-                onChange={(e) => setFilterJobTitle(e.target.value)}
-              >
-                <MenuItem value="">-- Tất cả --</MenuItem>
-                {jobTitles.map((title: any) => (
-                  <MenuItem key={title} value={title}>
-                    {title}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Box>
-        </Box>
-
-        {/* Cycle & Deadline Selection */}
-        <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
-          <FormControl fullWidth>
-            <InputLabel>Kỳ đánh giá *</InputLabel>
-            <Select
-              value={selectedCycleId}
-              label="Kỳ đánh giá *"
-              onChange={(e) => setSelectedCycleId(e.target.value)}
-            >
-              {cycles.map((c: any) => {
-                const isStarted = c.startDate && new Date(new Date().setHours(0, 0, 0, 0)) >= new Date(new Date(c.startDate).setHours(0, 0, 0, 0));
-                return (
-                  <MenuItem key={c.id} value={c.id} disabled={isStarted}>
-                    {c.name} ({c.status}) {isStarted ? " - Đang diễn ra (Không thể giao mới)" : ""}
-                  </MenuItem>
-                );
-              })}
-            </Select>
-          </FormControl>
-          <TextField
-            fullWidth
-            label="Hạn chót thương lượng & chốt OKR"
-            type="date"
-            value={deadline}
-            onChange={(e) => setDeadline(e.target.value)}
-            InputLabelProps={{ shrink: true }}
-            helperText="Thời gian để nhân sự điều chỉnh và chốt OKR trước khi kỳ bắt đầu."
-            inputProps={{
-              max: cycles.find(c => c.id === selectedCycleId)?.startDate 
-                ? new Date(cycles.find(c => c.id === selectedCycleId).startDate).toISOString().split('T')[0] 
-                : undefined
-            }}
-          />
-        </Box>
-
-        {/* User Selection Header */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-          <PersonSearch color="primary" />
-          <Typography variant="h6" fontWeight="bold">
-            Chọn Nhân sự để giao
-          </Typography>
-          <Box sx={{ ml: "auto", display: "flex", gap: 1 }}>
-            <Button
-              size="small"
-              variant="outlined"
-              startIcon={
-                selectedUserIds.length === filteredUsers.length && filteredUsers.length > 0 ? (
-                  <Deselect />
-                ) : (
-                  <SelectAll />
-                )
-              }
-              onClick={handleSelectAll}
-              disabled={filteredUsers.length === 0}
-            >
-              {selectedUserIds.length === filteredUsers.length && filteredUsers.length > 0
-                ? "Bỏ chọn tất cả"
-                : "Chọn tất cả"}
-            </Button>
-          </Box>
-        </Box>
-
-        <TableContainer
-          component={Paper}
-          elevation={0}
-          sx={{ border: "1px solid #e2e8f0", maxHeight: 400 }}
-        >
-          <Table stickyHeader size="small">
-            <TableHead>
-              <TableRow
-                sx={{ "& th": { bgcolor: "#f1f5f9", fontWeight: "bold" } }}
-              >
-                <TableCell width={50}>
-                  <Checkbox
-                    checked={
-                      selectedUserIds.length === filteredUsers.length &&
-                      filteredUsers.length > 0
-                    }
-                    indeterminate={
-                      selectedUserIds.length > 0 &&
-                      selectedUserIds.length < filteredUsers.length
-                    }
-                    onChange={handleSelectAll}
-                    size="small"
-                  />
-                </TableCell>
-                <TableCell>Họ tên</TableCell>
-                <TableCell>Email</TableCell>
-                <TableCell>Bộ môn</TableCell>
-                <TableCell>Chức vụ quản lý</TableCell>
-                <TableCell>Chức danh nghề nghiệp</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {loadingUsers ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={6}
-                    align="center"
-                    sx={{ py: 3, color: "text.secondary" }}
-                  >
-                    Đang tải danh sách nhân sự...
-                  </TableCell>
-                </TableRow>
-              ) : filteredUsers.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={6}
-                    align="center"
-                    sx={{ py: 3, color: "text.secondary" }}
-                  >
-                    Không tìm thấy nhân sự nào phù hợp với tiêu chí của
-                    template.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filteredUsers.map((user: any) => (
-                  <TableRow
-                    key={user.id}
-                    hover
-                    selected={selectedUserIds.includes(user.id)}
-                    onClick={() => handleToggleUser(user.id)}
-                    sx={{ cursor: "pointer" }}
-                  >
-                    <TableCell>
-                      <Checkbox
-                        checked={selectedUserIds.includes(user.id)}
-                        onChange={() => handleToggleUser(user.id)}
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                      >
-                        <Avatar
-                          src={user.avatarUrl}
-                          sx={{ width: 28, height: 28 }}
-                        >
-                          {(user.name || user.email)?.[0]?.toUpperCase()}
-                        </Avatar>
-                        {user.name || "(Chưa đặt tên)"}
-                      </Box>
-                    </TableCell>
-                    <TableCell sx={{ fontSize: "0.85rem" }}>
-                      {user.email}
-                    </TableCell>
-                    <TableCell>
-                      {user.department?.name ? (
-                        <Chip
-                          label={user.department.name}
-                          size="small"
-                          variant="outlined"
-                        />
-                      ) : (
-                        <Typography variant="caption" color="text.secondary">
-                          —
-                        </Typography>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {user.managementPosition?.name ? (
-                        <Chip
-                          label={user.managementPosition.name}
-                          size="small"
-                          color="secondary"
-                        />
-                      ) : (
-                        <Typography variant="caption" color="text.secondary">
-                          —
-                        </Typography>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {user.jobTitle || (
-                        <Typography variant="caption" color="text.secondary">
-                          —
-                        </Typography>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-
-        {/* Selection Summary */}
-        {selectedUserIds.length > 0 && (
-          <Box
+        <Box sx={{ p: 3 }}>
+          {/* ═══ PHẦN 1: THÔNG TIN BẮT BUỘC ═══ */}
+          <Paper
+            variant="outlined"
             sx={{
-              mt: 2,
-              p: 1.5,
-              bgcolor: "#f0fdf4",
-              borderRadius: 1,
-              border: "1px solid #bbf7d0",
+              p: 2.5,
+              mb: 3,
+              borderColor: "#3b82f6",
+              borderWidth: 2,
+              borderRadius: 2,
+              bgcolor: "#fafbff",
             }}
           >
-            <Typography variant="body2" color="success.main">
-              ✅ Đã chọn <strong>{selectedUserIds.length}</strong> nhân sự:
+            <Typography variant="subtitle1" fontWeight="bold" color="#1e3a8a" sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
+              📋 Thông tin bắt buộc
             </Typography>
-            <Box
-              sx={{ display: "flex", gap: 0.5, flexWrap: "wrap", mt: 0.5 }}
-            >
-              {selectedUserIds.slice(0, 10).map((id) => {
-                const user = users.find((u) => u.id === id);
-                return (
-                  <Chip
-                    key={id}
-                    label={user?.name || user?.email || id}
-                    size="small"
-                    color="success"
-                    variant="outlined"
-                    onDelete={() => handleToggleUser(id)}
-                  />
-                );
-              })}
-              {selectedUserIds.length > 10 && (
-                <Chip
-                  label={`+${selectedUserIds.length - 10} người khác`}
-                  size="small"
-                  color="default"
-                />
-              )}
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <FormControl fullWidth required>
+                <InputLabel>Kỳ đánh giá *</InputLabel>
+                <Select
+                  value={selectedCycleId}
+                  label="Kỳ đánh giá *"
+                  onChange={(e) => setSelectedCycleId(e.target.value)}
+                >
+                  {cycles.map((c: any) => {
+                    const isStarted = c.startDate && new Date(new Date().setHours(0, 0, 0, 0)) >= new Date(new Date(c.startDate).setHours(0, 0, 0, 0));
+                    const start = c.startDate
+                      ? new Date(c.startDate).toLocaleDateString("vi-VN")
+                      : "N/A";
+                    const end = c.endDate
+                      ? new Date(c.endDate).toLocaleDateString("vi-VN")
+                      : "N/A";
+                    return (
+                      <MenuItem key={c.id} value={c.id} disabled={isStarted}>
+                        {c.name} ({start} → {end}) [{c.status === "OPEN" ? "Đang mở" : "Đã đóng"}]
+                        {isStarted ? " - Đang diễn ra (Không thể giao mới)" : ""}
+                      </MenuItem>
+                    );
+                  })}
+                </Select>
+              </FormControl>
+              <TextField
+                fullWidth
+                label="Hạn chót thương lượng & chốt OKR"
+                type="date"
+                value={deadline}
+                onChange={(e) => setDeadline(e.target.value)}
+                InputLabelProps={{ shrink: true }}
+                helperText="Thời gian để nhân sự điều chỉnh và chốt OKR trước khi kỳ bắt đầu."
+                inputProps={{
+                  max: cycles.find(c => c.id === selectedCycleId)?.startDate 
+                    ? new Date(cycles.find(c => c.id === selectedCycleId).startDate).toISOString().split('T')[0] 
+                    : undefined
+                }}
+              />
+            </Box>
+          </Paper>
+
+          <Divider sx={{ mb: 3 }} />
+
+          {/* ═══ PHẦN 2: BỘ LỌC NHÂN SỰ (Tùy chọn) ═══ */}
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: "bold", color: "text.secondary", display: "flex", alignItems: "center", gap: 1 }}>
+              🔍 Lọc nhân sự
+              <Chip label="Tùy chọn" size="small" variant="outlined" color="default" sx={{ fontSize: "0.7rem" }} />
+            </Typography>
+            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+              <FormControl size="small" sx={{ minWidth: 200, flex: 1 }}>
+                <InputLabel>Bộ môn</InputLabel>
+                <Select
+                  value={filterDepartmentId}
+                  label="Bộ môn"
+                  onChange={(e) => setFilterDepartmentId(e.target.value)}
+                >
+                  <MenuItem value="">-- Tất cả --</MenuItem>
+                  {departments.map((dept: any) => (
+                    <MenuItem key={dept.id} value={dept.id}>
+                      {dept.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <FormControl size="small" sx={{ minWidth: 200, flex: 1 }}>
+                <InputLabel>Chức vụ quản lý</InputLabel>
+                <Select
+                  value={filterPositionId}
+                  label="Chức vụ quản lý"
+                  onChange={(e) => setFilterPositionId(e.target.value)}
+                >
+                  <MenuItem value="">-- Tất cả --</MenuItem>
+                  {positions.map((pos: any) => (
+                    <MenuItem key={pos.id} value={pos.id}>
+                      {pos.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <FormControl size="small" sx={{ minWidth: 200, flex: 1 }}>
+                <InputLabel>Chức danh nghề nghiệp</InputLabel>
+                <Select
+                  value={filterJobTitle}
+                  label="Chức danh nghề nghiệp"
+                  onChange={(e) => setFilterJobTitle(e.target.value)}
+                >
+                  <MenuItem value="">-- Tất cả --</MenuItem>
+                  {jobTitles.map((title: any) => (
+                    <MenuItem key={title} value={title}>
+                      {title}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Box>
           </Box>
-        )}
+
+          {/* ═══ PHẦN 3: BẢNG CHỌN NHÂN SỰ ═══ */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
+            <PersonSearch color="primary" />
+            <Typography variant="h6" fontWeight="bold">
+              Chọn Nhân sự để giao
+            </Typography>
+            <Box sx={{ ml: "auto", display: "flex", gap: 1 }}>
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={
+                  selectedUserIds.length === filteredUsers.length && filteredUsers.length > 0 ? (
+                    <Deselect />
+                  ) : (
+                    <SelectAll />
+                  )
+                }
+                onClick={handleSelectAll}
+                disabled={filteredUsers.length === 0}
+              >
+                {selectedUserIds.length === filteredUsers.length && filteredUsers.length > 0
+                  ? "Bỏ chọn tất cả"
+                  : "Chọn tất cả"}
+              </Button>
+            </Box>
+          </Box>
+
+          <TableContainer
+            component={Paper}
+            elevation={0}
+            sx={{ border: "1px solid #e2e8f0", maxHeight: 400 }}
+          >
+            <Table stickyHeader size="small">
+              <TableHead>
+                <TableRow
+                  sx={{ "& th": { bgcolor: "#f1f5f9", fontWeight: "bold" } }}
+                >
+                  <TableCell width={50}>
+                    <Checkbox
+                      checked={
+                        selectedUserIds.length === filteredUsers.length &&
+                        filteredUsers.length > 0
+                      }
+                      indeterminate={
+                        selectedUserIds.length > 0 &&
+                        selectedUserIds.length < filteredUsers.length
+                      }
+                      onChange={handleSelectAll}
+                      size="small"
+                    />
+                  </TableCell>
+                  <TableCell>Họ tên</TableCell>
+                  <TableCell>Email</TableCell>
+                  <TableCell>Bộ môn</TableCell>
+                  <TableCell>Chức vụ quản lý</TableCell>
+                  <TableCell>Chức danh nghề nghiệp</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {loadingUsers ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={6}
+                      align="center"
+                      sx={{ py: 3, color: "text.secondary" }}
+                    >
+                      Đang tải danh sách nhân sự...
+                    </TableCell>
+                  </TableRow>
+                ) : filteredUsers.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={6}
+                      align="center"
+                      sx={{ py: 3, color: "text.secondary" }}
+                    >
+                      Không tìm thấy nhân sự nào phù hợp với tiêu chí của
+                      template.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredUsers.map((user: any) => (
+                    <TableRow
+                      key={user.id}
+                      hover
+                      selected={selectedUserIds.includes(user.id)}
+                      onClick={() => handleToggleUser(user.id)}
+                      sx={{ cursor: "pointer" }}
+                    >
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedUserIds.includes(user.id)}
+                          onChange={() => handleToggleUser(user.id)}
+                          size="small"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Box
+                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                        >
+                          <Avatar
+                            src={user.avatarUrl}
+                            sx={{ width: 28, height: 28 }}
+                          >
+                            {(user.name || user.email)?.[0]?.toUpperCase()}
+                          </Avatar>
+                          {user.name || "(Chưa đặt tên)"}
+                        </Box>
+                      </TableCell>
+                      <TableCell sx={{ fontSize: "0.85rem" }}>
+                        {user.email}
+                      </TableCell>
+                      <TableCell>
+                        {user.department?.name ? (
+                          <Chip
+                            label={user.department.name}
+                            size="small"
+                            variant="outlined"
+                          />
+                        ) : (
+                          <Typography variant="caption" color="text.secondary">
+                            —
+                          </Typography>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {user.managementPosition?.name ? (
+                          <Chip
+                            label={user.managementPosition.name}
+                            size="small"
+                            color="secondary"
+                          />
+                        ) : (
+                          <Typography variant="caption" color="text.secondary">
+                            —
+                          </Typography>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {user.jobTitle || (
+                          <Typography variant="caption" color="text.secondary">
+                            —
+                          </Typography>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          {/* Selection Summary */}
+          {selectedUserIds.length > 0 && (
+            <Box
+              sx={{
+                mt: 2,
+                p: 1.5,
+                bgcolor: "#f0fdf4",
+                borderRadius: 1,
+                border: "1px solid #bbf7d0",
+              }}
+            >
+              <Typography variant="body2" color="success.main">
+                ✅ Đã chọn <strong>{selectedUserIds.length}</strong> nhân sự:
+              </Typography>
+              <Box
+                sx={{ display: "flex", gap: 0.5, flexWrap: "wrap", mt: 0.5 }}
+              >
+                {selectedUserIds.slice(0, 10).map((id) => {
+                  const user = users.find((u) => u.id === id);
+                  return (
+                    <Chip
+                      key={id}
+                      label={user?.name || user?.email || id}
+                      size="small"
+                      color="success"
+                      variant="outlined"
+                      onDelete={() => handleToggleUser(id)}
+                    />
+                  );
+                })}
+                {selectedUserIds.length > 10 && (
+                  <Chip
+                    label={`+${selectedUserIds.length - 10} người khác`}
+                    size="small"
+                    color="default"
+                  />
+                )}
+              </Box>
+            </Box>
+          )}
+        </Box>
       </DialogContent>
 
       <DialogActions sx={{ p: 3 }}>
