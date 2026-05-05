@@ -1,0 +1,45 @@
+{
+  "login": {
+    "title": "Welcome Back",
+    "subtitle": "Please sign in with your authorized institutional account",
+    "signInGoogle": "Sign in with Google",
+    "signInMicrosoft": "Sign in with Microsoft",
+    "connecting": "Connecting...",
+    "or": "or",
+    "accessRequirement": "Access Requirement",
+    "restrictedMessage": "System is restricted to authorized personnel.",
+    "authorizedDomains": "Only accounts ending in <1>{{domains}}</1> are authorized.",
+    "errorAuthFailed": "❌ Authentication failed. Please try again.",
+    "errorAccessDenied": "❌ You have denied access.",
+    "errorDefault": "❌ Error: {{error}}"
+  },
+  "header": {
+    "profile": "My Profile",
+    "adminPortal": "Admin Portal",
+    "logout": "Logout"
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "myOkr": "My OKRs",
+    "evaluationForm": "Evaluation Form",
+    "departmentGroup": "Department",
+    "overview": "Overview",
+    "okrManagement": "OKR Management",
+    "personnel": "Personnel",
+    "researchDocs": "Research & Docs",
+    "itSupport": "IT Support",
+    "clickToToggle": "Click to collapse/expand",
+    "vnuHcmus": "VNU-HCMUS",
+    "perfManagement": "Performance Management"
+  },
+  "common": {
+    "hcmus": "HCMUS",
+    "systemName": "Performance Management System"
+  },
+  "notFound": {
+    "title": "Page or Domain not found",
+    "description": "The page you are looking for does not exist, or the organizational domain has been removed from the system.",
+    "goBack": "Go Back",
+    "goHome": "Go to Home"
+  }
+}

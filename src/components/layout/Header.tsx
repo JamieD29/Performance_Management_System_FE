@@ -19,6 +19,7 @@ import {
   AdminPanelSettings,
   Settings,
 } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -32,7 +33,7 @@ export default function Header({
   sidebarWidth = 280,
 }: HeaderProps) {
   const navigate = useNavigate();
-  // const theme = useTheme(); // <-- Có thể xóa dòng này nếu không dùng theme ở chỗ khác
+  const { t, i18n } = useTranslation();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const openMenu = Boolean(anchorEl);
 
@@ -112,14 +113,51 @@ export default function Header({
             color: "#1e3a8a",
           }}
         >
-          HCMUS{" "}
+          {t("common.hcmus")}{" "}
           <Typography
             component="span"
             sx={{ color: "#64748b", fontWeight: 400 }}
           >
-            | Performance Management System
+            | {t("common.systemName")}
           </Typography>
         </Typography>
+
+        <Button 
+          onClick={() => i18n.changeLanguage(i18n.language === 'vi' ? 'en' : 'vi')}
+          variant="outlined"
+          size="small"
+          sx={{ 
+            borderRadius: "20px", 
+            textTransform: "none", 
+            bgcolor: "#f8fafc",
+            fontWeight: "bold",
+            color: "#1976d2",
+            borderColor: "#e2e8f0",
+            minWidth: "auto",
+            px: 1.5,
+            py: 0.5,
+            mr: 2,
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            "&:hover": {
+              bgcolor: "#f1f5f9",
+              borderColor: "#cbd5e1",
+            }
+          }}
+        >
+          {i18n.language === 'en' ? (
+            <>
+              <img src="https://flagcdn.com/w20/us.png" width="20" alt="English" style={{ borderRadius: '2px' }} />
+              EN
+            </>
+          ) : (
+            <>
+              <img src="https://flagcdn.com/w20/vn.png" width="20" alt="Vietnamese" style={{ borderRadius: '2px' }} />
+              VN
+            </>
+          )}
+        </Button>
 
         <Button
           onClick={(e) => setAnchorEl(e.currentTarget)}
@@ -198,7 +236,7 @@ export default function Header({
           >
             <Settings fontSize="small" sx={{ mr: 1.5, color: "#64748b" }} />
             <Typography variant="body2" fontWeight={500}>
-              Hồ sơ cá nhân
+              {t("header.profile")}
             </Typography>
           </MenuItem>
           {isAdmin && (
@@ -219,7 +257,7 @@ export default function Header({
                 sx={{ mr: 1.5, color: "#64748b" }}
               />
               <Typography variant="body2" fontWeight={500}>
-                Admin Portal
+                {t("header.adminPortal")}
               </Typography>
             </MenuItem>
           )}
@@ -238,7 +276,7 @@ export default function Header({
           >
             <Logout fontSize="small" sx={{ mr: 1.5 }} />
             <Typography variant="body2" fontWeight={500}>
-              Đăng xuất
+              {t("header.logout")}
             </Typography>
           </MenuItem>
         </Menu>

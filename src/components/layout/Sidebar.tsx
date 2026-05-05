@@ -28,6 +28,7 @@ import {
   ClipboardCheck,
   FileCheck2,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 // ==========================================
 // CONSTANTS
@@ -54,6 +55,7 @@ export default function Sidebar({
 }: SidebarProps) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
 
   const [openDept, setOpenDept] = useState(true);
 
@@ -81,7 +83,7 @@ export default function Sidebar({
   const canViewUsers =
     isManager || !!user?.managementPosition;
 
-  const departmentName = user.department?.name || "Bộ môn";
+  const departmentName = user.department?.name || t("sidebar.departmentGroup");
 
   const handleNavigate = (path: string) => {
     navigate(path);
@@ -232,19 +234,19 @@ export default function Sidebar({
   // ==========================================
   const deptSubItems = [
     {
-      label: "Tổng quan",
+      label: t("sidebar.overview"),
       path: "/departments/overview",
       icon: <LayoutDashboard size={18} />,
     },
     {
-      label: "Quản lý OKR",
+      label: t("sidebar.okrManagement"),
       path: "/departments/okr",
       icon: <Target size={18} />,
     },
     ...(canViewUsers
       ? [
           {
-            label: "Nhân sự",
+            label: t("sidebar.personnel"),
             path: "/departments/users",
             icon: <Users size={18} />,
           },
@@ -343,7 +345,7 @@ export default function Sidebar({
         }}
       >
         <Tooltip
-          title="Click để thu nhỏ/mở rộng"
+          title={t("sidebar.clickToToggle")}
           placement="right"
           arrow
           enterDelay={800}
@@ -396,7 +398,7 @@ export default function Sidebar({
               whiteSpace: "nowrap",
             }}
           >
-            VNU-HCMUS
+            {t("sidebar.vnuHcmus")}
           </Typography>
           <Typography
             variant="caption"
@@ -408,7 +410,7 @@ export default function Sidebar({
               whiteSpace: "nowrap",
             }}
           >
-            Performance Management
+            {t("sidebar.perfManagement")}
           </Typography>
         </Box>
       </Toolbar>
@@ -443,7 +445,7 @@ export default function Sidebar({
           {/* ── Dashboard ── */}
           <Box sx={{ px: collapsed ? 0.5 : 1, mb: 3 }}>
             <Tooltip
-              title={collapsed ? "Dashboard" : ""}
+              title={collapsed ? t("sidebar.dashboard") : ""}
               placement="right"
               arrow
             >
@@ -488,7 +490,7 @@ export default function Sidebar({
                   <LayoutDashboard size={21} />
                 </ListItemIcon>
                 <ListItemText
-                  primary="Dashboard"
+                  primary={t("sidebar.dashboard")}
                   sx={{
                     opacity: collapsed ? 0 : 1,
                     width: collapsed ? 0 : "auto",
@@ -508,7 +510,7 @@ export default function Sidebar({
           {/* ── OKR Của tôi ── */}
           <Box sx={{ px: collapsed ? 0.5 : 1, mb: 3 }}>
             <Tooltip
-              title={collapsed ? "OKR Của tôi" : ""}
+              title={collapsed ? t("sidebar.myOkr") : ""}
               placement="right"
               arrow
             >
@@ -553,7 +555,7 @@ export default function Sidebar({
                   <ClipboardCheck size={21} />
                 </ListItemIcon>
                 <ListItemText
-                  primary="OKR Của tôi"
+                  primary={t("sidebar.myOkr")}
                   sx={{
                     opacity: collapsed ? 0 : 1,
                     width: collapsed ? 0 : "auto",
@@ -573,7 +575,7 @@ export default function Sidebar({
           {/* ── Phiếu Đánh Giá ── */}
           <Box sx={{ px: collapsed ? 0.5 : 1, mb: 3 }}>
             <Tooltip
-              title={collapsed ? "Phiếu Đánh Giá" : ""}
+              title={collapsed ? t("sidebar.evaluationForm") : ""}
               placement="right"
               arrow
             >
@@ -618,7 +620,7 @@ export default function Sidebar({
                   <FileCheck2 size={21} />
                 </ListItemIcon>
                 <ListItemText
-                  primary="Phiếu Đánh Giá"
+                  primary={t("sidebar.evaluationForm")}
                   sx={{
                     opacity: collapsed ? 0 : 1,
                     width: collapsed ? 0 : "auto",
@@ -678,7 +680,7 @@ export default function Sidebar({
                 color: colors.accent2,
               }}
             >
-              Bộ môn
+              {t("sidebar.departmentGroup")}
             </Typography>
 
             {collapsed && (
@@ -750,7 +752,7 @@ export default function Sidebar({
                       <LayoutDashboard size={18} />
                     </ListItemIcon>
                     <ListItemText
-                      primary="Tổng quan"
+                      primary={t("sidebar.overview")}
                       primaryTypographyProps={{ fontSize: "0.92rem" }}
                     />
                   </ListItemButton>
@@ -763,7 +765,7 @@ export default function Sidebar({
                       <Target size={18} />
                     </ListItemIcon>
                     <ListItemText
-                      primary="Quản lý OKR"
+                      primary={t("sidebar.okrManagement")}
                       primaryTypographyProps={{ fontSize: "0.92rem" }}
                     />
                   </ListItemButton>
@@ -777,7 +779,7 @@ export default function Sidebar({
                         <Users size={18} />
                       </ListItemIcon>
                       <ListItemText
-                        primary="Nhân sự"
+                        primary={t("sidebar.personnel")}
                         primaryTypographyProps={{ fontSize: "0.92rem" }}
                       />
                     </ListItemButton>
@@ -800,7 +802,7 @@ export default function Sidebar({
           >
             <ListItem disablePadding sx={{ display: "block" }}>
               <Tooltip
-                title={collapsed ? "Research & Docs" : ""}
+                title={collapsed ? t("sidebar.researchDocs") : ""}
                 placement="right"
                 arrow
               >
@@ -812,7 +814,7 @@ export default function Sidebar({
                     <BookOpen size={21} />
                   </ListItemIcon>
                   <ListItemText
-                    primary="Research & Docs"
+                    primary={t("sidebar.researchDocs")}
                     sx={{
                       opacity: collapsed ? 0 : 1,
                       width: collapsed ? 0 : "auto",
@@ -841,7 +843,7 @@ export default function Sidebar({
         }}
       >
         <Divider sx={{ borderColor: colors.divider, mb: 1.5 }} />
-        <Tooltip title={collapsed ? "IT Support" : ""} placement="right" arrow>
+        <Tooltip title={collapsed ? t("sidebar.itSupport") : ""} placement="right" arrow>
           <ListItemButton
             sx={{
               borderRadius: "12px",
@@ -865,7 +867,7 @@ export default function Sidebar({
               <HelpCircle size={20} />
             </ListItemIcon>
             <ListItemText
-              primary="IT Support"
+              primary={t("sidebar.itSupport")}
               sx={{
                 opacity: collapsed ? 0 : 1,
                 width: collapsed ? 0 : "auto",

@@ -14,6 +14,7 @@ import {
   Fade,
 } from "@mui/material";
 import { School as SchoolIcon } from "@mui/icons-material";
+import { useTranslation, Trans } from "react-i18next";
 import { api } from "../../services/api";
 import loginBg from "../../assets/images/login-bg2.jpg";
 
@@ -49,6 +50,7 @@ const MicrosoftLogo = () => (
 );
 
 export default function Login() {
+  const { t, i18n } = useTranslation();
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isMsLoading, setIsMsLoading] = useState(false);
@@ -104,16 +106,16 @@ export default function Login() {
       }
 
       // Các lỗi khác (huỷ login, lỗi server...) thì hiện thông báo đỏ tại trang Login
-      let errorMessage = "Authentication failed";
+      let errorMessage = t("login.errorAuthFailed");
       switch (errorParam) {
         case "auth_failed":
-          errorMessage = "❌ Đăng nhập thất bại. Vui lòng thử lại.";
+          errorMessage = t("login.errorAuthFailed");
           break;
         case "access_denied":
-          errorMessage = "❌ Bạn đã từ chối cấp quyền truy cập.";
+          errorMessage = t("login.errorAccessDenied");
           break;
         default:
-          errorMessage = `❌ Lỗi: ${errorParam}`;
+          errorMessage = t("login.errorDefault", { error: errorParam });
       }
 
       setError(errorMessage);
@@ -203,13 +205,13 @@ export default function Login() {
                 variant="h4"
                 sx={{ fontWeight: 600, color: "#1a1a1a", mb: 0.5 }}
               >
-                OKR & KPI Management
+                {t("common.systemName")}
               </Typography>
               <Typography
                 variant="body1"
                 sx={{ color: "#080808", fontWeight: 500, fontSize: "20px" }}
               >
-                University of Science - VNUHCM
+                {t("sidebar.vnuHcmus")}
               </Typography>
             </Box>
 
@@ -217,6 +219,7 @@ export default function Login() {
             <Paper
               elevation={3}
               sx={{
+                position: "relative",
                 width: "100%",
                 p: { xs: 3, sm: 4 },
                 borderRadius: "16px",
@@ -224,6 +227,40 @@ export default function Login() {
                 boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
               }}
             >
+              <Box sx={{ position: "absolute", top: 16, left: 16, zIndex: 10 }}>
+                <Button 
+                  onClick={() => i18n.changeLanguage(i18n.language === 'vi' ? 'en' : 'vi')}
+                  variant="outlined"
+                  size="small"
+                  sx={{ 
+                    borderRadius: "20px", 
+                    textTransform: "none", 
+                    bgcolor: "rgba(255, 255, 255, 0.8)",
+                    backdropFilter: "blur(4px)",
+                    fontWeight: "bold",
+                    color: "#1976d2",
+                    borderColor: "#1976d2",
+                    minWidth: "auto",
+                    px: 1.5,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1
+                  }}
+                >
+                  {i18n.language === 'en' ? (
+                    <>
+                      <img src="https://flagcdn.com/w20/us.png" width="20" alt="English" style={{ borderRadius: '2px' }} />
+                      EN
+                    </>
+                  ) : (
+                    <>
+                      <img src="https://flagcdn.com/w20/vn.png" width="20" alt="Vietnamese" style={{ borderRadius: '2px' }} />
+                      VN
+                    </>
+                  )}
+                </Button>
+              </Box>
+
               <Typography
                 variant="h5"
                 sx={{
@@ -233,13 +270,13 @@ export default function Login() {
                   color: "#1a1a1a",
                 }}
               >
-                Welcome Back
+                {t("login.title")}
               </Typography>
               <Typography
                 variant="body2"
                 sx={{ color: "#666", textAlign: "center", mb: 3 }}
               >
-                Please sign in with your authorized institutional account
+                {t("login.subtitle")}
               </Typography>
 
               {/* Error Alert */}
@@ -277,11 +314,11 @@ export default function Login() {
                     },
                   }}
                 >
-                  {isLoading ? "Connecting..." : "Sign in with Google"}
+                  {isLoading ? t("login.connecting") : t("login.signInGoogle")}
                 </Button>
 
                 <Divider sx={{ color: "#9ca3af", fontSize: "0.85rem", my: 1 }}>
-                  or
+                  {t("login.or")}
                 </Divider>
 
                 {/* MICROSOFT BUTTON */}
@@ -315,7 +352,7 @@ export default function Login() {
                     },
                   }}
                 >
-                  {isMsLoading ? "Connecting..." : "Sign in with Microsoft"}
+                  {isMsLoading ? t("login.connecting") : t("login.signInMicrosoft")}
                 </Button>
               </Stack>
 
@@ -338,7 +375,7 @@ export default function Login() {
                     textAlign: "center",
                   }}
                 >
-                  🔒 Access Requirement
+                  🔒 {t("login.accessRequirement")}
                 </Typography>
                 <Typography
                   variant="caption"
@@ -349,9 +386,15 @@ export default function Login() {
                     textAlign: "center",
                   }}
                 >
-                  {allowedDomains.length > 0
-                    ? `Only accounts ending in ${allowedDomains.map((d) => `@${d}`).join(", ")} are authorized.`
-                    : "System is restricted to authorized personnel."}
+                  {allowedDomains.length > 0 ? (
+                    <Trans 
+                      i18nKey="login.authorizedDomains" 
+                      values={{ domains: allowedDomains.map((d: any) => `@${d.domain || d.name || d}`).join(", ") }}
+                      components={{ 1: <Typography component="span" sx={{ color: "#d32f2f", fontWeight: "bold" }} /> }}
+                    />
+                  ) : (
+                    t("login.restrictedMessage")
+                  )}
                 </Typography>
               </Box>
             </Paper>

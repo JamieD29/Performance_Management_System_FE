@@ -4,9 +4,11 @@ import { useNavigate } from "react-router-dom";
 import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
 import HomeIcon from "@mui/icons-material/Home";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { useTranslation } from "react-i18next";
 
 const NotFoundPage = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <Box
@@ -55,7 +57,7 @@ const NotFoundPage = () => {
             variant="h5"
             sx={{ fontWeight: 600, color: "text.primary" }}
           >
-            Không tìm thấy trang hoặc Tên miền
+            {t("notFound.title")}
           </Typography>
 
           <Typography
@@ -63,8 +65,7 @@ const NotFoundPage = () => {
             color="text.secondary"
             sx={{ maxWidth: "400px", mb: 2 }}
           >
-            Trang bạn đang tìm kiếm không tồn tại, hoặc tên miền tổ chức
-            (Domain) đã bị xóa khỏi hệ thống.
+            {t("notFound.description")}
           </Typography>
 
           {/* Các nút điều hướng */}
@@ -75,7 +76,7 @@ const NotFoundPage = () => {
               onClick={() => navigate(-1)} // Quay lại trang trước
               sx={{ textTransform: "none", fontWeight: 600 }}
             >
-              Quay lại
+              {t("notFound.goBack")}
             </Button>
 
             <Button
@@ -90,7 +91,7 @@ const NotFoundPage = () => {
                 px: 3,
               }}
             >
-              Về trang chủ
+              {t("notFound.goHome")}
             </Button>
           </Box>
         </Paper>
@@ -102,7 +103,7 @@ const NotFoundPage = () => {
           align="center"
           sx={{ mt: 4, color: "text.disabled" }}
         >
-          © 2026 VNU-HCMUS Performance Management System
+          © 2026 {t("sidebar.vnuHcmus")} {t("common.systemName")}
         </Typography>
       </Container>
     </Box>

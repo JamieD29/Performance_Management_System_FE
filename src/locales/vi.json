@@ -1,0 +1,45 @@
+{
+  "login": {
+    "title": "Chào Mừng Trở Lại",
+    "subtitle": "Vui lòng đăng nhập bằng tài khoản tổ chức đã được cấp phép",
+    "signInGoogle": "Đăng nhập với Google",
+    "signInMicrosoft": "Đăng nhập với Microsoft",
+    "connecting": "Đang kết nối...",
+    "or": "hoặc",
+    "accessRequirement": "Yêu Cầu Truy Cập",
+    "restrictedMessage": "Hệ thống chỉ dành cho nhân sự được cấp phép.",
+    "authorizedDomains": "Chỉ các tài khoản có đuôi <1>{{domains}}</1> mới được phép truy cập.",
+    "errorAuthFailed": "❌ Đăng nhập thất bại. Vui lòng thử lại.",
+    "errorAccessDenied": "❌ Bạn đã từ chối cấp quyền truy cập.",
+    "errorDefault": "❌ Lỗi: {{error}}"
+  },
+  "header": {
+    "profile": "Hồ sơ cá nhân",
+    "adminPortal": "Cổng Quản trị",
+    "logout": "Đăng xuất"
+  },
+  "sidebar": {
+    "dashboard": "Bảng Điều Khiển",
+    "myOkr": "OKR Của tôi",
+    "evaluationForm": "Phiếu Đánh Giá",
+    "departmentGroup": "Bộ môn",
+    "overview": "Tổng quan",
+    "okrManagement": "Quản lý OKR",
+    "personnel": "Nhân sự",
+    "researchDocs": "Nghiên cứu & Tài liệu",
+    "itSupport": "Hỗ trợ IT",
+    "clickToToggle": "Click để thu nhỏ/mở rộng",
+    "vnuHcmus": "VNU-HCMUS",
+    "perfManagement": "Hệ Thống Quản Lý Hiệu Suất"
+  },
+  "common": {
+    "hcmus": "HCMUS",
+    "systemName": "Hệ Thống Quản Lý Hiệu Suất"
+  },
+  "notFound": {
+    "title": "Không tìm thấy trang hoặc Tên miền",
+    "description": "Trang bạn đang tìm kiếm không tồn tại, hoặc tên miền tổ chức (Domain) đã bị xóa khỏi hệ thống.",
+    "goBack": "Quay lại",
+    "goHome": "Về trang chủ"
+  }
+}
