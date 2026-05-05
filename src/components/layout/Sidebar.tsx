@@ -78,10 +78,10 @@ export default function Sidebar({
       })
     : [];
 
-  const isManager = userRoles.includes("ADMIN");
+  const isAdmin = userRoles.includes("ADMIN");
   // Admin, hoặc bất kỳ user nào có chức vụ quản lý đều thấy tab Nhân sự
   const canViewUsers =
-    isManager || !!user?.managementPosition;
+    isAdmin || !!user?.managementPosition;
 
   const departmentName = user.department?.name || t("sidebar.departmentGroup");
 
@@ -442,7 +442,10 @@ export default function Sidebar({
         }}
       >
         <List component="nav" sx={{ px: 0 }}>
-          {/* ── Dashboard ── */}
+          {/* ── PERSONAL TABS (Hidden for Admin) ── */}
+          {!isAdmin && (
+            <>
+              {/* ── Dashboard ── */}
           <Box sx={{ px: collapsed ? 0.5 : 1, mb: 3 }}>
             <Tooltip
               title={collapsed ? t("sidebar.dashboard") : ""}
@@ -658,136 +661,228 @@ export default function Sidebar({
               </ListItemButton>
             </Tooltip>
           </Box>
+          </>
+          )}
 
           {/* ── NHÓM BỘ MÔN ── */}
-          <Box
-            sx={{
-              bgcolor: "rgba(255, 255, 255, 0.03)",
-              borderRadius: "16px",
-              mb: 2,
-              mx: collapsed ? 0.5 : 1,
-              py: 1,
-              border: "1px solid rgba(255, 255, 255, 0.05)",
-            }}
-          >
-            <Typography
-              variant="overline"
-              sx={{
-                ...sectionLabelSx,
-                px: 1.5,
-                pt: 0,
-                pb: 1,
-                color: colors.accent2,
-              }}
-            >
-              {t("sidebar.departmentGroup")}
-            </Typography>
-
-            {collapsed && (
-              <Divider sx={{ mx: 1, my: 1, borderColor: colors.divider }} />
-            )}
-
-            <Tooltip
-              title={collapsed ? departmentName : ""}
-              placement="right"
-              arrow
-            >
-              <ListItemButton
-                onClick={(e) => {
-                  if (collapsed) {
-                    handlePopoverOpen(e, "dept");
-                  } else {
-                    setOpenDept(!openDept);
-                  }
-                }}
-                sx={groupHeaderStyles}
-              >
-                <ListItemIcon
-                  sx={{
-                    color: colors.accent2,
-                    minWidth: collapsed ? "unset" : 38,
-                    mr: collapsed ? 0 : 1,
-                    transition: `color ${TRANSITION_DURATION} ease`,
-                  }}
-                >
-                  <Building2 size={21} />
-                </ListItemIcon>
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    flex: 1,
-                    opacity: collapsed ? 0 : 1,
-                    width: collapsed ? 0 : "auto",
-                    overflow: "hidden",
-                    transition: `opacity 0.2s ease, width ${TRANSITION_DURATION} ${TRANSITION_EASING}`,
-                  }}
-                >
-                  <ListItemText
-                    primary={departmentName}
-                    primaryTypographyProps={{
-                      fontWeight: 700,
-                      fontSize: "1rem",
-                      color: colors.textBright,
-                      noWrap: true,
-                    }}
-                  />
-                  {openDept ? (
-                    <ChevronUp size={16} color={colors.textMuted} />
-                  ) : (
-                    <ChevronDown size={16} color={colors.textMuted} />
-                  )}
-                </Box>
-              </ListItemButton>
-            </Tooltip>
-
-            {!collapsed && (
-              <Collapse in={openDept} timeout={300} unmountOnExit>
-                <List component="div" disablePadding>
+          {isAdmin ? (
+            <>
+              {/* Overview */}
+              <Box sx={{ px: collapsed ? 0.5 : 1, mb: 1.5 }}>
+                <Tooltip title={collapsed ? t("sidebar.overview") : ""} placement="right" arrow>
                   <ListItemButton
-                    sx={{ ...getItemStyles("/departments/overview"), pl: 4 }}
                     onClick={() => handleNavigate("/departments/overview")}
+                    sx={getItemStyles("/departments/overview")}
                   >
                     <ListItemIcon sx={getIconStyles("/departments/overview")}>
-                      <LayoutDashboard size={18} />
+                      <LayoutDashboard size={21} />
                     </ListItemIcon>
                     <ListItemText
                       primary={t("sidebar.overview")}
-                      primaryTypographyProps={{ fontSize: "0.92rem" }}
+                      sx={{
+                        opacity: collapsed ? 0 : 1,
+                        width: collapsed ? 0 : "auto",
+                        transition: `opacity 0.2s ease, width ${TRANSITION_DURATION} ${TRANSITION_EASING}`,
+                        overflow: "hidden",
+                        whiteSpace: "nowrap",
+                      }}
+                      primaryTypographyProps={{
+                        fontWeight: isActive("/departments/overview") ? 700 : 600,
+                        fontSize: "0.95rem",
+                      }}
                     />
                   </ListItemButton>
+                </Tooltip>
+              </Box>
 
+              {/* Quản lý OKR */}
+              <Box sx={{ px: collapsed ? 0.5 : 1, mb: 1.5 }}>
+                <Tooltip title={collapsed ? t("sidebar.okrManagement") : ""} placement="right" arrow>
                   <ListItemButton
-                    sx={{ ...getItemStyles("/departments/okr"), pl: 4 }}
                     onClick={() => handleNavigate("/departments/okr")}
+                    sx={getItemStyles("/departments/okr")}
                   >
                     <ListItemIcon sx={getIconStyles("/departments/okr")}>
-                      <Target size={18} />
+                      <Target size={21} />
                     </ListItemIcon>
                     <ListItemText
                       primary={t("sidebar.okrManagement")}
-                      primaryTypographyProps={{ fontSize: "0.92rem" }}
+                      sx={{
+                        opacity: collapsed ? 0 : 1,
+                        width: collapsed ? 0 : "auto",
+                        transition: `opacity 0.2s ease, width ${TRANSITION_DURATION} ${TRANSITION_EASING}`,
+                        overflow: "hidden",
+                        whiteSpace: "nowrap",
+                      }}
+                      primaryTypographyProps={{
+                        fontWeight: isActive("/departments/okr") ? 700 : 600,
+                        fontSize: "0.95rem",
+                      }}
                     />
                   </ListItemButton>
+                </Tooltip>
+              </Box>
 
-                  {canViewUsers && (
+              {/* Nhân sự */}
+              {canViewUsers && (
+                <Box sx={{ px: collapsed ? 0.5 : 1, mb: 1.5 }}>
+                  <Tooltip title={collapsed ? t("sidebar.personnel") : ""} placement="right" arrow>
                     <ListItemButton
-                      sx={{ ...getItemStyles("/departments/users"), pl: 4 }}
                       onClick={() => handleNavigate("/departments/users")}
+                      sx={getItemStyles("/departments/users")}
                     >
                       <ListItemIcon sx={getIconStyles("/departments/users")}>
-                        <Users size={18} />
+                        <Users size={21} />
                       </ListItemIcon>
                       <ListItemText
                         primary={t("sidebar.personnel")}
+                        sx={{
+                          opacity: collapsed ? 0 : 1,
+                          width: collapsed ? 0 : "auto",
+                          transition: `opacity 0.2s ease, width ${TRANSITION_DURATION} ${TRANSITION_EASING}`,
+                          overflow: "hidden",
+                          whiteSpace: "nowrap",
+                        }}
+                        primaryTypographyProps={{
+                          fontWeight: isActive("/departments/users") ? 700 : 600,
+                          fontSize: "0.95rem",
+                        }}
+                      />
+                    </ListItemButton>
+                  </Tooltip>
+                </Box>
+              )}
+            </>
+          ) : (
+            <Box
+              sx={{
+                bgcolor: "rgba(255, 255, 255, 0.03)",
+                borderRadius: "16px",
+                mb: 2,
+                mx: collapsed ? 0.5 : 1,
+                py: 1,
+                border: "1px solid rgba(255, 255, 255, 0.05)",
+              }}
+            >
+              <Typography
+                variant="overline"
+                sx={{
+                  ...sectionLabelSx,
+                  px: 1.5,
+                  pt: 0,
+                  pb: 1,
+                  color: colors.accent2,
+                }}
+              >
+                {t("sidebar.departmentGroup")}
+              </Typography>
+
+              {collapsed && (
+                <Divider sx={{ mx: 1, my: 1, borderColor: colors.divider }} />
+              )}
+
+              <Tooltip
+                title={collapsed ? departmentName : ""}
+                placement="right"
+                arrow
+              >
+                <ListItemButton
+                  onClick={(e) => {
+                    if (collapsed) {
+                      handlePopoverOpen(e, "dept");
+                    } else {
+                      setOpenDept(!openDept);
+                    }
+                  }}
+                  sx={groupHeaderStyles}
+                >
+                  <ListItemIcon
+                    sx={{
+                      color: colors.accent2,
+                      minWidth: collapsed ? "unset" : 38,
+                      mr: collapsed ? 0 : 1,
+                      transition: `color ${TRANSITION_DURATION} ease`,
+                    }}
+                  >
+                    <Building2 size={21} />
+                  </ListItemIcon>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      flex: 1,
+                      opacity: collapsed ? 0 : 1,
+                      width: collapsed ? 0 : "auto",
+                      overflow: "hidden",
+                      transition: `opacity 0.2s ease, width ${TRANSITION_DURATION} ${TRANSITION_EASING}`,
+                    }}
+                  >
+                    <ListItemText
+                      primary={departmentName}
+                      primaryTypographyProps={{
+                        fontWeight: 700,
+                        fontSize: "1rem",
+                        color: colors.textBright,
+                        noWrap: true,
+                      }}
+                    />
+                    {openDept ? (
+                      <ChevronUp size={16} color={colors.textMuted} />
+                    ) : (
+                      <ChevronDown size={16} color={colors.textMuted} />
+                    )}
+                  </Box>
+                </ListItemButton>
+              </Tooltip>
+
+              {!collapsed && (
+                <Collapse in={openDept} timeout={300} unmountOnExit>
+                  <List component="div" disablePadding>
+                    <ListItemButton
+                      sx={{ ...getItemStyles("/departments/overview"), pl: 4 }}
+                      onClick={() => handleNavigate("/departments/overview")}
+                    >
+                      <ListItemIcon sx={getIconStyles("/departments/overview")}>
+                        <LayoutDashboard size={18} />
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={t("sidebar.overview")}
                         primaryTypographyProps={{ fontSize: "0.92rem" }}
                       />
                     </ListItemButton>
-                  )}
-                </List>
-              </Collapse>
-            )}
-          </Box>
+
+                    <ListItemButton
+                      sx={{ ...getItemStyles("/departments/okr"), pl: 4 }}
+                      onClick={() => handleNavigate("/departments/okr")}
+                    >
+                      <ListItemIcon sx={getIconStyles("/departments/okr")}>
+                        <Target size={18} />
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={t("sidebar.okrManagement")}
+                        primaryTypographyProps={{ fontSize: "0.92rem" }}
+                      />
+                    </ListItemButton>
+
+                    {canViewUsers && (
+                      <ListItemButton
+                        sx={{ ...getItemStyles("/departments/users"), pl: 4 }}
+                        onClick={() => handleNavigate("/departments/users")}
+                      >
+                        <ListItemIcon sx={getIconStyles("/departments/users")}>
+                          <Users size={18} />
+                        </ListItemIcon>
+                        <ListItemText
+                          primary={t("sidebar.personnel")}
+                          primaryTypographyProps={{ fontSize: "0.92rem" }}
+                        />
+                      </ListItemButton>
+                    )}
+                  </List>
+                </Collapse>
+              )}
+            </Box>
+          )}
 
           {/* ── DOCS ── */}
           <Box
