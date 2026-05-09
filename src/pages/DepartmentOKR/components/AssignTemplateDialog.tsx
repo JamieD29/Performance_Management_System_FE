@@ -260,7 +260,11 @@ export default function AssignTemplateDialog({
                 <Select
                   value={filterDepartmentId}
                   label="Bộ môn"
-                  onChange={(e) => setFilterDepartmentId(e.target.value)}
+                  onChange={(e) => {
+                    setFilterDepartmentId(e.target.value);
+                    setFilterPositionId("");
+                    setFilterJobTitle("");
+                  }}
                 >
                   <MenuItem value="">-- Tất cả --</MenuItem>
                   {departments.map((dept: any) => (

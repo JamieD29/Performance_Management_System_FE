@@ -90,7 +90,16 @@ export default function TemplateEditorDialog({
   const loadData = async () => {
     try {
       const posRes = await api.get("/management-positions");
-      setPositions(posRes.data?.data || posRes.data || []);
+      const loadedPositions = posRes.data?.data || posRes.data || [];
+      setPositions(loadedPositions);
+
+      if (initialData && initialData.positionId) {
+        const found = loadedPositions.find((p: any) => p.id === initialData.positionId);
+        if (!found) {
+          setPositionId("");
+          setPositionName("");
+        }
+      }
 
       // Fetch danh sách Chức danh nghề nghiệp từ DB enum
       const jtRes = await api.get("/okr-templates/job-titles");
@@ -236,8 +245,23 @@ export default function TemplateEditorDialog({
     setStructure(newStructure);
   };
 
-  // Clamp to non-negative
-  const setNonNeg = (val: string) => Math.max(0, Number(val) || 0);
+  // Format input: no negative, limit decimals, strip leading zero, max 99999
+  const formatNumberInput = (val: string) => {
+    if (!val) return "";
+    let cleaned = val.replace(/-/g, ""); // Remove negatives
+    if (/^0[0-9]/.test(cleaned)) {
+      cleaned = cleaned.replace(/^0+/, ""); // Strip leading zero
+    }
+    const parts = cleaned.split(".");
+    if (parts.length > 2) cleaned = parts[0] + "." + parts[1]; // Max 1 decimal point
+    if (parts[1] && parts[1].length > 2) {
+      cleaned = parts[0] + "." + parts[1].substring(0, 2); // Max 2 decimals
+    }
+    if (Number(cleaned) > 99999) return "99999";
+    return cleaned;
+  };
+
+  const setNonNeg = (val: string) => formatNumberInput(val);
 
   // ============================================================
   // Excel Import
@@ -327,6 +351,37 @@ export default function TemplateEditorDialog({
     }
   };
 
+  // Validation checks for Disable Save button
+  const isStructureValid = () => {
+    if (structure.length === 0) return false;
+    
+    const validateNode = (node: any, isObjective = false): boolean => {
+      const maxScore = Number(node.maxScore) || 0;
+      if (isObjective && (!node.items || node.items.length === 0)) return false;
+      
+      if (node.items && node.items.length > 0) {
+        let childTotal = 0;
+        for (const child of node.items) {
+          if (!validateNode(child)) return false;
+          childTotal += Number(child.maxScore) || 0;
+        }
+        if (childTotal > maxScore) return false;
+      }
+      return true;
+    };
+
+    let totalObjScore = 0;
+    for (const obj of structure) {
+      if (!validateNode(obj, true)) return false;
+      totalObjScore += Number(obj.maxScore) || 0;
+    }
+    
+    if (totalObjScore !== 100) return false;
+    return true;
+  };
+
+  const isFormValid = title.trim() !== "" && isStructureValid();
+
   // ============================================================
   // Submit
   // ============================================================
@@ -376,6 +431,7 @@ export default function TemplateEditorDialog({
             onChange={(e) =>
               updateItem(oIndex, "title", e.target.value, kIndex, sIndex, ssIndex)
             }
+            maxLength={255}
           />
         </TableCell>
         <TableCell>
@@ -409,6 +465,7 @@ export default function TemplateEditorDialog({
             onChange={(e) =>
               updateItem(oIndex, "unit", e.target.value, kIndex, sIndex, ssIndex)
             }
+            maxLength={50}
           />
         </TableCell>
         <TableCell>
@@ -604,6 +661,7 @@ export default function TemplateEditorDialog({
                         placeholder="Tên mục tiêu lớn..."
                         value={obj.title}
                         onChange={(e) => updateItem(oIndex, "title", e.target.value)}
+                        maxLength={255}
                       />
                     </TableCell>
                     <TableCell>
@@ -650,6 +708,7 @@ export default function TemplateEditorDialog({
                             placeholder="Kết quả then chốt..."
                             value={kr.title}
                             onChange={(e) => updateItem(oIndex, "title", e.target.value, kIndex)}
+                            maxLength={255}
                           />
                         </TableCell>
                         <TableCell>
@@ -677,6 +736,7 @@ export default function TemplateEditorDialog({
                             placeholder="N/A"
                             value={kr.unit || ""}
                             onChange={(e) => updateItem(oIndex, "unit", e.target.value, kIndex)}
+                            maxLength={50}
                           />
                         </TableCell>
                         <TableCell>
@@ -723,6 +783,7 @@ export default function TemplateEditorDialog({
                                   placeholder="Tiêu chí chi tiết..."
                                   value={subKr.title}
                                   onChange={(e) => updateItem(oIndex, "title", e.target.value, kIndex, sIndex)}
+                                  maxLength={255}
                                 />
                               </TableCell>
                               <TableCell>
@@ -750,6 +811,7 @@ export default function TemplateEditorDialog({
                                   placeholder="N/A"
                                   value={subKr.unit || ""}
                                   onChange={(e) => updateItem(oIndex, "unit", e.target.value, kIndex, sIndex)}
+                                  maxLength={50}
                                 />
                               </TableCell>
                               <TableCell>
@@ -821,7 +883,7 @@ export default function TemplateEditorDialog({
           variant="contained"
           onClick={handleSubmit}
           startIcon={<Save />}
-          disabled={!title}
+          disabled={!isFormValid}
         >
           Lưu Template
         </Button>
