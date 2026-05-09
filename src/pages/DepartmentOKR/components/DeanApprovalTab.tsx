@@ -206,7 +206,7 @@ export default function DeanApprovalTab() {
       <Dialog
         open={viewDialog}
         onClose={() => setViewDialog(false)}
-        maxWidth="md"
+        maxWidth="xl"
         fullWidth
       >
         <DialogTitle sx={{ fontWeight: "bold" }}>

@@ -33,6 +33,9 @@ import {
   Send,
   Assignment,
   Save,
+  Add,
+  Close,
+  Delete,
 } from "@mui/icons-material";
 import { api } from "../../services/api";
 import { confirmAction, showSuccess, showError } from "../../utils/swal";
@@ -64,7 +67,18 @@ function OkrCard({ okr, onRefresh }: { okr: any; onRefresh: () => void }) {
   >({});
   const [saving, setSaving] = useState(false);
 
-  const structure = Array.isArray(okr.keyResults) ? okr.keyResults : [];
+  // Add KR/SubKR State
+  const [openAddDialog, setOpenAddDialog] = useState(false);
+  const [addParentType, setAddParentType] = useState<'KR' | 'SUBKR' | null>(null);
+  const [addObjectiveId, setAddObjectiveId] = useState<string | null>(null);
+  const [addKrId, setAddKrId] = useState<string | null>(null);
+  const [newCriteriaTitle, setNewCriteriaTitle] = useState('');
+  const [newCriteriaUnitScore, setNewCriteriaUnitScore] = useState('');
+  const [newCriteriaUnit, setNewCriteriaUnit] = useState('');
+
+  const [localStructure, setLocalStructure] = useState<any[]>([]);
+  const [hasChanges, setHasChanges] = useState(false);
+
   const isAccepted = okr.status === "ACCEPTED";
   const isSubmitted = okr.status === "SUBMITTED";
   const isCompleted = okr.status === "COMPLETED";
@@ -76,12 +90,14 @@ function OkrCard({ okr, onRefresh }: { okr: any; onRefresh: () => void }) {
 
   const canReport = isAccepted && isCycleStarted; // Chỉ tự khai khi đã ACCEPTED và kỳ đã bắt đầu
 
-  // Load existing self-report data if any
+  // Load existing self-report data and structure
   useEffect(() => {
     if (okr.selfReportData && typeof okr.selfReportData === "object") {
       setReportData(okr.selfReportData);
     }
-  }, [okr.selfReportData]);
+    setLocalStructure(Array.isArray(okr.keyResults) ? okr.keyResults : []);
+    setHasChanges(false);
+  }, [okr.selfReportData, okr.keyResults]);
 
   // Calculate total self-report score
   const calcTotalScore = () => {
@@ -95,7 +111,7 @@ function OkrCard({ okr, onRefresh }: { okr: any; onRefresh: () => void }) {
   // Calculate max possible score
   const calcMaxScore = () => {
     let max = 0;
-    structure.forEach((obj: any) => {
+    localStructure.forEach((obj: any) => {
       max += Number(obj.maxScore) || 0;
     });
     return max;
@@ -115,6 +131,129 @@ function OkrCard({ okr, onRefresh }: { okr: any; onRefresh: () => void }) {
     });
     const max = Number(obj.maxScore) || 0;
     return max > 0 ? Math.min(total, max) : total;
+  };
+
+  const handleOpenAddDialog = (type: 'KR' | 'SUBKR', objId: string, krId?: string) => {
+    setAddParentType(type);
+    setAddObjectiveId(objId);
+    setAddKrId(krId || null);
+    setNewCriteriaTitle('');
+    setNewCriteriaUnitScore('');
+    setNewCriteriaUnit('');
+    setOpenAddDialog(true);
+  };
+
+  const handleSaveNewCriteria = () => {
+    if (!newCriteriaTitle.trim()) {
+      showError("Lỗi", "Vui lòng nhập nội dung.");
+      return;
+    }
+    const newStructure = JSON.parse(JSON.stringify(localStructure));
+    
+    let generatedId = "";
+
+    if (addParentType === 'KR') {
+      const obj = newStructure.find((o: any) => o.id === addObjectiveId);
+      if (obj) {
+        if (!obj.items) obj.items = [];
+        const lastItem = obj.items[obj.items.length - 1];
+        if (lastItem && lastItem.id) {
+          const parts = String(lastItem.id).split('.');
+          if (parts.length > 1) {
+            const lastNum = parseInt(parts[parts.length - 1], 10);
+            parts[parts.length - 1] = isNaN(lastNum) ? "1" : String(lastNum + 1);
+            generatedId = parts.join('.');
+          } else {
+            const lastNum = parseInt(lastItem.id, 10);
+            if (!isNaN(lastNum)) {
+              generatedId = String(lastNum + 1);
+            } else {
+              generatedId = `${lastItem.id}.1`;
+            }
+          }
+        } else {
+          generatedId = `${obj.id}.1`;
+        }
+
+        const newItem = {
+          id: generatedId,
+          title: newCriteriaTitle,
+          unitScore: Number(newCriteriaUnitScore) || 0,
+          unit: newCriteriaUnit || 'đv',
+          isNew: true,
+          items: []
+        };
+        obj.items.push(newItem);
+      }
+    } else if (addParentType === 'SUBKR') {
+      const obj = newStructure.find((o: any) => o.id === addObjectiveId);
+      if (obj) {
+        const kr = obj.items?.find((k: any) => k.id === addKrId);
+        if (kr) {
+          if (!kr.items) kr.items = [];
+          const lastItem = kr.items[kr.items.length - 1];
+          if (lastItem && lastItem.id) {
+            const parts = String(lastItem.id).split('.');
+            if (parts.length > 1) {
+              const lastNum = parseInt(parts[parts.length - 1], 10);
+              parts[parts.length - 1] = isNaN(lastNum) ? "1" : String(lastNum + 1);
+              generatedId = parts.join('.');
+            } else {
+              generatedId = `${lastItem.id}.1`;
+            }
+          } else {
+            generatedId = `${kr.id}.1`;
+          }
+
+          const newItem = {
+            id: generatedId,
+            title: newCriteriaTitle,
+            unitScore: Number(newCriteriaUnitScore) || 0,
+            unit: newCriteriaUnit || 'đv',
+            isNew: true,
+            items: []
+          };
+          kr.items.push(newItem);
+        }
+      }
+    }
+
+    setLocalStructure(newStructure);
+    setHasChanges(true);
+    setOpenAddDialog(false);
+  };
+
+  const handleDeleteItem = (objId: string, krId?: string, subId?: string) => {
+    const newStructure = JSON.parse(JSON.stringify(localStructure));
+    
+    if (subId && krId) {
+       const obj = newStructure.find((o:any) => o.id === objId);
+       if (obj) {
+          const kr = obj.items?.find((k:any) => k.id === krId);
+          if (kr && kr.items) {
+             kr.items = kr.items.filter((s:any) => s.id !== subId);
+          }
+       }
+    } else if (krId) {
+       const obj = newStructure.find((o:any) => o.id === objId);
+       if (obj && obj.items) {
+          obj.items = obj.items.filter((k:any) => k.id !== krId);
+       }
+    }
+    
+    setLocalStructure(newStructure);
+    setHasChanges(true);
+  };
+
+  const handleSubmitChanges = async () => {
+    try {
+      await api.put(`/okrs/${okr.id}/structure`, { keyResults: localStructure });
+      setHasChanges(false);
+      onRefresh();
+      showSuccess("Thành công", "Đã gửi cấu trúc mới.");
+    } catch (error) {
+      showError("Lỗi", "Không thể cập nhật cấu trúc.");
+    }
   };
 
   const handleAccept = async () => {
@@ -222,7 +361,7 @@ function OkrCard({ okr, onRefresh }: { okr: any; onRefresh: () => void }) {
 
     // Build report with calculated scores
     const enrichedReport: Record<string, any> = {};
-    structure.forEach((obj: any) => {
+    localStructure.forEach((obj: any) => {
       obj.items?.forEach((kr: any) => {
         const key = `${obj.id}-${kr.id}`;
         const qty = reportData[key]?.quantity || 0;
@@ -344,7 +483,35 @@ function OkrCard({ okr, onRefresh }: { okr: any; onRefresh: () => void }) {
       )}
 
       {/* Expanded content */}
-      <Collapse in={expanded}>
+      <Dialog 
+        open={expanded} 
+        onClose={() => setExpanded(false)} 
+        maxWidth="xl" 
+        fullWidth
+        PaperProps={{
+          sx: { minHeight: '80vh', maxHeight: '90vh' }
+        }}
+      >
+        <DialogTitle sx={{ bgcolor: "#1e3a8a", color: "white", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <Box>Chi tiết OKR: {okr.objective}</Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {(isPending || okr.status === 'NEGOTIATING') && hasChanges && (
+              <Button 
+                variant="contained" 
+                color="success" 
+                size="small" 
+                onClick={handleSubmitChanges}
+                startIcon={<Save />}
+              >
+                Gửi thay đổi
+              </Button>
+            )}
+            <IconButton onClick={() => setExpanded(false)} sx={{ color: "white" }}>
+              <Close />
+            </IconButton>
+          </Box>
+        </DialogTitle>
+        <DialogContent dividers sx={{ p: 0 }}>
         {isAccepted && !isCycleStarted && (
           <Box sx={{ p: 2, bgcolor: "#fffbeb" }}>
             <Alert severity="warning">
@@ -429,7 +596,7 @@ function OkrCard({ okr, onRefresh }: { okr: any; onRefresh: () => void }) {
               </TableRow>
             </TableHead>
             <TableBody>
-              {structure.map((obj: any, oIndex: number) => (
+              {localStructure.map((obj: any, oIndex: number) => (
                 <React.Fragment key={obj.id || oIndex}>
                   {/* Objective row */}
                   <TableRow sx={{ bgcolor: "#dbeafe" }}>
@@ -461,13 +628,18 @@ function OkrCard({ okr, onRefresh }: { okr: any; onRefresh: () => void }) {
                     )}
                     {(isPending || okr.status === 'NEGOTIATING') && (
                       <TableCell align="center">
-                        <IconButton size="small" onClick={() => setActiveChatId(activeChatId === obj.id ? null : obj.id)}>
-                          <Comment fontSize="small" color={okr.proposedChanges?.[obj.id]?.length > 0 ? "primary" : "inherit"} />
-                        </IconButton>
+                        <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+                          <IconButton size="small" onClick={() => handleOpenAddDialog('KR', obj.id)} title="Thêm tiêu chí">
+                            <Add fontSize="small" color="success" />
+                          </IconButton>
+                          <IconButton size="small" onClick={() => setActiveChatId(activeChatId === obj.id ? null : obj.id)}>
+                            <Comment fontSize="small" color={okr.proposedChanges?.[obj.id]?.length > 0 ? "primary" : "inherit"} />
+                          </IconButton>
+                        </Box>
                       </TableCell>
                     )}
                   </TableRow>
-                  {renderChatRow(obj.id, 10)}
+                  {renderChatRow(obj.id, 11)}
 
                   {/* KR rows */}
                   {obj.items?.map((kr: any, kIndex: number) => {
@@ -480,10 +652,16 @@ function OkrCard({ okr, onRefresh }: { okr: any; onRefresh: () => void }) {
 
                     return (
                       <React.Fragment key={`${oIndex}-${kIndex}`}>
-                        <TableRow sx={{ bgcolor: "#f8fafc" }}>
-                          <TableCell sx={{ pl: 3 }}>{kr.id}</TableCell>
-                          <TableCell>{kr.title}</TableCell>
-                          <TableCell>{kr.maxScore}</TableCell>
+                        <TableRow sx={{ bgcolor: kr.isNew ? "#fef08a" : "#f8fafc" }}>
+                          <TableCell sx={{ pl: 3, fontWeight: kr.isNew ? "bold" : "normal" }}>
+                            {kr.id}
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: kr.isNew ? "bold" : "normal" }}>
+                            {kr.title}
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: kr.isNew ? "bold" : "normal" }}>
+                            {kr.maxScore || "—"}
+                          </TableCell>
                           <TableCell>
                             {kr.unitScore ? (
                               <Chip
@@ -556,13 +734,21 @@ function OkrCard({ okr, onRefresh }: { okr: any; onRefresh: () => void }) {
                           {(isSubmitted || isCompleted) && <TableCell></TableCell>}
                           {(isPending || okr.status === 'NEGOTIATING') && (
                             <TableCell align="center">
-                              <IconButton size="small" onClick={() => setActiveChatId(activeChatId === kr.id ? null : kr.id)}>
-                                <Comment fontSize="small" color={okr.proposedChanges?.[kr.id]?.length > 0 ? "primary" : "inherit"} />
-                              </IconButton>
+                              <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+                                <IconButton size="small" onClick={() => handleOpenAddDialog('SUBKR', obj.id, kr.id)} title="Thêm tiêu chí con">
+                                  <Add fontSize="small" color="success" />
+                                </IconButton>
+                                <IconButton size="small" onClick={() => setActiveChatId(activeChatId === kr.id ? null : kr.id)}>
+                                  <Comment fontSize="small" color={okr.proposedChanges?.[kr.id]?.length > 0 ? "primary" : "inherit"} />
+                                </IconButton>
+                                <IconButton size="small" onClick={() => handleDeleteItem(obj.id, kr.id)} title="Xóa tiêu chí">
+                                  <Delete fontSize="small" color="error" />
+                                </IconButton>
+                              </Box>
                             </TableCell>
                           )}
                         </TableRow>
-                        {renderChatRow(kr.id, 10)}
+                        {renderChatRow(kr.id, 11)}
 
                         {/* Sub-KR rows */}
                         {kr.items?.map((sub: any, sIndex: number) => {
@@ -575,14 +761,16 @@ function OkrCard({ okr, onRefresh }: { okr: any; onRefresh: () => void }) {
 
                           return (
                             <React.Fragment key={`${oIndex}-${kIndex}-${sIndex}`}>
-                              <TableRow>
-                              <TableCell sx={{ pl: 6, fontSize: "0.85rem" }}>
+                              <TableRow sx={{ bgcolor: sub.isNew ? "#fef08a" : "inherit" }}>
+                              <TableCell sx={{ pl: 6, fontSize: "0.85rem", fontWeight: sub.isNew ? "bold" : "normal" }}>
                                 {sub.id}
                               </TableCell>
-                              <TableCell sx={{ fontSize: "0.9rem" }}>
+                              <TableCell sx={{ fontSize: "0.9rem", fontWeight: sub.isNew ? "bold" : "normal" }}>
                                 {sub.title}
                               </TableCell>
-                              <TableCell>{sub.maxScore}</TableCell>
+                              <TableCell sx={{ fontWeight: sub.isNew ? "bold" : "normal" }}>
+                                {sub.maxScore || "—"}
+                              </TableCell>
                               <TableCell>
                                 {sub.unitScore ? (
                                   <Chip
@@ -650,13 +838,18 @@ function OkrCard({ okr, onRefresh }: { okr: any; onRefresh: () => void }) {
                               {(isSubmitted || isCompleted) && <TableCell></TableCell>}
                               {(isPending || okr.status === 'NEGOTIATING') && (
                                 <TableCell align="center">
-                                  <IconButton size="small" onClick={() => setActiveChatId(activeChatId === sub.id ? null : sub.id)}>
-                                    <Comment fontSize="small" color={okr.proposedChanges?.[sub.id]?.length > 0 ? "primary" : "inherit"} />
-                                  </IconButton>
+                                  <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+                                    <IconButton size="small" onClick={() => setActiveChatId(activeChatId === sub.id ? null : sub.id)}>
+                                      <Comment fontSize="small" color={okr.proposedChanges?.[sub.id]?.length > 0 ? "primary" : "inherit"} />
+                                    </IconButton>
+                                    <IconButton size="small" onClick={() => handleDeleteItem(obj.id, kr.id, sub.id)} title="Xóa tiêu chí con">
+                                      <Delete fontSize="small" color="error" />
+                                    </IconButton>
+                                  </Box>
                                 </TableCell>
                               )}
                             </TableRow>
-                            {renderChatRow(sub.id, 10)}
+                            {renderChatRow(sub.id, 11)}
                             </React.Fragment>
                           );
                         })}
@@ -724,7 +917,45 @@ function OkrCard({ okr, onRefresh }: { okr: any; onRefresh: () => void }) {
             </Alert>
           </Box>
         )}
-      </Collapse>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add KR/SubKR Dialog */}
+      <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          {addParentType === 'KR' ? 'Thêm Tiêu chí mới' : 'Thêm Tiêu chí con mới'}
+        </DialogTitle>
+        <DialogContent dividers>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+            <TextField 
+              label="Nội dung tiêu chí" 
+              fullWidth 
+              value={newCriteriaTitle} 
+              onChange={(e) => setNewCriteriaTitle(e.target.value)} 
+            />
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <TextField 
+                label="Điểm / Đơn vị" 
+                type="number" 
+                fullWidth 
+                value={newCriteriaUnitScore} 
+                onChange={(e) => setNewCriteriaUnitScore(e.target.value)} 
+              />
+              <TextField 
+                label="Đơn vị tính" 
+                fullWidth 
+                value={newCriteriaUnit} 
+                onChange={(e) => setNewCriteriaUnit(e.target.value)} 
+                placeholder="VD: bài, đv, giờ..."
+              />
+            </Box>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenAddDialog(false)}>Hủy</Button>
+          <Button variant="contained" onClick={handleSaveNewCriteria}>Lưu tạm</Button>
+        </DialogActions>
+      </Dialog>
     </Paper>
   );
 }
