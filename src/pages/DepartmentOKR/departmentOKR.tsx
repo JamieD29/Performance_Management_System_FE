@@ -10,6 +10,7 @@ import {
 import { NavigateNext, Business, Flag, Gavel, Assessment } from "@mui/icons-material";
 
 import TemplateListTab from "./components/TemplateListTab";
+import AssignOkrTab from "./components/AssignOkrTab";
 import DeanApprovalTab from "./components/DeanApprovalTab";
 import EvaluationListTab from "./components/EvaluationListTab";
 import EvaluationFormManagerTab from "./components/EvaluationFormManagerTab";
@@ -37,8 +38,15 @@ export default function DepartmentOKR() {
       </Box>
 
       <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
-        <Tabs value={tabValue} onChange={(_, v) => setTabValue(v)}>
+        <Tabs 
+          value={tabValue} 
+          onChange={(_, v) => setTabValue(v)}
+          variant="scrollable"
+          scrollButtons="auto"
+          allowScrollButtonsMobile
+        >
           <Tab icon={<Flag />} iconPosition="start" label="Templates OKR" />
+          <Tab icon={<Assessment />} iconPosition="start" label="Gán OKR" />
           <Tab icon={<Gavel />} iconPosition="start" label="Duyệt đề xuất" />
           <Tab icon={<Assessment />} iconPosition="start" label="Báo cáo OKR" />
           <Tab icon={<Assessment />} iconPosition="start" label="Xét duyệt Phiếu (Hoàn thành)" />
@@ -46,9 +54,10 @@ export default function DepartmentOKR() {
       </Box>
 
       {tabValue === 0 && <TemplateListTab />}
-      {tabValue === 1 && <DeanApprovalTab />}
-      {tabValue === 2 && <EvaluationListTab />}
-      {tabValue === 3 && <EvaluationFormManagerTab />}
+      {tabValue === 1 && <AssignOkrTab />}
+      {tabValue === 2 && <DeanApprovalTab />}
+      {tabValue === 3 && <EvaluationListTab />}
+      {tabValue === 4 && <EvaluationFormManagerTab />}
     </Container>
   );
 }

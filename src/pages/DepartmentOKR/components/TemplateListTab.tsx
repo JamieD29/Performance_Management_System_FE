@@ -12,18 +12,15 @@ import {
   Typography,
   Chip,
 } from "@mui/material";
-import { Add, Edit, Send } from "@mui/icons-material";
+import { Add, Edit } from "@mui/icons-material";
 import { api } from "../../../services/api";
 import { showError } from "../../../utils/swal";
 import TemplateEditorDialog from "./TemplateEditorDialog";
-import AssignTemplateDialog from "./AssignTemplateDialog";
 
 export default function TemplateListTab() {
   const [templates, setTemplates] = useState<any[]>([]);
   const [openEditor, setOpenEditor] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
-  const [openAssign, setOpenAssign] = useState(false);
-  const [assignTemplate, setAssignTemplate] = useState<any>(null);
 
   useEffect(() => {
     fetchTemplates();
@@ -63,10 +60,6 @@ export default function TemplateListTab() {
     }
   };
 
-  const handleAssign = (tmpl: any) => {
-    setAssignTemplate(tmpl);
-    setOpenAssign(true);
-  };
 
   return (
     <Box>
@@ -159,15 +152,6 @@ export default function TemplateListTab() {
                     >
                       Chỉnh sửa
                     </Button>
-                    <Button
-                      size="small"
-                      color="success"
-                      variant="contained"
-                      startIcon={<Send />}
-                      onClick={() => handleAssign(t)}
-                    >
-                      Gán
-                    </Button>
                   </TableCell>
                 </TableRow>
               ))
@@ -185,16 +169,6 @@ export default function TemplateListTab() {
         />
       )}
 
-      {openAssign && assignTemplate && (
-        <AssignTemplateDialog
-          open={openAssign}
-          onClose={() => {
-            setOpenAssign(false);
-            setAssignTemplate(null);
-          }}
-          template={assignTemplate}
-        />
-      )}
     </Box>
   );
 }

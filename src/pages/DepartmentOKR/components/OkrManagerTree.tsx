@@ -128,9 +128,9 @@ export default function OkrManagerTree({ okr, onRefresh }: { okr: any; onRefresh
               {/* KR rows */}
               {obj.items?.map((kr: any, kIndex: number) => (
                 <React.Fragment key={`${oIndex}-${kIndex}`}>
-                  <TableRow sx={{ bgcolor: "#f8fafc" }}>
-                    <TableCell sx={{ pl: 3 }}>{kr.id}</TableCell>
-                    <TableCell>{kr.title}</TableCell>
+                  <TableRow sx={{ bgcolor: kr.isNew ? "#fef08a" : "#f8fafc" }}>
+                    <TableCell sx={{ pl: 3, fontWeight: kr.isNew ? "bold" : "normal" }}>{kr.id}</TableCell>
+                    <TableCell sx={{ fontWeight: kr.isNew ? "bold" : "normal" }}>{kr.title}</TableCell>
                     <TableCell>
                       <TextField 
                         size="small" type="number" defaultValue={kr.maxScore} 
@@ -156,9 +156,9 @@ export default function OkrManagerTree({ okr, onRefresh }: { okr: any; onRefresh
                   {/* Sub-KR rows */}
                   {kr.items?.map((sub: any, sIndex: number) => (
                     <React.Fragment key={`${oIndex}-${kIndex}-${sIndex}`}>
-                      <TableRow>
-                        <TableCell sx={{ pl: 6 }}>{sub.id}</TableCell>
-                        <TableCell>{sub.title}</TableCell>
+                      <TableRow sx={{ bgcolor: sub.isNew ? "#fef08a" : "inherit" }}>
+                        <TableCell sx={{ pl: 6, fontWeight: sub.isNew ? "bold" : "normal" }}>{sub.id}</TableCell>
+                        <TableCell sx={{ fontWeight: sub.isNew ? "bold" : "normal" }}>{sub.title}</TableCell>
                         <TableCell>
                           <TextField 
                             size="small" type="number" defaultValue={sub.maxScore} 
