@@ -22,7 +22,7 @@ function SlideTransition(props: SlideProps) {
   return <Slide {...props} direction="left" />;
 }
 
-const POLL_INTERVAL = 30000; // 30 giây
+const POLL_INTERVAL = 10000; // 10 giây
 
 export default function NotificationToast() {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
@@ -37,11 +37,12 @@ export default function NotificationToast() {
 
       const res = await api.get("/notifications");
       const data: NotificationItem[] = Array.isArray(res.data) ? res.data : [];
+      const unreadData = data.filter(n => !n.isRead);
 
-      if (data.length > 0) {
-        setNotifications(data);
+      if (unreadData.length > 0) {
+        setNotifications(unreadData);
         // Hiển thị thông báo mới nhất chưa xem
-        const newest = data[0];
+        const newest = unreadData[0];
         if (!currentNotification || newest.id !== currentNotification.id) {
           setCurrentNotification(newest);
           setOpen(true);
@@ -60,19 +61,11 @@ export default function NotificationToast() {
     return () => clearInterval(interval);
   }, [fetchNotifications]);
 
-  const handleClose = async () => {
-    setOpen(false);
-    if (currentNotification) {
-      try {
-        await api.patch(`/notifications/${currentNotification.id}/read`);
-        // Gỡ khỏi danh sách
-        setNotifications((prev) =>
-          prev.filter((n) => n.id !== currentNotification.id),
-        );
-      } catch (error) {
-        // Silently fail
-      }
+  const handleClose = async (event?: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === 'clickaway') {
+      return;
     }
+    setOpen(false);
   };
 
   // Hiển thị notification kế tiếp khi đóng cái hiện tại
@@ -93,11 +86,16 @@ export default function NotificationToast() {
   return (
     <Snackbar
       open={open}
+      autoHideDuration={6000}
       onClose={handleClose}
       TransitionComponent={SlideTransition}
       TransitionProps={{ onExited: handleExited }}
       anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-      sx={{ maxWidth: 400 }}
+      sx={{ maxWidth: 400, cursor: "pointer" }}
+      onClick={() => {
+        // Bấm vào toast thì tắt toast đi
+        setOpen(false);
+      }}
     >
       <Alert
         severity="info"

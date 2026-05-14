@@ -7,7 +7,16 @@ import {
   Tabs,
   Tab,
 } from "@mui/material";
-import { NavigateNext, Business, Flag, Gavel, Assessment } from "@mui/icons-material";
+import { NavigateNext } from "@mui/icons-material";
+import { 
+  Building2, 
+  FileText, 
+  UserPlus, 
+  CheckCircle, 
+  BarChart3, 
+  FileCheck2 
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 import TemplateListTab from "./components/TemplateListTab";
 import AssignOkrTab from "./components/AssignOkrTab";
@@ -18,46 +27,146 @@ import EvaluationFormManagerTab from "./components/EvaluationFormManagerTab";
 export default function DepartmentOKR() {
   const [tabValue, setTabValue] = useState(0);
 
+  // Tab definitions
+  const TABS = [
+    { label: "Templates OKR", icon: <FileText size={18} /> },
+    { label: "Gán OKR", icon: <UserPlus size={18} /> },
+    { label: "Duyệt đề xuất", icon: <CheckCircle size={18} /> },
+    { label: "Báo cáo OKR", icon: <BarChart3 size={18} /> },
+    { label: "Xét duyệt Phiếu", icon: <FileCheck2 size={18} /> },
+  ];
+
   return (
     <Container maxWidth="xl" sx={{ py: 2 }}>
       <Breadcrumbs separator={<NavigateNext fontSize="small" />} sx={{ mb: 3 }}>
         <Typography
           color="inherit"
-          sx={{ display: "flex", alignItems: "center" }}
+          sx={{ display: "flex", alignItems: "center", gap: 0.5, fontWeight: 500 }}
         >
-          <Business sx={{ mr: 0.5 }} fontSize="inherit" />
+          <Building2 size={18} />
           Bộ môn
         </Typography>
-        <Typography color="text.primary">Quản lý OKR</Typography>
+        <Typography color="text.primary" fontWeight={600}>Quản lý OKR</Typography>
       </Breadcrumbs>
 
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h4" fontWeight="bold" color="#1e3a8a">
+      <Box sx={{ mb: 4, display: 'flex', flexDirection: 'column', gap: 1 }}>
+        <Typography variant="h4" fontWeight="800" sx={{
+          background: "linear-gradient(90deg, #1e3a8a 0%, #3b82f6 100%)",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent"
+        }}>
           Quản lý OKR
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Quản lý thư viện mục tiêu, gán OKR, duyệt đề xuất và theo dõi tiến độ của bộ môn.
         </Typography>
       </Box>
 
-      <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
+      {/* Styled Tabs */}
+      <Box sx={{ 
+        mb: 4, 
+        bgcolor: "white", 
+        p: 0.5, 
+        borderRadius: 3, 
+        boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
+        display: "flex",
+        width: "100%",
+        overflow: "hidden"
+      }}>
         <Tabs 
           value={tabValue} 
           onChange={(_, v) => setTabValue(v)}
-          variant="scrollable"
-          scrollButtons="auto"
-          allowScrollButtonsMobile
+          variant="fullWidth"
+          TabIndicatorProps={{
+            style: { display: "none" } // Ẩn đường kẻ gạch chân mặc định
+          }}
+          sx={{
+            minHeight: 48,
+            width: "100%",
+            "& .MuiTabs-flexContainer": {
+              gap: 1
+            }
+          }}
         >
-          <Tab icon={<Flag />} iconPosition="start" label="Templates OKR" />
-          <Tab icon={<Assessment />} iconPosition="start" label="Gán OKR" />
-          <Tab icon={<Gavel />} iconPosition="start" label="Duyệt đề xuất" />
-          <Tab icon={<Assessment />} iconPosition="start" label="Báo cáo OKR" />
-          <Tab icon={<Assessment />} iconPosition="start" label="Xét duyệt Phiếu (Hoàn thành)" />
+          {TABS.map((tab, index) => (
+            <Tab 
+              key={index}
+              disableRipple
+              label={
+                <Box 
+                  sx={{ 
+                    position: "relative", 
+                    width: "100%", 
+                    height: "100%", 
+                    display: "flex", 
+                    alignItems: "center", 
+                    justifyContent: "center",
+                    py: 1.2,
+                    px: 2.5,
+                    zIndex: 1
+                  }}
+                >
+                  {tabValue === index && (
+                    <motion.div
+                      layoutId="activeOkrTabBackground"
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)",
+                        borderRadius: "10px",
+                        zIndex: -1,
+                        boxShadow: "0 4px 12px rgba(59, 130, 246, 0.35)",
+                      }}
+                      transition={{ type: "tween", ease: "circOut", duration: 0.35 }}
+                    />
+                  )}
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1, zIndex: 2, position: "relative" }}>
+                    {tab.icon}
+                    <span>{tab.label}</span>
+                  </Box>
+                </Box>
+              }
+              sx={{
+                p: 0,
+                m: 0,
+                minHeight: 44,
+                borderRadius: 2.5,
+                textTransform: "none",
+                fontWeight: tabValue === index ? 700 : 500,
+                fontSize: "0.95rem",
+                color: tabValue === index ? "#ffffff" : "#64748b",
+                transition: "color 0.2s ease",
+                "&:hover": {
+                  color: tabValue === index ? "#ffffff" : "#0f172a",
+                  bgcolor: tabValue === index ? "transparent" : "#f1f5f9",
+                },
+                "&.Mui-selected": {
+                  color: "#ffffff",
+                }
+              }}
+            />
+          ))}
         </Tabs>
       </Box>
 
-      {tabValue === 0 && <TemplateListTab />}
-      {tabValue === 1 && <AssignOkrTab />}
-      {tabValue === 2 && <DeanApprovalTab />}
-      {tabValue === 3 && <EvaluationListTab />}
-      {tabValue === 4 && <EvaluationFormManagerTab />}
+      {/* Framer Motion Tab Panels */}
+      <Box sx={{ position: "relative", minHeight: "calc(100vh - 200px)" }}>
+        <motion.div
+          key={tabValue}
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, ease: "easeOut" }}
+        >
+          {tabValue === 0 && <TemplateListTab />}
+          {tabValue === 1 && <AssignOkrTab />}
+          {tabValue === 2 && <DeanApprovalTab />}
+          {tabValue === 3 && <EvaluationListTab />}
+          {tabValue === 4 && <EvaluationFormManagerTab />}
+        </motion.div>
+      </Box>
     </Container>
   );
 }
