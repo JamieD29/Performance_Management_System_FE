@@ -60,16 +60,7 @@ const removeVietnameseTones = (str: string) => {
   return str.toLowerCase();
 };
 
-// Framer Motion variants — typed explicitly to fix TS error
-const rowVariants: Variants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: i * 0.05, duration: 0.3, ease: "easeOut" },
-  }),
-  exit: { opacity: 0, x: -20, transition: { duration: 0.2 } },
-};
+// Bỏ rowVariants cho từng hàng vì animate trực tiếp thẻ <tr> sẽ làm hỏng cấu trúc bảng và gây ra hiện tượng scrollbar/expand.
 
 const dialogContentVariants: Variants = {
   hidden: { opacity: 0, y: 20, scale: 0.97 },
@@ -267,33 +258,28 @@ export default function CycleManagement() {
           </FormControl>
         </Paper>
 
-        <TableContainer component={Paper} variant="outlined">
-          <Table>
-            <TableHead className="bg-gray-50">
-              <TableRow>
-                <TableCell>Tên Kỳ</TableCell>
-                <TableCell>Thời gian</TableCell>
-                <TableCell align="center">Tiến trình</TableCell>
-                <TableCell align="center">Trạng thái</TableCell>
-                <TableCell align="center">Thao tác</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              <AnimatePresence mode="popLayout">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+        >
+          <TableContainer component={Paper} variant="outlined">
+            <Table>
+              <TableHead className="bg-gray-50">
+                <TableRow>
+                  <TableCell>Tên Kỳ</TableCell>
+                  <TableCell>Thời gian</TableCell>
+                  <TableCell align="center">Tiến trình</TableCell>
+                  <TableCell align="center">Trạng thái</TableCell>
+                  <TableCell align="center">Thao tác</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
                 {filteredCycles.length > 0 ? (
-                  filteredCycles.map((cycle, index) => {
+                  filteredCycles.map((cycle) => {
                     const timeStatus = getTimeStatus(cycle);
                     return (
-                      <motion.tr
-                        key={cycle.id}
-                        custom={index}
-                        variants={rowVariants}
-                        initial="hidden"
-                        animate="visible"
-                        exit="exit"
-                        layout
-                        style={{ display: "table-row" }}
-                      >
+                      <TableRow key={cycle.id} hover>
                         <TableCell className="font-medium">{cycle.name}</TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -340,7 +326,7 @@ export default function CycleManagement() {
                             {cycle.status === "OPEN" ? "Đóng kỳ" : "Mở kỳ"}
                           </Button>
                         </TableCell>
-                      </motion.tr>
+                      </TableRow>
                     );
                   })
                 ) : (
@@ -351,10 +337,10 @@ export default function CycleManagement() {
                     </TableCell>
                   </TableRow>
                 )}
-              </AnimatePresence>
-            </TableBody>
-          </Table>
-        </TableContainer>
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </motion.div>
 
         {/* MODAL TẠO MỚI — MUI DatePicker + Framer Motion */}
         <Dialog

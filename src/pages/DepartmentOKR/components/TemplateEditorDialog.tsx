@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -8,866 +8,350 @@ import {
   TextField,
   Box,
   Typography,
-  IconButton,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Divider,
-  Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Alert,
-  Snackbar,
+  Paper,
+  Divider,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  IconButton,
   Tooltip,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import {
-  Add,
-  Delete,
-  Flag,
   Save,
+  Add,
   UploadFile,
   CheckCircle,
   HelpOutline,
 } from "@mui/icons-material";
+import * as XLSX from "xlsx";
 import { api } from "../../../services/api";
-import { parseExcelToStructure } from "../../../utils/excelParser";
+import { performanceService } from "../../../services/performanceService";
+import { showSuccess, showError } from "../../../utils/swal";
+import { useTemplateStructure } from "../hooks/useTemplateStructure";
+import { ObjectiveRow, KeyResultRow, SubKRRow, SubSubKRRow } from "./RowComponents";
 
 interface TemplateEditorDialogProps {
   open: boolean;
   onClose: () => void;
-  onSave: (data: any) => void;
-  initialData?: any;
+  template?: any;
+  onRefresh: () => void;
 }
 
 export default function TemplateEditorDialog({
   open,
   onClose,
-  onSave,
-  initialData,
+  template,
+  onRefresh,
 }: TemplateEditorDialogProps) {
   const [title, setTitle] = useState("");
   const [positionId, setPositionId] = useState("");
-  const [positionName, setPositionName] = useState("");
   const [jobTitle, setJobTitle] = useState("");
-
-  const [structure, setStructure] = useState<any[]>([]);
   const [positions, setPositions] = useState<any[]>([]);
-  const [jobTitles, setJobTitles] = useState<any[]>([]);
+  const [jobTitles, setJobTitles] = useState<string[]>([]);
 
-  // Snackbar state for import feedback
+  const {
+    structure,
+    setStructure,
+    updateItem,
+    handleAddObjective,
+    handleDeleteObjective,
+    handleAddKR,
+    handleDeleteKR,
+    handleAddSubKR,
+    handleDeleteSubKR,
+    handleAddSubSubKR,
+    handleDeleteSubSubKR,
+    setNonNeg,
+  } = useTemplateStructure();
+
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
     message: string;
-    severity: "success" | "error" | "info";
-  }>({ open: false, message: "", severity: "info" });
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
+    severity: "success" | "error";
+  }>({ open: false, message: "", severity: "success" });
 
   useEffect(() => {
-    if (open) {
-      loadData();
-      if (initialData) {
-        setTitle(initialData.title);
-        setPositionId(initialData.positionId || "");
-        setPositionName(initialData.positionName || "");
-        setJobTitle(initialData.jobTitle || "");
-        setStructure(initialData.structure || []);
-      } else {
-        setTitle("");
-        setPositionId("");
-        setPositionName("");
-        setJobTitle("");
-        setStructure([]);
-      }
+    loadMetadata();
+    if (template) {
+      setTitle(template.title || "");
+      setPositionId(template.positionId || "");
+      setJobTitle(template.jobTitle || "");
+      setStructure(Array.isArray(template.keyResults) ? template.keyResults : []);
+    } else {
+      setTitle("");
+      setPositionId("");
+      setJobTitle("");
+      setStructure([]);
     }
-  }, [open, initialData]);
+  }, [open, template, setStructure]);
 
-  const loadData = async () => {
+  const loadMetadata = async () => {
     try {
-      const posRes = await api.get("/management-positions");
-      const loadedPositions = posRes.data?.data || posRes.data || [];
-      setPositions(loadedPositions);
-
-      if (initialData && initialData.positionId) {
-        const found = loadedPositions.find((p: any) => p.id === initialData.positionId);
-        if (!found) {
-          setPositionId("");
-          setPositionName("");
-        }
-      }
-
-      // Fetch danh sách Chức danh nghề nghiệp từ DB enum
-      const jtRes = await api.get("/okr-templates/job-titles");
+      const [posRes, jtRes] = await Promise.all([
+        api.get("/management-positions"),
+        api.get("/users/job-titles"),
+      ]);
+      setPositions(posRes.data || []);
       setJobTitles(jtRes.data || []);
     } catch (error) {
-      console.error("Lỗi load data", error);
+      console.error("Error loading metadata", error);
     }
   };
 
-  const handlePositionChange = (pid: string) => {
-    setPositionId(pid);
-    const found = positions.find((p: any) => p.id === pid);
-    setPositionName(found?.name || "");
-  };
-
-  // ============================================================
-  // Structure Manipulation
-  // ============================================================
-  const handleAddObjective = () => {
-    const newChar = String.fromCharCode(65 + structure.length);
-    setStructure([
-      ...structure,
-      {
-        id: newChar,
-        type: "objective",
-        title: "",
-        maxScore: 0,
-        items: [],
-      },
-    ]);
-  };
-
-  const handleAddKR = (objIndex: number) => {
-    const newStructure = [...structure];
-    const objective = newStructure[objIndex];
-    const newId = `${objective.items.length + 1}`;
-    objective.items.push({
-      id: newId,
-      type: "kr",
-      title: "",
-      maxScore: 0,
-      unitScore: 0,
-      unit: "",
-      target: 0,
-      items: [],
-    });
-    setStructure(newStructure);
-  };
-
-  const handleAddSubKR = (objIndex: number, krIndex: number) => {
-    const newStructure = [...structure];
-    const kr = newStructure[objIndex].items[krIndex];
-    const newId = `${kr.id}.${kr.items.length + 1}`;
-    kr.items.push({
-      id: newId,
-      type: "sub_kr",
-      title: "",
-      maxScore: 0,
-      unitScore: 0,
-      unit: "",
-      target: 0,
-      items: [],
-    });
-    setStructure(newStructure);
-  };
-
-  const handleAddSubSubKR = (
-    objIndex: number,
-    krIndex: number,
-    subKrIndex: number,
-  ) => {
-    const newStructure = [...structure];
-    const subKr = newStructure[objIndex].items[krIndex].items[subKrIndex];
-    if (!subKr.items) subKr.items = [];
-    const newId = String.fromCharCode(97 + subKr.items.length); // a, b, c...
-    subKr.items.push({
-      id: newId,
-      type: "sub_sub_kr",
-      title: "",
-      maxScore: 0,
-      unitScore: 0,
-      unit: "",
-      target: 0,
-      items: [],
-    });
-    setStructure(newStructure);
-  };
-
-  const handleDeleteObj = (objIndex: number) => {
-    setStructure(structure.filter((_, i) => i !== objIndex));
-  };
-
-  const handleDeleteKR = (objIndex: number, krIndex: number) => {
-    const newStructure = [...structure];
-    newStructure[objIndex].items.splice(krIndex, 1);
-    setStructure(newStructure);
-  };
-
-  const handleDeleteSubKR = (
-    objIndex: number,
-    krIndex: number,
-    subIndex: number,
-  ) => {
-    const newStructure = [...structure];
-    newStructure[objIndex].items[krIndex].items.splice(subIndex, 1);
-    setStructure(newStructure);
-  };
-
-  const handleDeleteSubSubKR = (
-    objIndex: number,
-    krIndex: number,
-    subKrIndex: number,
-    subSubIndex: number,
-  ) => {
-    const newStructure = [...structure];
-    newStructure[objIndex].items[krIndex].items[subKrIndex].items.splice(
-      subSubIndex,
-      1,
-    );
-    setStructure(newStructure);
-  };
-
-  const updateItem = (
-    objIndex: number,
-    field: string,
-    value: any,
-    krIndex?: number,
-    subKrIndex?: number,
-    subSubKrIndex?: number,
-  ) => {
-    const newStructure = [...structure];
-    if (krIndex === undefined) {
-      newStructure[objIndex][field] = value;
-    } else if (subKrIndex === undefined) {
-      newStructure[objIndex].items[krIndex][field] = value;
-    } else if (subSubKrIndex === undefined) {
-      newStructure[objIndex].items[krIndex].items[subKrIndex][field] = value;
-    } else {
-      newStructure[objIndex].items[krIndex].items[subKrIndex].items[
-        subSubKrIndex
-      ][field] = value;
-    }
-    setStructure(newStructure);
-  };
-
-  // Format input: no negative, limit decimals, strip leading zero, max 99999
-  const formatNumberInput = (val: string) => {
-    if (!val) return "";
-    let cleaned = val.replace(/-/g, ""); // Remove negatives
-    if (/^0[0-9]/.test(cleaned)) {
-      cleaned = cleaned.replace(/^0+/, ""); // Strip leading zero
-    }
-    const parts = cleaned.split(".");
-    if (parts.length > 2) cleaned = parts[0] + "." + parts[1]; // Max 1 decimal point
-    if (parts[1] && parts[1].length > 2) {
-      cleaned = parts[0] + "." + parts[1].substring(0, 2); // Max 2 decimals
-    }
-    if (Number(cleaned) > 99999) return "99999";
-    return cleaned;
-  };
-
-  const setNonNeg = (val: string) => formatNumberInput(val);
-
-  // ============================================================
-  // Excel Import
-  // ============================================================
-  const handleImportClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const file = event.target.files?.[0];
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
-    const validTypes = [
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      "application/vnd.ms-excel",
-    ];
-    if (
-      !validTypes.includes(file.type) &&
-      !file.name.endsWith(".xlsx") &&
-      !file.name.endsWith(".xls")
-    ) {
-      setSnackbar({
-        open: true,
-        message: "Chỉ hỗ trợ file Excel (.xlsx, .xls)",
-        severity: "error",
-      });
-      return;
-    }
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const data = new Uint8Array(event.target?.result as ArrayBuffer);
+        const workbook = XLSX.read(data, { type: "array" });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
 
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      setSnackbar({
-        open: true,
-        message: "File quá lớn. Giới hạn tối đa 5MB.",
-        severity: "error",
-      });
-      return;
-    }
-
-    try {
-      const parsed = await parseExcelToStructure(file);
-
-      if (parsed.length === 0) {
+        const importedStructure = parseExcelData(jsonData);
+        setStructure(importedStructure);
         setSnackbar({
           open: true,
-          message:
-            "Không tìm thấy dữ liệu OKR trong file. Hãy kiểm tra lại cấu trúc file.",
+          message: "Import dữ liệu từ Excel thành công!",
+          severity: "success",
+        });
+      } catch (error) {
+        console.error("Excel parse error:", error);
+        setSnackbar({
+          open: true,
+          message: "Lỗi định dạng file Excel. Vui lòng kiểm tra lại template.",
           severity: "error",
         });
-        return;
       }
-
-      setStructure(parsed);
-
-      // Count items
-      let total = parsed.length;
-      parsed.forEach((obj) => {
-        total += obj.items?.length || 0;
-        obj.items?.forEach((kr: any) => {
-          total += kr.items?.length || 0;
-          kr.items?.forEach((sub: any) => {
-            total += sub.items?.length || 0;
-          });
-        });
-      });
-
-      setSnackbar({
-        open: true,
-        message: `✅ Import thành công! ${parsed.length} mục tiêu, tổng ${total} mục. Hãy kiểm tra và chỉnh sửa trước khi lưu.`,
-        severity: "success",
-      });
-    } catch (err) {
-      setSnackbar({
-        open: true,
-        message:
-          err instanceof Error ? err.message : "Lỗi không xác định khi đọc file",
-        severity: "error",
-      });
-    }
-
-    // Reset file input so user can re-import same file
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
-  // Validation checks for Disable Save button
-  const isStructureValid = () => {
-    if (structure.length === 0) return false;
-    
-    const validateNode = (node: any, isObjective = false): boolean => {
-      const maxScore = Number(node.maxScore) || 0;
-      if (isObjective && (!node.items || node.items.length === 0)) return false;
-      
-      if (node.items && node.items.length > 0) {
-        let childTotal = 0;
-        for (const child of node.items) {
-          if (!validateNode(child)) return false;
-          childTotal += Number(child.maxScore) || 0;
-        }
-        if (childTotal > maxScore) return false;
-      }
-      return true;
     };
-
-    let totalObjScore = 0;
-    for (const obj of structure) {
-      if (!validateNode(obj, true)) return false;
-      totalObjScore += Number(obj.maxScore) || 0;
-    }
-    
-    if (totalObjScore !== 100) return false;
-    return true;
+    reader.readAsArrayBuffer(file);
+    e.target.value = "";
   };
 
-  const isFormValid = title.trim() !== "" && isStructureValid();
+  const parseExcelData = (data: any[][]) => {
+    const rows = data.slice(1);
+    const result: any[] = [];
+    let currentObj: any = null;
+    let currentKR: any = null;
+    let currentSub: any = null;
 
-  // ============================================================
-  // Submit
-  // ============================================================
-  const handleSubmit = () => {
-    const userStr = sessionStorage.getItem("user");
-    const user = userStr ? JSON.parse(userStr) : {};
+    rows.forEach((row) => {
+      const id = String(row[0] || "").trim();
+      const title = String(row[1] || "").trim();
+      if (!id || !title) return;
 
-    onSave({
-      title,
-      positionId,
-      positionName,
-      jobTitle,
-      structure,
-      createdByUserId: user.id || "",
-      createdByName: user.name || user.email || "Unknown",
+      const maxScore = Number(row[2]) || 0;
+      const unitScore = Number(row[3]) || 0;
+      const unit = String(row[4] || "").trim();
+      const target = Number(row[5]) || 0;
+
+      const dotCount = (id.match(/\./g) || []).length;
+
+      if (dotCount === 0) {
+        currentObj = { id, title, maxScore, items: [] };
+        result.push(currentObj);
+        currentKR = null;
+        currentSub = null;
+      } else if (dotCount === 1) {
+        currentKR = { id, title, maxScore, unitScore, unit, target, items: [] };
+        if (currentObj) currentObj.items.push(currentKR);
+        currentSub = null;
+      } else if (dotCount === 2) {
+        currentSub = { id, title, maxScore, unitScore, unit, target, items: [] };
+        if (currentKR) currentKR.items.push(currentSub);
+      } else if (dotCount === 3) {
+        if (currentSub) {
+          currentSub.items.push({ id, title, unitScore, unit, target });
+        }
+      }
     });
+
+    return result;
   };
 
+  const handleSubmit = async () => {
+    try {
+      const payload = {
+        title,
+        positionId: positionId || null,
+        jobTitle: jobTitle || null,
+        keyResults: structure,
+      };
 
-  // ============================================================
-  // Render Helpers
-  // ============================================================
-  const inputClass = "w-full border border-slate-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500 bg-white placeholder-slate-400 transition-colors";
-  const objInputClass = "w-full border border-blue-400/50 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-300 bg-white/10 text-white placeholder-white/60 transition-colors";
-
-  // Render sub-sub-KR rows (level 4: a, b, c...)
-  const renderSubSubKRRows = (
-    subSubItems: any[],
-    oIndex: number,
-    kIndex: number,
-    sIndex: number,
-  ) => {
-    if (!subSubItems || subSubItems.length === 0) return null;
-    return subSubItems.map((ssKr: any, ssIndex: number) => (
-      <TableRow
-        key={`${oIndex}-${kIndex}-${sIndex}-${ssIndex}`}
-        sx={{ bgcolor: "#fff" }}
-      >
-        <TableCell sx={{ pl: 9, fontSize: "0.8rem", color: "#6b7280" }}>
-          {ssKr.id}
-        </TableCell>
-        <TableCell>
-          <input
-            className={inputClass}
-            placeholder="Mô tả chi tiết..."
-            value={ssKr.title}
-            onChange={(e) =>
-              updateItem(oIndex, "title", e.target.value, kIndex, sIndex, ssIndex)
-            }
-            maxLength={255}
-          />
-        </TableCell>
-        <TableCell>
-          <input
-            type="number"
-            min="0"
-            className={inputClass}
-            value={ssKr.maxScore}
-            onChange={(e) =>
-              updateItem(oIndex, "maxScore", setNonNeg(e.target.value), kIndex, sIndex, ssIndex)
-            }
-          />
-        </TableCell>
-        <TableCell>
-          <input
-            type="number"
-            min="0"
-            className={inputClass}
-            placeholder="+1"
-            value={ssKr.unitScore || ""}
-            onChange={(e) =>
-              updateItem(oIndex, "unitScore", setNonNeg(e.target.value), kIndex, sIndex, ssIndex)
-            }
-          />
-        </TableCell>
-        <TableCell>
-          <input
-            className={inputClass}
-            placeholder="N/A"
-            value={ssKr.unit || ""}
-            onChange={(e) =>
-              updateItem(oIndex, "unit", e.target.value, kIndex, sIndex, ssIndex)
-            }
-            maxLength={50}
-          />
-        </TableCell>
-        <TableCell>
-          <input
-            type="number"
-            min="0"
-            className={inputClass}
-            value={ssKr.target || ""}
-            onChange={(e) =>
-              updateItem(oIndex, "target", setNonNeg(e.target.value), kIndex, sIndex, ssIndex)
-            }
-          />
-        </TableCell>
-        <TableCell>
-          <IconButton
-            size="small"
-            color="error"
-            onClick={() => handleDeleteSubSubKR(oIndex, kIndex, sIndex, ssIndex)}
-          >
-            <Delete fontSize="small" />
-          </IconButton>
-        </TableCell>
-      </TableRow>
-    ));
+      if (template?.id) {
+        await api.put(`/okr-templates/${template.id}`, payload);
+        showSuccess("Thành công", "Đã cập nhật OKR Template.");
+      } else {
+        await api.post("/okr-templates", payload);
+        showSuccess("Thành công", "Đã tạo OKR Template mới.");
+      }
+      onRefresh();
+      onClose();
+    } catch (error) {
+      console.error(error);
+      showError("Lỗi", "Có lỗi xảy ra khi lưu template.");
+    }
   };
+
+  const isFormValid = useMemo(() => {
+    return title.trim() !== "" && structure.length > 0;
+  }, [title, structure]);
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xl" fullWidth>
-      <DialogTitle sx={{ color: "#1e3a8a", fontWeight: "bold" }}>
-        <Flag sx={{ mr: 1, verticalAlign: "middle" }} />
-        {initialData ? "Chỉnh sửa Template OKR" : "Tạo mới Template OKR"}
+      <DialogTitle sx={{ bgcolor: "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <Typography variant="h5" fontWeight="bold" color="#1e3a8a">
+            {template ? "Chỉnh sửa OKR Template" : "Tạo OKR Template mới"}
+          </Typography>
+          <Box>
+            <Button
+              component="label"
+              variant="outlined"
+              startIcon={<UploadFile />}
+              sx={{ mr: 1 }}
+            >
+              Import Excel
+              <input type="file" hidden accept=".xlsx, .xls" onChange={handleFileUpload} />
+            </Button>
+            <Tooltip title="Tải file mẫu Excel">
+              <IconButton size="small" color="primary">
+                <HelpOutline />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        </Box>
       </DialogTitle>
-      <Divider />
 
-      <DialogContent sx={{ mt: 2, bgcolor: "#f8fafc" }}>
-        {/* Header fields */}
-        <Box sx={{ display: "flex", gap: 2, mb: 3, flexWrap: "wrap" }}>
+      <DialogContent sx={{ p: 4 }}>
+        <Box sx={{ display: "flex", gap: 3, mb: 4, mt: 1 }}>
           <TextField
-            sx={{ flex: 2, minWidth: 300 }}
-            label="Tên Template (VD: OKR Phó khoa - Giảng viên)"
+            fullWidth
+            label="Tên Template OKR (VD: OKR Giảng viên 2024)"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
+            variant="outlined"
           />
-          <FormControl sx={{ flex: 1, minWidth: 180 }}>
-            <InputLabel>Chức vụ</InputLabel>
+          <FormControl sx={{ minWidth: 250 }}>
+            <InputLabel>Chức vụ áp dụng</InputLabel>
             <Select
               value={positionId}
-              label="Chức vụ"
-              onChange={(e) => handlePositionChange(e.target.value)}
+              label="Chức vụ áp dụng"
+              onChange={(e) => setPositionId(e.target.value)}
             >
-              <MenuItem value="">-- Không chọn --</MenuItem>
-              {positions.map((p: any) => (
-                <MenuItem key={p.id} value={p.id}>
-                  {p.name}
-                </MenuItem>
+              <MenuItem value="">-- Tất cả --</MenuItem>
+              {positions.map((p) => (
+                <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>
               ))}
             </Select>
           </FormControl>
-          <FormControl sx={{ flex: 1, minWidth: 180 }}>
-            <InputLabel>Chức danh nghề nghiệp</InputLabel>
+          <FormControl sx={{ minWidth: 250 }}>
+            <InputLabel>Chức danh áp dụng</InputLabel>
             <Select
               value={jobTitle}
-              label="Chức danh nghề nghiệp"
+              label="Chức danh áp dụng"
               onChange={(e) => setJobTitle(e.target.value)}
             >
-              <MenuItem value="">-- Không chọn --</MenuItem>
-              {jobTitles.map((jt: any) => (
-                <MenuItem key={jt.key} value={jt.value}>
-                  {jt.label}
-                </MenuItem>
+              <MenuItem value="">-- Tất cả --</MenuItem>
+              {jobTitles.map((t) => (
+                <MenuItem key={t} value={t}>{t}</MenuItem>
               ))}
             </Select>
           </FormControl>
         </Box>
 
-        {/* Structure header + action buttons */}
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            mb: 2,
-            alignItems: "center",
-          }}
-        >
-          <Typography variant="h6" fontWeight="bold">
-            Cấu trúc Điểm chuẩn OKR
-          </Typography>
-          <Box sx={{ display: "flex", gap: 1 }}>
-            {/* Hidden file input */}
-            <input
-              type="file"
-              ref={fileInputRef}
-              accept=".xlsx,.xls"
-              style={{ display: "none" }}
-              onChange={handleFileChange}
-            />
-            <Button
-              variant="outlined"
-              color="success"
-              startIcon={<UploadFile />}
-              onClick={handleImportClick}
-            >
-              Import từ Excel
-            </Button>
-            <Button
-              variant="contained"
-              startIcon={<Add />}
-              onClick={handleAddObjective}
-            >
-              Thêm Mục tiêu lớn (A, B...)
-            </Button>
-          </Box>
+        <Divider sx={{ mb: 3 }} />
+
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+          <Typography variant="h6" fontWeight="bold">Cấu trúc OKR</Typography>
+          <Button variant="contained" startIcon={<Add />} onClick={handleAddObjective}>
+            Thêm Mục tiêu lớn (A, B, C...)
+          </Button>
         </Box>
 
-        {/* Table */}
-        <TableContainer
-          component={Paper}
-          elevation={0}
-          sx={{ border: "1px solid #e2e8f0" }}
-        >
+        <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
           <Table size="small">
-            <TableHead sx={{ bgcolor: "#1e3a8a" }}>
+            <TableHead sx={{ bgcolor: "#f1f5f9" }}>
               <TableRow>
-                <TableCell
-                  sx={{ color: "white", fontWeight: "bold", width: "6%" }}
-                >
-                  STT
-                </TableCell>
-                <TableCell
-                  sx={{ color: "white", fontWeight: "bold", width: "34%" }}
-                >
-                  Nội dung
-                </TableCell>
-                <TableCell
-                  sx={{ color: "white", fontWeight: "bold", width: "12%" }}
-                >
-                  Điểm tối đa
-                </TableCell>
-                <TableCell
-                  sx={{ color: "white", fontWeight: "bold", width: "12%" }}
-                >
-                  Điểm/đơn vị
-                </TableCell>
-                <TableCell
-                  sx={{ color: "white", fontWeight: "bold", width: "12%" }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    Đơn vị tính
-                    <Tooltip 
-                      title={
-                        <span style={{ whiteSpace: 'pre-line' }}>
-                          Đơn vị tính sẽ được đặt linh hoạt dựa trên chi tiết các nhiệm vụ được giao.{"\n"}Ví dụ: học phần, đề cương, buổi, chương trình, ....
-                        </span>
-                      }
-                      placement="top"
-                    >
-                      <HelpOutline sx={{ fontSize: 16, cursor: 'help', opacity: 0.8 }} />
-                    </Tooltip>
-                  </Box>
-                </TableCell>
-                <TableCell
-                  sx={{ color: "white", fontWeight: "bold", width: "12%" }}
-                >
-                  Số liệu (quy đổi)
-                </TableCell>
-                <TableCell
-                  sx={{ color: "white", fontWeight: "bold", width: "12%" }}
-                >
-                  Thao tác
-                </TableCell>
+                <TableCell width="60">Mã</TableCell>
+                <TableCell>Nội dung (Mục tiêu / Tiêu chí)</TableCell>
+                <TableCell width="120">Điểm tối đa</TableCell>
+                <TableCell width="120">Điểm/Đơn vị</TableCell>
+                <TableCell width="100">Đơn vị</TableCell>
+                <TableCell width="100">Chỉ tiêu</TableCell>
+                <TableCell width="150">Thao tác</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {structure.map((obj, oIndex) => (
                 <React.Fragment key={obj.id || oIndex}>
-                  {/* === OBJECTIVE ROW (Level 1: A, B, C...) === */}
-                  <TableRow
-                    sx={{
-                      bgcolor: "#1e3a8a",
-                      "& td": {
-                        color: "white",
-                        borderBottom: "2px solid #3b82f6",
-                      },
-                    }}
-                  >
-                    <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
-                      {obj.id}
-                    </TableCell>
-                    <TableCell>
-                      <input
-                        className={objInputClass}
-                        placeholder="Tên mục tiêu lớn..."
-                        value={obj.title}
-                        onChange={(e) => updateItem(oIndex, "title", e.target.value)}
-                        maxLength={255}
+                  <ObjectiveRow 
+                    obj={obj} 
+                    idx={oIndex} 
+                    updateItem={updateItem} 
+                    handleAddKR={handleAddKR} 
+                    handleDeleteObjective={handleDeleteObjective} 
+                    setNonNeg={setNonNeg} 
+                  />
+                  {obj.items?.map((kr: any, kIndex: number) => (
+                    <React.Fragment key={kr.id || kIndex}>
+                      <KeyResultRow 
+                        kr={kr} 
+                        oIdx={oIndex} 
+                        kIdx={kIndex} 
+                        updateItem={updateItem} 
+                        handleAddSubKR={handleAddSubKR} 
+                        handleDeleteKR={handleDeleteKR} 
+                        setNonNeg={setNonNeg} 
                       />
-                    </TableCell>
-                    <TableCell>
-                      <input
-                        type="number"
-                        min="0"
-                        className={objInputClass}
-                        value={obj.maxScore}
-                        onChange={(e) => updateItem(oIndex, "maxScore", setNonNeg(e.target.value))}
-                      />
-                    </TableCell>
-                    <TableCell></TableCell>
-                    <TableCell></TableCell>
-                    <TableCell></TableCell>
-                    <TableCell>
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        sx={{ color: "white", borderColor: "white", mr: 0.5 }}
-                        onClick={() => handleAddKR(oIndex)}
-                      >
-                        <Add fontSize="small" /> KR
-                      </Button>
-                      <IconButton
-                        size="small"
-                        sx={{ color: "#fca5a5" }}
-                        onClick={() => handleDeleteObj(oIndex)}
-                      >
-                        <Delete fontSize="small" />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-
-                  {/* === KR ROWS (Level 2: 1, 2, 3...) === */}
-                  {obj.items.map((kr: any, kIndex: number) => (
-                    <React.Fragment key={`${oIndex}-${kIndex}`}>
-                      <TableRow sx={{ bgcolor: "#f1f5f9" }}>
-                        <TableCell sx={{ pl: 3, fontWeight: "bold" }}>
-                          {kr.id}
-                        </TableCell>
-                        <TableCell>
-                          <input
-                            className={inputClass}
-                            placeholder="Kết quả then chốt..."
-                            value={kr.title}
-                            onChange={(e) => updateItem(oIndex, "title", e.target.value, kIndex)}
-                            maxLength={255}
+                      {kr.items?.map((sub: any, sIndex: number) => (
+                        <React.Fragment key={sub.id || sIndex}>
+                          <SubKRRow 
+                            sub={sub} 
+                            oIdx={oIndex} 
+                            kIdx={kIndex} 
+                            sIdx={sIndex} 
+                            updateItem={updateItem} 
+                            handleAddSubSubKR={handleAddSubSubKR} 
+                            handleDeleteSubKR={handleDeleteSubKR} 
+                            setNonNeg={setNonNeg} 
                           />
-                        </TableCell>
-                        <TableCell>
-                          <input
-                            type="number"
-                            min="0"
-                            className={inputClass}
-                            value={kr.maxScore}
-                            onChange={(e) => updateItem(oIndex, "maxScore", setNonNeg(e.target.value), kIndex)}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <input
-                            type="number"
-                            min="0"
-                            className={inputClass}
-                            placeholder="+2"
-                            value={kr.unitScore || ""}
-                            onChange={(e) => updateItem(oIndex, "unitScore", setNonNeg(e.target.value), kIndex)}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <input
-                            className={inputClass}
-                            placeholder="N/A"
-                            value={kr.unit || ""}
-                            onChange={(e) => updateItem(oIndex, "unit", e.target.value, kIndex)}
-                            maxLength={50}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <input
-                            type="number"
-                            min="0"
-                            className={inputClass}
-                            placeholder="Target"
-                            value={kr.target || ""}
-                            onChange={(e) => updateItem(oIndex, "target", setNonNeg(e.target.value), kIndex)}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            size="small"
-                            onClick={() => handleAddSubKR(oIndex, kIndex)}
-                          >
-                            <Add fontSize="small" />
-                            Sub
-                          </Button>
-                          <IconButton
-                            size="small"
-                            color="error"
-                            onClick={() => handleDeleteKR(oIndex, kIndex)}
-                          >
-                            <Delete fontSize="small" />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-
-                      {/* === SUB-KR ROWS (Level 3: 1.1, 1.2...) === */}
-                      {kr.items &&
-                        kr.items.map((subKr: any, sIndex: number) => (
-                          <React.Fragment key={`${oIndex}-${kIndex}-${sIndex}`}>
-                            <TableRow sx={{ bgcolor: "#fafafa" }}>
-                              <TableCell
-                                sx={{ pl: 6, fontSize: "0.85rem" }}
-                              >
-                                {subKr.id}
-                              </TableCell>
-                              <TableCell>
-                                <input
-                                  className={inputClass}
-                                  placeholder="Tiêu chí chi tiết..."
-                                  value={subKr.title}
-                                  onChange={(e) => updateItem(oIndex, "title", e.target.value, kIndex, sIndex)}
-                                  maxLength={255}
-                                />
-                              </TableCell>
-                              <TableCell>
-                                <input
-                                  type="number"
-                                  min="0"
-                                  className={inputClass}
-                                  value={subKr.maxScore}
-                                  onChange={(e) => updateItem(oIndex, "maxScore", setNonNeg(e.target.value), kIndex, sIndex)}
-                                />
-                              </TableCell>
-                              <TableCell>
-                                <input
-                                  type="number"
-                                  min="0"
-                                  className={inputClass}
-                                  placeholder="+1"
-                                  value={subKr.unitScore || ""}
-                                  onChange={(e) => updateItem(oIndex, "unitScore", setNonNeg(e.target.value), kIndex, sIndex)}
-                                />
-                              </TableCell>
-                              <TableCell>
-                                <input
-                                  className={inputClass}
-                                  placeholder="N/A"
-                                  value={subKr.unit || ""}
-                                  onChange={(e) => updateItem(oIndex, "unit", e.target.value, kIndex, sIndex)}
-                                  maxLength={50}
-                                />
-                              </TableCell>
-                              <TableCell>
-                                <input
-                                  type="number"
-                                  min="0"
-                                  className={inputClass}
-                                  value={subKr.target || ""}
-                                  onChange={(e) => updateItem(oIndex, "target", setNonNeg(e.target.value), kIndex, sIndex)}
-                                />
-                              </TableCell>
-                              <TableCell>
-                                <Button
-                                  size="small"
-                                  sx={{ fontSize: "0.7rem" }}
-                                  onClick={() =>
-                                    handleAddSubSubKR(oIndex, kIndex, sIndex)
-                                  }
-                                >
-                                  <Add fontSize="small" />
-                                  a,b,c
-                                </Button>
-                                <IconButton
-                                  size="small"
-                                  color="error"
-                                  onClick={() =>
-                                    handleDeleteSubKR(oIndex, kIndex, sIndex)
-                                  }
-                                >
-                                  <Delete fontSize="small" />
-                                </IconButton>
-                              </TableCell>
-                            </TableRow>
-
-                            {/* === SUB-SUB-KR ROWS (Level 4: a, b, c...) === */}
-                            {renderSubSubKRRows(
-                              subKr.items,
-                              oIndex,
-                              kIndex,
-                              sIndex,
-                            )}
-                          </React.Fragment>
-                        ))}
+                          {sub.items?.map((item: any, ssIndex: number) => (
+                            <SubSubKRRow 
+                              key={item.id || ssIndex}
+                              item={item} 
+                              oIdx={oIndex} 
+                              kIdx={kIndex} 
+                              sIdx={sIndex} 
+                              ssIdx={ssIndex} 
+                              updateItem={updateItem} 
+                              handleDeleteSubSubKR={handleDeleteSubSubKR} 
+                              setNonNeg={setNonNeg} 
+                            />
+                          ))}
+                        </React.Fragment>
+                      ))}
                     </React.Fragment>
                   ))}
                 </React.Fragment>
               ))}
               {structure.length === 0 && (
                 <TableRow>
-                  <TableCell
-                    colSpan={7}
-                    align="center"
-                    sx={{ py: 3, color: "text.secondary" }}
-                  >
-                    Chưa có dữ liệu. Hãy thêm Mục tiêu lớn hoặc Import từ
-                    Excel.
+                  <TableCell colSpan={7} align="center" sx={{ py: 3, color: "text.secondary" }}>
+                    Chưa có dữ liệu. Hãy thêm Mục tiêu lớn hoặc Import từ Excel.
                   </TableCell>
                 </TableRow>
               )}
@@ -876,20 +360,12 @@ export default function TemplateEditorDialog({
         </TableContainer>
       </DialogContent>
       <DialogActions sx={{ p: 3 }}>
-        <Button onClick={onClose} color="inherit">
-          Hủy
-        </Button>
-        <Button
-          variant="contained"
-          onClick={handleSubmit}
-          startIcon={<Save />}
-          disabled={!isFormValid}
-        >
+        <Button onClick={onClose} color="inherit">Hủy</Button>
+        <Button variant="contained" onClick={handleSubmit} startIcon={<Save />} disabled={!isFormValid}>
           Lưu Template
         </Button>
       </DialogActions>
 
-      {/* Snackbar for import feedback */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
@@ -900,9 +376,7 @@ export default function TemplateEditorDialog({
           onClose={() => setSnackbar({ ...snackbar, open: false })}
           severity={snackbar.severity}
           variant="filled"
-          icon={
-            snackbar.severity === "success" ? <CheckCircle /> : undefined
-          }
+          icon={snackbar.severity === "success" ? <CheckCircle /> : undefined}
           sx={{ width: "100%" }}
         >
           {snackbar.message}

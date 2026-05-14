@@ -20,6 +20,7 @@ import {
   Settings,
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
+import NotificationBell from "./NotificationBell";
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -158,6 +159,8 @@ export default function Header({
             </>
           )}
         </Button>
+
+        <NotificationBell />
 
         <Button
           onClick={(e) => setAnchorEl(e.currentTarget)}
