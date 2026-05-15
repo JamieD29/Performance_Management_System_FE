@@ -1,6 +1,4 @@
-import { useProfileValidation } from "../../../hooks/useProfileValidation";
-import { useState } from "react";
-import { Stack, TextField, Box, Typography } from "@mui/material";
+import { Stack, TextField, Box, Typography, Alert } from "@mui/material";
 import {
   Badge as BadgeIcon,
   Event as EventIcon,
@@ -14,37 +12,18 @@ import type { ProfileFormData } from "../types";
 interface PersonalInfoStepProps {
   formData: ProfileFormData;
   onChange: (field: keyof ProfileFormData, value: string) => void;
+  /** Thông báo lỗi/cảnh báo từ parent (hiển thị khi bấm Tiếp tục) */
+  validationError?: string;
 }
 
 export function PersonalInfoStep({
   formData,
   onChange,
+  validationError,
 }: PersonalInfoStepProps) {
-  const { validateAgeAtJoinDate } = useProfileValidation();
-  const [localErrors, setLocalErrors] = useState({ dob: "", joinDate: "" });
-
   const now = new Date();
   const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-
-  const handleJoinDateChange = (val: string) => {
-    onChange("joinDate", val);
-    if (formData.dob && val) {
-      const { joinDateError } = validateAgeAtJoinDate(formData.dob, val);
-      setLocalErrors({ dob: "", joinDate: joinDateError });
-    } else {
-      setLocalErrors((prev) => ({ ...prev, joinDate: "" }));
-    }
-  };
-
-  const handleDobChange = (val: string) => {
-    onChange("dob", val);
-    if (val && formData.joinDate) {
-      const { dobError } = validateAgeAtJoinDate(val, formData.joinDate);
-      setLocalErrors({ dob: dobError, joinDate: "" });
-    } else {
-      setLocalErrors((prev) => ({ ...prev, dob: "" }));
-    }
-  };
+  const minJoinDateStr = "1995-01-01";
 
   return (
     <Stack spacing={2.5}>
@@ -147,11 +126,9 @@ export function PersonalInfoStep({
           size="small"
           type="date"
           value={formData.dob}
-          onChange={(e) => handleDobChange(e.target.value)}
+          onChange={(e) => onChange("dob", e.target.value)}
           InputLabelProps={{ shrink: true }}
           inputProps={{ max: todayStr }}
-          error={!!localErrors.dob}
-          helperText={localErrors.dob}
           sx={{
             "& .MuiOutlinedInput-root": {
               backgroundColor: "#fff",
@@ -191,7 +168,7 @@ export function PersonalInfoStep({
           }}
           sx={{
             "& .MuiOutlinedInput-root": {
-              backgroundColor: "#f5f5f5", // Khóa lại
+              backgroundColor: "#f5f5f5",
               borderRadius: "10px",
               color: "#78909c",
             },
@@ -222,11 +199,9 @@ export function PersonalInfoStep({
           size="small"
           type="date"
           value={formData.joinDate}
-          onChange={(e) => handleJoinDateChange(e.target.value)}
+          onChange={(e) => onChange("joinDate", e.target.value)}
           InputLabelProps={{ shrink: true }}
-          inputProps={{ max: todayStr }}
-          error={!!localErrors.joinDate}
-          helperText={localErrors.joinDate}
+          inputProps={{ max: todayStr, min: minJoinDateStr }}
           sx={{
             "& .MuiOutlinedInput-root": {
               backgroundColor: "#fff",
@@ -234,6 +209,16 @@ export function PersonalInfoStep({
             },
           }}
         />
+        {/* Cảnh báo tuổi — hiển thị ngay dưới ngày vào trường */}
+        {validationError && (
+          <Alert severity="warning" sx={{ mt: 1.5, borderRadius: "10px" }}>
+            <strong>⚠️ Cảnh báo:</strong> {validationError}
+            <br />
+            <Typography variant="caption" color="text.secondary">
+              Vui lòng kiểm tra lại ngày sinh và ngày vào trường rồi nhấn "Tiếp tục" lại.
+            </Typography>
+          </Alert>
+        )}
       </AnimatedField>
     </Stack>
   );

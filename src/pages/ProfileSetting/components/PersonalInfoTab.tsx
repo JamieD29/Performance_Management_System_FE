@@ -10,6 +10,7 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Alert,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import {
@@ -118,6 +119,8 @@ interface PersonalInfoTabProps {
   handleJoinDateChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   // 📌 Enum options từ BE (Single Source of Truth)
   genders?: string[];
+  // Cảnh báo tuổi < 20
+  ageWarning?: string;
 }
 
 export default function PersonalInfoTab({
@@ -128,11 +131,12 @@ export default function PersonalInfoTab({
   handleDobChange,
   handleJoinDateChange,
   genders,
+  ageWarning,
 }: PersonalInfoTabProps) {
   const _genders = genders && genders.length > 0 ? genders : FALLBACK_GENDERS;
   // Biến giới hạn ngày tháng
   const todayStr = new Date().toISOString().split("T")[0];
-  const minJoinDateStr = "1996-01-01";
+  const minJoinDateStr = "1995-01-01";
 
   // Các props mặc định cho TextField
   const commonProps = {
@@ -318,6 +322,19 @@ export default function PersonalInfoTab({
           sx={getColorfulInputStyle(THEME_COLORS.IDENTITY)}
         />
       </Grid>
+
+      {/* Cảnh báo tuổi nếu < 20 */}
+      {ageWarning && (
+        <Grid size={{ xs: 12 }}>
+          <Alert severity="warning" sx={{ borderRadius: "12px" }}>
+            <strong>⚠️ Cảnh báo độ tuổi:</strong> {ageWarning}
+            <br />
+            <Typography variant="caption" color="text.secondary">
+              Vui lòng kiểm tra lại ngày sinh và ngày vào trường. Nếu chính xác, bạn vẫn có thể lưu bằng cách nhấn Lưu lần nữa.
+            </Typography>
+          </Alert>
+        </Grid>
+      )}
     </Grid>
   );
 }

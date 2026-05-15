@@ -30,6 +30,8 @@ export const useProfileLogic = () => {
     {} as UserProfileForm,
   );
   const [errors, setErrors] = useState<FormErrors>({});
+  const [ageWarning, setAgeWarning] = useState<string>("");
+  const [ageWarningAcknowledged, setAgeWarningAcknowledged] = useState(false);
 
   const [departments, setDepartments] = useState<any[]>([]);
 
@@ -126,28 +128,31 @@ export const useProfileLogic = () => {
     joinDate: string,
     focusField?: "dob" | "joinDate",
   ) => {
-    const { dobError, joinDateError } = validateAgeAtJoinDate(dob, joinDate);
+    const { dobError, joinDateError, isAgeWarning } = validateAgeAtJoinDate(dob, joinDate);
     const genericJoinDateError = validateJoinDateStr(joinDate);
 
-    setErrors((prev) => ({
-      ...prev,
-      // Nếu focus vào DOB, chỉ hiện lỗi DOB, và xóa lỗi age trên JoinDate.
-      // Nếu không có focusField (khi Save), hiện lỗi cả 2 nếu có.
-      dob:
-        focusField === "dob"
-          ? dobError || undefined
-          : focusField === "joinDate"
-            ? undefined
-            : dobError || undefined,
-
-      joinDate:
-        focusField === "joinDate"
-          ? joinDateError || genericJoinDateError || undefined
-          : focusField === "dob"
-            ? genericJoinDateError || undefined
-            : joinDateError || genericJoinDateError || undefined,
-    }));
-    return dobError || joinDateError || genericJoinDateError;
+    // Nếu là cảnh báo tuổi (không phải hard error), hiển thị warning thay vì block
+    if (isAgeWarning) {
+      // Hiển thị cảnh báo tuổi nhưng không set errors (cho phép lưu)
+      setAgeWarning(joinDateError || dobError);
+      // Reset acknowledged nếu dữ liệu thay đổi
+      setAgeWarningAcknowledged(false);
+      setErrors((prev) => ({
+        ...prev,
+        dob: undefined,
+        joinDate: genericJoinDateError || undefined,
+      }));
+      return genericJoinDateError || "";
+    } else {
+      // Không có cảnh báo tuổi
+      setAgeWarning("");
+      setErrors((prev) => ({
+        ...prev,
+        dob: undefined,
+        joinDate: genericJoinDateError || undefined,
+      }));
+      return genericJoinDateError || "";
+    }
   };
 
   const handleDobChange = (value: string) => {
@@ -230,13 +235,25 @@ export const useProfileLogic = () => {
       return;
     }
 
+    // Kiểm tra cảnh báo tuổi — cần xác nhận trước khi cho lưu
+    if (ageWarning && !ageWarningAcknowledged) {
+      setNotification({
+        type: "warning",
+        message: `⚠️ ${ageWarning} — Vui lòng kiểm tra lại hoặc nhấn "Lưu" một lần nữa để xác nhận.`,
+      });
+      setAgeWarningAcknowledged(true);
+      setActiveTab(0);
+      return;
+    }
+
     // 2. Tiến hành gọi API lưu dữ liệu
     setSaving(true);
     try {
-      const { dob, ...restData } = formData;
+      const { dob, departmentID, ...restData } = formData;
       await api.patch("/users/profile", {
         ...restData,
         dateOfBirth: dob,
+        departmentId: departmentID, // BE expects camelCase "departmentId", FE uses "departmentID"
       });
 
       setOriginalData(formData); // Cập nhật lại bản gốc bằng data mới
@@ -273,6 +290,7 @@ export const useProfileLogic = () => {
     errors,
     departments, // Xuất danh sách phòng ban
     getDepartmentName, // Xuất hàm lấy tên phòng ban
+    ageWarning, // Cảnh báo tuổi < 20
 
     // Handlers
     handleChange,

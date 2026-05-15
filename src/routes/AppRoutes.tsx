@@ -57,6 +57,29 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+// 2b. Component bảo vệ route quản lý (Admin HOẶC có chức vụ quản lý)
+function ManagerRoute({ children }: { children: React.ReactNode }) {
+  const userStr = sessionStorage.getItem('user');
+  const user = userStr ? JSON.parse(userStr) : {};
+  const rawRoles = user.roles || [];
+
+  const isAdmin =
+    Array.isArray(rawRoles) &&
+    rawRoles.some((r: any) => {
+      const val = typeof r === 'string' ? r : r.slug || r.name || '';
+      return val.toString().toUpperCase() === 'ADMIN';
+    });
+
+  const hasManagementPosition = !!user?.managementPosition;
+
+  if (!isAdmin && !hasManagementPosition) {
+    console.warn('⛔ Access Denied: No management position -> Redirecting to Dashboard');
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <>{children}</>;
+}
+
 // 3. Component bảo vệ Route thường
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuth();
@@ -148,14 +171,14 @@ export default function AppRoutes() {
         <Route path="/my-okr" element={<MyOkrPage />} />
         <Route path="/my-evaluation" element={<MyEvaluationPage />} />
 
-        {/* 3. GROUP BỘ MÔN (Theo Sidebar mới) */}
+        {/* 3. GROUP BỘ MÔN (Chỉ cho Admin hoặc User có chức vụ quản lý) */}
         {/* Tổng quan */}
-        <Route path="/departments/overview" element={<DepartmentOverview />} />
+        <Route path="/departments/overview" element={<ManagerRoute><DepartmentOverview /></ManagerRoute>} />
         {/* OKR Bộ môn */}
-        <Route path="/departments/okr" element={<DepartmentOKR />} />
+        <Route path="/departments/okr" element={<ManagerRoute><DepartmentOKR /></ManagerRoute>} />
 
         {/* 🔥 "NHÂN SỰ" - KẾT NỐI VÀO COMPONENT DEPARTMENT CŨ TẠI ĐÂY */}
-        <Route path="/departments/users" element={<Department />} />
+        <Route path="/departments/users" element={<ManagerRoute><Department /></ManagerRoute>} />
 
         {/* 4. TRANG ADMIN (Bảo vệ 2 lớp) */}
         <Route

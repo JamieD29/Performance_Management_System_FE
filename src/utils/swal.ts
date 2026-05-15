@@ -5,6 +5,22 @@
 import Swal from "sweetalert2";
 
 // ============================================================
+// 📐 Z-INDEX FIX — Đảm bảo SweetAlert luôn hiển thị trên MUI Dialog
+// MUI Dialog mặc định z-index: 1300, SweetAlert2 mặc định ~1060
+// ============================================================
+const SWAL_Z_INDEX = 99999;
+
+// Inject global CSS to override SweetAlert2 z-index
+const style = document.createElement("style");
+style.textContent = `
+  .swal2-container { z-index: ${SWAL_Z_INDEX} !important; }
+`;
+if (!document.querySelector("[data-swal-zindex-fix]")) {
+  style.setAttribute("data-swal-zindex-fix", "true");
+  document.head.appendChild(style);
+}
+
+// ============================================================
 // 🎨 THEME CONFIG — Tùy chỉnh màu sắc cho đồng bộ với MUI
 // ============================================================
 const COLORS = {
