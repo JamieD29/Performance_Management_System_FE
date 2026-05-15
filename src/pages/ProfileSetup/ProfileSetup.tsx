@@ -20,6 +20,7 @@ import {
   ArrowBack as ArrowBackIcon,
 } from "@mui/icons-material";
 import { api } from "../../services/api";
+import { useProfileValidation } from "../../hooks/useProfileValidation";
 
 import type { DepartmentOption, ProfileFormData } from "./types";
 import { FALLBACK_ACADEMIC_RANKS, FALLBACK_DEGREES, FALLBACK_JOB_TITLES } from "./constants";
@@ -54,9 +55,11 @@ export default function ProfileSetup() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [validationError, setValidationError] = useState("");
 
   // 📌 Single Source of Truth: Fetch enum options từ BE
   const { options: profileOptions, loading: loadingOptions } = useProfileOptions();
+  const { validateAgeAtJoinDate, validateJoinDateStr } = useProfileValidation();
   const academicRanks = profileOptions.academicRanks.length > 0 ? profileOptions.academicRanks : FALLBACK_ACADEMIC_RANKS;
   const degrees = profileOptions.degrees.length > 0 ? profileOptions.degrees : FALLBACK_DEGREES;
   const jobTitles = profileOptions.jobTitles.length > 0 ? profileOptions.jobTitles : FALLBACK_JOB_TITLES;
@@ -94,6 +97,10 @@ export default function ProfileSetup() {
 
   const handleFieldChange = (field: keyof ProfileFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    // Xóa lỗi validation khi user thay đổi dữ liệu
+    if (validationError && (field === "dob" || field === "joinDate")) {
+      setValidationError("");
+    }
   };
 
   const isStep1Complete =
@@ -111,6 +118,21 @@ export default function ProfileSetup() {
 
   const handleNext = () => {
     if (activeStep === 0 && isStep1Complete) {
+      // Validate ngày vào trường và độ tuổi trước khi cho qua step 2
+      const joinDateError = validateJoinDateStr(formData.joinDate);
+      if (joinDateError) {
+        setValidationError(joinDateError);
+        return;
+      }
+
+      const { joinDateError: ageError, isAgeWarning } = validateAgeAtJoinDate(formData.dob, formData.joinDate);
+      if (isAgeWarning) {
+        setValidationError(ageError);
+        return;
+      }
+
+      // Hợp lệ — cho qua
+      setValidationError("");
       setActiveStep((prev) => prev + 1);
     } else if (activeStep === 1 && isStep2Complete) {
       setConfirmOpen(true);
@@ -294,6 +316,7 @@ export default function ProfileSetup() {
                 <PersonalInfoStep
                   formData={formData}
                   onChange={handleFieldChange}
+                  validationError={validationError}
                 />
               )}
               {activeStep === 1 && (

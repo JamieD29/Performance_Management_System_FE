@@ -79,9 +79,11 @@ export default function Sidebar({
     : [];
 
   const isAdmin = userRoles.includes("ADMIN");
+  // User có chức vụ quản lý mới thấy được nhóm bộ môn (Overview, OKR, Nhân sự)
+  const hasManagementPosition = !!user?.managementPosition;
+  const canManage = isAdmin || hasManagementPosition;
   // Admin, hoặc bất kỳ user nào có chức vụ quản lý đều thấy tab Nhân sự
-  const canViewUsers =
-    isAdmin || !!user?.managementPosition;
+  const canViewUsers = canManage;
 
   const departmentName = user.department?.name || t("sidebar.departmentGroup");
 
@@ -664,8 +666,8 @@ export default function Sidebar({
           </>
           )}
 
-          {/* ── NHÓM BỘ MÔN ── */}
-          {isAdmin ? (
+          {/* ── NHÓM BỘ MÔN (Chỉ hiển thị cho Admin hoặc User có chức vụ quản lý) ── */}
+          {!canManage ? null : isAdmin ? (
             <>
               {/* Overview */}
               <Box sx={{ px: collapsed ? 0.5 : 1, mb: 1.5 }}>
@@ -883,6 +885,7 @@ export default function Sidebar({
               )}
             </Box>
           )}
+
 
           {/* ── DOCS ── */}
           <Box

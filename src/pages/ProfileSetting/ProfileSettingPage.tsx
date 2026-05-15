@@ -52,6 +52,7 @@ export default function ProfileSetting() {
     handleAvatarChange,
     handleCancel,
     handleSave,
+    ageWarning,
   } = useProfileLogic();
 
   // 📌 Single Source of Truth: Fetch enum options từ BE
@@ -231,6 +232,7 @@ export default function ProfileSetting() {
                       handleDobChange={handleDobChange}
                       handleJoinDateChange={handleJoinDateChange}
                       genders={beGenders}
+                      ageWarning={isEditing ? ageWarning : undefined}
                     />
                   )}
 

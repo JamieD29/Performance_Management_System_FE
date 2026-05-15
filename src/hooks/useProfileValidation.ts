@@ -1,5 +1,6 @@
 export const useProfileValidation = () => {
-  const minJoinDateStr = "1990-01-01"; // Updated fallback
+  const MIN_AGE_THRESHOLD = 20;
+  const minJoinDateStr = "1995-01-01";
 
   /**
    * Validates if a staff code is max 4 characters long and only contains digits
@@ -28,7 +29,7 @@ export const useProfileValidation = () => {
   };
 
   /**
-   * Calculates the minimum join date string (YYYY-MM-DD) based on date of birth (must be >= 23 years old)
+   * Calculates the minimum join date string (YYYY-MM-DD) based on date of birth (must be >= 20 years old)
    */
   const getMinJoinDateStr = (dob?: string) => {
     if (!dob) return minJoinDateStr;
@@ -36,28 +37,30 @@ export const useProfileValidation = () => {
     const birthDate = new Date(dob);
     if (isNaN(birthDate.getTime())) return minJoinDateStr;
 
-    birthDate.setFullYear(birthDate.getFullYear() + 23);
-    const dobPlus23Str = `${birthDate.getFullYear()}-${String(birthDate.getMonth() + 1).padStart(2, "0")}-${String(birthDate.getDate()).padStart(2, "0")}`;
+    birthDate.setFullYear(birthDate.getFullYear() + MIN_AGE_THRESHOLD);
+    const dobPlusMinAgeStr = `${birthDate.getFullYear()}-${String(birthDate.getMonth() + 1).padStart(2, "0")}-${String(birthDate.getDate()).padStart(2, "0")}`;
 
-    return dobPlus23Str > minJoinDateStr ? dobPlus23Str : minJoinDateStr;
+    return dobPlusMinAgeStr > minJoinDateStr ? dobPlusMinAgeStr : minJoinDateStr;
   };
 
   /**
-   * Validates if age is at least 23 at the time of join date
+   * Validates if age is at least MIN_AGE_THRESHOLD at the time of join date.
+   * Returns warning (not hard error) — user can still proceed after confirming.
    */
   const validateAgeAtJoinDate = (
     dob: string,
     joinDate: string,
-  ): { dobError: string; joinDateError: string } => {
-    if (!dob || !joinDate) return { dobError: "", joinDateError: "" };
+  ): { dobError: string; joinDateError: string; isAgeWarning: boolean } => {
+    if (!dob || !joinDate) return { dobError: "", joinDateError: "", isAgeWarning: false };
     const age = calculateAgeAtDate(dob, joinDate);
-    if (age < 23) {
+    if (age < MIN_AGE_THRESHOLD) {
       return {
-        dobError: "Ngày tháng năm sinh không hợp lệ với ngày vào trường.",
-        joinDateError: "Ngày vào trường không hợp lệ với ngày tháng năm sinh.",
+        dobError: `Độ tuổi tại thời điểm vào trường chỉ ${age} tuổi (yêu cầu ít nhất ${MIN_AGE_THRESHOLD} tuổi).`,
+        joinDateError: `Tại thời điểm ngày vào trường, người dùng chỉ ${age} tuổi (cần ít nhất ${MIN_AGE_THRESHOLD} tuổi).`,
+        isAgeWarning: true,
       };
     }
-    return { dobError: "", joinDateError: "" };
+    return { dobError: "", joinDateError: "", isAgeWarning: false };
   };
 
   /**
@@ -77,7 +80,7 @@ export const useProfileValidation = () => {
       return "Ngày vào trường không thể ở tương lai.";
     }
     if (selectedDate < minimumDate) {
-      return `Ngày vào trường không hợp lệ (phải từ ngày ${minDateStr}).`;
+      return `Ngày vào trường không hợp lệ (phải từ ngày 01/01/1995).`;
     }
     return "";
   };

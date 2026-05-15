@@ -402,6 +402,7 @@ export default function AssignTemplateDialog({
                         <Checkbox
                           checked={selectedUserIds.includes(user.id)}
                           onChange={() => handleToggleUser(user.id)}
+                          onClick={(e) => e.stopPropagation()}
                           size="small"
                         />
                       </TableCell>
