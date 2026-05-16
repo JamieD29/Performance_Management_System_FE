@@ -10,11 +10,11 @@ import { Add, Delete } from "@mui/icons-material";
 const inputClass = "w-full p-1 border-b border-transparent hover:border-gray-300 focus:border-blue-500 outline-none transition-colors bg-transparent text-sm";
 
 export const ObjectiveRow = ({ obj, idx, updateItem, handleAddKR, handleDeleteObjective, setNonNeg }: any) => (
-  <TableRow sx={{ bgcolor: "#eff6ff" }}>
-    <TableCell sx={{ fontWeight: "bold", fontSize: "1.1rem" }}>{obj.id}</TableCell>
+  <TableRow sx={{ bgcolor: "#bfdbfe" }}>
+    <TableCell sx={{ fontWeight: "bold", fontSize: "1.1rem", color: "#1e3a8a" }}>{obj.id}</TableCell>
     <TableCell>
       <input
-        className={`${inputClass} font-bold`}
+        className={`${inputClass} font-bold text-blue-900`}
         placeholder="Tên Mục tiêu lớn..."
         value={obj.title || ""}
         onChange={(e) => updateItem(idx, "title", e.target.value)}
@@ -24,12 +24,12 @@ export const ObjectiveRow = ({ obj, idx, updateItem, handleAddKR, handleDeleteOb
       <input
         type="number"
         min="0"
-        className={`${inputClass} font-bold`}
+        className={`${inputClass} font-bold text-blue-900`}
         value={obj.maxScore || ""}
         onChange={(e) => updateItem(idx, "maxScore", setNonNeg(e.target.value))}
       />
     </TableCell>
-    <TableCell colSpan={3}></TableCell>
+    <TableCell colSpan={2}></TableCell>
     <TableCell>
       <Button
         size="small"
@@ -66,14 +66,17 @@ export const KeyResultRow = ({ kr, oIdx, kIdx, updateItem, handleAddSubKR, handl
       />
     </TableCell>
     <TableCell>
-      <input
-        type="number"
-        min="0"
-        className={inputClass}
-        placeholder="+1"
-        value={kr.unitScore || ""}
-        onChange={(e) => updateItem(oIdx, "unitScore", setNonNeg(e.target.value), kIdx)}
-      />
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <span style={{ color: '#6b7280', marginRight: '4px', fontWeight: 500 }}>+</span>
+        <input
+          type="number"
+          min="0"
+          className={inputClass}
+          placeholder="1"
+          value={kr.unitScore || ""}
+          onChange={(e) => updateItem(oIdx, "unitScore", setNonNeg(e.target.value), kIdx)}
+        />
+      </div>
     </TableCell>
     <TableCell>
       <input
@@ -84,15 +87,7 @@ export const KeyResultRow = ({ kr, oIdx, kIdx, updateItem, handleAddSubKR, handl
         maxLength={50}
       />
     </TableCell>
-    <TableCell>
-      <input
-        type="number"
-        min="0"
-        className={inputClass}
-        value={kr.target || ""}
-        onChange={(e) => updateItem(oIdx, "target", setNonNeg(e.target.value), kIdx)}
-      />
-    </TableCell>
+
     <TableCell>
       <Button
         size="small"
@@ -130,14 +125,17 @@ export const SubKRRow = ({ sub, oIdx, kIdx, sIdx, updateItem, handleAddSubSubKR,
       />
     </TableCell>
     <TableCell>
-      <input
-        type="number"
-        min="0"
-        className={inputClass}
-        placeholder="+1"
-        value={sub.unitScore || ""}
-        onChange={(e) => updateItem(oIdx, "unitScore", setNonNeg(e.target.value), kIdx, sIdx)}
-      />
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <span style={{ color: '#6b7280', marginRight: '4px', fontWeight: 500 }}>+</span>
+        <input
+          type="number"
+          min="0"
+          className={inputClass}
+          placeholder="1"
+          value={sub.unitScore || ""}
+          onChange={(e) => updateItem(oIdx, "unitScore", setNonNeg(e.target.value), kIdx, sIdx)}
+        />
+      </div>
     </TableCell>
     <TableCell>
       <input
@@ -148,15 +146,7 @@ export const SubKRRow = ({ sub, oIdx, kIdx, sIdx, updateItem, handleAddSubSubKR,
         maxLength={50}
       />
     </TableCell>
-    <TableCell>
-      <input
-        type="number"
-        min="0"
-        className={inputClass}
-        value={sub.target || ""}
-        onChange={(e) => updateItem(oIdx, "target", setNonNeg(e.target.value), kIdx, sIdx)}
-      />
-    </TableCell>
+
     <TableCell>
       <Button
         size="small"
@@ -186,33 +176,28 @@ export const SubSubKRRow = ({ item, oIdx, kIdx, sIdx, ssIdx, updateItem, handleD
     </TableCell>
     <TableCell></TableCell>
     <TableCell>
-      <input
-        type="number"
-        min="0"
-        className={inputClass}
-        placeholder="+1"
-        value={item.unitScore || ""}
-        onChange={(e) => updateItem(oIdx, "unitScore", setNonNeg(e.target.value), kIdx, sIdx, ssIdx)}
-      />
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <span style={{ color: '#6b7280', marginRight: '4px', fontWeight: 500 }}>+</span>
+        <input
+          type="number"
+          min="0"
+          className={inputClass}
+          placeholder="1"
+          value={item.unitScore || ""}
+          onChange={(e) => updateItem(oIdx, "unitScore", setNonNeg(e.target.value), kIdx, sIdx, ssIdx)}
+        />
+      </div>
     </TableCell>
     <TableCell>
       <input
         className={inputClass}
-        placeholder="đv"
+        placeholder="N/A"
         value={item.unit || ""}
         onChange={(e) => updateItem(oIdx, "unit", e.target.value, kIdx, sIdx, ssIdx)}
         maxLength={50}
       />
     </TableCell>
-    <TableCell>
-      <input
-        type="number"
-        min="0"
-        className={inputClass}
-        value={item.target || ""}
-        onChange={(e) => updateItem(oIdx, "target", setNonNeg(e.target.value), kIdx, sIdx, ssIdx)}
-      />
-    </TableCell>
+
     <TableCell>
       <IconButton size="small" color="error" onClick={() => handleDeleteSubSubKR(oIdx, kIdx, sIdx, ssIdx)}>
         <Delete fontSize="small" />

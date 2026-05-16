@@ -45,20 +45,6 @@ export default function TemplateListTab() {
     setOpenEditor(true);
   };
 
-  const handleSave = async (data: any) => {
-    try {
-      if (selectedTemplate) {
-        await api.put(`/okr-templates/${selectedTemplate.id}`, data);
-      } else {
-        await api.post("/okr-templates", data);
-      }
-      setOpenEditor(false);
-      fetchTemplates();
-    } catch (error) {
-      console.error("Error saving template", error);
-      showError("Lỗi", "Có lỗi xảy ra khi lưu template.");
-    }
-  };
 
 
   return (
@@ -164,8 +150,8 @@ export default function TemplateListTab() {
         <TemplateEditorDialog
           open={openEditor}
           onClose={() => setOpenEditor(false)}
-          onSave={handleSave}
-          initialData={selectedTemplate}
+          onRefresh={fetchTemplates}
+          template={selectedTemplate}
         />
       )}
 

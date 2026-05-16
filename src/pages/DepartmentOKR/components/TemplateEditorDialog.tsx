@@ -56,7 +56,7 @@ export default function TemplateEditorDialog({
   const [positionId, setPositionId] = useState("");
   const [jobTitle, setJobTitle] = useState("");
   const [positions, setPositions] = useState<any[]>([]);
-  const [jobTitles, setJobTitles] = useState<string[]>([]);
+  const [jobTitles, setJobTitles] = useState<any[]>([]);
 
   const {
     structure,
@@ -85,7 +85,7 @@ export default function TemplateEditorDialog({
       setTitle(template.title || "");
       setPositionId(template.positionId || "");
       setJobTitle(template.jobTitle || "");
-      setStructure(Array.isArray(template.keyResults) ? template.keyResults : []);
+      setStructure(Array.isArray(template.structure) ? template.structure : []);
     } else {
       setTitle("");
       setPositionId("");
@@ -98,7 +98,7 @@ export default function TemplateEditorDialog({
     try {
       const [posRes, jtRes] = await Promise.all([
         api.get("/management-positions"),
-        api.get("/users/job-titles"),
+        api.get("/okr-templates/job-titles"),
       ]);
       setPositions(posRes.data || []);
       setJobTitles(jtRes.data || []);
@@ -187,7 +187,7 @@ export default function TemplateEditorDialog({
         title,
         positionId: positionId || null,
         jobTitle: jobTitle || null,
-        keyResults: structure,
+        structure: structure,
       };
 
       if (template?.id) {
@@ -267,7 +267,7 @@ export default function TemplateEditorDialog({
             >
               <MenuItem value="">-- Tất cả --</MenuItem>
               {jobTitles.map((t) => (
-                <MenuItem key={t} value={t}>{t}</MenuItem>
+                <MenuItem key={t.value} value={t.value}>{t.label}</MenuItem>
               ))}
             </Select>
           </FormControl>
@@ -290,8 +290,12 @@ export default function TemplateEditorDialog({
                 <TableCell>Nội dung (Mục tiêu / Tiêu chí)</TableCell>
                 <TableCell width="120">Điểm tối đa</TableCell>
                 <TableCell width="120">Điểm/Đơn vị</TableCell>
-                <TableCell width="100">Đơn vị</TableCell>
-                <TableCell width="100">Chỉ tiêu</TableCell>
+                <TableCell width="120">
+                  Đơn vị
+                  <Tooltip title="Đơn vị tính (VD: bài báo, hoạt động, chương trình, môn học,... )">
+                    <HelpOutline sx={{ fontSize: 16, ml: 0.5, color: "text.secondary", cursor: "pointer", verticalAlign: "middle" }} />
+                  </Tooltip>
+                </TableCell>
                 <TableCell width="150">Thao tác</TableCell>
               </TableRow>
             </TableHead>
@@ -350,7 +354,7 @@ export default function TemplateEditorDialog({
               ))}
               {structure.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} align="center" sx={{ py: 3, color: "text.secondary" }}>
+                  <TableCell colSpan={6} align="center" sx={{ py: 3, color: "text.secondary" }}>
                     Chưa có dữ liệu. Hãy thêm Mục tiêu lớn hoặc Import từ Excel.
                   </TableCell>
                 </TableRow>
