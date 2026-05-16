@@ -116,7 +116,7 @@ export const useTemplateStructure = (initialStructure: any[] = []) => {
     const sub = newStructure[oIdx].items[kIdx].items[sIdx];
     if (!sub.items) sub.items = [];
     const charCode = 97 + sub.items.length; // a, b, c...
-    const newId = `${sub.id}.${String.fromCharCode(charCode)}`;
+    const newId = String.fromCharCode(charCode);
     sub.items.push({
       id: newId,
       title: "",
@@ -131,10 +131,10 @@ export const useTemplateStructure = (initialStructure: any[] = []) => {
     const newStructure = [...structure];
     const sub = newStructure[oIdx].items[kIdx].items[sIdx];
     sub.items = sub.items.filter((_: any, i: number) => i !== ssIdx);
-    // Re-index .a, .b, .c...
+    // Re-index a, b, c...
     sub.items = sub.items.map((ss: any, i: number) => ({
       ...ss,
-      id: `${sub.id}.${String.fromCharCode(97 + i)}`,
+      id: String.fromCharCode(97 + i),
     }));
     setStructure(newStructure);
   }, [structure]);

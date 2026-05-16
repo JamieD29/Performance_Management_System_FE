@@ -25,10 +25,11 @@ import {
   Checkbox,
   Alert,
 } from "@mui/material";
-import { Send, PersonSearch, SelectAll, Deselect } from "@mui/icons-material";
+import { Send, PersonSearch, SelectAll, Deselect, AddCircleOutline } from "@mui/icons-material";
 import { api } from "../../../services/api";
 import { showWarning, showSuccess, showError } from "../../../utils/swal";
 import { performanceService } from "../../../services/performanceService";
+import VariantEditorDialog from "./VariantEditorDialog";
 
 interface AssignTemplateDialogProps {
   open: boolean;
@@ -43,7 +44,10 @@ export default function AssignTemplateDialog({
 }: AssignTemplateDialogProps) {
   const [users, setUsers] = useState<any[]>([]);
   const [cycles, setCycles] = useState<any[]>([]);
-  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+  const [userAssignments, setUserAssignments] = useState<Record<string, string>>({});
+  const [variants, setVariants] = useState<any[]>([]);
+  const [openVariantEditor, setOpenVariantEditor] = useState(false);
+  
   const [selectedCycleId, setSelectedCycleId] = useState("");
   const [deadline, setDeadline] = useState("");
   const [loading, setLoading] = useState(false);
@@ -54,11 +58,13 @@ export default function AssignTemplateDialog({
   const [filterJobTitle, setFilterJobTitle] = useState("");
 
   useEffect(() => {
-    if (open) {
+    if (open && template) {
       setFilterPositionId(template?.positionId || "");
       setFilterJobTitle(template?.jobTitle || "");
       setFilterDepartmentId("");
       loadData();
+      setVariants([{ id: "base", title: "Phiên bản Gốc (Mặc định)", structure: template.structure }]);
+      setUserAssignments({});
     }
   }, [open, template]);
 
@@ -80,39 +86,69 @@ export default function AssignTemplateDialog({
     }
   };
 
-  // Toggle chọn 1 user
-  const handleToggleUser = (userId: string) => {
-    setSelectedUserIds((prev) =>
-      prev.includes(userId)
-        ? prev.filter((id) => id !== userId)
-        : [...prev, userId],
-    );
+  const handleAssignVariant = (userId: string, variantId: string) => {
+    setUserAssignments((prev) => {
+      const next = { ...prev };
+      if (!variantId) delete next[userId];
+      else next[userId] = variantId;
+      return next;
+    });
   };
 
-  // Chọn tất cả / Bỏ chọn tất cả
   const handleSelectAll = () => {
-    if (selectedUserIds.length === filteredUsers.length && filteredUsers.length > 0) {
-      setSelectedUserIds([]);
+    const assignedCount = Object.keys(userAssignments).length;
+    if (assignedCount === filteredUsers.length && filteredUsers.length > 0) {
+      setUserAssignments({});
     } else {
-      setSelectedUserIds(filteredUsers.map((u) => u.id));
+      const next: Record<string, string> = {};
+      filteredUsers.forEach((u) => (next[u.id] = "base"));
+      setUserAssignments(next);
     }
   };
 
   const handleAssign = async () => {
-    if (selectedUserIds.length === 0 || !selectedCycleId) {
+    const assignedCount = Object.keys(userAssignments).length;
+    if (assignedCount === 0 || !selectedCycleId) {
       showWarning("Thiếu thông tin", "Vui lòng chọn ít nhất 1 User và Kỳ đánh giá!");
       return;
     }
     setLoading(true);
     try {
-      await api.post(`/okr-templates/${template.id}/apply`, {
-        userIds: selectedUserIds,
-        cycleId: selectedCycleId,
-        deadline: deadline || undefined,
+      const variantGroups: Record<string, string[]> = {};
+      Object.entries(userAssignments).forEach(([userId, varId]) => {
+        if (!variantGroups[varId]) variantGroups[varId] = [];
+        variantGroups[varId].push(userId);
       });
+
+      for (const [varId, userIds] of Object.entries(variantGroups)) {
+        if (varId === "base") {
+          await api.post(`/okr-templates/${template.id}/apply`, {
+            userIds,
+            cycleId: selectedCycleId,
+            deadline: deadline || undefined,
+          });
+        } else {
+          const customVar = variants.find((v) => v.id === varId);
+          if (customVar) {
+            const createRes = await api.post("/okr-templates", {
+              title: customVar.title,
+              positionId: template.positionId || null,
+              jobTitle: template.jobTitle || null,
+              structure: customVar.structure,
+            });
+            const newTemplateId = createRes.data.id;
+            await api.post(`/okr-templates/${newTemplateId}/apply`, {
+              userIds,
+              cycleId: selectedCycleId,
+              deadline: deadline || undefined,
+            });
+          }
+        }
+      }
+
       showSuccess(
         "Thành công!",
-        `Đã giao OKR Template cho ${selectedUserIds.length} nhân sự. Mỗi người sẽ nhận được OKR ở trạng thái chờ duyệt.`,
+        `Đã giao OKR Template cho ${assignedCount} nhân sự.`,
       );
       onClose();
     } catch (error) {
@@ -189,6 +225,11 @@ export default function AssignTemplateDialog({
         </Box>
 
         <Box sx={{ p: 3 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+            <Button variant="outlined" color="secondary" startIcon={<AddCircleOutline />} onClick={() => setOpenVariantEditor(true)}>
+              Tạo phiên bản tùy biến
+            </Button>
+          </Box>
           {/* ═══ PHẦN 1: THÔNG TIN BẮT BUỘC ═══ */}
           <Paper
             variant="outlined"
@@ -320,7 +361,7 @@ export default function AssignTemplateDialog({
                 size="small"
                 variant="outlined"
                 startIcon={
-                  selectedUserIds.length === filteredUsers.length && filteredUsers.length > 0 ? (
+                  Object.keys(userAssignments).length === filteredUsers.length && filteredUsers.length > 0 ? (
                     <Deselect />
                   ) : (
                     <SelectAll />
@@ -329,7 +370,7 @@ export default function AssignTemplateDialog({
                 onClick={handleSelectAll}
                 disabled={filteredUsers.length === 0}
               >
-                {selectedUserIds.length === filteredUsers.length && filteredUsers.length > 0
+                {Object.keys(userAssignments).length === filteredUsers.length && filteredUsers.length > 0
                   ? "Bỏ chọn tất cả"
                   : "Chọn tất cả"}
               </Button>
@@ -349,12 +390,12 @@ export default function AssignTemplateDialog({
                   <TableCell width={50}>
                     <Checkbox
                       checked={
-                        selectedUserIds.length === filteredUsers.length &&
+                        Object.keys(userAssignments).length === filteredUsers.length &&
                         filteredUsers.length > 0
                       }
                       indeterminate={
-                        selectedUserIds.length > 0 &&
-                        selectedUserIds.length < filteredUsers.length
+                        Object.keys(userAssignments).length > 0 &&
+                        Object.keys(userAssignments).length < filteredUsers.length
                       }
                       onChange={handleSelectAll}
                       size="small"
@@ -364,7 +405,7 @@ export default function AssignTemplateDialog({
                   <TableCell>Email</TableCell>
                   <TableCell>Bộ môn</TableCell>
                   <TableCell>Chức vụ quản lý</TableCell>
-                  <TableCell>Chức danh nghề nghiệp</TableCell>
+                  <TableCell>Phiên bản gán</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -394,14 +435,20 @@ export default function AssignTemplateDialog({
                     <TableRow
                       key={user.id}
                       hover
-                      selected={selectedUserIds.includes(user.id)}
-                      onClick={() => handleToggleUser(user.id)}
+                      selected={!!userAssignments[user.id]}
+                      onClick={() => {
+                         if (userAssignments[user.id]) handleAssignVariant(user.id, "");
+                         else handleAssignVariant(user.id, "base");
+                      }}
                       sx={{ cursor: "pointer" }}
                     >
                       <TableCell>
                         <Checkbox
-                          checked={selectedUserIds.includes(user.id)}
-                          onChange={() => handleToggleUser(user.id)}
+                          checked={!!userAssignments[user.id]}
+                          onChange={(e) => {
+                             if (e.target.checked) handleAssignVariant(user.id, "base");
+                             else handleAssignVariant(user.id, "");
+                          }}
                           onClick={(e) => e.stopPropagation()}
                           size="small"
                         />
@@ -449,11 +496,23 @@ export default function AssignTemplateDialog({
                         )}
                       </TableCell>
                       <TableCell>
-                        {user.jobTitle || (
-                          <Typography variant="caption" color="text.secondary">
-                            —
-                          </Typography>
-                        )}
+                        <FormControl size="small" fullWidth>
+                          <Select
+                            displayEmpty
+                            value={userAssignments[user.id] || ""}
+                            onChange={(e) => handleAssignVariant(user.id, e.target.value)}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <MenuItem value="">
+                              <em style={{ color: "gray" }}>-- Không giao --</em>
+                            </MenuItem>
+                            {variants.map((v) => (
+                              <MenuItem key={v.id} value={v.id} sx={{ fontWeight: v.id === "base" ? "bold" : "normal" }}>
+                                {v.title}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
                       </TableCell>
                     </TableRow>
                   ))
@@ -463,7 +522,7 @@ export default function AssignTemplateDialog({
           </TableContainer>
 
           {/* Selection Summary */}
-          {selectedUserIds.length > 0 && (
+          {Object.keys(userAssignments).length > 0 && (
             <Box
               sx={{
                 mt: 2,
@@ -474,27 +533,28 @@ export default function AssignTemplateDialog({
               }}
             >
               <Typography variant="body2" color="success.main">
-                ✅ Đã chọn <strong>{selectedUserIds.length}</strong> nhân sự:
+                ✅ Đã chọn <strong>{Object.keys(userAssignments).length}</strong> nhân sự:
               </Typography>
               <Box
                 sx={{ display: "flex", gap: 0.5, flexWrap: "wrap", mt: 0.5 }}
               >
-                {selectedUserIds.slice(0, 10).map((id) => {
+                {Object.keys(userAssignments).slice(0, 10).map((id) => {
                   const user = users.find((u) => u.id === id);
+                  const varName = variants.find(v => v.id === userAssignments[id])?.title;
                   return (
                     <Chip
                       key={id}
-                      label={user?.name || user?.email || id}
+                      label={`${user?.name || user?.email || id} (${varName})`}
                       size="small"
                       color="success"
                       variant="outlined"
-                      onDelete={() => handleToggleUser(id)}
+                      onDelete={() => handleAssignVariant(id, "")}
                     />
                   );
                 })}
-                {selectedUserIds.length > 10 && (
+                {Object.keys(userAssignments).length > 10 && (
                   <Chip
-                    label={`+${selectedUserIds.length - 10} người khác`}
+                    label={`+${Object.keys(userAssignments).length - 10} người khác`}
                     size="small"
                     color="default"
                   />
@@ -512,14 +572,25 @@ export default function AssignTemplateDialog({
         <Button
           variant="contained"
           onClick={handleAssign}
-          disabled={selectedUserIds.length === 0 || !selectedCycleId || loading}
+          disabled={Object.keys(userAssignments).length === 0 || !selectedCycleId || loading}
           startIcon={<Send />}
         >
           {loading
             ? "Đang giao..."
-            : `Giao OKR cho ${selectedUserIds.length || ""} Nhân sự`}
+            : `Giao OKR cho ${Object.keys(userAssignments).length || ""} Nhân sự`}
         </Button>
       </DialogActions>
+
+      {openVariantEditor && (
+        <VariantEditorDialog
+          open={openVariantEditor}
+          onClose={() => setOpenVariantEditor(false)}
+          baseTemplate={template}
+          onSaveVariant={(variant) => {
+            setVariants(prev => [...prev, variant]);
+          }}
+        />
+      )}
     </Dialog>
   );
 }

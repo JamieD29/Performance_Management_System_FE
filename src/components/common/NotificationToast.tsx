@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   Snackbar,
   Alert,
@@ -30,28 +30,39 @@ export default function NotificationToast() {
     useState<NotificationItem | null>(null);
   const [open, setOpen] = useState(false);
 
+  // Track ID đã dismiss để không hiện lại khi poll
+  const dismissedIdsRef = useRef<Set<string>>(new Set());
+
   const fetchNotifications = useCallback(async () => {
     try {
       const token = sessionStorage.getItem("authToken");
-      if (!token) return; // Chưa đăng nhập thì không poll
+      if (!token) return;
 
       const res = await api.get("/notifications");
       const data: NotificationItem[] = Array.isArray(res.data) ? res.data : [];
-      const unreadData = data.filter(n => !n.isRead);
+
+      // Lọc: chưa đọc VÀ chưa bị dismiss trong session này
+      const unreadData = data.filter(
+        (n) => !n.isRead && !dismissedIdsRef.current.has(n.id),
+      );
 
       if (unreadData.length > 0) {
         setNotifications(unreadData);
-        // Hiển thị thông báo mới nhất chưa xem
-        const newest = unreadData[0];
-        if (!currentNotification || newest.id !== currentNotification.id) {
-          setCurrentNotification(newest);
-          setOpen(true);
-        }
+        // Chỉ hiện toast nếu chưa đang hiện cái nào
+        setCurrentNotification((prev) => {
+          if (!prev || dismissedIdsRef.current.has(prev.id)) {
+            setOpen(true);
+            return unreadData[0];
+          }
+          return prev;
+        });
+      } else {
+        setNotifications([]);
       }
     } catch (error) {
       // Silently fail — notification polling không nên crash app
     }
-  }, [currentNotification]);
+  }, []); // Không dependency currentNotification để tránh infinite loop
 
   // Poll API định kỳ
   useEffect(() => {
@@ -61,17 +72,38 @@ export default function NotificationToast() {
     return () => clearInterval(interval);
   }, [fetchNotifications]);
 
-  const handleClose = async (event?: React.SyntheticEvent | Event, reason?: string) => {
-    if (reason === 'clickaway') {
+  // Đánh dấu đã đọc trên server
+  const markAsRead = async (notificationId: string) => {
+    try {
+      await api.patch(`/notifications/${notificationId}/read`);
+    } catch (error) {
+      console.warn("Không thể đánh dấu đã đọc:", error);
+    }
+  };
+
+  const handleClose = async (
+    _event?: React.SyntheticEvent | Event,
+    reason?: string,
+  ) => {
+    if (reason === "clickaway") {
       return;
     }
+
     setOpen(false);
+
+    // Đánh dấu đã đọc trên server + ghi nhận dismiss local
+    if (currentNotification) {
+      dismissedIdsRef.current.add(currentNotification.id);
+      markAsRead(currentNotification.id);
+    }
   };
 
   // Hiển thị notification kế tiếp khi đóng cái hiện tại
   const handleExited = () => {
     const remaining = notifications.filter(
-      (n) => n.id !== currentNotification?.id,
+      (n) =>
+        n.id !== currentNotification?.id &&
+        !dismissedIdsRef.current.has(n.id),
     );
     if (remaining.length > 0) {
       setCurrentNotification(remaining[0]);
@@ -86,15 +118,14 @@ export default function NotificationToast() {
   return (
     <Snackbar
       open={open}
-      autoHideDuration={6000}
+      autoHideDuration={8000}
       onClose={handleClose}
       TransitionComponent={SlideTransition}
       TransitionProps={{ onExited: handleExited }}
       anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       sx={{ maxWidth: 400, cursor: "pointer" }}
       onClick={() => {
-        // Bấm vào toast thì tắt toast đi
-        setOpen(false);
+        handleClose();
       }}
     >
       <Alert
@@ -102,7 +133,14 @@ export default function NotificationToast() {
         variant="filled"
         icon={<NotificationsActive />}
         action={
-          <IconButton size="small" color="inherit" onClick={handleClose}>
+          <IconButton
+            size="small"
+            color="inherit"
+            onClick={(e) => {
+              e.stopPropagation(); // Ngăn event bubble lên Snackbar onClick
+              handleClose();
+            }}
+          >
             <Close fontSize="small" />
           </IconButton>
         }
