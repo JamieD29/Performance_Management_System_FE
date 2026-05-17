@@ -67,6 +67,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
 
   const [localStructure, setLocalStructure] = useState<any[]>([]);
   const [hasChanges, setHasChanges] = useState(false);
+  const [localComments, setLocalComments] = useState<Record<string, any[]>>({});
 
   // Edit Criteria State
   const [openEditDialog, setOpenEditDialog] = useState(false);
@@ -298,8 +299,12 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
 
   const handleSubmitChanges = async () => {
     try {
-      await api.put(`/okrs/${okr.id}/structure`, { keyResults: localStructure });
+      await api.put(`/okrs/${okr.id}/structure`, { 
+        keyResults: localStructure,
+        localComments: Object.keys(localComments).length > 0 ? localComments : undefined
+      });
       setHasChanges(false);
+      setLocalComments({});
       onRefresh();
       showSuccess("Thành công", "Đã gửi cấu trúc mới.");
     } catch (error) {
@@ -327,20 +332,17 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
 
   const handleSendChat = async (itemId: string) => {
     if (!chatMessage.trim()) return;
-    setChatLoading(true);
-    try {
-      await api.post(`/okrs/${okr.id}/chat`, {
-        itemId,
-        message: chatMessage,
-        sender: "USER",
-      });
-      setChatMessage("");
-      onRefresh();
-    } catch (error) {
-      showError("Lỗi", "Không thể gửi nhận xét. Vui lòng thử lại.");
-    } finally {
-      setChatLoading(false);
-    }
+    const newMessage = {
+      message: chatMessage,
+      sender: "USER",
+      createdAt: new Date().toISOString(),
+    };
+    setLocalComments(prev => ({
+      ...prev,
+      [itemId]: [...(prev[itemId] || []), newMessage]
+    }));
+    setChatMessage("");
+    setHasChanges(true);
   };
 
   const updateReport = (
@@ -576,7 +578,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                               <Edit fontSize="small" color="info" />
                             </IconButton>
                             <IconButton size="small" onClick={() => setActiveChatId(activeChatId === obj.id ? null : obj.id)}>
-                              <Comment fontSize="small" color={okr.proposedChanges?.[obj.id]?.length > 0 ? "primary" : "inherit"} />
+                              <Comment fontSize="small" color={(okr.proposedChanges?.[obj.id]?.length > 0 || localComments[obj.id]?.length > 0) ? "primary" : "inherit"} />
                             </IconButton>
                           </Box>
                         </TableCell>
@@ -585,7 +587,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                     <NegotiationChat 
                       itemId={obj.id}
                       activeChatId={activeChatId}
-                      history={okr.proposedChanges?.[obj.id] || []}
+                      history={[...(okr.proposedChanges?.[obj.id] || []), ...(localComments[obj.id] || [])]}
                       chatMessage={chatMessage}
                       setChatMessage={setChatMessage}
                       onSend={handleSendChat}
@@ -653,7 +655,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                     <Edit fontSize="small" color="info" />
                                   </IconButton>
                                   <IconButton size="small" onClick={() => setActiveChatId(activeChatId === kr.id ? null : kr.id)}>
-                                    <Comment fontSize="small" color={okr.proposedChanges?.[kr.id]?.length > 0 ? "primary" : "inherit"} />
+                                    <Comment fontSize="small" color={(okr.proposedChanges?.[kr.id]?.length > 0 || localComments[kr.id]?.length > 0) ? "primary" : "inherit"} />
                                   </IconButton>
                                   <IconButton size="small" onClick={() => handleDeleteItem(obj.id, kr.id)} title="Xóa tiêu chí">
                                     <Delete fontSize="small" color="error" />
@@ -665,7 +667,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                           <NegotiationChat 
                             itemId={kr.id}
                             activeChatId={activeChatId}
-                            history={okr.proposedChanges?.[kr.id] || []}
+                            history={[...(okr.proposedChanges?.[kr.id] || []), ...(localComments[kr.id] || [])]}
                             chatMessage={chatMessage}
                             setChatMessage={setChatMessage}
                             onSend={handleSendChat}
@@ -730,7 +732,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                           <Edit fontSize="small" color="info" />
                                         </IconButton>
                                         <IconButton size="small" onClick={() => setActiveChatId(activeChatId === sub.id ? null : sub.id)}>
-                                          <Comment fontSize="small" color={okr.proposedChanges?.[sub.id]?.length > 0 ? "primary" : "inherit"} />
+                                          <Comment fontSize="small" color={(okr.proposedChanges?.[sub.id]?.length > 0 || localComments[sub.id]?.length > 0) ? "primary" : "inherit"} />
                                         </IconButton>
                                         <IconButton size="small" onClick={() => handleDeleteItem(obj.id, kr.id, sub.id)} title="Xóa tiêu chí con">
                                           <Delete fontSize="small" color="error" />
@@ -742,7 +744,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                 <NegotiationChat 
                                   itemId={sub.id}
                                   activeChatId={activeChatId}
-                                  history={okr.proposedChanges?.[sub.id] || []}
+                                  history={[...(okr.proposedChanges?.[sub.id] || []), ...(localComments[sub.id] || [])]}
                                   chatMessage={chatMessage}
                                   setChatMessage={setChatMessage}
                                   onSend={handleSendChat}
