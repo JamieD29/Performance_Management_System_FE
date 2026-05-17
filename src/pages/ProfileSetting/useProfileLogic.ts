@@ -256,6 +256,9 @@ export const useProfileLogic = () => {
     }
   };
 
+  const { dobError } = validateAgeAtJoinDate(formData.dob, formData.joinDate);
+  const ageWarning = dobError || "";
+
   // --------------------------------------------------------
   // 5. EXPORT NHỮNG GÌ UI CẦN DÙNG
   // --------------------------------------------------------
@@ -273,6 +276,7 @@ export const useProfileLogic = () => {
     errors,
     departments, // Xuất danh sách phòng ban
     getDepartmentName, // Xuất hàm lấy tên phòng ban
+    ageWarning, // Xuất cảnh báo độ tuổi
 
     // Handlers
     handleChange,
@@ -288,3 +292,4 @@ export const useProfileLogic = () => {
     handleSave,
   };
 };
+
