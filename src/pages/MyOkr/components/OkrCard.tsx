@@ -86,22 +86,28 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
   // Diff Logic
   const originalStructure = okr.proposedChanges?.originalStructure || null;
 
-  const findOriginalItem = (id: string) => {
+  const findOriginalItem = (objId: string, krId?: string, subId?: string) => {
     if (!originalStructure) return null;
-    for (const obj of originalStructure) {
-      if (obj.id === id) return obj;
-      if (obj.items) {
-        for (const kr of obj.items) {
-          if (kr.id === id) return kr;
-          if (kr.items) {
-            for (const sub of kr.items) {
-              if (sub.id === id) return sub;
-            }
-          }
-        }
-      }
+    
+    // Tìm Objective
+    const obj = originalStructure.find((o: any) => String(o.id) === String(objId));
+    if (!obj) return null;
+    
+    if (krId === undefined) {
+      return obj;
     }
-    return null;
+    
+    // Tìm KR
+    const kr = obj.items?.find((k: any) => String(k.id) === String(krId));
+    if (!kr) return null;
+    
+    if (subId === undefined) {
+      return kr;
+    }
+    
+    // Tìm Sub-KR
+    const sub = kr.items?.find((s: any) => String(s.id) === String(subId));
+    return sub || null;
   };
 
   const hasChanged = (newItem: any, oldItem: any) => {
@@ -129,20 +135,27 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
 
   const deletedItems: any[] = [];
   if (originalStructure && (okr.status === 'PENDING' || okr.status === 'NEGOTIATING')) {
-    const flatten = (items: any[]) => {
-      let result: any[] = [];
-      items.forEach(i => {
-        result.push(i);
-        if (i.items) result = result.concat(flatten(i.items));
-      });
-      return result;
-    };
-    const oldFlat = flatten(originalStructure);
-    const newFlat = flatten(localStructure);
-    oldFlat.forEach(o => {
-      if (!newFlat.find(n => n.id === o.id)) {
-        deletedItems.push(o);
+    originalStructure.forEach((oldObj: any) => {
+      const newObj = localStructure.find((o: any) => String(o.id) === String(oldObj.id));
+      if (!newObj) {
+        deletedItems.push({ ...oldObj, type: 'OBJ', objId: oldObj.id });
+        return;
       }
+      
+      oldObj.items?.forEach((oldKr: any) => {
+        const newKr = newObj.items?.find((k: any) => String(k.id) === String(oldKr.id));
+        if (!newKr) {
+          deletedItems.push({ ...oldKr, type: 'KR', objId: oldObj.id, krId: oldKr.id });
+          return;
+        }
+        
+        oldKr.items?.forEach((oldSub: any) => {
+          const newSub = newKr.items?.find((s: any) => String(s.id) === String(oldSub.id));
+          if (!newSub) {
+            deletedItems.push({ ...oldSub, type: 'SUBKR', objId: oldObj.id, krId: oldKr.id, subId: oldSub.id });
+          }
+        });
+      });
     });
   }
 
@@ -356,39 +369,31 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
     setHasChanges(true);
   };
 
-  const handleRestoreDeletedItem = (idToRestore: string) => {
-    const oldItem = findOriginalItem(idToRestore);
+  const handleRestoreDeletedItem = (delItem: any) => {
+    const { type, objId, krId, subId } = delItem;
+    const oldItem = findOriginalItem(objId, krId, subId);
     if (!oldItem) return;
 
     const newStructure = JSON.parse(JSON.stringify(localStructure));
-    const parts = String(idToRestore).split('.');
     
-    if (parts.length === 2) {
-      const objId = parts[0];
-      const obj = newStructure.find((o:any) => String(o.id) === String(objId));
+    if (type === 'OBJ') {
+      newStructure.push(JSON.parse(JSON.stringify(oldItem)));
+      newStructure.sort((a: any, b: any) => String(a.id).localeCompare(String(b.id)));
+    } else if (type === 'KR') {
+      const obj = newStructure.find((o: any) => String(o.id) === String(objId));
       if (obj) {
         if (!obj.items) obj.items = [];
         obj.items.push(JSON.parse(JSON.stringify(oldItem)));
-        obj.items.sort((a:any, b:any) => {
-           const numA = parseFloat(a.id.split('.').slice(1).join('.'));
-           const numB = parseFloat(b.id.split('.').slice(1).join('.'));
-           return numA - numB;
-        });
+        obj.items.sort((a: any, b: any) => parseFloat(a.id) - parseFloat(b.id));
       }
-    } else if (parts.length === 3) {
-      const objId = parts[0];
-      const krId = parts[0] + '.' + parts[1];
-      const obj = newStructure.find((o:any) => String(o.id) === String(objId));
+    } else if (type === 'SUBKR') {
+      const obj = newStructure.find((o: any) => String(o.id) === String(objId));
       if (obj) {
-        const kr = obj.items?.find((k:any) => String(k.id) === String(krId));
+        const kr = obj.items?.find((k: any) => String(k.id) === String(krId));
         if (kr) {
           if (!kr.items) kr.items = [];
           kr.items.push(JSON.parse(JSON.stringify(oldItem)));
-          kr.items.sort((a:any, b:any) => {
-             const numA = parseFloat(a.id.split('.').slice(2).join('.'));
-             const numB = parseFloat(b.id.split('.').slice(2).join('.'));
-             return numA - numB;
-          });
+          kr.items.sort((a: any, b: any) => parseFloat(a.id) - parseFloat(b.id));
         }
       }
     }
@@ -765,7 +770,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                         const krUnitScore = Number(kr.unitScore) || 0;
                         const krCalcScore = krUnitScore > 0 ? krQty * krUnitScore : krQty;
                         const existingReport = okr.selfReportData?.[krKey];
-                        const oldKr = findOriginalItem(kr.id);
+                        const oldKr = findOriginalItem(obj.id, kr.id);
                         const isKrChanged = hasChanged(kr, oldKr);
                         const isKrNew = !oldKr;
 
@@ -854,7 +859,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                               const subUnitScore = Number(sub.unitScore) || 0;
                               const subCalcScore = subUnitScore > 0 ? subQty * subUnitScore : subQty;
                               const existingSub = okr.selfReportData?.[subKey];
-                              const oldSub = findOriginalItem(sub.id);
+                              const oldSub = findOriginalItem(obj.id, kr.id, sub.id);
                               const isSubChanged = hasChanged(sub, oldSub);
                               const isSubNew = !oldSub;
 
@@ -953,14 +958,14 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                     </TableRow>
                     {deletedItems.map((delItem, idx) => (
                       <TableRow key={`del-${idx}`} sx={{ bgcolor: "#fef2f2" }}>
-                        <TableCell sx={{ pl: delItem.id.split('.').length === 1 ? 2 : delItem.id.split('.').length === 2 ? 4 : 8, textDecoration: "line-through", color: "error.main" }}>{delItem.id}</TableCell>
+                        <TableCell sx={{ pl: delItem.type === 'OBJ' ? 2 : delItem.type === 'KR' ? 4 : 8, textDecoration: "line-through", color: "error.main" }}>{delItem.id}</TableCell>
                         <TableCell sx={{ textDecoration: "line-through", color: "error.main" }}>{delItem.title}</TableCell>
                         <TableCell sx={{ textDecoration: "line-through", color: "error.main" }}>{delItem.maxScore || "—"}</TableCell>
                         <TableCell sx={{ textDecoration: "line-through", color: "error.main" }}>{delItem.unitScore ? `+${delItem.unitScore}/${delItem.unit || 'đv'}` : '—'}</TableCell>
                         {canReport && <><TableCell></TableCell><TableCell></TableCell><TableCell></TableCell></>}
                         {(okr.status === "SUBMITTED" || okr.status === "COMPLETED") && <><TableCell></TableCell><TableCell></TableCell><TableCell></TableCell></>}
                         <TableCell align="center">
-                          <IconButton size="small" onClick={() => handleRestoreDeletedItem(delItem.id)} title="Khôi phục">
+                          <IconButton size="small" onClick={() => handleRestoreDeletedItem(delItem)} title="Khôi phục">
                             <Undo fontSize="small" color="primary" />
                           </IconButton>
                         </TableCell>
