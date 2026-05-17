@@ -19,6 +19,7 @@ import {
   IconButton,
   LinearProgress,
   TextField,
+  DialogActions,
 } from "@mui/material";
 import {
   Check,
@@ -30,6 +31,7 @@ import {
   Add,
   Close,
   Delete,
+  Edit,
 } from "@mui/icons-material";
 import { api } from "../../../services/api";
 import { confirmAction, showSuccess, showError } from "../../../utils/swal";
@@ -65,6 +67,19 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
 
   const [localStructure, setLocalStructure] = useState<any[]>([]);
   const [hasChanges, setHasChanges] = useState(false);
+
+  // Edit Criteria State
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [editItemInfo, setEditItemInfo] = useState<{
+    type: 'OBJ' | 'KR' | 'SUBKR';
+    objId: string;
+    krId?: string;
+    subId?: string;
+  } | null>(null);
+  const [editCriteriaTitle, setEditCriteriaTitle] = useState('');
+  const [editCriteriaMaxScore, setEditCriteriaMaxScore] = useState('');
+  const [editCriteriaUnitScore, setEditCriteriaUnitScore] = useState('');
+  const [editCriteriaUnit, setEditCriteriaUnit] = useState('');
 
   const isAccepted = okr.status === "ACCEPTED";
   const isSubmitted = okr.status === "SUBMITTED";
@@ -226,6 +241,59 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
     
     setLocalStructure(newStructure);
     setHasChanges(true);
+  };
+
+  const handleOpenEditDialog = (type: 'OBJ' | 'KR' | 'SUBKR', objId: string, krId?: string, subId?: string) => {
+    let item: any = null;
+    const obj = localStructure.find(o => o.id === objId);
+    if (type === 'OBJ') {
+      item = obj;
+    } else if (type === 'KR') {
+      item = obj?.items?.find((k: any) => k.id === krId);
+    } else if (type === 'SUBKR') {
+      const kr = obj?.items?.find((k: any) => k.id === krId);
+      item = kr?.items?.find((s: any) => s.id === subId);
+    }
+
+    if (item) {
+      setEditItemInfo({ type, objId, krId, subId });
+      setEditCriteriaTitle(item.title || '');
+      setEditCriteriaMaxScore(String(item.maxScore ?? ''));
+      setEditCriteriaUnitScore(String(item.unitScore ?? ''));
+      setEditCriteriaUnit(item.unit || '');
+      setOpenEditDialog(true);
+    }
+  };
+
+  const handleSaveEditCriteria = () => {
+    if (!editCriteriaTitle.trim()) {
+      showError("Lỗi", "Vui lòng nhập nội dung.");
+      return;
+    }
+    const newStructure = JSON.parse(JSON.stringify(localStructure));
+    const obj = newStructure.find((o: any) => o.id === editItemInfo?.objId);
+    let targetItem: any = null;
+
+    if (editItemInfo?.type === 'OBJ') {
+      targetItem = obj;
+    } else if (editItemInfo?.type === 'KR') {
+      targetItem = obj?.items?.find((k: any) => k.id === editItemInfo.krId);
+    } else if (editItemInfo?.type === 'SUBKR') {
+      const kr = obj?.items?.find((k: any) => k.id === editItemInfo.krId);
+      targetItem = kr?.items?.find((s: any) => s.id === editItemInfo.subId);
+    }
+
+    if (targetItem) {
+      targetItem.title = editCriteriaTitle;
+      targetItem.maxScore = Number(editCriteriaMaxScore) || 0;
+      targetItem.unitScore = Number(editCriteriaUnitScore) || 0;
+      targetItem.unit = editCriteriaUnit;
+      targetItem.isEdited = true;
+    }
+
+    setLocalStructure(newStructure);
+    setHasChanges(true);
+    setOpenEditDialog(false);
   };
 
   const handleSubmitChanges = async () => {
@@ -504,6 +572,9 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                             <IconButton size="small" onClick={() => handleOpenAddDialog('KR', obj.id)} title="Thêm tiêu chí">
                               <Add fontSize="small" color="success" />
                             </IconButton>
+                            <IconButton size="small" onClick={() => handleOpenEditDialog('OBJ', obj.id)} title="Chỉnh sửa">
+                              <Edit fontSize="small" color="info" />
+                            </IconButton>
                             <IconButton size="small" onClick={() => setActiveChatId(activeChatId === obj.id ? null : obj.id)}>
                               <Comment fontSize="small" color={okr.proposedChanges?.[obj.id]?.length > 0 ? "primary" : "inherit"} />
                             </IconButton>
@@ -577,6 +648,9 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                 <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
                                   <IconButton size="small" onClick={() => handleOpenAddDialog('SUBKR', obj.id, kr.id)} title="Thêm tiêu chí con">
                                     <Add fontSize="small" color="success" />
+                                  </IconButton>
+                                  <IconButton size="small" onClick={() => handleOpenEditDialog('KR', obj.id, kr.id)} title="Chỉnh sửa">
+                                    <Edit fontSize="small" color="info" />
                                   </IconButton>
                                   <IconButton size="small" onClick={() => setActiveChatId(activeChatId === kr.id ? null : kr.id)}>
                                     <Comment fontSize="small" color={okr.proposedChanges?.[kr.id]?.length > 0 ? "primary" : "inherit"} />
@@ -652,6 +726,9 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                   {(isPending || okr.status === 'NEGOTIATING') && (
                                     <TableCell align="center">
                                       <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+                                        <IconButton size="small" onClick={() => handleOpenEditDialog('SUBKR', obj.id, kr.id, sub.id)} title="Chỉnh sửa">
+                                          <Edit fontSize="small" color="info" />
+                                        </IconButton>
                                         <IconButton size="small" onClick={() => setActiveChatId(activeChatId === sub.id ? null : sub.id)}>
                                           <Comment fontSize="small" color={okr.proposedChanges?.[sub.id]?.length > 0 ? "primary" : "inherit"} />
                                         </IconButton>
@@ -724,6 +801,48 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
         unit={newCriteriaUnit}
         setUnit={setNewCriteriaUnit}
       />
+
+      {/* Dialog Sửa Tiêu chí */}
+      <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Chỉnh sửa Tiêu chí</DialogTitle>
+        <DialogContent dividers>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+            <TextField 
+              label="Nội dung tiêu chí" 
+              fullWidth 
+              value={editCriteriaTitle} 
+              onChange={(e) => setEditCriteriaTitle(e.target.value)} 
+            />
+            <TextField 
+              label="Điểm tối đa" 
+              type="number" 
+              fullWidth 
+              value={editCriteriaMaxScore} 
+              onChange={(e) => setEditCriteriaMaxScore(e.target.value)} 
+            />
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <TextField 
+                label="Điểm / Đơn vị" 
+                type="number" 
+                fullWidth 
+                value={editCriteriaUnitScore} 
+                onChange={(e) => setEditCriteriaUnitScore(e.target.value)} 
+              />
+              <TextField 
+                label="Đơn vị tính" 
+                fullWidth 
+                value={editCriteriaUnit} 
+                onChange={(e) => setEditCriteriaUnit(e.target.value)} 
+                placeholder="VD: bài, đv, giờ..."
+              />
+            </Box>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenEditDialog(false)}>Hủy</Button>
+          <Button variant="contained" onClick={handleSaveEditCriteria}>Lưu thay đổi</Button>
+        </DialogActions>
+      </Dialog>
     </Paper>
   );
 };

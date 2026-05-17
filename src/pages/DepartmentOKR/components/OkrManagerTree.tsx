@@ -23,6 +23,65 @@ export default function OkrManagerTree({ okr, onRefresh }: { okr: any; onRefresh
   const [chatMessage, setChatMessage] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
   const structure = Array.isArray(okr.keyResults) ? okr.keyResults : [];
+  const originalStructure = okr.proposedChanges?.originalStructure || null;
+
+  const findOriginalItem = (id: string) => {
+    if (!originalStructure) return null;
+    for (const obj of originalStructure) {
+      if (obj.id === id) return obj;
+      if (obj.items) {
+        for (const kr of obj.items) {
+          if (kr.id === id) return kr;
+          if (kr.items) {
+            for (const sub of kr.items) {
+              if (sub.id === id) return sub;
+            }
+          }
+        }
+      }
+    }
+    return null;
+  };
+
+  const hasChanged = (newItem: any, oldItem: any) => {
+    if (!oldItem) return false;
+    return String(newItem.title || '').trim() !== String(oldItem.title || '').trim() || 
+           Number(newItem.maxScore || 0) !== Number(oldItem.maxScore || 0) || 
+           Number(newItem.unitScore || 0) !== Number(oldItem.unitScore || 0) ||
+           String(newItem.unit || '').trim() !== String(oldItem.unit || '').trim();
+  };
+
+  const renderOldRow = (oldItem: any, indent: number) => {
+    if (!oldItem) return null;
+    return (
+      <TableRow sx={{ bgcolor: "#f1f5f9", opacity: 0.7 }}>
+        <TableCell sx={{ pl: indent, textDecoration: "line-through", color: "text.secondary" }}>{oldItem.id}</TableCell>
+        <TableCell sx={{ textDecoration: "line-through", color: "text.secondary" }}>[Cũ] {oldItem.title}</TableCell>
+        <TableCell sx={{ textDecoration: "line-through", color: "text.secondary" }}>{oldItem.maxScore || "—"}</TableCell>
+        <TableCell sx={{ textDecoration: "line-through", color: "text.secondary" }}>{oldItem.unitScore ? `+${oldItem.unitScore}/${oldItem.unit || 'đv'}` : '—'}</TableCell>
+        <TableCell align="center"></TableCell>
+      </TableRow>
+    );
+  };
+
+  const deletedItems: any[] = [];
+  if (originalStructure) {
+    const flatten = (items: any[]) => {
+      let result: any[] = [];
+      items.forEach(i => {
+        result.push(i);
+        if (i.items) result = result.concat(flatten(i.items));
+      });
+      return result;
+    };
+    const oldFlat = flatten(originalStructure);
+    const newFlat = flatten(structure);
+    oldFlat.forEach(o => {
+      if (!newFlat.find(n => n.id === o.id)) {
+        deletedItems.push(o);
+      }
+    });
+  }
 
   const handleSendChat = async (itemId: string) => {
     if (!chatMessage.trim()) return;
@@ -109,12 +168,17 @@ export default function OkrManagerTree({ okr, onRefresh }: { okr: any; onRefresh
           </TableRow>
         </TableHead>
         <TableBody>
-          {structure.map((obj: any, oIndex: number) => (
+          {structure.map((obj: any, oIndex: number) => {
+            const oldObj = findOriginalItem(obj.id);
+            const isObjChanged = hasChanged(obj, oldObj);
+            
+            return (
             <React.Fragment key={obj.id || oIndex}>
               {/* Objective row */}
-              <TableRow sx={{ bgcolor: "#dbeafe" }}>
+              {isObjChanged && renderOldRow(oldObj, 2)}
+              <TableRow sx={{ bgcolor: isObjChanged ? "#fef08a" : "#dbeafe" }}>
                 <TableCell sx={{ fontWeight: "bold" }}>{obj.id}</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>{obj.title}</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>{isObjChanged ? '[Mới] ' : ''}{obj.title}</TableCell>
                 <TableCell sx={{ fontWeight: "bold" }}>{obj.maxScore}</TableCell>
                 <TableCell></TableCell>
                 <TableCell align="center">
@@ -126,11 +190,17 @@ export default function OkrManagerTree({ okr, onRefresh }: { okr: any; onRefresh
               {renderChatRow(obj.id, 5)}
 
               {/* KR rows */}
-              {obj.items?.map((kr: any, kIndex: number) => (
+              {obj.items?.map((kr: any, kIndex: number) => {
+                const oldKr = findOriginalItem(kr.id);
+                const isKrChanged = hasChanged(kr, oldKr);
+                const isKrNew = !oldKr;
+
+                return (
                 <React.Fragment key={`${oIndex}-${kIndex}`}>
-                  <TableRow sx={{ bgcolor: kr.isNew ? "#fef08a" : "#f8fafc" }}>
-                    <TableCell sx={{ pl: 3, fontWeight: kr.isNew ? "bold" : "normal" }}>{kr.id}</TableCell>
-                    <TableCell sx={{ fontWeight: kr.isNew ? "bold" : "normal" }}>{kr.title}</TableCell>
+                  {isKrChanged && renderOldRow(oldKr, 3)}
+                  <TableRow sx={{ bgcolor: (isKrNew || isKrChanged || kr.isEdited) ? "#fef08a" : "#f8fafc" }}>
+                    <TableCell sx={{ pl: 3, fontWeight: (isKrNew || isKrChanged || kr.isEdited) ? "bold" : "normal" }}>{kr.id}</TableCell>
+                    <TableCell sx={{ fontWeight: (isKrNew || isKrChanged || kr.isEdited) ? "bold" : "normal" }}>{isKrChanged ? '[Mới] ' : ''}{kr.title}</TableCell>
                     <TableCell>
                       <TextField 
                         size="small" type="number" defaultValue={kr.maxScore} 
@@ -154,11 +224,17 @@ export default function OkrManagerTree({ okr, onRefresh }: { okr: any; onRefresh
                   {renderChatRow(kr.id, 5)}
 
                   {/* Sub-KR rows */}
-                  {kr.items?.map((sub: any, sIndex: number) => (
+                  {kr.items?.map((sub: any, sIndex: number) => {
+                    const oldSub = findOriginalItem(sub.id);
+                    const isSubChanged = hasChanged(sub, oldSub);
+                    const isSubNew = !oldSub;
+
+                    return (
                     <React.Fragment key={`${oIndex}-${kIndex}-${sIndex}`}>
-                      <TableRow sx={{ bgcolor: sub.isNew ? "#fef08a" : "inherit" }}>
-                        <TableCell sx={{ pl: 6, fontWeight: sub.isNew ? "bold" : "normal" }}>{sub.id}</TableCell>
-                        <TableCell sx={{ fontWeight: sub.isNew ? "bold" : "normal" }}>{sub.title}</TableCell>
+                      {isSubChanged && renderOldRow(oldSub, 6)}
+                      <TableRow sx={{ bgcolor: (isSubNew || isSubChanged || sub.isEdited) ? "#fef08a" : "inherit" }}>
+                        <TableCell sx={{ pl: 6, fontWeight: (isSubNew || isSubChanged || sub.isEdited) ? "bold" : "normal" }}>{sub.id}</TableCell>
+                        <TableCell sx={{ fontWeight: (isSubNew || isSubChanged || sub.isEdited) ? "bold" : "normal" }}>{isSubChanged ? '[Mới] ' : ''}{sub.title}</TableCell>
                         <TableCell>
                           <TextField 
                             size="small" type="number" defaultValue={sub.maxScore} 
@@ -181,11 +257,31 @@ export default function OkrManagerTree({ okr, onRefresh }: { okr: any; onRefresh
                       </TableRow>
                       {renderChatRow(sub.id, 5)}
                     </React.Fragment>
-                  ))}
+                  )})}
                 </React.Fragment>
-              ))}
+              )})}
             </React.Fragment>
-          ))}
+          )})}
+
+          {/* Deleted items at the end */}
+          {deletedItems.length > 0 && (
+            <>
+              <TableRow>
+                <TableCell colSpan={5} sx={{ bgcolor: "#fee2e2", fontWeight: "bold", textAlign: "center", color: "#b91c1c" }}>
+                  Các tiêu chí đã bị xóa
+                </TableCell>
+              </TableRow>
+              {deletedItems.map((delItem, idx) => (
+                  <TableRow key={`del-${idx}`} sx={{ bgcolor: "#fef2f2" }}>
+                    <TableCell sx={{ pl: delItem.id.split('.').length === 1 ? 2 : delItem.id.split('.').length === 2 ? 4 : 6, textDecoration: "line-through", color: "error.main" }}>{delItem.id}</TableCell>
+                    <TableCell sx={{ textDecoration: "line-through", color: "error.main" }}>{delItem.title}</TableCell>
+                    <TableCell sx={{ textDecoration: "line-through", color: "error.main" }}>{delItem.maxScore || "—"}</TableCell>
+                    <TableCell sx={{ textDecoration: "line-through", color: "error.main" }}>{delItem.unitScore ? `+${delItem.unitScore}/${delItem.unit || 'đv'}` : '—'}</TableCell>
+                    <TableCell align="center"></TableCell>
+                  </TableRow>
+              ))}
+            </>
+          )}
         </TableBody>
       </Table>
     </TableContainer>
