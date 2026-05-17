@@ -32,12 +32,12 @@ import {
   CheckCircle,
   HelpOutline,
 } from "@mui/icons-material";
-import * as XLSX from "xlsx";
 import { api } from "../../../services/api";
 import { performanceService } from "../../../services/performanceService";
 import { showSuccess, showError } from "../../../utils/swal";
 import { useTemplateStructure } from "../hooks/useTemplateStructure";
 import { ObjectiveRow, KeyResultRow, SubKRRow, SubSubKRRow } from "./RowComponents";
+import { parseExcelToStructure } from "../../../utils/excelParser";
 
 interface TemplateEditorDialogProps {
   open: boolean;
@@ -107,78 +107,28 @@ export default function TemplateEditorDialog({
     }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const data = new Uint8Array(event.target?.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: "array" });
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
-
-        const importedStructure = parseExcelData(jsonData);
-        setStructure(importedStructure);
-        setSnackbar({
-          open: true,
-          message: "Import dữ liệu từ Excel thành công!",
-          severity: "success",
-        });
-      } catch (error) {
-        console.error("Excel parse error:", error);
-        setSnackbar({
-          open: true,
-          message: "Lỗi định dạng file Excel. Vui lòng kiểm tra lại template.",
-          severity: "error",
-        });
-      }
-    };
-    reader.readAsArrayBuffer(file);
-    e.target.value = "";
-  };
-
-  const parseExcelData = (data: any[][]) => {
-    const rows = data.slice(1);
-    const result: any[] = [];
-    let currentObj: any = null;
-    let currentKR: any = null;
-    let currentSub: any = null;
-
-    rows.forEach((row) => {
-      const id = String(row[0] || "").trim();
-      const title = String(row[1] || "").trim();
-      if (!id || !title) return;
-
-      const maxScore = Number(row[2]) || 0;
-      const unitScore = Number(row[3]) || 0;
-      const unit = String(row[4] || "").trim();
-      const target = Number(row[5]) || 0;
-
-      const dotCount = (id.match(/\./g) || []).length;
-
-      if (dotCount === 0) {
-        currentObj = { id, title, maxScore, items: [] };
-        result.push(currentObj);
-        currentKR = null;
-        currentSub = null;
-      } else if (dotCount === 1) {
-        currentKR = { id, title, maxScore, unitScore, unit, target, items: [] };
-        if (currentObj) currentObj.items.push(currentKR);
-        currentSub = null;
-      } else if (dotCount === 2) {
-        currentSub = { id, title, maxScore, unitScore, unit, target, items: [] };
-        if (currentKR) currentKR.items.push(currentSub);
-      } else if (dotCount === 3) {
-        if (currentSub) {
-          currentSub.items.push({ id, title, unitScore, unit, target });
-        }
-      }
-    });
-
-    return result;
+    try {
+      const importedStructure = await parseExcelToStructure(file);
+      setStructure(importedStructure);
+      setSnackbar({
+        open: true,
+        message: "Import dữ liệu từ Excel thành công!",
+        severity: "success",
+      });
+    } catch (error: any) {
+      console.error("Excel parse error:", error);
+      setSnackbar({
+        open: true,
+        message: error.message || "Lỗi định dạng file Excel. Vui lòng kiểm tra lại template.",
+        severity: "error",
+      });
+    } finally {
+      e.target.value = "";
+    }
   };
 
   const handleSubmit = async () => {
@@ -191,17 +141,17 @@ export default function TemplateEditorDialog({
       };
 
       if (template?.id) {
-        await api.put(`/okr-templates/${template.id}`, payload);
-        showSuccess("Thành công", "Đã cập nhật OKR Template.");
+        const res = await api.put(`/okr-templates/${template.id}`, payload);
+        showSuccess("Thành công", res.data?.message || "Đã cập nhật OKR Template.");
       } else {
-        await api.post("/okr-templates", payload);
-        showSuccess("Thành công", "Đã tạo OKR Template mới.");
+        const res = await api.post("/okr-templates", payload);
+        showSuccess("Thành công", res.data?.message || "Đã tạo OKR Template mới.");
       }
       onRefresh();
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      showError("Lỗi", "Có lỗi xảy ra khi lưu template.");
+      showError("Lỗi", error.response?.data?.message || "Có lỗi xảy ra khi lưu template.");
     }
   };
 
