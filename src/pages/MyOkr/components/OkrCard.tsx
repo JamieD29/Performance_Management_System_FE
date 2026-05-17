@@ -73,10 +73,11 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
   // Edit Criteria State
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [editItemInfo, setEditItemInfo] = useState<{
-    type: 'OBJ' | 'KR' | 'SUBKR';
+    type: 'OBJ' | 'KR' | 'SUBKR' | 'SUBSUBKR';
     objId: string;
     krId?: string;
     subId?: string;
+    subsubId?: string;
   } | null>(null);
   const [editCriteriaTitle, setEditCriteriaTitle] = useState('');
   const [editCriteriaMaxScore, setEditCriteriaMaxScore] = useState('');
@@ -86,7 +87,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
   // Diff Logic
   const originalStructure = okr.proposedChanges?.originalStructure || null;
 
-  const findOriginalItem = (objId: string, krId?: string, subId?: string) => {
+  const findOriginalItem = (objId: string, krId?: string, subId?: string, subsubId?: string) => {
     if (!originalStructure) return null;
     
     // Tìm Objective
@@ -107,7 +108,13 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
     
     // Tìm Sub-KR
     const sub = kr.items?.find((s: any) => String(s.id) === String(subId));
-    return sub || null;
+    if (!sub || subsubId === undefined) {
+      return sub || null;
+    }
+
+    // Tìm Sub-Sub-KR
+    const subsub = sub.items?.find((ss: any) => String(ss.id) === String(subsubId));
+    return subsub || null;
   };
 
   const hasChanged = (newItem: any, oldItem: any) => {
@@ -153,7 +160,15 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
           const newSub = newKr.items?.find((s: any) => String(s.id) === String(oldSub.id));
           if (!newSub) {
             deletedItems.push({ ...oldSub, type: 'SUBKR', objId: oldObj.id, krId: oldKr.id, subId: oldSub.id });
+            return;
           }
+
+          oldSub.items?.forEach((oldSubSub: any) => {
+            const newSubSub = newSub.items?.find((ss: any) => String(ss.id) === String(oldSubSub.id));
+            if (!newSubSub) {
+              deletedItems.push({ ...oldSubSub, type: 'SUBSUBKR', objId: oldObj.id, krId: oldKr.id, subId: oldSub.id, subsubId: oldSubSub.id });
+            }
+          });
         });
       });
     });
@@ -203,6 +218,10 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
       kr.items?.forEach((sub: any) => {
         const subKey = `${obj.id}-${kr.id}-${sub.id}`;
         total += Number(selfReport[subKey]?.score) || 0;
+        sub.items?.forEach((subsub: any) => {
+          const subsubKey = `${obj.id}-${kr.id}-${sub.id}-${subsub.id}`;
+          total += Number(selfReport[subsubKey]?.score) || 0;
+        });
       });
     });
     const max = Number(obj.maxScore) || 0;
@@ -299,10 +318,19 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
     setOpenAddDialog(false);
   };
 
-  const handleDeleteItem = (objId: string, krId?: string, subId?: string) => {
+  const handleDeleteItem = (objId: string, krId?: string, subId?: string, subsubId?: string) => {
     const newStructure = JSON.parse(JSON.stringify(localStructure));
 
-    if (subId && krId) {
+    if (subsubId && subId && krId) {
+      const obj = newStructure.find((o: any) => String(o.id) === String(objId));
+      if (obj) {
+        const kr = obj.items?.find((k: any) => String(k.id) === String(krId));
+        const sub = kr?.items?.find((s: any) => String(s.id) === String(subId));
+        if (sub && sub.items) {
+          sub.items = sub.items.filter((ss: any) => String(ss.id) !== String(subsubId));
+        }
+      }
+    } else if (subId && krId) {
       const obj = newStructure.find((o: any) => String(o.id) === String(objId));
       if (obj) {
         const kr = obj.items?.find((k: any) => String(k.id) === String(krId));
@@ -321,7 +349,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
     setHasChanges(true);
   };
 
-  const handleUndoItem = (type: 'OBJ' | 'KR' | 'SUBKR', objId: string, krId?: string, subId?: string) => {
+  const handleUndoItem = (type: 'OBJ' | 'KR' | 'SUBKR' | 'SUBSUBKR', objId: string, krId?: string, subId?: string, subsubId?: string) => {
     const newStructure = JSON.parse(JSON.stringify(localStructure));
     
     let oldItem: any = null;
@@ -333,6 +361,10 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
     } else if (type === 'SUBKR') {
       const oldKr = oldObj?.items?.find((k:any) => String(k.id) === String(krId));
       oldItem = oldKr?.items?.find((s:any) => String(s.id) === String(subId));
+    } else if (type === 'SUBSUBKR') {
+      const oldKr = oldObj?.items?.find((k:any) => String(k.id) === String(krId));
+      const oldSub = oldKr?.items?.find((s:any) => String(s.id) === String(subId));
+      oldItem = oldSub?.items?.find((ss:any) => String(ss.id) === String(subsubId));
     }
 
     if (!oldItem) return;
@@ -363,6 +395,17 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
         sub.unit = oldItem.unit;
         sub.isEdited = false;
       }
+    } else if (type === 'SUBSUBKR' && obj) {
+      const kr = obj.items?.find((k:any) => String(k.id) === String(krId));
+      const sub = kr?.items?.find((s:any) => String(s.id) === String(subId));
+      const subsub = sub?.items?.find((ss:any) => String(ss.id) === String(subsubId));
+      if (subsub) {
+        subsub.title = oldItem.title;
+        subsub.maxScore = oldItem.maxScore;
+        subsub.unitScore = oldItem.unitScore;
+        subsub.unit = oldItem.unit;
+        subsub.isEdited = false;
+      }
     }
     
     setLocalStructure(newStructure);
@@ -370,8 +413,8 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
   };
 
   const handleRestoreDeletedItem = (delItem: any) => {
-    const { type, objId, krId, subId } = delItem;
-    const oldItem = findOriginalItem(objId, krId, subId);
+    const { type, objId, krId, subId, subsubId } = delItem;
+    const oldItem = findOriginalItem(objId, krId, subId, subsubId);
     if (!oldItem) return;
 
     const newStructure = JSON.parse(JSON.stringify(localStructure));
@@ -396,13 +439,24 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
           kr.items.sort((a: any, b: any) => parseFloat(a.id) - parseFloat(b.id));
         }
       }
+    } else if (type === 'SUBSUBKR') {
+      const obj = newStructure.find((o: any) => String(o.id) === String(objId));
+      if (obj) {
+        const kr = obj.items?.find((k: any) => String(k.id) === String(krId));
+        const sub = kr?.items?.find((s: any) => String(s.id) === String(subId));
+        if (sub) {
+          if (!sub.items) sub.items = [];
+          sub.items.push(JSON.parse(JSON.stringify(oldItem)));
+          sub.items.sort((a: any, b: any) => String(a.id).localeCompare(String(b.id)));
+        }
+      }
     }
     
     setLocalStructure(newStructure);
     setHasChanges(true);
   };
 
-  const handleOpenEditDialog = (type: 'OBJ' | 'KR' | 'SUBKR', objId: string, krId?: string, subId?: string) => {
+  const handleOpenEditDialog = (type: 'OBJ' | 'KR' | 'SUBKR' | 'SUBSUBKR', objId: string, krId?: string, subId?: string, subsubId?: string) => {
     let item: any = null;
     const obj = localStructure.find(o => o.id === objId);
     if (type === 'OBJ') {
@@ -412,10 +466,14 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
     } else if (type === 'SUBKR') {
       const kr = obj?.items?.find((k: any) => k.id === krId);
       item = kr?.items?.find((s: any) => s.id === subId);
+    } else if (type === 'SUBSUBKR') {
+      const kr = obj?.items?.find((k: any) => k.id === krId);
+      const sub = kr?.items?.find((s: any) => s.id === subId);
+      item = sub?.items?.find((ss: any) => ss.id === subsubId);
     }
 
     if (item) {
-      setEditItemInfo({ type, objId, krId, subId });
+      setEditItemInfo({ type, objId, krId, subId, subsubId });
       setEditCriteriaTitle(item.title || '');
       setEditCriteriaMaxScore(String(item.maxScore ?? ''));
       setEditCriteriaUnitScore(String(item.unitScore ?? ''));
@@ -440,6 +498,10 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
     } else if (editItemInfo?.type === 'SUBKR') {
       const kr = obj?.items?.find((k: any) => k.id === editItemInfo.krId);
       targetItem = kr?.items?.find((s: any) => s.id === editItemInfo.subId);
+    } else if (editItemInfo?.type === 'SUBSUBKR') {
+      const kr = obj?.items?.find((k: any) => k.id === editItemInfo.krId);
+      const sub = kr?.items?.find((s: any) => s.id === editItemInfo.subId);
+      targetItem = sub?.items?.find((ss: any) => ss.id === editItemInfo.subsubId);
     }
 
     if (targetItem) {
@@ -554,6 +616,19 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
             krTitle: sub.title,
             objTitle: obj.title,
           };
+          sub.items?.forEach((subsub: any) => {
+            const subsubKey = `${obj.id}-${kr.id}-${sub.id}-${subsub.id}`;
+            const subsubQty = reportData[subsubKey]?.quantity || 0;
+            const subsubUnitScore = Number(subsub.unitScore) || 0;
+            const subsubScore = subsubUnitScore > 0 ? subsubQty * subsubUnitScore : subsubQty;
+            enrichedReport[subsubKey] = {
+              quantity: subsubQty,
+              evidence: reportData[subsubKey]?.evidence || "",
+              score: Math.min(subsubScore, Number(subsub.maxScore) || Infinity),
+              krTitle: subsub.title,
+              objTitle: obj.title,
+            };
+          });
         });
       });
     });
@@ -772,7 +847,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                         const existingReport = okr.selfReportData?.[krKey];
                         const oldKr = findOriginalItem(obj.id, kr.id);
                         const isKrChanged = hasChanged(kr, oldKr);
-                        const isKrNew = !oldKr;
+                        const isKrNew = originalStructure ? !oldKr : false;
 
                         return (
                           <React.Fragment key={`${oIndex}-${kIndex}`}>
@@ -861,7 +936,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                               const existingSub = okr.selfReportData?.[subKey];
                               const oldSub = findOriginalItem(obj.id, kr.id, sub.id);
                               const isSubChanged = hasChanged(sub, oldSub);
-                              const isSubNew = !oldSub;
+                              const isSubNew = originalStructure ? !oldSub : false;
 
                               return (
                                 <React.Fragment key={`${oIndex}-${kIndex}-${sIndex}`}>
@@ -938,6 +1013,95 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                     colSpan={11}
                                     status={okr.status}
                                   />
+
+                                  {sub.items?.map((subsub: any, ssIndex: number) => {
+                                    const subsubKey = `${obj.id}-${kr.id}-${sub.id}-${subsub.id}`;
+                                    const subsubQty = reportData[subsubKey]?.quantity || 0;
+                                    const subsubUnitScore = Number(subsub.unitScore) || 0;
+                                    const subsubCalcScore = subsubUnitScore > 0 ? subsubQty * subsubUnitScore : subsubQty;
+                                    const existingSubSub = okr.selfReportData?.[subsubKey];
+                                    const oldSubSub = findOriginalItem(obj.id, kr.id, sub.id, subsub.id);
+                                    const isSubSubChanged = hasChanged(subsub, oldSubSub);
+                                    const isSubSubNew = originalStructure ? !oldSubSub : false;
+
+                                    return (
+                                      <React.Fragment key={`${oIndex}-${kIndex}-${sIndex}-${ssIndex}`}>
+                                        {isSubSubChanged && renderOldRow(oldSubSub, 9)}
+                                        <TableRow sx={{ bgcolor: (isSubSubNew || isSubSubChanged || subsub.isEdited) ? "#fef08a" : "#fffbeb" }}>
+                                          <TableCell sx={{ pl: 9, fontSize: "0.8rem", fontWeight: (isSubSubNew || isSubSubChanged || subsub.isEdited) ? "bold" : "normal" }}>{subsub.id}</TableCell>
+                                          <TableCell sx={{ fontSize: "0.85rem", fontWeight: (isSubSubNew || isSubSubChanged || subsub.isEdited) ? "bold" : "normal" }}>{isSubSubChanged ? '[Mới] ' : ''}{subsub.title}</TableCell>
+                                          <TableCell sx={{ fontWeight: (isSubSubNew || isSubSubChanged || subsub.isEdited) ? "bold" : "normal" }}>—</TableCell>
+                                          <TableCell>
+                                            {subsub.unitScore ? (
+                                              <Chip label={`+${subsub.unitScore}/${subsub.unit || "đv"}`} size="small" variant="outlined" sx={{ fontSize: "0.75rem" }} />
+                                            ) : "—"}
+                                          </TableCell>
+                                          {canReport && (
+                                            <>
+                                              <TableCell>
+                                                <TextField
+                                                  size="small"
+                                                  type="number"
+                                                  value={subsubQty || ""}
+                                                  onChange={(e) => updateReport(subsubKey, "quantity", e.target.value)}
+                                                  inputProps={{ min: 0, style: { textAlign: "center" } }}
+                                                  sx={{ width: 80 }}
+                                                />
+                                              </TableCell>
+                                              <TableCell sx={{ fontWeight: "bold", color: "#2563eb" }}>{subsubCalcScore.toFixed(1)}</TableCell>
+                                              <TableCell>
+                                                <TextField
+                                                  size="small"
+                                                  fullWidth
+                                                  placeholder="Link..."
+                                                  value={reportData[subsubKey]?.evidence || ""}
+                                                  onChange={(e) => updateReport(subsubKey, "evidence", e.target.value)}
+                                                />
+                                              </TableCell>
+                                            </>
+                                          )}
+                                          {(isSubmitted || isCompleted) && (
+                                            <>
+                                              <TableCell>{existingSubSub?.quantity || 0}</TableCell>
+                                              <TableCell sx={{ fontWeight: "bold", color: "#2563eb" }}>{existingSubSub?.score || 0}</TableCell>
+                                              <TableCell></TableCell>
+                                            </>
+                                          )}
+                                          {(isPending || okr.status === 'NEGOTIATING') && (
+                                            <TableCell align="center">
+                                              <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+                                                <IconButton size="small" onClick={() => handleOpenEditDialog('SUBSUBKR', obj.id, kr.id, sub.id, subsub.id)} title="Chỉnh sửa">
+                                                  <Edit fontSize="small" color="info" />
+                                                </IconButton>
+                                                {isSubSubChanged && (
+                                                  <IconButton size="small" onClick={() => handleUndoItem('SUBSUBKR', obj.id, kr.id, sub.id, subsub.id)} title="Hoàn tác thay đổi">
+                                                    <Undo fontSize="small" color="primary" />
+                                                  </IconButton>
+                                                )}
+                                                <IconButton size="small" onClick={() => setActiveChatId(activeChatId === subsub.id ? null : subsub.id)}>
+                                                  <Comment fontSize="small" color={(okr.proposedChanges?.[subsub.id]?.length > 0 || localComments[subsub.id]?.length > 0) ? "primary" : "inherit"} />
+                                                </IconButton>
+                                                <IconButton size="small" onClick={() => handleDeleteItem(obj.id, kr.id, sub.id, subsub.id)} title="Xóa tiêu chí con">
+                                                  <Delete fontSize="small" color="error" />
+                                                </IconButton>
+                                              </Box>
+                                            </TableCell>
+                                          )}
+                                        </TableRow>
+                                        <NegotiationChat
+                                          itemId={subsub.id}
+                                          activeChatId={activeChatId}
+                                          history={[...(okr.proposedChanges?.[subsub.id] || []), ...(localComments[subsub.id] || [])]}
+                                          chatMessage={chatMessage}
+                                          setChatMessage={setChatMessage}
+                                          onSend={handleSendChat}
+                                          loading={chatLoading}
+                                          colSpan={11}
+                                          status={okr.status}
+                                        />
+                                      </React.Fragment>
+                                    );
+                                  })}
                                 </React.Fragment>
                               );
                             })}

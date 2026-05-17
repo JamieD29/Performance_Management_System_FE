@@ -84,6 +84,14 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
           const subMaxScore = Number(sub.maxScore) || 0;
           const subTargetQty = subMaxScore > 0 ? Math.ceil(subMaxScore / subUnitScore) : (newData[subKey]?.quantity || 1);
           newData[subKey] = { ...newData[subKey], quantity: subTargetQty };
+
+          sub.items?.forEach((subsub: any) => {
+            const subsubKey = `${obj.id}-${kr.id}-${sub.id}-${subsub.id}`;
+            const subsubUnitScore = Number(subsub.unitScore) || 1;
+            const subsubMaxScore = Number(subsub.maxScore) || 0;
+            const subsubTargetQty = subsubMaxScore > 0 ? Math.ceil(subsubMaxScore / subsubUnitScore) : (newData[subsubKey]?.quantity || 1);
+            newData[subsubKey] = { ...newData[subsubKey], quantity: subsubTargetQty };
+          });
         });
       });
     });
@@ -117,6 +125,14 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
         const sUnitScore = Number(sub.unitScore) || 0;
         const sScore = Math.min(sUnitScore > 0 ? sQty * sUnitScore : sQty, Number(sub.maxScore) || Infinity);
         total += sScore;
+
+        sub.items?.forEach((subsub: any) => {
+          const subsubKey = `${obj.id}-${kr.id}-${sub.id}-${subsub.id}`;
+          const ssQty = Number(dataSrc[subsubKey]?.quantity) || 0;
+          const ssUnitScore = Number(subsub.unitScore) || 0;
+          const ssScore = Math.min(ssUnitScore > 0 ? ssQty * ssUnitScore : ssQty, Number(subsub.maxScore) || Infinity);
+          total += ssScore;
+        });
       });
     });
     const max = Number(obj.maxScore) || 0;
@@ -293,45 +309,98 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
                               Number(sub.maxScore) || Infinity
                             );
 
-                            return (
-                              <TableRow key={`${oIndex}-${kIndex}-${sIndex}`}>
-                                <TableCell sx={{ pl: 6, fontSize: "0.85rem" }}>{sub.id}</TableCell>
-                                <TableCell sx={{ fontSize: "0.9rem" }}>{sub.title}</TableCell>
-                                <TableCell align="center">{sub.maxScore}</TableCell>
-                                <TableCell align="center">
-                                  {sub.unitScore ? <Chip label={`+${sub.unitScore}/${sub.unit || "đv"}`} size="small" variant="outlined" /> : "—"}
-                                </TableCell>
-                                <TableCell align="center" sx={{ color: "#64748b" }}>{selfSubObj.quantity || 0}</TableCell>
-                                <TableCell align="center" sx={{ color: "#64748b" }}>{selfSubObj.score?.toFixed(1) || 0}</TableCell>
-                                <TableCell align="center">
-                                  {selfSubObj.evidence ? (
-                                    <Tooltip title={selfSubObj.evidence}>
-                                      <Button size="small" variant="text" href={selfSubObj.evidence} target="_blank" sx={{ minWidth: 0, textTransform: 'none' }}>
-                                        Link
-                                      </Button>
-                                    </Tooltip>
-                                  ) : "—"}
-                                </TableCell>
-                                
-                                <TableCell align="center">
-                                  {isCompleted ? (
-                                    <Typography fontWeight="bold" color="#1C4D8D">{mgrSubQty}</Typography>
-                                  ) : (
-                                    <TextField 
-                                      size="small"
-                                      type="number"
-                                      variant="outlined"
-                                      value={mgrSubQty}
-                                      onChange={(e) => updateManagerQuantity(subKey, e.target.value)}
-                                      inputProps={{ min: 0, style: { textAlign: 'center', fontWeight: 'bold', color: '#1C4D8D', padding: '4px' } }}
-                                      sx={{ width: "60px", bgcolor: "#fff" }}
-                                    />
-                                  )}
-                                </TableCell>
-                                <TableCell align="center" sx={{ fontWeight: "bold", color: "#1C4D8D" }}>{mgrSubCalcScore.toFixed(1)}</TableCell>
-                              </TableRow>
-                            );
-                          })}
+                             return (
+                               <React.Fragment key={`${oIndex}-${kIndex}-${sIndex}`}>
+                                 <TableRow>
+                                   <TableCell sx={{ pl: 6, fontSize: "0.85rem" }}>{sub.id}</TableCell>
+                                   <TableCell sx={{ fontSize: "0.9rem" }}>{sub.title}</TableCell>
+                                   <TableCell align="center">{sub.maxScore}</TableCell>
+                                   <TableCell align="center">
+                                     {sub.unitScore ? <Chip label={`+${sub.unitScore}/${sub.unit || "đv"}`} size="small" variant="outlined" /> : "—"}
+                                   </TableCell>
+                                   <TableCell align="center" sx={{ color: "#64748b" }}>{selfSubObj.quantity || 0}</TableCell>
+                                   <TableCell align="center" sx={{ color: "#64748b" }}>{selfSubObj.score?.toFixed(1) || 0}</TableCell>
+                                   <TableCell align="center">
+                                     {selfSubObj.evidence ? (
+                                       <Tooltip title={selfSubObj.evidence}>
+                                         <Button size="small" variant="text" href={selfSubObj.evidence} target="_blank" sx={{ minWidth: 0, textTransform: 'none' }}>
+                                           Link
+                                         </Button>
+                                       </Tooltip>
+                                     ) : "—"}
+                                   </TableCell>
+                                   
+                                   <TableCell align="center">
+                                     {isCompleted ? (
+                                       <Typography fontWeight="bold" color="#1C4D8D">{mgrSubQty}</Typography>
+                                     ) : (
+                                       <TextField 
+                                         size="small"
+                                         type="number"
+                                         variant="outlined"
+                                         value={mgrSubQty}
+                                         onChange={(e) => updateManagerQuantity(subKey, e.target.value)}
+                                         inputProps={{ min: 0, style: { textAlign: 'center', fontWeight: 'bold', color: '#1C4D8D', padding: '4px' } }}
+                                         sx={{ width: "60px", bgcolor: "#fff" }}
+                                       />
+                                     )}
+                                   </TableCell>
+                                   <TableCell align="center" sx={{ fontWeight: "bold", color: "#1C4D8D" }}>{mgrSubCalcScore.toFixed(1)}</TableCell>
+                                 </TableRow>
+
+                                 {/* Sub-Sub-KRs */}
+                                 {sub.items?.map((subsub: any, ssIndex: number) => {
+                                   const subsubKey = `${obj.id}-${kr.id}-${sub.id}-${subsub.id}`;
+                                   const selfSubSubObj = selfReportData[subsubKey] || {};
+                                   
+                                   const mgrSubSubQty = managerData[subsubKey]?.quantity || 0;
+                                   const mgrSubSubCalcScore = Math.min(
+                                     (Number(subsub.unitScore) > 0 ? mgrSubSubQty * Number(subsub.unitScore) : mgrSubSubQty),
+                                     Number(subsub.maxScore) || Infinity
+                                   );
+
+                                   return (
+                                     <TableRow key={`${oIndex}-${kIndex}-${sIndex}-${ssIndex}`} sx={{ bgcolor: "#fffbeb" }}>
+                                       <TableCell sx={{ pl: 9, fontSize: "0.8rem" }}>{subsub.id}</TableCell>
+                                       <TableCell sx={{ fontSize: "0.85rem" }}>{subsub.title}</TableCell>
+                                       <TableCell align="center">—</TableCell>
+                                       <TableCell align="center">
+                                         {subsub.unitScore ? <Chip label={`+${subsub.unitScore}/${subsub.unit || "đv"}`} size="small" variant="outlined" sx={{ fontSize: "0.75rem" }} /> : "—"}
+                                       </TableCell>
+                                       <TableCell align="center" sx={{ color: "#64748b" }}>{selfSubSubObj.quantity || 0}</TableCell>
+                                       <TableCell align="center" sx={{ color: "#64748b" }}>{selfSubSubObj.score?.toFixed(1) || 0}</TableCell>
+                                       <TableCell align="center">
+                                         {selfSubSubObj.evidence ? (
+                                           <Tooltip title={selfSubSubObj.evidence}>
+                                             <Button size="small" variant="text" href={selfSubSubObj.evidence} target="_blank" sx={{ minWidth: 0, textTransform: 'none' }}>
+                                               Link
+                                             </Button>
+                                           </Tooltip>
+                                         ) : "—"}
+                                       </TableCell>
+                                       
+                                       <TableCell align="center">
+                                         {isCompleted ? (
+                                           <Typography fontWeight="bold" color="#1C4D8D">{mgrSubSubQty}</Typography>
+                                         ) : (
+                                           <TextField 
+                                             size="small"
+                                             type="number"
+                                             variant="outlined"
+                                             value={mgrSubSubQty}
+                                             onChange={(e) => updateManagerQuantity(subsubKey, e.target.value)}
+                                             inputProps={{ min: 0, style: { textAlign: 'center', fontWeight: 'bold', color: '#1C4D8D', padding: '4px' } }}
+                                             sx={{ width: "60px", bgcolor: "#fff" }}
+                                           />
+                                         )}
+                                       </TableCell>
+                                       <TableCell align="center" sx={{ fontWeight: "bold", color: "#1C4D8D" }}>{mgrSubSubCalcScore.toFixed(1)}</TableCell>
+                                     </TableRow>
+                                   );
+                                 })}
+                               </React.Fragment>
+                             );
+                           })}
                         </React.Fragment>
                       );
                     })}

@@ -42,10 +42,11 @@ export default function OkrManagerTree({ okr, onRefresh }: { okr: any; onRefresh
 
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [editItemInfo, setEditItemInfo] = useState<{
-    type: 'OBJ' | 'KR' | 'SUBKR';
+    type: 'OBJ' | 'KR' | 'SUBKR' | 'SUBSUBKR';
     objId: string;
     krId?: string;
     subId?: string;
+    subsubId?: string;
   } | null>(null);
   const [editCriteriaTitle, setEditCriteriaTitle] = useState('');
   const [editCriteriaMaxScore, setEditCriteriaMaxScore] = useState('');
@@ -53,22 +54,32 @@ export default function OkrManagerTree({ okr, onRefresh }: { okr: any; onRefresh
   const [editCriteriaUnit, setEditCriteriaUnit] = useState('');
   const originalStructure = okr.proposedChanges?.originalStructure || null;
 
-  const findOriginalItem = (id: string) => {
+  const findOriginalItem = (objId: string, krId?: string, subId?: string, subsubId?: string) => {
     if (!originalStructure) return null;
-    for (const obj of originalStructure) {
-      if (obj.id === id) return obj;
-      if (obj.items) {
-        for (const kr of obj.items) {
-          if (kr.id === id) return kr;
-          if (kr.items) {
-            for (const sub of kr.items) {
-              if (sub.id === id) return sub;
-            }
-          }
-        }
-      }
+    
+    // Tìm Objective
+    const obj = originalStructure.find((o: any) => String(o.id) === String(objId));
+    if (!obj) return null;
+    
+    if (krId === undefined) {
+      return obj;
     }
-    return null;
+
+    // Tìm KR
+    const kr = obj.items?.find((k: any) => String(k.id) === String(krId));
+    if (!kr || subId === undefined) {
+      return kr || null;
+    }
+
+    // Tìm Sub-KR
+    const sub = kr.items?.find((s: any) => String(s.id) === String(subId));
+    if (!sub || subsubId === undefined) {
+      return sub || null;
+    }
+
+    // Tìm Sub-Sub-KR
+    const subsub = sub.items?.find((ss: any) => String(ss.id) === String(subsubId));
+    return subsub || null;
   };
 
   const hasChanged = (newItem: any, oldItem: any) => {
@@ -215,10 +226,21 @@ export default function OkrManagerTree({ okr, onRefresh }: { okr: any; onRefresh
     setOpenAddDialog(false);
   };
 
-  const handleDeleteItem = (objId: string, krId?: string, subId?: string) => {
+  const handleDeleteItem = (objId: string, krId?: string, subId?: string, subsubId?: string) => {
     const newStructure = JSON.parse(JSON.stringify(localStructure));
     
-    if (subId && krId) {
+    if (subsubId && subId && krId) {
+       const obj = newStructure.find((o:any) => String(o.id) === String(objId));
+       if (obj) {
+          const kr = obj.items?.find((k:any) => String(k.id) === String(krId));
+          if (kr) {
+             const sub = kr.items?.find((s:any) => String(s.id) === String(subId));
+             if (sub && sub.items) {
+                sub.items = sub.items.filter((ss:any) => String(ss.id) !== String(subsubId));
+             }
+          }
+       }
+    } else if (subId && krId) {
        const obj = newStructure.find((o:any) => String(o.id) === String(objId));
        if (obj) {
           const kr = obj.items?.find((k:any) => String(k.id) === String(krId));
@@ -237,7 +259,7 @@ export default function OkrManagerTree({ okr, onRefresh }: { okr: any; onRefresh
     setHasChanges(true);
   };
 
-  const handleUndoItem = (type: 'OBJ' | 'KR' | 'SUBKR', objId: string, krId?: string, subId?: string) => {
+  const handleUndoItem = (type: 'OBJ' | 'KR' | 'SUBKR' | 'SUBSUBKR', objId: string, krId?: string, subId?: string, subsubId?: string) => {
     const newStructure = JSON.parse(JSON.stringify(localStructure));
     
     let oldItem: any = null;
@@ -249,6 +271,10 @@ export default function OkrManagerTree({ okr, onRefresh }: { okr: any; onRefresh
     } else if (type === 'SUBKR') {
       const oldKr = oldObj?.items?.find((k:any) => String(k.id) === String(krId));
       oldItem = oldKr?.items?.find((s:any) => String(s.id) === String(subId));
+    } else if (type === 'SUBSUBKR') {
+      const oldKr = oldObj?.items?.find((k:any) => String(k.id) === String(krId));
+      const oldSub = oldKr?.items?.find((s:any) => String(s.id) === String(subId));
+      oldItem = oldSub?.items?.find((ss:any) => String(ss.id) === String(subsubId));
     }
 
     if (!oldItem) return;
@@ -279,6 +305,17 @@ export default function OkrManagerTree({ okr, onRefresh }: { okr: any; onRefresh
         sub.unit = oldItem.unit;
         sub.isEdited = false;
       }
+    } else if (type === 'SUBSUBKR' && obj) {
+      const kr = obj.items?.find((k:any) => String(k.id) === String(krId));
+      const sub = kr?.items?.find((s:any) => String(s.id) === String(subId));
+      const subsub = sub?.items?.find((ss:any) => String(ss.id) === String(subsubId));
+      if (subsub) {
+        subsub.title = oldItem.title;
+        subsub.maxScore = oldItem.maxScore;
+        subsub.unitScore = oldItem.unitScore;
+        subsub.unit = oldItem.unit;
+        subsub.isEdited = false;
+      }
     }
     
     setLocalStructure(newStructure);
@@ -286,11 +323,20 @@ export default function OkrManagerTree({ okr, onRefresh }: { okr: any; onRefresh
   };
 
   const handleRestoreDeletedItem = (idToRestore: string) => {
-    const oldItem = findOriginalItem(idToRestore);
+    const parts = String(idToRestore).split('.');
+    let oldItem: any = null;
+    if (parts.length === 1) {
+      oldItem = findOriginalItem(parts[0]);
+    } else if (parts.length === 2) {
+      oldItem = findOriginalItem(parts[0], parts[0] + '.' + parts[1]);
+    } else if (parts.length === 3) {
+      oldItem = findOriginalItem(parts[0], parts[0] + '.' + parts[1], parts[0] + '.' + parts[1] + '.' + parts[2]);
+    } else if (parts.length === 4) {
+      oldItem = findOriginalItem(parts[0], parts[0] + '.' + parts[1], parts[0] + '.' + parts[1] + '.' + parts[2], idToRestore);
+    }
     if (!oldItem) return;
 
     const newStructure = JSON.parse(JSON.stringify(localStructure));
-    const parts = String(idToRestore).split('.');
     
     if (parts.length === 2) {
       const objId = parts[0];
@@ -320,13 +366,33 @@ export default function OkrManagerTree({ okr, onRefresh }: { okr: any; onRefresh
           });
         }
       }
+    } else if (parts.length === 4) {
+      const objId = parts[0];
+      const krId = parts[0] + '.' + parts[1];
+      const subId = parts[0] + '.' + parts[1] + '.' + parts[2];
+      const obj = newStructure.find((o:any) => String(o.id) === String(objId));
+      if (obj) {
+        const kr = obj.items?.find((k:any) => String(k.id) === String(krId));
+        if (kr) {
+          const sub = kr.items?.find((s:any) => String(s.id) === String(subId));
+          if (sub) {
+            if (!sub.items) sub.items = [];
+            sub.items.push(JSON.parse(JSON.stringify(oldItem)));
+            sub.items.sort((a:any, b:any) => {
+               const numA = parseFloat(a.id.split('.').slice(3).join('.'));
+               const numB = parseFloat(b.id.split('.').slice(3).join('.'));
+               return numA - numB;
+            });
+          }
+        }
+      }
     }
     
     setLocalStructure(newStructure);
     setHasChanges(true);
   };
 
-  const handleOpenEditDialog = (type: 'OBJ' | 'KR' | 'SUBKR', objId: string, krId?: string, subId?: string) => {
+  const handleOpenEditDialog = (type: 'OBJ' | 'KR' | 'SUBKR' | 'SUBSUBKR', objId: string, krId?: string, subId?: string, subsubId?: string) => {
     let item: any = null;
     const obj = localStructure.find(o => o.id === objId);
     if (type === 'OBJ') {
@@ -336,10 +402,14 @@ export default function OkrManagerTree({ okr, onRefresh }: { okr: any; onRefresh
     } else if (type === 'SUBKR') {
       const kr = obj?.items?.find((k: any) => k.id === krId);
       item = kr?.items?.find((s: any) => s.id === subId);
+    } else if (type === 'SUBSUBKR') {
+      const kr = obj?.items?.find((k: any) => k.id === krId);
+      const sub = kr?.items?.find((s: any) => s.id === subId);
+      item = sub?.items?.find((ss: any) => ss.id === subsubId);
     }
 
     if (item) {
-      setEditItemInfo({ type, objId, krId, subId });
+      setEditItemInfo({ type, objId, krId, subId, subsubId });
       setEditCriteriaTitle(item.title || '');
       setEditCriteriaMaxScore(String(item.maxScore ?? ''));
       setEditCriteriaUnitScore(String(item.unitScore ?? ''));
@@ -364,6 +434,10 @@ export default function OkrManagerTree({ okr, onRefresh }: { okr: any; onRefresh
     } else if (editItemInfo?.type === 'SUBKR') {
       const kr = obj?.items?.find((k: any) => k.id === editItemInfo.krId);
       targetItem = kr?.items?.find((s: any) => s.id === editItemInfo.subId);
+    } else if (editItemInfo?.type === 'SUBSUBKR') {
+      const kr = obj?.items?.find((k: any) => k.id === editItemInfo.krId);
+      const sub = kr?.items?.find((s: any) => s.id === editItemInfo.subId);
+      targetItem = sub?.items?.find((ss: any) => ss.id === editItemInfo.subsubId);
     }
 
     if (targetItem) {
@@ -491,9 +565,9 @@ export default function OkrManagerTree({ okr, onRefresh }: { okr: any; onRefresh
 
               {/* KR rows */}
               {obj.items?.map((kr: any, kIndex: number) => {
-                const oldKr = findOriginalItem(kr.id);
+                const oldKr = findOriginalItem(obj.id, kr.id);
                 const isKrChanged = hasChanged(kr, oldKr);
-                const isKrNew = !oldKr;
+                const isKrNew = originalStructure ? !oldKr : false;
 
                 return (
                 <React.Fragment key={`${oIndex}-${kIndex}`}>
@@ -533,9 +607,9 @@ export default function OkrManagerTree({ okr, onRefresh }: { okr: any; onRefresh
 
                   {/* Sub-KR rows */}
                   {kr.items?.map((sub: any, sIndex: number) => {
-                    const oldSub = findOriginalItem(sub.id);
+                    const oldSub = findOriginalItem(obj.id, kr.id, sub.id);
                     const isSubChanged = hasChanged(sub, oldSub);
-                    const isSubNew = !oldSub;
+                    const isSubNew = originalStructure ? !oldSub : false;
 
                     return (
                     <React.Fragment key={`${oIndex}-${kIndex}-${sIndex}`}>
@@ -569,6 +643,45 @@ export default function OkrManagerTree({ okr, onRefresh }: { okr: any; onRefresh
                         </TableCell>
                       </TableRow>
                       {renderChatRow(sub.id, 5)}
+
+                      {/* Sub-Sub-KR rows */}
+                      {sub.items?.map((subsub: any, ssIndex: number) => {
+                        const oldSubSub = findOriginalItem(obj.id, kr.id, sub.id, subsub.id);
+                        const isSubSubChanged = hasChanged(subsub, oldSubSub);
+                        const isSubSubNew = originalStructure ? !oldSubSub : false;
+
+                        return (
+                        <React.Fragment key={`${oIndex}-${kIndex}-${sIndex}-${ssIndex}`}>
+                          {isSubSubChanged && renderOldRow(oldSubSub, 9)}
+                          <TableRow sx={{ bgcolor: (isSubSubNew || isSubSubChanged || subsub.isEdited) ? "#fef08a" : "#fffbeb" }}>
+                            <TableCell sx={{ pl: 9, fontSize: "0.8rem", fontWeight: (isSubSubNew || isSubSubChanged || subsub.isEdited) ? "bold" : "normal" }}>{subsub.id}</TableCell>
+                            <TableCell sx={{ fontSize: "0.85rem", fontWeight: (isSubSubNew || isSubSubChanged || subsub.isEdited) ? "bold" : "normal" }}>{isSubSubChanged ? '[Mới] ' : ''}{subsub.title}</TableCell>
+                            <TableCell sx={{ fontWeight: (isSubSubNew || isSubSubChanged || subsub.isEdited) ? "bold" : "normal" }}>—</TableCell>
+                            <TableCell>
+                              {subsub.unitScore ? `+${subsub.unitScore}/${subsub.unit || 'đv'}` : '—'}
+                            </TableCell>
+                            <TableCell align="center">
+                              <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+                                <IconButton size="small" onClick={() => handleOpenEditDialog('SUBSUBKR', obj.id, kr.id, sub.id, subsub.id)} title="Chỉnh sửa">
+                                  <Edit fontSize="small" color="info" />
+                                </IconButton>
+                                {isSubSubChanged && (
+                                  <IconButton size="small" onClick={() => handleUndoItem('SUBSUBKR', obj.id, kr.id, sub.id, subsub.id)} title="Hoàn tác thay đổi">
+                                    <Undo fontSize="small" color="primary" />
+                                  </IconButton>
+                                )}
+                                <IconButton size="small" onClick={() => setActiveChatId(activeChatId === subsub.id ? null : subsub.id)}>
+                                  <Comment fontSize="small" color={(okr.proposedChanges?.[subsub.id]?.length > 0 || localComments[subsub.id]?.length > 0) ? "warning" : "inherit"} />
+                                </IconButton>
+                                <IconButton size="small" onClick={() => handleDeleteItem(obj.id, kr.id, sub.id, subsub.id)} title="Xóa tiêu chí con">
+                                  <Delete fontSize="small" color="error" />
+                                </IconButton>
+                              </Box>
+                            </TableCell>
+                          </TableRow>
+                          {renderChatRow(subsub.id, 5)}
+                        </React.Fragment>
+                      )})}
                     </React.Fragment>
                   )})}
                 </React.Fragment>
