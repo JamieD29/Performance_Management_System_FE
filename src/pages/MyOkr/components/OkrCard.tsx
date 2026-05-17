@@ -32,6 +32,7 @@ import {
   Close,
   Delete,
   Edit,
+  Undo,
 } from "@mui/icons-material";
 import { api } from "../../../services/api";
 import { confirmAction, showSuccess, showError } from "../../../utils/swal";
@@ -82,12 +83,75 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
   const [editCriteriaUnitScore, setEditCriteriaUnitScore] = useState('');
   const [editCriteriaUnit, setEditCriteriaUnit] = useState('');
 
+  // Diff Logic
+  const originalStructure = okr.proposedChanges?.originalStructure || null;
+
+  const findOriginalItem = (id: string) => {
+    if (!originalStructure) return null;
+    for (const obj of originalStructure) {
+      if (obj.id === id) return obj;
+      if (obj.items) {
+        for (const kr of obj.items) {
+          if (kr.id === id) return kr;
+          if (kr.items) {
+            for (const sub of kr.items) {
+              if (sub.id === id) return sub;
+            }
+          }
+        }
+      }
+    }
+    return null;
+  };
+
+  const hasChanged = (newItem: any, oldItem: any) => {
+    if (!oldItem) return false;
+    return String(newItem.title || '').trim() !== String(oldItem.title || '').trim() ||
+      Number(newItem.maxScore || 0) !== Number(oldItem.maxScore || 0) ||
+      Number(newItem.unitScore || 0) !== Number(oldItem.unitScore || 0) ||
+      String(newItem.unit || '').trim() !== String(oldItem.unit || '').trim();
+  };
+
+  const renderOldRow = (oldItem: any, indent: number) => {
+    if (!oldItem || !(okr.status === 'PENDING' || okr.status === 'NEGOTIATING')) return null;
+    return (
+      <TableRow sx={{ bgcolor: "#f1f5f9", opacity: 0.7 }}>
+        <TableCell sx={{ pl: indent, textDecoration: "line-through", color: "text.secondary", fontSize: "1rem" }}>{oldItem.id}</TableCell>
+        <TableCell sx={{ textDecoration: "line-through", color: "text.secondary" }}>[Cũ] {oldItem.title}</TableCell>
+        <TableCell sx={{ textDecoration: "line-through", color: "text.secondary" }}>{oldItem.maxScore || "—"}</TableCell>
+        <TableCell sx={{ textDecoration: "line-through", color: "text.secondary" }}>{oldItem.unitScore ? `+${oldItem.unitScore}/${oldItem.unit || 'đv'}` : '—'}</TableCell>
+        {canReport && <><TableCell></TableCell><TableCell></TableCell><TableCell></TableCell></>}
+        {(okr.status === "SUBMITTED" || okr.status === "COMPLETED") && <><TableCell></TableCell><TableCell></TableCell><TableCell></TableCell></>}
+        <TableCell align="center"></TableCell>
+      </TableRow>
+    );
+  };
+
+  const deletedItems: any[] = [];
+  if (originalStructure && (okr.status === 'PENDING' || okr.status === 'NEGOTIATING')) {
+    const flatten = (items: any[]) => {
+      let result: any[] = [];
+      items.forEach(i => {
+        result.push(i);
+        if (i.items) result = result.concat(flatten(i.items));
+      });
+      return result;
+    };
+    const oldFlat = flatten(originalStructure);
+    const newFlat = flatten(localStructure);
+    oldFlat.forEach(o => {
+      if (!newFlat.find(n => n.id === o.id)) {
+        deletedItems.push(o);
+      }
+    });
+  }
+
   const isAccepted = okr.status === "ACCEPTED";
   const isSubmitted = okr.status === "SUBMITTED";
   const isCompleted = okr.status === "COMPLETED";
   const isPending = okr.status === "PENDING";
-  
-  const isCycleStarted = okr.cycle?.startDate 
+
+  const isCycleStarted = okr.cycle?.startDate
     ? new Date(new Date().setHours(0, 0, 0, 0)) >= new Date(new Date(okr.cycle.startDate).setHours(0, 0, 0, 0))
     : true;
 
@@ -148,7 +212,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
       return;
     }
     const newStructure = JSON.parse(JSON.stringify(localStructure));
-    
+
     let generatedId = "";
 
     if (addParentType === 'KR') {
@@ -224,20 +288,109 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
 
   const handleDeleteItem = (objId: string, krId?: string, subId?: string) => {
     const newStructure = JSON.parse(JSON.stringify(localStructure));
-    
+
     if (subId && krId) {
-       const obj = newStructure.find((o:any) => o.id === objId);
-       if (obj) {
-          const kr = obj.items?.find((k:any) => k.id === krId);
-          if (kr && kr.items) {
-             kr.items = kr.items.filter((s:any) => s.id !== subId);
-          }
-       }
+      const obj = newStructure.find((o: any) => String(o.id) === String(objId));
+      if (obj) {
+        const kr = obj.items?.find((k: any) => String(k.id) === String(krId));
+        if (kr && kr.items) {
+          kr.items = kr.items.filter((s: any) => String(s.id) !== String(subId));
+        }
+      }
     } else if (krId) {
-       const obj = newStructure.find((o:any) => o.id === objId);
-       if (obj && obj.items) {
-          obj.items = obj.items.filter((k:any) => k.id !== krId);
-       }
+      const obj = newStructure.find((o: any) => String(o.id) === String(objId));
+      if (obj && obj.items) {
+        obj.items = obj.items.filter((k: any) => String(k.id) !== String(krId));
+      }
+    }
+
+    setLocalStructure(newStructure);
+    setHasChanges(true);
+  };
+
+  const handleUndoItem = (type: 'OBJ' | 'KR' | 'SUBKR', objId: string, krId?: string, subId?: string) => {
+    const newStructure = JSON.parse(JSON.stringify(localStructure));
+    
+    let oldItem: any = null;
+    const oldObj = originalStructure?.find((o:any) => String(o.id) === String(objId));
+    if (type === 'OBJ') {
+      oldItem = oldObj;
+    } else if (type === 'KR') {
+      oldItem = oldObj?.items?.find((k:any) => String(k.id) === String(krId));
+    } else if (type === 'SUBKR') {
+      const oldKr = oldObj?.items?.find((k:any) => String(k.id) === String(krId));
+      oldItem = oldKr?.items?.find((s:any) => String(s.id) === String(subId));
+    }
+
+    if (!oldItem) return;
+
+    const obj = newStructure.find((o:any) => String(o.id) === String(objId));
+    if (type === 'OBJ' && obj) {
+      obj.title = oldItem.title;
+      obj.maxScore = oldItem.maxScore;
+      obj.unitScore = oldItem.unitScore;
+      obj.unit = oldItem.unit;
+      obj.isEdited = false;
+    } else if (type === 'KR' && obj) {
+      const kr = obj.items?.find((k:any) => String(k.id) === String(krId));
+      if (kr) {
+        kr.title = oldItem.title;
+        kr.maxScore = oldItem.maxScore;
+        kr.unitScore = oldItem.unitScore;
+        kr.unit = oldItem.unit;
+        kr.isEdited = false;
+      }
+    } else if (type === 'SUBKR' && obj) {
+      const kr = obj.items?.find((k:any) => String(k.id) === String(krId));
+      const sub = kr?.items?.find((s:any) => String(s.id) === String(subId));
+      if (sub) {
+        sub.title = oldItem.title;
+        sub.maxScore = oldItem.maxScore;
+        sub.unitScore = oldItem.unitScore;
+        sub.unit = oldItem.unit;
+        sub.isEdited = false;
+      }
+    }
+    
+    setLocalStructure(newStructure);
+    setHasChanges(true);
+  };
+
+  const handleRestoreDeletedItem = (idToRestore: string) => {
+    const oldItem = findOriginalItem(idToRestore);
+    if (!oldItem) return;
+
+    const newStructure = JSON.parse(JSON.stringify(localStructure));
+    const parts = String(idToRestore).split('.');
+    
+    if (parts.length === 2) {
+      const objId = parts[0];
+      const obj = newStructure.find((o:any) => String(o.id) === String(objId));
+      if (obj) {
+        if (!obj.items) obj.items = [];
+        obj.items.push(JSON.parse(JSON.stringify(oldItem)));
+        obj.items.sort((a:any, b:any) => {
+           const numA = parseFloat(a.id.split('.').slice(1).join('.'));
+           const numB = parseFloat(b.id.split('.').slice(1).join('.'));
+           return numA - numB;
+        });
+      }
+    } else if (parts.length === 3) {
+      const objId = parts[0];
+      const krId = parts[0] + '.' + parts[1];
+      const obj = newStructure.find((o:any) => String(o.id) === String(objId));
+      if (obj) {
+        const kr = obj.items?.find((k:any) => String(k.id) === String(krId));
+        if (kr) {
+          if (!kr.items) kr.items = [];
+          kr.items.push(JSON.parse(JSON.stringify(oldItem)));
+          kr.items.sort((a:any, b:any) => {
+             const numA = parseFloat(a.id.split('.').slice(2).join('.'));
+             const numB = parseFloat(b.id.split('.').slice(2).join('.'));
+             return numA - numB;
+          });
+        }
+      }
     }
     
     setLocalStructure(newStructure);
@@ -299,7 +452,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
 
   const handleSubmitChanges = async () => {
     try {
-      await api.put(`/okrs/${okr.id}/structure`, { 
+      await api.put(`/okrs/${okr.id}/structure`, {
         keyResults: localStructure,
         localComments: Object.keys(localComments).length > 0 ? localComments : undefined
       });
@@ -490,10 +643,10 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
       )}
 
       {/* Expanded Dialog */}
-      <Dialog 
-        open={expanded} 
-        onClose={() => setExpanded(false)} 
-        maxWidth="xl" 
+      <Dialog
+        open={expanded}
+        onClose={() => setExpanded(false)}
+        maxWidth="xl"
         fullWidth
         PaperProps={{ sx: { minHeight: '80vh', maxHeight: '90vh' } }}
       >
@@ -501,10 +654,10 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
           <Box>Chi tiết OKR: {okr.objective}</Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {(isPending || okr.status === 'NEGOTIATING') && hasChanges && (
-              <Button 
-                variant="contained" 
-                color="success" 
-                size="small" 
+              <Button
+                variant="contained"
+                color="success"
+                size="small"
                 onClick={handleSubmitChanges}
                 startIcon={<Save />}
               >
@@ -553,213 +706,268 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {localStructure.map((obj: any, oIndex: number) => (
-                  <React.Fragment key={obj.id || oIndex}>
-                    <TableRow sx={{ bgcolor: "#dbeafe" }}>
-                      <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>{obj.id}</TableCell>
-                      <TableCell sx={{ fontWeight: "bold" }}>{obj.title}</TableCell>
-                      <TableCell sx={{ fontWeight: "bold" }}>{obj.maxScore}</TableCell>
-                      <TableCell></TableCell>
-                      {canReport && <><TableCell></TableCell><TableCell></TableCell><TableCell></TableCell></>}
-                      {(isSubmitted || isCompleted) && (
-                        <><TableCell></TableCell><TableCell></TableCell>
-                          <TableCell sx={{ fontWeight: "bold", color: "#15803d", fontSize: "1rem" }}>
-                            {calcObjectiveScore(obj)} / {obj.maxScore || 0}
-                          </TableCell>
-                        </>
-                      )}
-                      {(isPending || okr.status === 'NEGOTIATING') && (
-                        <TableCell align="center">
-                          <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
-                            <IconButton size="small" onClick={() => handleOpenAddDialog('KR', obj.id)} title="Thêm tiêu chí">
-                              <Add fontSize="small" color="success" />
-                            </IconButton>
-                            <IconButton size="small" onClick={() => handleOpenEditDialog('OBJ', obj.id)} title="Chỉnh sửa">
-                              <Edit fontSize="small" color="info" />
-                            </IconButton>
-                            <IconButton size="small" onClick={() => setActiveChatId(activeChatId === obj.id ? null : obj.id)}>
-                              <Comment fontSize="small" color={(okr.proposedChanges?.[obj.id]?.length > 0 || localComments[obj.id]?.length > 0) ? "primary" : "inherit"} />
-                            </IconButton>
-                          </Box>
-                        </TableCell>
-                      )}
-                    </TableRow>
-                    <NegotiationChat 
-                      itemId={obj.id}
-                      activeChatId={activeChatId}
-                      history={[...(okr.proposedChanges?.[obj.id] || []), ...(localComments[obj.id] || [])]}
-                      chatMessage={chatMessage}
-                      setChatMessage={setChatMessage}
-                      onSend={handleSendChat}
-                      loading={chatLoading}
-                      colSpan={11}
-                      status={okr.status}
-                    />
+                {localStructure.map((obj: any, oIndex: number) => {
+                  const oldObj = findOriginalItem(obj.id);
+                  const isObjChanged = hasChanged(obj, oldObj);
 
-                    {obj.items?.map((kr: any, kIndex: number) => {
-                      const krKey = `${obj.id}-${kr.id}`;
-                      const krQty = reportData[krKey]?.quantity || 0;
-                      const krUnitScore = Number(kr.unitScore) || 0;
-                      const krCalcScore = krUnitScore > 0 ? krQty * krUnitScore : krQty;
-                      const existingReport = okr.selfReportData?.[krKey];
-
-                      return (
-                        <React.Fragment key={`${oIndex}-${kIndex}`}>
-                          <TableRow sx={{ bgcolor: kr.isNew ? "#fef08a" : "#f8fafc" }}>
-                            <TableCell sx={{ pl: 3, fontWeight: kr.isNew ? "bold" : "normal" }}>{kr.id}</TableCell>
-                            <TableCell sx={{ fontWeight: kr.isNew ? "bold" : "normal" }}>{kr.title}</TableCell>
-                            <TableCell sx={{ fontWeight: kr.isNew ? "bold" : "normal" }}>{kr.maxScore || "—"}</TableCell>
-                            <TableCell>
-                              {kr.unitScore ? (
-                                <Chip label={`+${kr.unitScore}/${kr.unit || "đv"}`} size="small" color="primary" variant="outlined" />
-                              ) : "—"}
+                  return (
+                    <React.Fragment key={obj.id || oIndex}>
+                      {isObjChanged && renderOldRow(oldObj, 2)}
+                      <TableRow sx={{ bgcolor: isObjChanged ? "#fef08a" : "#dbeafe" }}>
+                        <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>{obj.id}</TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>{isObjChanged ? '[Mới] ' : ''}{obj.title}</TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>{obj.maxScore}</TableCell>
+                        <TableCell></TableCell>
+                        {canReport && <><TableCell></TableCell><TableCell></TableCell><TableCell></TableCell></>}
+                        {(isSubmitted || isCompleted) && (
+                          <><TableCell></TableCell><TableCell></TableCell>
+                            <TableCell sx={{ fontWeight: "bold", color: "#15803d", fontSize: "1rem" }}>
+                              {calcObjectiveScore(obj)} / {obj.maxScore || 0}
                             </TableCell>
-                            {canReport && (
-                              <>
-                                <TableCell>
-                                  <TextField
-                                    size="small"
-                                    type="number"
-                                    value={krQty || ""}
-                                    onChange={(e) => updateReport(krKey, "quantity", e.target.value)}
-                                    inputProps={{ min: 0, style: { textAlign: "center" } }}
-                                    sx={{ width: 80 }}
-                                  />
-                                </TableCell>
-                                <TableCell sx={{ fontWeight: "bold", color: "#2563eb" }}>{krCalcScore.toFixed(1)}</TableCell>
-                                <TableCell>
-                                  <TextField
-                                    size="small"
-                                    fullWidth
-                                    placeholder="Link minh chứng..."
-                                    value={reportData[krKey]?.evidence || ""}
-                                    onChange={(e) => updateReport(krKey, "evidence", e.target.value)}
-                                  />
-                                </TableCell>
-                              </>
-                            )}
-                            {(isSubmitted || isCompleted) && (
-                              <>
-                                <TableCell>{existingReport?.quantity || 0}</TableCell>
-                                <TableCell sx={{ fontWeight: "bold", color: "#2563eb" }}>{existingReport?.score || 0}</TableCell>
-                                <TableCell></TableCell>
-                              </>
-                            )}
-                            {(isPending || okr.status === 'NEGOTIATING') && (
-                              <TableCell align="center">
-                                <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
-                                  <IconButton size="small" onClick={() => handleOpenAddDialog('SUBKR', obj.id, kr.id)} title="Thêm tiêu chí con">
-                                    <Add fontSize="small" color="success" />
-                                  </IconButton>
-                                  <IconButton size="small" onClick={() => handleOpenEditDialog('KR', obj.id, kr.id)} title="Chỉnh sửa">
-                                    <Edit fontSize="small" color="info" />
-                                  </IconButton>
-                                  <IconButton size="small" onClick={() => setActiveChatId(activeChatId === kr.id ? null : kr.id)}>
-                                    <Comment fontSize="small" color={(okr.proposedChanges?.[kr.id]?.length > 0 || localComments[kr.id]?.length > 0) ? "primary" : "inherit"} />
-                                  </IconButton>
-                                  <IconButton size="small" onClick={() => handleDeleteItem(obj.id, kr.id)} title="Xóa tiêu chí">
-                                    <Delete fontSize="small" color="error" />
-                                  </IconButton>
-                                </Box>
+                          </>
+                        )}
+                        {(isPending || okr.status === 'NEGOTIATING') && (
+                          <TableCell align="center">
+                            <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+                              <IconButton size="small" onClick={() => handleOpenAddDialog('KR', obj.id)} title="Thêm tiêu chí">
+                                <Add fontSize="small" color="success" />
+                              </IconButton>
+                              {isObjChanged && (
+                                <IconButton size="small" onClick={() => handleUndoItem('OBJ', obj.id)} title="Hoàn tác thay đổi">
+                                  <Undo fontSize="small" color="primary" />
+                                </IconButton>
+                              )}
+                              <IconButton size="small" onClick={() => handleOpenEditDialog('OBJ', obj.id)} title="Chỉnh sửa">
+                                <Edit fontSize="small" color="info" />
+                              </IconButton>
+                              <IconButton size="small" onClick={() => setActiveChatId(activeChatId === obj.id ? null : obj.id)}>
+                                <Comment fontSize="small" color={(okr.proposedChanges?.[obj.id]?.length > 0 || localComments[obj.id]?.length > 0) ? "primary" : "inherit"} />
+                              </IconButton>
+                            </Box>
+                          </TableCell>
+                        )}
+                      </TableRow>
+                      <NegotiationChat
+                        itemId={obj.id}
+                        activeChatId={activeChatId}
+                        history={[...(okr.proposedChanges?.[obj.id] || []), ...(localComments[obj.id] || [])]}
+                        chatMessage={chatMessage}
+                        setChatMessage={setChatMessage}
+                        onSend={handleSendChat}
+                        loading={chatLoading}
+                        colSpan={11}
+                        status={okr.status}
+                      />
+
+                      {obj.items?.map((kr: any, kIndex: number) => {
+                        const krKey = `${obj.id}-${kr.id}`;
+                        const krQty = reportData[krKey]?.quantity || 0;
+                        const krUnitScore = Number(kr.unitScore) || 0;
+                        const krCalcScore = krUnitScore > 0 ? krQty * krUnitScore : krQty;
+                        const existingReport = okr.selfReportData?.[krKey];
+                        const oldKr = findOriginalItem(kr.id);
+                        const isKrChanged = hasChanged(kr, oldKr);
+                        const isKrNew = !oldKr;
+
+                        return (
+                          <React.Fragment key={`${oIndex}-${kIndex}`}>
+                            {isKrChanged && renderOldRow(oldKr, 3)}
+                            <TableRow sx={{ bgcolor: (isKrNew || isKrChanged || kr.isEdited) ? "#fef08a" : "#f8fafc" }}>
+                              <TableCell sx={{ pl: 3, fontWeight: (isKrNew || isKrChanged || kr.isEdited) ? "bold" : "normal" }}>{kr.id}</TableCell>
+                              <TableCell sx={{ fontWeight: (isKrNew || isKrChanged || kr.isEdited) ? "bold" : "normal" }}>{isKrChanged ? '[Mới] ' : ''}{kr.title}</TableCell>
+                              <TableCell sx={{ fontWeight: (isKrNew || isKrChanged || kr.isEdited) ? "bold" : "normal" }}>{kr.maxScore || "—"}</TableCell>
+                              <TableCell>
+                                {kr.unitScore ? (
+                                  <Chip label={`+${kr.unitScore}/${kr.unit || "đv"}`} size="small" color="primary" variant="outlined" />
+                                ) : "—"}
                               </TableCell>
-                            )}
-                          </TableRow>
-                          <NegotiationChat 
-                            itemId={kr.id}
-                            activeChatId={activeChatId}
-                            history={[...(okr.proposedChanges?.[kr.id] || []), ...(localComments[kr.id] || [])]}
-                            chatMessage={chatMessage}
-                            setChatMessage={setChatMessage}
-                            onSend={handleSendChat}
-                            loading={chatLoading}
-                            colSpan={11}
-                            status={okr.status}
-                          />
-
-                          {kr.items?.map((sub: any, sIndex: number) => {
-                            const subKey = `${obj.id}-${kr.id}-${sub.id}`;
-                            const subQty = reportData[subKey]?.quantity || 0;
-                            const subUnitScore = Number(sub.unitScore) || 0;
-                            const subCalcScore = subUnitScore > 0 ? subQty * subUnitScore : subQty;
-                            const existingSub = okr.selfReportData?.[subKey];
-
-                            return (
-                              <React.Fragment key={`${oIndex}-${kIndex}-${sIndex}`}>
-                                <TableRow sx={{ bgcolor: sub.isNew ? "#fef08a" : "inherit" }}>
-                                  <TableCell sx={{ pl: 6, fontSize: "0.85rem", fontWeight: sub.isNew ? "bold" : "normal" }}>{sub.id}</TableCell>
-                                  <TableCell sx={{ fontSize: "0.9rem", fontWeight: sub.isNew ? "bold" : "normal" }}>{sub.title}</TableCell>
-                                  <TableCell sx={{ fontWeight: sub.isNew ? "bold" : "normal" }}>{sub.maxScore || "—"}</TableCell>
+                              {canReport && (
+                                <>
                                   <TableCell>
-                                    {sub.unitScore ? (
-                                      <Chip label={`+${sub.unitScore}/${sub.unit || "đv"}`} size="small" variant="outlined" />
-                                    ) : "—"}
+                                    <TextField
+                                      size="small"
+                                      type="number"
+                                      value={krQty || ""}
+                                      onChange={(e) => updateReport(krKey, "quantity", e.target.value)}
+                                      inputProps={{ min: 0, style: { textAlign: "center" } }}
+                                      sx={{ width: 80 }}
+                                    />
                                   </TableCell>
-                                  {canReport && (
-                                    <>
-                                      <TableCell>
-                                        <TextField
-                                          size="small"
-                                          type="number"
-                                          value={subQty || ""}
-                                          onChange={(e) => updateReport(subKey, "quantity", e.target.value)}
-                                          inputProps={{ min: 0, style: { textAlign: "center" } }}
-                                          sx={{ width: 80 }}
-                                        />
-                                      </TableCell>
-                                      <TableCell sx={{ fontWeight: "bold", color: "#2563eb" }}>{subCalcScore.toFixed(1)}</TableCell>
-                                      <TableCell>
-                                        <TextField
-                                          size="small"
-                                          fullWidth
-                                          placeholder="Link..."
-                                          value={reportData[subKey]?.evidence || ""}
-                                          onChange={(e) => updateReport(subKey, "evidence", e.target.value)}
-                                        />
-                                      </TableCell>
-                                    </>
-                                  )}
-                                  {(isSubmitted || isCompleted) && (
-                                    <>
-                                      <TableCell>{existingSub?.quantity || 0}</TableCell>
-                                      <TableCell sx={{ fontWeight: "bold", color: "#2563eb" }}>{existingSub?.score || 0}</TableCell>
-                                      <TableCell></TableCell>
-                                    </>
-                                  )}
-                                  {(isPending || okr.status === 'NEGOTIATING') && (
-                                    <TableCell align="center">
-                                      <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
-                                        <IconButton size="small" onClick={() => handleOpenEditDialog('SUBKR', obj.id, kr.id, sub.id)} title="Chỉnh sửa">
-                                          <Edit fontSize="small" color="info" />
-                                        </IconButton>
-                                        <IconButton size="small" onClick={() => setActiveChatId(activeChatId === sub.id ? null : sub.id)}>
-                                          <Comment fontSize="small" color={(okr.proposedChanges?.[sub.id]?.length > 0 || localComments[sub.id]?.length > 0) ? "primary" : "inherit"} />
-                                        </IconButton>
-                                        <IconButton size="small" onClick={() => handleDeleteItem(obj.id, kr.id, sub.id)} title="Xóa tiêu chí con">
-                                          <Delete fontSize="small" color="error" />
-                                        </IconButton>
-                                      </Box>
+                                  <TableCell sx={{ fontWeight: "bold", color: "#2563eb" }}>{krCalcScore.toFixed(1)}</TableCell>
+                                  <TableCell>
+                                    <TextField
+                                      size="small"
+                                      fullWidth
+                                      placeholder="Link minh chứng..."
+                                      value={reportData[krKey]?.evidence || ""}
+                                      onChange={(e) => updateReport(krKey, "evidence", e.target.value)}
+                                    />
+                                  </TableCell>
+                                </>
+                              )}
+                              {(isSubmitted || isCompleted) && (
+                                <>
+                                  <TableCell>{existingReport?.quantity || 0}</TableCell>
+                                  <TableCell sx={{ fontWeight: "bold", color: "#2563eb" }}>{existingReport?.score || 0}</TableCell>
+                                  <TableCell></TableCell>
+                                </>
+                              )}
+                              {(isPending || okr.status === 'NEGOTIATING') && (
+                                <TableCell align="center">
+                                  <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+                                    <IconButton size="small" onClick={() => handleOpenAddDialog('SUBKR', obj.id, kr.id)} title="Thêm tiêu chí con">
+                                      <Add fontSize="small" color="success" />
+                                    </IconButton>
+                                    {isKrChanged && (
+                                      <IconButton size="small" onClick={() => handleUndoItem('KR', obj.id, kr.id)} title="Hoàn tác thay đổi">
+                                        <Undo fontSize="small" color="primary" />
+                                      </IconButton>
+                                    )}
+                                    <IconButton size="small" onClick={() => handleOpenEditDialog('KR', obj.id, kr.id)} title="Chỉnh sửa">
+                                      <Edit fontSize="small" color="info" />
+                                    </IconButton>
+                                    <IconButton size="small" onClick={() => setActiveChatId(activeChatId === kr.id ? null : kr.id)}>
+                                      <Comment fontSize="small" color={(okr.proposedChanges?.[kr.id]?.length > 0 || localComments[kr.id]?.length > 0) ? "primary" : "inherit"} />
+                                    </IconButton>
+                                    <IconButton size="small" onClick={() => handleDeleteItem(obj.id, kr.id)} title="Xóa tiêu chí">
+                                      <Delete fontSize="small" color="error" />
+                                    </IconButton>
+                                  </Box>
+                                </TableCell>
+                              )}
+                            </TableRow>
+                            <NegotiationChat
+                              itemId={kr.id}
+                              activeChatId={activeChatId}
+                              history={[...(okr.proposedChanges?.[kr.id] || []), ...(localComments[kr.id] || [])]}
+                              chatMessage={chatMessage}
+                              setChatMessage={setChatMessage}
+                              onSend={handleSendChat}
+                              loading={chatLoading}
+                              colSpan={11}
+                              status={okr.status}
+                            />
+
+                            {kr.items?.map((sub: any, sIndex: number) => {
+                              const subKey = `${obj.id}-${kr.id}-${sub.id}`;
+                              const subQty = reportData[subKey]?.quantity || 0;
+                              const subUnitScore = Number(sub.unitScore) || 0;
+                              const subCalcScore = subUnitScore > 0 ? subQty * subUnitScore : subQty;
+                              const existingSub = okr.selfReportData?.[subKey];
+                              const oldSub = findOriginalItem(sub.id);
+                              const isSubChanged = hasChanged(sub, oldSub);
+                              const isSubNew = !oldSub;
+
+                              return (
+                                <React.Fragment key={`${oIndex}-${kIndex}-${sIndex}`}>
+                                  {isSubChanged && renderOldRow(oldSub, 6)}
+                                  <TableRow sx={{ bgcolor: (isSubNew || isSubChanged || sub.isEdited) ? "#fef08a" : "inherit" }}>
+                                    <TableCell sx={{ pl: 6, fontSize: "0.85rem", fontWeight: (isSubNew || isSubChanged || sub.isEdited) ? "bold" : "normal" }}>{sub.id}</TableCell>
+                                    <TableCell sx={{ fontSize: "0.9rem", fontWeight: (isSubNew || isSubChanged || sub.isEdited) ? "bold" : "normal" }}>{isSubChanged ? '[Mới] ' : ''}{sub.title}</TableCell>
+                                    <TableCell sx={{ fontWeight: (isSubNew || isSubChanged || sub.isEdited) ? "bold" : "normal" }}>{sub.maxScore || "—"}</TableCell>
+                                    <TableCell>
+                                      {sub.unitScore ? (
+                                        <Chip label={`+${sub.unitScore}/${sub.unit || "đv"}`} size="small" variant="outlined" />
+                                      ) : "—"}
                                     </TableCell>
-                                  )}
-                                </TableRow>
-                                <NegotiationChat 
-                                  itemId={sub.id}
-                                  activeChatId={activeChatId}
-                                  history={[...(okr.proposedChanges?.[sub.id] || []), ...(localComments[sub.id] || [])]}
-                                  chatMessage={chatMessage}
-                                  setChatMessage={setChatMessage}
-                                  onSend={handleSendChat}
-                                  loading={chatLoading}
-                                  colSpan={11}
-                                  status={okr.status}
-                                />
-                              </React.Fragment>
-                            );
-                          })}
-                        </React.Fragment>
-                      );
-                    })}
-                  </React.Fragment>
-                ))}
+                                    {canReport && (
+                                      <>
+                                        <TableCell>
+                                          <TextField
+                                            size="small"
+                                            type="number"
+                                            value={subQty || ""}
+                                            onChange={(e) => updateReport(subKey, "quantity", e.target.value)}
+                                            inputProps={{ min: 0, style: { textAlign: "center" } }}
+                                            sx={{ width: 80 }}
+                                          />
+                                        </TableCell>
+                                        <TableCell sx={{ fontWeight: "bold", color: "#2563eb" }}>{subCalcScore.toFixed(1)}</TableCell>
+                                        <TableCell>
+                                          <TextField
+                                            size="small"
+                                            fullWidth
+                                            placeholder="Link..."
+                                            value={reportData[subKey]?.evidence || ""}
+                                            onChange={(e) => updateReport(subKey, "evidence", e.target.value)}
+                                          />
+                                        </TableCell>
+                                      </>
+                                    )}
+                                    {(isSubmitted || isCompleted) && (
+                                      <>
+                                        <TableCell>{existingSub?.quantity || 0}</TableCell>
+                                        <TableCell sx={{ fontWeight: "bold", color: "#2563eb" }}>{existingSub?.score || 0}</TableCell>
+                                        <TableCell></TableCell>
+                                      </>
+                                    )}
+                                    {(isPending || okr.status === 'NEGOTIATING') && (
+                                      <TableCell align="center">
+                                        <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+                                          <IconButton size="small" onClick={() => handleOpenEditDialog('SUBKR', obj.id, kr.id, sub.id)} title="Chỉnh sửa">
+                                            <Edit fontSize="small" color="info" />
+                                          </IconButton>
+                                          {isSubChanged && (
+                                            <IconButton size="small" onClick={() => handleUndoItem('SUBKR', obj.id, kr.id, sub.id)} title="Hoàn tác thay đổi">
+                                              <Undo fontSize="small" color="primary" />
+                                            </IconButton>
+                                          )}
+                                          <IconButton size="small" onClick={() => setActiveChatId(activeChatId === sub.id ? null : sub.id)}>
+                                            <Comment fontSize="small" color={(okr.proposedChanges?.[sub.id]?.length > 0 || localComments[sub.id]?.length > 0) ? "primary" : "inherit"} />
+                                          </IconButton>
+                                          <IconButton size="small" onClick={() => handleDeleteItem(obj.id, kr.id, sub.id)} title="Xóa tiêu chí con">
+                                            <Delete fontSize="small" color="error" />
+                                          </IconButton>
+                                        </Box>
+                                      </TableCell>
+                                    )}
+                                  </TableRow>
+                                  <NegotiationChat
+                                    itemId={sub.id}
+                                    activeChatId={activeChatId}
+                                    history={[...(okr.proposedChanges?.[sub.id] || []), ...(localComments[sub.id] || [])]}
+                                    chatMessage={chatMessage}
+                                    setChatMessage={setChatMessage}
+                                    onSend={handleSendChat}
+                                    loading={chatLoading}
+                                    colSpan={11}
+                                    status={okr.status}
+                                  />
+                                </React.Fragment>
+                              );
+                            })}
+                          </React.Fragment>
+                        );
+                      })}
+                    </React.Fragment>
+                  );
+                })}
+
+                {/* Deleted items at the end */}
+                {deletedItems.length > 0 && (
+                  <>
+                    <TableRow>
+                      <TableCell colSpan={isSubmitted || isCompleted ? 7 : canReport ? 7 : 5} sx={{ bgcolor: "#fee2e2", fontWeight: "bold", textAlign: "center", color: "#b91c1c" }}>
+                        Các tiêu chí đã bị xóa
+                      </TableCell>
+                    </TableRow>
+                    {deletedItems.map((delItem, idx) => (
+                      <TableRow key={`del-${idx}`} sx={{ bgcolor: "#fef2f2" }}>
+                        <TableCell sx={{ pl: delItem.id.split('.').length === 1 ? 2 : delItem.id.split('.').length === 2 ? 4 : 8, textDecoration: "line-through", color: "error.main" }}>{delItem.id}</TableCell>
+                        <TableCell sx={{ textDecoration: "line-through", color: "error.main" }}>{delItem.title}</TableCell>
+                        <TableCell sx={{ textDecoration: "line-through", color: "error.main" }}>{delItem.maxScore || "—"}</TableCell>
+                        <TableCell sx={{ textDecoration: "line-through", color: "error.main" }}>{delItem.unitScore ? `+${delItem.unitScore}/${delItem.unit || 'đv'}` : '—'}</TableCell>
+                        {canReport && <><TableCell></TableCell><TableCell></TableCell><TableCell></TableCell></>}
+                        {(okr.status === "SUBMITTED" || okr.status === "COMPLETED") && <><TableCell></TableCell><TableCell></TableCell><TableCell></TableCell></>}
+                        <TableCell align="center">
+                          <IconButton size="small" onClick={() => handleRestoreDeletedItem(delItem.id)} title="Khôi phục">
+                            <Undo fontSize="small" color="primary" />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </>
+                )}
               </TableBody>
             </Table>
           </TableContainer>
@@ -791,7 +999,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
         </DialogContent>
       </Dialog>
 
-      <AddCriteriaDialog 
+      <AddCriteriaDialog
         open={openAddDialog}
         onClose={() => setOpenAddDialog(false)}
         onSave={handleSaveNewCriteria}
@@ -809,32 +1017,32 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
         <DialogTitle>Chỉnh sửa Tiêu chí</DialogTitle>
         <DialogContent dividers>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
-            <TextField 
-              label="Nội dung tiêu chí" 
-              fullWidth 
-              value={editCriteriaTitle} 
-              onChange={(e) => setEditCriteriaTitle(e.target.value)} 
+            <TextField
+              label="Nội dung tiêu chí"
+              fullWidth
+              value={editCriteriaTitle}
+              onChange={(e) => setEditCriteriaTitle(e.target.value)}
             />
-            <TextField 
-              label="Điểm tối đa" 
-              type="number" 
-              fullWidth 
-              value={editCriteriaMaxScore} 
-              onChange={(e) => setEditCriteriaMaxScore(e.target.value)} 
+            <TextField
+              label="Điểm tối đa"
+              type="number"
+              fullWidth
+              value={editCriteriaMaxScore}
+              onChange={(e) => setEditCriteriaMaxScore(e.target.value)}
             />
             <Box sx={{ display: 'flex', gap: 2 }}>
-              <TextField 
-                label="Điểm / Đơn vị" 
-                type="number" 
-                fullWidth 
-                value={editCriteriaUnitScore} 
-                onChange={(e) => setEditCriteriaUnitScore(e.target.value)} 
+              <TextField
+                label="Điểm / Đơn vị"
+                type="number"
+                fullWidth
+                value={editCriteriaUnitScore}
+                onChange={(e) => setEditCriteriaUnitScore(e.target.value)}
               />
-              <TextField 
-                label="Đơn vị tính" 
-                fullWidth 
-                value={editCriteriaUnit} 
-                onChange={(e) => setEditCriteriaUnit(e.target.value)} 
+              <TextField
+                label="Đơn vị tính"
+                fullWidth
+                value={editCriteriaUnit}
+                onChange={(e) => setEditCriteriaUnit(e.target.value)}
                 placeholder="VD: bài, đv, giờ..."
               />
             </Box>

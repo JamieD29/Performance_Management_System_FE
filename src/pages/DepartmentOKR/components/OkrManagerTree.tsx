@@ -18,7 +18,7 @@ import {
   DialogContent,
   DialogActions,
 } from "@mui/material";
-import { Comment, Send, Edit, Add, Delete, Save } from "@mui/icons-material";
+import { Comment, Send, Edit, Add, Delete, Save, Undo } from "@mui/icons-material";
 import { api } from "../../../services/api";
 import { showError, showSuccess } from "../../../utils/swal";
 import AddCriteriaDialog from "../../MyOkr/components/AddCriteriaDialog";
@@ -219,18 +219,107 @@ export default function OkrManagerTree({ okr, onRefresh }: { okr: any; onRefresh
     const newStructure = JSON.parse(JSON.stringify(localStructure));
     
     if (subId && krId) {
-       const obj = newStructure.find((o:any) => o.id === objId);
+       const obj = newStructure.find((o:any) => String(o.id) === String(objId));
        if (obj) {
-          const kr = obj.items?.find((k:any) => k.id === krId);
+          const kr = obj.items?.find((k:any) => String(k.id) === String(krId));
           if (kr && kr.items) {
-             kr.items = kr.items.filter((s:any) => s.id !== subId);
+             kr.items = kr.items.filter((s:any) => String(s.id) !== String(subId));
           }
        }
     } else if (krId) {
-       const obj = newStructure.find((o:any) => o.id === objId);
+       const obj = newStructure.find((o:any) => String(o.id) === String(objId));
        if (obj && obj.items) {
-          obj.items = obj.items.filter((k:any) => k.id !== krId);
+          obj.items = obj.items.filter((k:any) => String(k.id) !== String(krId));
        }
+    }
+    
+    setLocalStructure(newStructure);
+    setHasChanges(true);
+  };
+
+  const handleUndoItem = (type: 'OBJ' | 'KR' | 'SUBKR', objId: string, krId?: string, subId?: string) => {
+    const newStructure = JSON.parse(JSON.stringify(localStructure));
+    
+    let oldItem: any = null;
+    const oldObj = originalStructure?.find((o:any) => String(o.id) === String(objId));
+    if (type === 'OBJ') {
+      oldItem = oldObj;
+    } else if (type === 'KR') {
+      oldItem = oldObj?.items?.find((k:any) => String(k.id) === String(krId));
+    } else if (type === 'SUBKR') {
+      const oldKr = oldObj?.items?.find((k:any) => String(k.id) === String(krId));
+      oldItem = oldKr?.items?.find((s:any) => String(s.id) === String(subId));
+    }
+
+    if (!oldItem) return;
+
+    const obj = newStructure.find((o:any) => String(o.id) === String(objId));
+    if (type === 'OBJ' && obj) {
+      obj.title = oldItem.title;
+      obj.maxScore = oldItem.maxScore;
+      obj.unitScore = oldItem.unitScore;
+      obj.unit = oldItem.unit;
+      obj.isEdited = false;
+    } else if (type === 'KR' && obj) {
+      const kr = obj.items?.find((k:any) => String(k.id) === String(krId));
+      if (kr) {
+        kr.title = oldItem.title;
+        kr.maxScore = oldItem.maxScore;
+        kr.unitScore = oldItem.unitScore;
+        kr.unit = oldItem.unit;
+        kr.isEdited = false;
+      }
+    } else if (type === 'SUBKR' && obj) {
+      const kr = obj.items?.find((k:any) => String(k.id) === String(krId));
+      const sub = kr?.items?.find((s:any) => String(s.id) === String(subId));
+      if (sub) {
+        sub.title = oldItem.title;
+        sub.maxScore = oldItem.maxScore;
+        sub.unitScore = oldItem.unitScore;
+        sub.unit = oldItem.unit;
+        sub.isEdited = false;
+      }
+    }
+    
+    setLocalStructure(newStructure);
+    setHasChanges(true);
+  };
+
+  const handleRestoreDeletedItem = (idToRestore: string) => {
+    const oldItem = findOriginalItem(idToRestore);
+    if (!oldItem) return;
+
+    const newStructure = JSON.parse(JSON.stringify(localStructure));
+    const parts = String(idToRestore).split('.');
+    
+    if (parts.length === 2) {
+      const objId = parts[0];
+      const obj = newStructure.find((o:any) => String(o.id) === String(objId));
+      if (obj) {
+        if (!obj.items) obj.items = [];
+        obj.items.push(JSON.parse(JSON.stringify(oldItem)));
+        obj.items.sort((a:any, b:any) => {
+           const numA = parseFloat(a.id.split('.').slice(1).join('.'));
+           const numB = parseFloat(b.id.split('.').slice(1).join('.'));
+           return numA - numB;
+        });
+      }
+    } else if (parts.length === 3) {
+      const objId = parts[0];
+      const krId = parts[0] + '.' + parts[1];
+      const obj = newStructure.find((o:any) => String(o.id) === String(objId));
+      if (obj) {
+        const kr = obj.items?.find((k:any) => String(k.id) === String(krId));
+        if (kr) {
+          if (!kr.items) kr.items = [];
+          kr.items.push(JSON.parse(JSON.stringify(oldItem)));
+          kr.items.sort((a:any, b:any) => {
+             const numA = parseFloat(a.id.split('.').slice(2).join('.'));
+             const numB = parseFloat(b.id.split('.').slice(2).join('.'));
+             return numA - numB;
+          });
+        }
+      }
     }
     
     setLocalStructure(newStructure);
@@ -292,7 +381,7 @@ export default function OkrManagerTree({ okr, onRefresh }: { okr: any; onRefresh
 
   const handleSubmitChanges = async () => {
     try {
-      await api.put(`/okrs/${okr.id}/structure`, { 
+      await api.put(`/okrs/${okr.id}/manager-structure`, { 
         keyResults: localStructure,
         localComments: Object.keys(localComments).length > 0 ? localComments : undefined
       });
@@ -384,6 +473,11 @@ export default function OkrManagerTree({ okr, onRefresh }: { okr: any; onRefresh
                     <IconButton size="small" onClick={() => handleOpenAddDialog('KR', obj.id)} title="Thêm tiêu chí">
                       <Add fontSize="small" color="success" />
                     </IconButton>
+                    {isObjChanged && (
+                      <IconButton size="small" onClick={() => handleUndoItem('OBJ', obj.id)} title="Hoàn tác thay đổi">
+                        <Undo fontSize="small" color="primary" />
+                      </IconButton>
+                    )}
                     <IconButton size="small" onClick={() => handleOpenEditDialog('OBJ', obj.id)} title="Chỉnh sửa">
                       <Edit fontSize="small" color="info" />
                     </IconButton>
@@ -418,6 +512,11 @@ export default function OkrManagerTree({ okr, onRefresh }: { okr: any; onRefresh
                         <IconButton size="small" onClick={() => handleOpenAddDialog('SUBKR', obj.id, kr.id)} title="Thêm tiêu chí con">
                           <Add fontSize="small" color="success" />
                         </IconButton>
+                        {isKrChanged && (
+                          <IconButton size="small" onClick={() => handleUndoItem('KR', obj.id, kr.id)} title="Hoàn tác thay đổi">
+                            <Undo fontSize="small" color="primary" />
+                          </IconButton>
+                        )}
                         <IconButton size="small" onClick={() => handleOpenEditDialog('KR', obj.id, kr.id)} title="Chỉnh sửa">
                           <Edit fontSize="small" color="info" />
                         </IconButton>
@@ -455,6 +554,11 @@ export default function OkrManagerTree({ okr, onRefresh }: { okr: any; onRefresh
                             <IconButton size="small" onClick={() => handleOpenEditDialog('SUBKR', obj.id, kr.id, sub.id)} title="Chỉnh sửa">
                               <Edit fontSize="small" color="info" />
                             </IconButton>
+                            {isSubChanged && (
+                              <IconButton size="small" onClick={() => handleUndoItem('SUBKR', obj.id, kr.id, sub.id)} title="Hoàn tác thay đổi">
+                                <Undo fontSize="small" color="primary" />
+                              </IconButton>
+                            )}
                             <IconButton size="small" onClick={() => setActiveChatId(activeChatId === sub.id ? null : sub.id)}>
                               <Comment fontSize="small" color={(okr.proposedChanges?.[sub.id]?.length > 0 || localComments[sub.id]?.length > 0) ? "warning" : "inherit"} />
                             </IconButton>
@@ -482,11 +586,15 @@ export default function OkrManagerTree({ okr, onRefresh }: { okr: any; onRefresh
               </TableRow>
               {deletedItems.map((delItem, idx) => (
                   <TableRow key={`del-${idx}`} sx={{ bgcolor: "#fef2f2" }}>
-                    <TableCell sx={{ pl: delItem.id.split('.').length === 1 ? 2 : delItem.id.split('.').length === 2 ? 4 : 6, textDecoration: "line-through", color: "error.main" }}>{delItem.id}</TableCell>
+                    <TableCell sx={{ pl: delItem.id.split('.').length === 1 ? 2 : delItem.id.split('.').length === 2 ? 4 : 8, textDecoration: "line-through", color: "error.main" }}>{delItem.id}</TableCell>
                     <TableCell sx={{ textDecoration: "line-through", color: "error.main" }}>{delItem.title}</TableCell>
                     <TableCell sx={{ textDecoration: "line-through", color: "error.main" }}>{delItem.maxScore || "—"}</TableCell>
                     <TableCell sx={{ textDecoration: "line-through", color: "error.main" }}>{delItem.unitScore ? `+${delItem.unitScore}/${delItem.unit || 'đv'}` : '—'}</TableCell>
-                    <TableCell align="center"></TableCell>
+                    <TableCell align="center">
+                      <IconButton size="small" onClick={() => handleRestoreDeletedItem(delItem.id)} title="Khôi phục">
+                        <Undo fontSize="small" color="primary" />
+                      </IconButton>
+                    </TableCell>
                   </TableRow>
               ))}
             </>
