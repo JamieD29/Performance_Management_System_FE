@@ -20,7 +20,15 @@ import {
   ListItemIcon,
   ListItemText,
 } from "@mui/material";
-import { Add, Delete, Edit, NavigateNext, Search, School, MoreVert } from "@mui/icons-material";
+import {
+  Add,
+  Delete,
+  Edit,
+  NavigateNext,
+  Search,
+  School,
+  MoreVert,
+} from "@mui/icons-material";
 import { Users, ChevronRight, Building2 } from "lucide-react";
 import Grid from "@mui/material/Grid";
 import AddDepartmentModal from "./AddDepartmentModal";
@@ -39,7 +47,6 @@ interface DepartmentMasterViewProps {
   onDeleteDept: (id: string, name: string) => void;
   onRefresh: () => void;
 }
-
 
 const getEnglishName = (code: string) => {
   const map: Record<string, string> = {
@@ -97,7 +104,10 @@ export default function DepartmentMasterView({
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [menuDept, setMenuDept] = useState<Department | null>(null);
 
-  const handleMenuClick = (event: React.MouseEvent<HTMLElement>, dept: Department) => {
+  const handleMenuClick = (
+    event: React.MouseEvent<HTMLElement>,
+    dept: Department,
+  ) => {
     event.stopPropagation();
     setAnchorEl(event.currentTarget);
     setMenuDept(dept);
@@ -125,7 +135,10 @@ export default function DepartmentMasterView({
     <Container maxWidth="xl" sx={{ py: 2 }}>
       {/* BREADCRUMBS */}
       <Breadcrumbs separator={<NavigateNext fontSize="small" />} sx={{ mb: 3 }}>
-        <Typography color="inherit" sx={{ display: "flex", alignItems: "center" }}>
+        <Typography
+          color="inherit"
+          sx={{ display: "flex", alignItems: "center" }}
+        >
           <School sx={{ mr: 0.5 }} fontSize="inherit" />
           Bộ môn
         </Typography>
@@ -220,12 +233,14 @@ export default function DepartmentMasterView({
                       "linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)) padding-box, linear-gradient(to right, #f1f5f9, #f1f5f9) border-box",
                     backdropFilter: "blur(12px)",
                     transition: "all 0.4s ease-out",
-                    boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)",
+                    boxShadow:
+                      "0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)",
                     "&:hover": {
                       transform: "scale(1.03)",
                       background:
                         "linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.95)) padding-box, linear-gradient(45deg, #2563eb, #3b82f6, #60a5fa) border-box",
-                      boxShadow: "0 25px 30px -12px rgba(30, 58, 138, 0.25), 0 0 15px rgba(59, 130, 246, 0.3)",
+                      boxShadow:
+                        "0 25px 30px -12px rgba(30, 58, 138, 0.25), 0 0 15px rgba(59, 130, 246, 0.3)",
                       "& .dept-arrow": {
                         transform: "translateX(8px)",
                         color: "#3b82f6",
@@ -240,7 +255,14 @@ export default function DepartmentMasterView({
                   }}
                 >
                   <CardContent sx={{ p: 2.2, position: "relative", zIndex: 2 }}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1.5 }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 2,
+                        mb: 1.5,
+                      }}
+                    >
                       <Avatar
                         className="dept-avatar"
                         variant="rounded"
@@ -281,7 +303,7 @@ export default function DepartmentMasterView({
                             color: "#3b82f6",
                             fontWeight: 600,
                             mt: 0.2,
-                            mb: 0.5
+                            mb: 0.5,
                           }}
                         >
                           {getEnglishName(dept.code)}
@@ -310,8 +332,22 @@ export default function DepartmentMasterView({
                       />
                     </Box>
 
-                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: "auto" }}>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1, color: "#64748b" }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        mt: "auto",
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1,
+                          color: "#64748b",
+                        }}
+                      >
                         <Users size={14} />
                         <Typography variant="caption" fontWeight={600}>
                           {dept.memberCount || 0} nhân sự
@@ -326,7 +362,9 @@ export default function DepartmentMasterView({
                               onClick={(e) => handleMenuClick(e, dept)}
                               sx={{
                                 padding: "4px",
-                                "&:hover": { bgcolor: "rgba(59, 130, 246, 0.1)" },
+                                "&:hover": {
+                                  bgcolor: "rgba(59, 130, 246, 0.1)",
+                                },
                                 color: "#64748b",
                               }}
                             >
@@ -352,12 +390,17 @@ export default function DepartmentMasterView({
             border: "1px solid #e2e8f0",
           }}
         >
-          <Building2 size={48} style={{ color: "#cbd5e1", margin: "0 auto 16px" }} />
+          <Building2
+            size={48}
+            style={{ color: "#cbd5e1", margin: "0 auto 16px" }}
+          />
           <Typography variant="h6" color="text.secondary" fontWeight={500}>
             Không tìm thấy bộ môn nào
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            {deptSearch ? "Thử tìm kiếm với từ khóa khác" : "Chưa có dữ liệu bộ môn trong hệ thống"}
+            {deptSearch
+              ? "Thử tìm kiếm với từ khóa khác"
+              : "Chưa có dữ liệu bộ môn trong hệ thống"}
           </Typography>
         </Paper>
       )}

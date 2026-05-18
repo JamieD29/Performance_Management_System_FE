@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Box,
   Button,
@@ -11,16 +11,23 @@ import {
   Paper,
   Typography,
   Chip,
+  TextField,
+  InputAdornment,
+  IconButton,
+  Tooltip,
+  CircularProgress,
 } from "@mui/material";
-import { Add, Edit } from "@mui/icons-material";
+import { Add, Edit, Delete, Search } from "@mui/icons-material";
 import { api } from "../../../services/api";
-import { showError } from "../../../utils/swal";
+import { showError, showSuccess, confirmDelete } from "../../../utils/swal";
 import TemplateEditorDialog from "./TemplateEditorDialog";
 
 export default function TemplateListTab() {
   const [templates, setTemplates] = useState<any[]>([]);
   const [openEditor, setOpenEditor] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchTemplates();
@@ -28,10 +35,13 @@ export default function TemplateListTab() {
 
   const fetchTemplates = async () => {
     try {
+      setLoading(true);
       const res = await api.get("/okr-templates");
       setTemplates(res.data);
     } catch (error) {
       console.error("Error fetching templates", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -45,7 +55,30 @@ export default function TemplateListTab() {
     setOpenEditor(true);
   };
 
+  const handleDelete = async (tmpl: any) => {
+    const isConfirmed = await confirmDelete(tmpl.title);
+    if (!isConfirmed) return;
 
+    try {
+      await api.delete(`/okr-templates/${tmpl.id}`);
+      showSuccess("Đã xóa template thành công!");
+      fetchTemplates();
+    } catch (error) {
+      console.error("Error deleting template:", error);
+      showError("Lỗi", "Không thể xóa template. Vui lòng thử lại sau.");
+    }
+  };
+
+  const filteredTemplates = useMemo(() => {
+    return templates.filter((t) => {
+      const term = searchTerm.toLowerCase();
+      const matchTitle = t.title?.toLowerCase().includes(term);
+      const matchPosition = t.positionName?.toLowerCase().includes(term);
+      const matchJob = t.jobTitle?.toLowerCase().includes(term);
+      const matchAuthor = t.createdByName?.toLowerCase().includes(term);
+      return matchTitle || matchPosition || matchJob || matchAuthor;
+    });
+  }, [templates, searchTerm]);
 
   return (
     <Box>
@@ -60,13 +93,29 @@ export default function TemplateListTab() {
         <Typography variant="h6" color="text.secondary">
           Danh sách OKR Templates (Mẫu)
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<Add />}
-          onClick={handleCreateNew}
-        >
-          Tạo Template mới
-        </Button>
+        <Box sx={{ display: "flex", gap: 2 }}>
+          <TextField
+            size="small"
+            placeholder="Tìm kiếm template..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search fontSize="small" />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ minWidth: 300, bgcolor: "white" }}
+          />
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={handleCreateNew}
+          >
+            Tạo Template mới
+          </Button>
+        </Box>
       </Box>
 
       <TableContainer
@@ -89,18 +138,28 @@ export default function TemplateListTab() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {templates.length === 0 ? (
+            {loading ? (
+              <TableRow>
+                <TableCell
+                  colSpan={5}
+                  align="center"
+                  sx={{ py: 5 }}
+                >
+                  <CircularProgress size={32} />
+                </TableCell>
+              </TableRow>
+            ) : filteredTemplates.length === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={5}
                   align="center"
                   sx={{ py: 3, color: "text.secondary" }}
                 >
-                  Chưa có template nào.
+                  Không tìm thấy template nào.
                 </TableCell>
               </TableRow>
             ) : (
-              templates.map((t) => (
+              filteredTemplates.map((t) => (
                 <TableRow key={t.id} hover>
                   <TableCell sx={{ fontWeight: 500 }}>{t.title}</TableCell>
                   <TableCell>
@@ -130,14 +189,25 @@ export default function TemplateListTab() {
                     {new Date(t.createdAt).toLocaleDateString("vi-VN")}
                   </TableCell>
                   <TableCell align="right">
-                    <Button
-                      size="small"
-                      startIcon={<Edit />}
-                      onClick={() => handleEdit(t)}
-                      sx={{ mr: 1 }}
-                    >
-                      Chỉnh sửa
-                    </Button>
+                    <Tooltip title="Chỉnh sửa">
+                      <IconButton
+                        size="small"
+                        color="primary"
+                        onClick={() => handleEdit(t)}
+                        sx={{ mr: 1 }}
+                      >
+                        <Edit fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Xóa">
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() => handleDelete(t)}
+                      >
+                        <Delete fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
                   </TableCell>
                 </TableRow>
               ))
