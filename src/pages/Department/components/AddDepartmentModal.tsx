@@ -10,6 +10,7 @@ import {
   Alert,
 } from "@mui/material";
 import { api } from "../../../services/api"; // ⚠️ Check đường dẫn api
+import { showSuccess, showError } from "../../../utils/swal";
 
 interface AddDepartmentModalProps {
   open: boolean;
@@ -59,9 +60,11 @@ export default function AddDepartmentModal({
     setError("");
     try {
       if (initialData?.id) {
-        await api.put(`/departments/${initialData.id}`, formData);
+        await api.patch(`/departments/${initialData.id}`, formData);
+        showSuccess("Thành công", "Cập nhật bộ môn thành công!");
       } else {
         await api.post("/departments", formData);
+        showSuccess("Thành công", "Thêm bộ môn mới thành công!");
       }
       if (!initialData) {
         setFormData({ name: "", code: "", description: "" }); // Reset form only when adding
@@ -71,14 +74,17 @@ export default function AddDepartmentModal({
     } catch (err: any) {
       // NestJS thường trả về message dạng mảng string, hoặc string đơn
       const errorMsg = err.response?.data?.message;
+      let finalMsg = "Có lỗi xảy ra";
 
       if (Array.isArray(errorMsg)) {
-        // Nếu là mảng nhiều lỗi -> Lấy cái đầu tiên cho gọn, hoặc nối lại
-        setError(errorMsg[0]);
-      } else {
-        // Nếu là chuỗi đơn
-        setError(errorMsg || "Có lỗi xảy ra");
+        // Nếu là mảng nhiều lỗi -> Ghép lại bằng dấu phẩy
+        finalMsg = errorMsg.join(", ");
+      } else if (typeof errorMsg === "string") {
+        finalMsg = errorMsg;
       }
+
+      setError(finalMsg);
+      showError("Lỗi", finalMsg);
     } finally {
       setLoading(false);
     }
