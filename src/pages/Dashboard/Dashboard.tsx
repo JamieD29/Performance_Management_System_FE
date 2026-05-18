@@ -11,7 +11,8 @@ import { useDashboardData } from "./useDashboardData";
 import WelcomeHeader from "./components/WelcomeHeader";
 import OkrStepper from "./components/OkrStepper";
 import ScoreGauge from "./components/ScoreGauge";
-import ObjectiveBarChart from "./components/ObjectiveBarChart";
+import ObjectiveRadarChart from "./components/ObjectiveRadarChart";
+import DataEntryProgress from "./components/DataEntryProgress";
 import ActionCard from "./components/ActionCard";
 import DeadlineCountdown from "./components/DeadlineCountdown";
 import CycleProgress from "./components/CycleProgress";
@@ -92,7 +93,10 @@ export default function Dashboard() {
           }}
         >
           {hasOkr && (
-            <DeadlineCountdown daysLeft={computed.daysUntilDeadline} />
+            <DeadlineCountdown 
+              daysLeft={computed.daysUntilDeadline} 
+              label={computed.deadlineLabel}
+            />
           )}
           {currentCycle && (
             <CycleProgress
@@ -111,6 +115,13 @@ export default function Dashboard() {
             currentStep={computed.currentStepIndex}
             isRejected={primaryOkr?.status === "REJECTED"}
           />
+        </Box>
+      )}
+
+      {/* === SECTION 3.5: Data Entry Progress === */}
+      {hasOkr && data.dataEntryProgress && data.dataEntryProgress.length > 0 && primaryOkr?.status !== "COMPLETED" && (
+        <Box sx={{ mb: 4 }}>
+          <DataEntryProgress progressList={data.dataEntryProgress} />
         </Box>
       )}
 
@@ -133,7 +144,7 @@ export default function Dashboard() {
           {evaluation &&
             evaluation.evaluationData &&
             evaluation.evaluationData.length > 0 && (
-              <ObjectiveBarChart evaluationData={evaluation.evaluationData} />
+              <ObjectiveRadarChart evaluationData={evaluation.evaluationData} />
             )}
         </Box>
       )}

@@ -5,9 +5,10 @@ import { Clock, AlertTriangle, CheckCircle } from "lucide-react";
 
 interface DeadlineCountdownProps {
   daysLeft: number | null;
+  label?: string | null;
 }
 
-export default function DeadlineCountdown({ daysLeft }: DeadlineCountdownProps) {
+export default function DeadlineCountdown({ daysLeft, label }: DeadlineCountdownProps) {
   if (daysLeft === null) {
     return (
       <Paper
@@ -55,11 +56,14 @@ export default function DeadlineCountdown({ daysLeft }: DeadlineCountdownProps) 
         }}
       >
         <Box sx={{ mb: 0.5 }}>{config.icon}</Box>
+        <Typography variant="subtitle2" sx={{ color: config.color, mb: 0.5, fontWeight: "bold" }}>
+          {label || "Hạn chót"}
+        </Typography>
         <Typography variant="h4" fontWeight="800" sx={{ color: config.color, lineHeight: 1.2 }}>
           {isOverdue ? `Quá ${Math.abs(daysLeft)}` : daysLeft}
         </Typography>
         <Typography variant="caption" fontWeight="600" sx={{ color: config.color }}>
-          {isOverdue ? "ngày quá hạn" : daysLeft === 0 ? "Hạn chót hôm nay!" : "ngày còn lại"}
+          {isOverdue ? "ngày quá hạn" : daysLeft === 0 ? "hôm nay!" : "ngày còn lại"}
         </Typography>
       </Paper>
     </motion.div>
