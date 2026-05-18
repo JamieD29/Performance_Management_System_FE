@@ -19,6 +19,7 @@ import {
   Divider,
   Alert,
   Avatar,
+  IconButton,
 } from "@mui/material";
 import { Check, Close, Visibility } from "@mui/icons-material";
 import { api } from "../../../services/api";
@@ -209,8 +210,20 @@ export default function DeanApprovalTab() {
         maxWidth="xl"
         fullWidth
       >
-        <DialogTitle sx={{ fontWeight: "bold" }}>
+        <DialogTitle sx={{ m: 0, p: 2, fontWeight: "bold" }}>
           Chi tiết đề xuất điều chỉnh
+          <IconButton
+            aria-label="close"
+            onClick={() => setViewDialog(false)}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 8,
+              color: (theme) => theme.palette.grey[500],
+            }}
+          >
+            <Close />
+          </IconButton>
         </DialogTitle>
         <Divider />
         <DialogContent sx={{ mt: 2 }}>
@@ -245,18 +258,6 @@ export default function DeanApprovalTab() {
           )}
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setViewDialog(false)}>Đóng</Button>
-          <Button
-            variant="contained"
-            color="success"
-            startIcon={<Check />}
-            onClick={() => {
-              setViewDialog(false);
-              handleApprove(selectedOkr?.id);
-            }}
-          >
-            Duyệt
-          </Button>
           <Button
             variant="outlined"
             color="error"
@@ -267,6 +268,17 @@ export default function DeanApprovalTab() {
             }}
           >
             Từ chối
+          </Button>
+          <Button
+            variant="contained"
+            color="success"
+            startIcon={<Check />}
+            onClick={() => {
+              setViewDialog(false);
+              handleApprove(selectedOkr?.id);
+            }}
+          >
+            Duyệt
           </Button>
         </DialogActions>
       </Dialog>

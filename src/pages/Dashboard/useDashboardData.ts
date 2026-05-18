@@ -67,6 +67,14 @@ export interface DashboardData {
   allOkrs: UserOkrData[];
   /** Phiếu đánh giá */
   evaluation: UserEvaluationData | null;
+  /** Tiến độ nhập điểm theo từng Objective */
+  dataEntryProgress: Array<{
+    id: string;
+    name: string;
+    totalItems: number;
+    filledItems: number;
+    percent: number;
+  }>;
   /** Thông tin kỳ đánh giá hiện tại */
   currentCycle: {
     name: string;
@@ -90,6 +98,8 @@ export interface DashboardData {
     actionRoute: string;
     /** Label cho CTA button */
     actionLabel: string;
+    /** Tên của hạn chót */
+    deadlineLabel: string | null;
   };
 }
 
@@ -162,6 +172,58 @@ function calcCycleProgress(startDate: string, endDate: string): number {
   if (end <= start) return 0;
   const progress = ((now - start) / (end - start)) * 100;
   return Math.max(0, Math.min(100, progress));
+}
+
+
+
+/** Tính tiến độ nhập liệu số lượng mục theo từng Nhiệm vụ/Objective */
+function computeDataEntryProgress(keyResults: any[], selfReportData: any) {
+  if (!keyResults || !Array.isArray(keyResults)) return [];
+  const progressList: any[] = [];
+
+  for (const obj of keyResults) {
+    let totalItems = 0;
+    let filledItems = 0;
+
+    const traverse = (items: any[], prefixKey: string) => {
+      if (!items || !Array.isArray(items)) return;
+      for (const item of items) {
+        const currentKey = `${prefixKey}-${item.id}`;
+        
+        // Nếu là node lá (không có items con) -> tính là 1 mục cần điền
+        if (!item.items || item.items.length === 0) {
+          totalItems++;
+          const data = selfReportData?.[currentKey];
+          // Có khai số lượng > 0 HOẶC có điền minh chứng thì coi như đã nhập
+          if (
+            data &&
+            ((data.quantity !== undefined && Number(data.quantity) > 0) ||
+              (data.evidence && String(data.evidence).trim() !== ""))
+          ) {
+            filledItems++;
+          }
+        } else {
+          traverse(item.items, currentKey);
+        }
+      }
+    };
+
+    if (obj.items) {
+      traverse(obj.items, obj.id);
+    }
+    
+    const percent = totalItems > 0 ? Math.round((filledItems / totalItems) * 100) : 0;
+
+    progressList.push({
+      id: obj.id,
+      name: obj.title || obj.id,
+      totalItems,
+      filledItems,
+      percent,
+    });
+  }
+
+  return progressList;
 }
 
 /** Chọn OKR quan trọng nhất (ưu tiên theo status) */
@@ -359,11 +421,26 @@ export function useDashboardData() {
 
       const action = computeAction(primaryOkr, evaluation);
 
+      const dataEntryProgress = primaryOkr
+        ? computeDataEntryProgress(primaryOkr.keyResults, primaryOkr.selfReportData)
+        : [];
+
+      const getDeadlineLabel = (status: string) => {
+        if (status === "PENDING" || status === "NEGOTIATING" || status === "REJECTED") {
+          return "Hạn chót đàm phán OKR";
+        }
+        if (status === "ACCEPTED") {
+          return "Hạn chót nộp báo cáo";
+        }
+        return "Hạn chót";
+      };
+
       setData({
         primaryOkr,
         allOkrs,
         evaluation,
         currentCycle,
+        dataEntryProgress,
         computed: {
           currentStepIndex,
           daysUntilDeadline,
@@ -372,6 +449,7 @@ export function useDashboardData() {
           actionMessage: action.message,
           actionRoute: action.route,
           actionLabel: action.label,
+          deadlineLabel: primaryOkr ? getDeadlineLabel(primaryOkr.status) : null,
         },
       });
     } catch (err: any) {

@@ -56,15 +56,21 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
     Record<string, { quantity: number; evidence: string }>
   >({});
   const [saving, setSaving] = useState(false);
+  const [hasDraftChanges, setHasDraftChanges] = useState(false);
+  const [draftSaveStatus, setDraftSaveStatus] = useState<
+    "idle" | "saving" | "saved"
+  >("idle");
 
   // Add KR/SubKR State
   const [openAddDialog, setOpenAddDialog] = useState(false);
-  const [addParentType, setAddParentType] = useState<'KR' | 'SUBKR' | null>(null);
+  const [addParentType, setAddParentType] = useState<"KR" | "SUBKR" | null>(
+    null,
+  );
   const [addObjectiveId, setAddObjectiveId] = useState<string | null>(null);
   const [addKrId, setAddKrId] = useState<string | null>(null);
-  const [newCriteriaTitle, setNewCriteriaTitle] = useState('');
-  const [newCriteriaUnitScore, setNewCriteriaUnitScore] = useState('');
-  const [newCriteriaUnit, setNewCriteriaUnit] = useState('');
+  const [newCriteriaTitle, setNewCriteriaTitle] = useState("");
+  const [newCriteriaUnitScore, setNewCriteriaUnitScore] = useState("");
+  const [newCriteriaUnit, setNewCriteriaUnit] = useState("");
 
   const [localStructure, setLocalStructure] = useState<any[]>([]);
   const [hasChanges, setHasChanges] = useState(false);
@@ -73,39 +79,46 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
   // Edit Criteria State
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [editItemInfo, setEditItemInfo] = useState<{
-    type: 'OBJ' | 'KR' | 'SUBKR' | 'SUBSUBKR';
+    type: "OBJ" | "KR" | "SUBKR" | "SUBSUBKR";
     objId: string;
     krId?: string;
     subId?: string;
     subsubId?: string;
   } | null>(null);
-  const [editCriteriaTitle, setEditCriteriaTitle] = useState('');
-  const [editCriteriaMaxScore, setEditCriteriaMaxScore] = useState('');
-  const [editCriteriaUnitScore, setEditCriteriaUnitScore] = useState('');
-  const [editCriteriaUnit, setEditCriteriaUnit] = useState('');
+  const [editCriteriaTitle, setEditCriteriaTitle] = useState("");
+  const [editCriteriaMaxScore, setEditCriteriaMaxScore] = useState("");
+  const [editCriteriaUnitScore, setEditCriteriaUnitScore] = useState("");
+  const [editCriteriaUnit, setEditCriteriaUnit] = useState("");
 
   // Diff Logic
   const originalStructure = okr.proposedChanges?.originalStructure || null;
 
-  const findOriginalItem = (objId: string, krId?: string, subId?: string, subsubId?: string) => {
+  const findOriginalItem = (
+    objId: string,
+    krId?: string,
+    subId?: string,
+    subsubId?: string,
+  ) => {
     if (!originalStructure) return null;
-    
+
     // Tìm Objective
-    const obj = originalStructure.find((o: any) => String(o.id) === String(objId));
+    const obj = originalStructure.find(
+      (o: any) => String(o.id) === String(objId),
+    );
     if (!obj) return null;
-    
+
     if (krId === undefined) {
       return obj;
     }
-    
+
     // Tìm KR
     const kr = obj.items?.find((k: any) => String(k.id) === String(krId));
     if (!kr) return null;
-    
+
     if (subId === undefined) {
       return kr;
     }
-    
+
     // Tìm Sub-KR
     const sub = kr.items?.find((s: any) => String(s.id) === String(subId));
     if (!sub || subsubId === undefined) {
@@ -113,60 +126,130 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
     }
 
     // Tìm Sub-Sub-KR
-    const subsub = sub.items?.find((ss: any) => String(ss.id) === String(subsubId));
+    const subsub = sub.items?.find(
+      (ss: any) => String(ss.id) === String(subsubId),
+    );
     return subsub || null;
   };
 
   const hasChanged = (newItem: any, oldItem: any) => {
     if (!oldItem) return false;
-    return String(newItem.title || '').trim() !== String(oldItem.title || '').trim() ||
+    return (
+      String(newItem.title || "").trim() !==
+        String(oldItem.title || "").trim() ||
       Number(newItem.maxScore || 0) !== Number(oldItem.maxScore || 0) ||
       Number(newItem.unitScore || 0) !== Number(oldItem.unitScore || 0) ||
-      String(newItem.unit || '').trim() !== String(oldItem.unit || '').trim();
+      String(newItem.unit || "").trim() !== String(oldItem.unit || "").trim()
+    );
   };
 
   const renderOldRow = (oldItem: any, indent: number) => {
-    if (!oldItem || !(okr.status === 'PENDING' || okr.status === 'NEGOTIATING')) return null;
+    if (!oldItem || !(okr.status === "PENDING" || okr.status === "NEGOTIATING"))
+      return null;
     return (
       <TableRow sx={{ bgcolor: "#f1f5f9", opacity: 0.7 }}>
-        <TableCell sx={{ pl: indent, textDecoration: "line-through", color: "text.secondary", fontSize: "1rem" }}>{oldItem.id}</TableCell>
-        <TableCell sx={{ textDecoration: "line-through", color: "text.secondary" }}>[Cũ] {oldItem.title}</TableCell>
-        <TableCell sx={{ textDecoration: "line-through", color: "text.secondary" }}>{oldItem.maxScore || "—"}</TableCell>
-        <TableCell sx={{ textDecoration: "line-through", color: "text.secondary" }}>{oldItem.unitScore ? `+${oldItem.unitScore}/${oldItem.unit || 'đv'}` : '—'}</TableCell>
-        {canReport && <><TableCell></TableCell><TableCell></TableCell><TableCell></TableCell></>}
-        {(okr.status === "SUBMITTED" || okr.status === "COMPLETED") && <><TableCell></TableCell><TableCell></TableCell><TableCell></TableCell></>}
+        <TableCell
+          sx={{
+            pl: indent,
+            textDecoration: "line-through",
+            color: "text.secondary",
+            fontSize: "1rem",
+          }}
+        >
+          {oldItem.id}
+        </TableCell>
+        <TableCell
+          sx={{ textDecoration: "line-through", color: "text.secondary" }}
+        >
+          [Cũ] {oldItem.title}
+        </TableCell>
+        <TableCell
+          sx={{ textDecoration: "line-through", color: "text.secondary" }}
+        >
+          {oldItem.maxScore || "—"}
+        </TableCell>
+        <TableCell
+          sx={{ textDecoration: "line-through", color: "text.secondary" }}
+        >
+          {oldItem.unitScore
+            ? `+${oldItem.unitScore}/${oldItem.unit || "đv"}`
+            : "—"}
+        </TableCell>
+        {canReport && (
+          <>
+            <TableCell></TableCell>
+            <TableCell></TableCell>
+            <TableCell></TableCell>
+          </>
+        )}
+        {(okr.status === "SUBMITTED" || okr.status === "COMPLETED") && (
+          <>
+            <TableCell></TableCell>
+            <TableCell></TableCell>
+            <TableCell></TableCell>
+          </>
+        )}
         <TableCell align="center"></TableCell>
       </TableRow>
     );
   };
 
   const deletedItems: any[] = [];
-  if (originalStructure && (okr.status === 'PENDING' || okr.status === 'NEGOTIATING')) {
+  if (
+    originalStructure &&
+    (okr.status === "PENDING" || okr.status === "NEGOTIATING")
+  ) {
     originalStructure.forEach((oldObj: any) => {
-      const newObj = localStructure.find((o: any) => String(o.id) === String(oldObj.id));
+      const newObj = localStructure.find(
+        (o: any) => String(o.id) === String(oldObj.id),
+      );
       if (!newObj) {
-        deletedItems.push({ ...oldObj, type: 'OBJ', objId: oldObj.id });
+        deletedItems.push({ ...oldObj, type: "OBJ", objId: oldObj.id });
         return;
       }
-      
+
       oldObj.items?.forEach((oldKr: any) => {
-        const newKr = newObj.items?.find((k: any) => String(k.id) === String(oldKr.id));
+        const newKr = newObj.items?.find(
+          (k: any) => String(k.id) === String(oldKr.id),
+        );
         if (!newKr) {
-          deletedItems.push({ ...oldKr, type: 'KR', objId: oldObj.id, krId: oldKr.id });
+          deletedItems.push({
+            ...oldKr,
+            type: "KR",
+            objId: oldObj.id,
+            krId: oldKr.id,
+          });
           return;
         }
-        
+
         oldKr.items?.forEach((oldSub: any) => {
-          const newSub = newKr.items?.find((s: any) => String(s.id) === String(oldSub.id));
+          const newSub = newKr.items?.find(
+            (s: any) => String(s.id) === String(oldSub.id),
+          );
           if (!newSub) {
-            deletedItems.push({ ...oldSub, type: 'SUBKR', objId: oldObj.id, krId: oldKr.id, subId: oldSub.id });
+            deletedItems.push({
+              ...oldSub,
+              type: "SUBKR",
+              objId: oldObj.id,
+              krId: oldKr.id,
+              subId: oldSub.id,
+            });
             return;
           }
 
           oldSub.items?.forEach((oldSubSub: any) => {
-            const newSubSub = newSub.items?.find((ss: any) => String(ss.id) === String(oldSubSub.id));
+            const newSubSub = newSub.items?.find(
+              (ss: any) => String(ss.id) === String(oldSubSub.id),
+            );
             if (!newSubSub) {
-              deletedItems.push({ ...oldSubSub, type: 'SUBSUBKR', objId: oldObj.id, krId: oldKr.id, subId: oldSub.id, subsubId: oldSubSub.id });
+              deletedItems.push({
+                ...oldSubSub,
+                type: "SUBSUBKR",
+                objId: oldObj.id,
+                krId: oldKr.id,
+                subId: oldSub.id,
+                subsubId: oldSubSub.id,
+              });
             }
           });
         });
@@ -180,7 +263,8 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
   const isPending = okr.status === "PENDING";
 
   const isCycleStarted = okr.cycle?.startDate
-    ? new Date(new Date().setHours(0, 0, 0, 0)) >= new Date(new Date(okr.cycle.startDate).setHours(0, 0, 0, 0))
+    ? new Date(new Date().setHours(0, 0, 0, 0)) >=
+      new Date(new Date(okr.cycle.startDate).setHours(0, 0, 0, 0))
     : true;
 
   const canReport = isAccepted && isCycleStarted;
@@ -228,13 +312,17 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
     return max > 0 ? Math.min(total, max) : total;
   };
 
-  const handleOpenAddDialog = (type: 'KR' | 'SUBKR', objId: string, krId?: string) => {
+  const handleOpenAddDialog = (
+    type: "KR" | "SUBKR",
+    objId: string,
+    krId?: string,
+  ) => {
     setAddParentType(type);
     setAddObjectiveId(objId);
     setAddKrId(krId || null);
-    setNewCriteriaTitle('');
-    setNewCriteriaUnitScore('');
-    setNewCriteriaUnit('');
+    setNewCriteriaTitle("");
+    setNewCriteriaUnitScore("");
+    setNewCriteriaUnit("");
     setOpenAddDialog(true);
   };
 
@@ -247,17 +335,19 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
 
     let generatedId = "";
 
-    if (addParentType === 'KR') {
+    if (addParentType === "KR") {
       const obj = newStructure.find((o: any) => o.id === addObjectiveId);
       if (obj) {
         if (!obj.items) obj.items = [];
         const lastItem = obj.items[obj.items.length - 1];
         if (lastItem && lastItem.id) {
-          const parts = String(lastItem.id).split('.');
+          const parts = String(lastItem.id).split(".");
           if (parts.length > 1) {
             const lastNum = parseInt(parts[parts.length - 1], 10);
-            parts[parts.length - 1] = isNaN(lastNum) ? "1" : String(lastNum + 1);
-            generatedId = parts.join('.');
+            parts[parts.length - 1] = isNaN(lastNum)
+              ? "1"
+              : String(lastNum + 1);
+            generatedId = parts.join(".");
           } else {
             const lastNum = parseInt(lastItem.id, 10);
             if (!isNaN(lastNum)) {
@@ -274,13 +364,13 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
           id: generatedId,
           title: newCriteriaTitle,
           unitScore: Number(newCriteriaUnitScore) || 0,
-          unit: newCriteriaUnit || 'đv',
+          unit: newCriteriaUnit || "đv",
           isNew: true,
-          items: []
+          items: [],
         };
         obj.items.push(newItem);
       }
-    } else if (addParentType === 'SUBKR') {
+    } else if (addParentType === "SUBKR") {
       const obj = newStructure.find((o: any) => o.id === addObjectiveId);
       if (obj) {
         const kr = obj.items?.find((k: any) => k.id === addKrId);
@@ -288,11 +378,13 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
           if (!kr.items) kr.items = [];
           const lastItem = kr.items[kr.items.length - 1];
           if (lastItem && lastItem.id) {
-            const parts = String(lastItem.id).split('.');
+            const parts = String(lastItem.id).split(".");
             if (parts.length > 1) {
               const lastNum = parseInt(parts[parts.length - 1], 10);
-              parts[parts.length - 1] = isNaN(lastNum) ? "1" : String(lastNum + 1);
-              generatedId = parts.join('.');
+              parts[parts.length - 1] = isNaN(lastNum)
+                ? "1"
+                : String(lastNum + 1);
+              generatedId = parts.join(".");
             } else {
               generatedId = `${lastItem.id}.1`;
             }
@@ -304,9 +396,9 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
             id: generatedId,
             title: newCriteriaTitle,
             unitScore: Number(newCriteriaUnitScore) || 0,
-            unit: newCriteriaUnit || 'đv',
+            unit: newCriteriaUnit || "đv",
             isNew: true,
-            items: []
+            items: [],
           };
           kr.items.push(newItem);
         }
@@ -318,7 +410,12 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
     setOpenAddDialog(false);
   };
 
-  const handleDeleteItem = (objId: string, krId?: string, subId?: string, subsubId?: string) => {
+  const handleDeleteItem = (
+    objId: string,
+    krId?: string,
+    subId?: string,
+    subsubId?: string,
+  ) => {
     const newStructure = JSON.parse(JSON.stringify(localStructure));
 
     if (subsubId && subId && krId) {
@@ -327,7 +424,9 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
         const kr = obj.items?.find((k: any) => String(k.id) === String(krId));
         const sub = kr?.items?.find((s: any) => String(s.id) === String(subId));
         if (sub && sub.items) {
-          sub.items = sub.items.filter((ss: any) => String(ss.id) !== String(subsubId));
+          sub.items = sub.items.filter(
+            (ss: any) => String(ss.id) !== String(subsubId),
+          );
         }
       }
     } else if (subId && krId) {
@@ -335,7 +434,9 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
       if (obj) {
         const kr = obj.items?.find((k: any) => String(k.id) === String(krId));
         if (kr && kr.items) {
-          kr.items = kr.items.filter((s: any) => String(s.id) !== String(subId));
+          kr.items = kr.items.filter(
+            (s: any) => String(s.id) !== String(subId),
+          );
         }
       }
     } else if (krId) {
@@ -349,35 +450,51 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
     setHasChanges(true);
   };
 
-  const handleUndoItem = (type: 'OBJ' | 'KR' | 'SUBKR' | 'SUBSUBKR', objId: string, krId?: string, subId?: string, subsubId?: string) => {
+  const handleUndoItem = (
+    type: "OBJ" | "KR" | "SUBKR" | "SUBSUBKR",
+    objId: string,
+    krId?: string,
+    subId?: string,
+    subsubId?: string,
+  ) => {
     const newStructure = JSON.parse(JSON.stringify(localStructure));
-    
+
     let oldItem: any = null;
-    const oldObj = originalStructure?.find((o:any) => String(o.id) === String(objId));
-    if (type === 'OBJ') {
+    const oldObj = originalStructure?.find(
+      (o: any) => String(o.id) === String(objId),
+    );
+    if (type === "OBJ") {
       oldItem = oldObj;
-    } else if (type === 'KR') {
-      oldItem = oldObj?.items?.find((k:any) => String(k.id) === String(krId));
-    } else if (type === 'SUBKR') {
-      const oldKr = oldObj?.items?.find((k:any) => String(k.id) === String(krId));
-      oldItem = oldKr?.items?.find((s:any) => String(s.id) === String(subId));
-    } else if (type === 'SUBSUBKR') {
-      const oldKr = oldObj?.items?.find((k:any) => String(k.id) === String(krId));
-      const oldSub = oldKr?.items?.find((s:any) => String(s.id) === String(subId));
-      oldItem = oldSub?.items?.find((ss:any) => String(ss.id) === String(subsubId));
+    } else if (type === "KR") {
+      oldItem = oldObj?.items?.find((k: any) => String(k.id) === String(krId));
+    } else if (type === "SUBKR") {
+      const oldKr = oldObj?.items?.find(
+        (k: any) => String(k.id) === String(krId),
+      );
+      oldItem = oldKr?.items?.find((s: any) => String(s.id) === String(subId));
+    } else if (type === "SUBSUBKR") {
+      const oldKr = oldObj?.items?.find(
+        (k: any) => String(k.id) === String(krId),
+      );
+      const oldSub = oldKr?.items?.find(
+        (s: any) => String(s.id) === String(subId),
+      );
+      oldItem = oldSub?.items?.find(
+        (ss: any) => String(ss.id) === String(subsubId),
+      );
     }
 
     if (!oldItem) return;
 
-    const obj = newStructure.find((o:any) => String(o.id) === String(objId));
-    if (type === 'OBJ' && obj) {
+    const obj = newStructure.find((o: any) => String(o.id) === String(objId));
+    if (type === "OBJ" && obj) {
       obj.title = oldItem.title;
       obj.maxScore = oldItem.maxScore;
       obj.unitScore = oldItem.unitScore;
       obj.unit = oldItem.unit;
       obj.isEdited = false;
-    } else if (type === 'KR' && obj) {
-      const kr = obj.items?.find((k:any) => String(k.id) === String(krId));
+    } else if (type === "KR" && obj) {
+      const kr = obj.items?.find((k: any) => String(k.id) === String(krId));
       if (kr) {
         kr.title = oldItem.title;
         kr.maxScore = oldItem.maxScore;
@@ -385,9 +502,9 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
         kr.unit = oldItem.unit;
         kr.isEdited = false;
       }
-    } else if (type === 'SUBKR' && obj) {
-      const kr = obj.items?.find((k:any) => String(k.id) === String(krId));
-      const sub = kr?.items?.find((s:any) => String(s.id) === String(subId));
+    } else if (type === "SUBKR" && obj) {
+      const kr = obj.items?.find((k: any) => String(k.id) === String(krId));
+      const sub = kr?.items?.find((s: any) => String(s.id) === String(subId));
       if (sub) {
         sub.title = oldItem.title;
         sub.maxScore = oldItem.maxScore;
@@ -395,10 +512,12 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
         sub.unit = oldItem.unit;
         sub.isEdited = false;
       }
-    } else if (type === 'SUBSUBKR' && obj) {
-      const kr = obj.items?.find((k:any) => String(k.id) === String(krId));
-      const sub = kr?.items?.find((s:any) => String(s.id) === String(subId));
-      const subsub = sub?.items?.find((ss:any) => String(ss.id) === String(subsubId));
+    } else if (type === "SUBSUBKR" && obj) {
+      const kr = obj.items?.find((k: any) => String(k.id) === String(krId));
+      const sub = kr?.items?.find((s: any) => String(s.id) === String(subId));
+      const subsub = sub?.items?.find(
+        (ss: any) => String(ss.id) === String(subsubId),
+      );
       if (subsub) {
         subsub.title = oldItem.title;
         subsub.maxScore = oldItem.maxScore;
@@ -407,7 +526,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
         subsub.isEdited = false;
       }
     }
-    
+
     setLocalStructure(newStructure);
     setHasChanges(true);
   };
@@ -418,28 +537,32 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
     if (!oldItem) return;
 
     const newStructure = JSON.parse(JSON.stringify(localStructure));
-    
-    if (type === 'OBJ') {
+
+    if (type === "OBJ") {
       newStructure.push(JSON.parse(JSON.stringify(oldItem)));
-      newStructure.sort((a: any, b: any) => String(a.id).localeCompare(String(b.id)));
-    } else if (type === 'KR') {
+      newStructure.sort((a: any, b: any) =>
+        String(a.id).localeCompare(String(b.id)),
+      );
+    } else if (type === "KR") {
       const obj = newStructure.find((o: any) => String(o.id) === String(objId));
       if (obj) {
         if (!obj.items) obj.items = [];
         obj.items.push(JSON.parse(JSON.stringify(oldItem)));
         obj.items.sort((a: any, b: any) => parseFloat(a.id) - parseFloat(b.id));
       }
-    } else if (type === 'SUBKR') {
+    } else if (type === "SUBKR") {
       const obj = newStructure.find((o: any) => String(o.id) === String(objId));
       if (obj) {
         const kr = obj.items?.find((k: any) => String(k.id) === String(krId));
         if (kr) {
           if (!kr.items) kr.items = [];
           kr.items.push(JSON.parse(JSON.stringify(oldItem)));
-          kr.items.sort((a: any, b: any) => parseFloat(a.id) - parseFloat(b.id));
+          kr.items.sort(
+            (a: any, b: any) => parseFloat(a.id) - parseFloat(b.id),
+          );
         }
       }
-    } else if (type === 'SUBSUBKR') {
+    } else if (type === "SUBSUBKR") {
       const obj = newStructure.find((o: any) => String(o.id) === String(objId));
       if (obj) {
         const kr = obj.items?.find((k: any) => String(k.id) === String(krId));
@@ -447,26 +570,34 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
         if (sub) {
           if (!sub.items) sub.items = [];
           sub.items.push(JSON.parse(JSON.stringify(oldItem)));
-          sub.items.sort((a: any, b: any) => String(a.id).localeCompare(String(b.id)));
+          sub.items.sort((a: any, b: any) =>
+            String(a.id).localeCompare(String(b.id)),
+          );
         }
       }
     }
-    
+
     setLocalStructure(newStructure);
     setHasChanges(true);
   };
 
-  const handleOpenEditDialog = (type: 'OBJ' | 'KR' | 'SUBKR' | 'SUBSUBKR', objId: string, krId?: string, subId?: string, subsubId?: string) => {
+  const handleOpenEditDialog = (
+    type: "OBJ" | "KR" | "SUBKR" | "SUBSUBKR",
+    objId: string,
+    krId?: string,
+    subId?: string,
+    subsubId?: string,
+  ) => {
     let item: any = null;
-    const obj = localStructure.find(o => o.id === objId);
-    if (type === 'OBJ') {
+    const obj = localStructure.find((o) => o.id === objId);
+    if (type === "OBJ") {
       item = obj;
-    } else if (type === 'KR') {
+    } else if (type === "KR") {
       item = obj?.items?.find((k: any) => k.id === krId);
-    } else if (type === 'SUBKR') {
+    } else if (type === "SUBKR") {
       const kr = obj?.items?.find((k: any) => k.id === krId);
       item = kr?.items?.find((s: any) => s.id === subId);
-    } else if (type === 'SUBSUBKR') {
+    } else if (type === "SUBSUBKR") {
       const kr = obj?.items?.find((k: any) => k.id === krId);
       const sub = kr?.items?.find((s: any) => s.id === subId);
       item = sub?.items?.find((ss: any) => ss.id === subsubId);
@@ -474,10 +605,10 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
 
     if (item) {
       setEditItemInfo({ type, objId, krId, subId, subsubId });
-      setEditCriteriaTitle(item.title || '');
-      setEditCriteriaMaxScore(String(item.maxScore ?? ''));
-      setEditCriteriaUnitScore(String(item.unitScore ?? ''));
-      setEditCriteriaUnit(item.unit || '');
+      setEditCriteriaTitle(item.title || "");
+      setEditCriteriaMaxScore(String(item.maxScore ?? ""));
+      setEditCriteriaUnitScore(String(item.unitScore ?? ""));
+      setEditCriteriaUnit(item.unit || "");
       setOpenEditDialog(true);
     }
   };
@@ -491,17 +622,19 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
     const obj = newStructure.find((o: any) => o.id === editItemInfo?.objId);
     let targetItem: any = null;
 
-    if (editItemInfo?.type === 'OBJ') {
+    if (editItemInfo?.type === "OBJ") {
       targetItem = obj;
-    } else if (editItemInfo?.type === 'KR') {
+    } else if (editItemInfo?.type === "KR") {
       targetItem = obj?.items?.find((k: any) => k.id === editItemInfo.krId);
-    } else if (editItemInfo?.type === 'SUBKR') {
+    } else if (editItemInfo?.type === "SUBKR") {
       const kr = obj?.items?.find((k: any) => k.id === editItemInfo.krId);
       targetItem = kr?.items?.find((s: any) => s.id === editItemInfo.subId);
-    } else if (editItemInfo?.type === 'SUBSUBKR') {
+    } else if (editItemInfo?.type === "SUBSUBKR") {
       const kr = obj?.items?.find((k: any) => k.id === editItemInfo.krId);
       const sub = kr?.items?.find((s: any) => s.id === editItemInfo.subId);
-      targetItem = sub?.items?.find((ss: any) => ss.id === editItemInfo.subsubId);
+      targetItem = sub?.items?.find(
+        (ss: any) => ss.id === editItemInfo.subsubId,
+      );
     }
 
     if (targetItem) {
@@ -521,7 +654,8 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
     try {
       await api.put(`/okrs/${okr.id}/structure`, {
         keyResults: localStructure,
-        localComments: Object.keys(localComments).length > 0 ? localComments : undefined
+        localComments:
+          Object.keys(localComments).length > 0 ? localComments : undefined,
       });
       setHasChanges(false);
       setLocalComments({});
@@ -557,9 +691,9 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
       sender: "USER",
       createdAt: new Date().toISOString(),
     };
-    setLocalComments(prev => ({
+    setLocalComments((prev) => ({
       ...prev,
-      [itemId]: [...(prev[itemId] || []), newMessage]
+      [itemId]: [...(prev[itemId] || []), newMessage],
     }));
     setChatMessage("");
     setHasChanges(true);
@@ -577,19 +711,11 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
         [field]: field === "quantity" ? Math.max(0, Number(value) || 0) : value,
       },
     }));
+    setHasDraftChanges(true);
+    setDraftSaveStatus("idle");
   };
 
-  const handleSubmitReport = async () => {
-    const ok = await confirmAction({
-      title: "Nộp bài tự khai?",
-      text: "Sau khi nộp, bài sẽ được gửi cho Trưởng khoa duyệt. Bạn chắc chắn chứ?",
-      icon: "question",
-      confirmText: "Nộp bài",
-      confirmColor: "#1976d2",
-    });
-    if (!ok) return;
-    setSaving(true);
-
+  const buildEnrichedReport = () => {
     const enrichedReport: Record<string, any> = {};
     localStructure.forEach((obj: any) => {
       obj.items?.forEach((kr: any) => {
@@ -620,7 +746,8 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
             const subsubKey = `${obj.id}-${kr.id}-${sub.id}-${subsub.id}`;
             const subsubQty = reportData[subsubKey]?.quantity || 0;
             const subsubUnitScore = Number(subsub.unitScore) || 0;
-            const subsubScore = subsubUnitScore > 0 ? subsubQty * subsubUnitScore : subsubQty;
+            const subsubScore =
+              subsubUnitScore > 0 ? subsubQty * subsubUnitScore : subsubQty;
             enrichedReport[subsubKey] = {
               quantity: subsubQty,
               evidence: reportData[subsubKey]?.evidence || "",
@@ -632,6 +759,43 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
         });
       });
     });
+    return enrichedReport;
+  };
+
+  // Auto-save draft effect
+  useEffect(() => {
+    if (!hasDraftChanges || okr.status !== "ACCEPTED") return;
+
+    const timer = setTimeout(async () => {
+      setDraftSaveStatus("saving");
+      try {
+        const enrichedReport = buildEnrichedReport();
+        await api.put(`/okrs/${okr.id}/draft-report`, {
+          selfReportData: enrichedReport,
+        });
+        setDraftSaveStatus("saved");
+        setHasDraftChanges(false);
+      } catch (error) {
+        console.error("Lỗi khi lưu nháp", error);
+        setDraftSaveStatus("idle");
+      }
+    }, 1500); // Auto-save after 1.5s of no typing
+
+    return () => clearTimeout(timer);
+  }, [reportData, hasDraftChanges, okr.status, okr.id, localStructure]);
+
+  const handleSubmitReport = async () => {
+    const ok = await confirmAction({
+      title: "Nộp bài tự khai?",
+      text: "Sau khi nộp, bài sẽ được gửi cho Trưởng khoa duyệt. Bạn chắc chắn chứ?",
+      icon: "question",
+      confirmText: "Nộp bài",
+      confirmColor: "#1976d2",
+    });
+    if (!ok) return;
+    setSaving(true);
+
+    const enrichedReport = buildEnrichedReport();
 
     try {
       await api.put(`/okrs/${okr.id}/self-report`, {
@@ -649,7 +813,8 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
 
   const totalSelfScore = calcTotalScore();
   const maxScore = calcMaxScore();
-  const progressPercent = maxScore > 0 ? Math.min((totalSelfScore / maxScore) * 100, 100) : 0;
+  const progressPercent =
+    maxScore > 0 ? Math.min((totalSelfScore / maxScore) * 100, 100) : 0;
 
   return (
     <Paper
@@ -675,8 +840,16 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
           </Typography>
           <Box sx={{ display: "flex", gap: 1, mt: 0.5, flexWrap: "wrap" }}>
             <Chip
-              label={isAccepted && !isCycleStarted ? "Chờ kỳ bắt đầu" : (statusConfig[okr.status]?.label || okr.status)}
-              color={isAccepted && !isCycleStarted ? "warning" : (statusConfig[okr.status]?.color || "default")}
+              label={
+                isAccepted && !isCycleStarted
+                  ? "Chờ kỳ bắt đầu"
+                  : statusConfig[okr.status]?.label || okr.status
+              }
+              color={
+                isAccepted && !isCycleStarted
+                  ? "warning"
+                  : statusConfig[okr.status]?.color || "default"
+              }
               size="small"
             />
             {okr.deadline && (
@@ -696,7 +869,17 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
             )}
           </Box>
         </Box>
-        <Box sx={{ display: "flex", gap: 1 }}>
+        <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+          {draftSaveStatus === "saving" && (
+            <Typography variant="caption" color="text.secondary" sx={{ mr: 1 }}>
+              Đang lưu nháp...
+            </Typography>
+          )}
+          {draftSaveStatus === "saved" && (
+            <Typography variant="caption" color="success.main" sx={{ mr: 1 }}>
+              Đã lưu nháp
+            </Typography>
+          )}
           <Button
             size="small"
             variant="outlined"
@@ -728,12 +911,20 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
         onClose={() => setExpanded(false)}
         maxWidth="xl"
         fullWidth
-        PaperProps={{ sx: { minHeight: '80vh', maxHeight: '90vh' } }}
+        PaperProps={{ sx: { minHeight: "80vh", maxHeight: "90vh" } }}
       >
-        <DialogTitle sx={{ bgcolor: "#1e3a8a", color: "white", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <DialogTitle
+          sx={{
+            bgcolor: "#1e3a8a",
+            color: "white",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
           <Box>Chi tiết OKR: {okr.objective}</Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            {(isPending || okr.status === 'NEGOTIATING') && hasChanges && (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            {(isPending || okr.status === "NEGOTIATING") && hasChanges && (
               <Button
                 variant="contained"
                 color="success"
@@ -744,7 +935,10 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                 Gửi thay đổi
               </Button>
             )}
-            <IconButton onClick={() => setExpanded(false)} sx={{ color: "white" }}>
+            <IconButton
+              onClick={() => setExpanded(false)}
+              sx={{ color: "white" }}
+            >
               <Close />
             </IconButton>
           </Box>
@@ -753,7 +947,11 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
           {isAccepted && !isCycleStarted && (
             <Box sx={{ p: 2, bgcolor: "#fffbeb" }}>
               <Alert severity="warning">
-                Kỳ đánh giá chưa bắt đầu (Dự kiến bắt đầu từ <strong>{new Date(okr.cycle.startDate).toLocaleDateString('vi-VN')}</strong>). Bạn chưa thể tự khai điểm lúc này.
+                Kỳ đánh giá chưa bắt đầu (Dự kiến bắt đầu từ{" "}
+                <strong>
+                  {new Date(okr.cycle.startDate).toLocaleDateString("vi-VN")}
+                </strong>
+                ). Bạn chưa thể tự khai điểm lúc này.
               </Alert>
             </Box>
           )}
@@ -762,26 +960,99 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
             <Table size="small">
               <TableHead sx={{ bgcolor: "#1e3a8a" }}>
                 <TableRow>
-                  <TableCell sx={{ color: "white", fontWeight: "bold", width: "5%" }}>STT</TableCell>
-                  <TableCell sx={{ color: "white", fontWeight: "bold", width: "30%" }}>Nội dung</TableCell>
-                  <TableCell sx={{ color: "white", fontWeight: "bold", width: "10%" }}>Điểm tối đa</TableCell>
-                  <TableCell sx={{ color: "white", fontWeight: "bold", width: "12%" }}>Điểm/đơn vị</TableCell>
+                  <TableCell
+                    sx={{ color: "white", fontWeight: "bold", width: "5%" }}
+                  >
+                    STT
+                  </TableCell>
+                  <TableCell
+                    sx={{ color: "white", fontWeight: "bold", width: "30%" }}
+                  >
+                    Nội dung
+                  </TableCell>
+                  <TableCell
+                    sx={{ color: "white", fontWeight: "bold", width: "10%" }}
+                  >
+                    Điểm tối đa
+                  </TableCell>
+                  <TableCell
+                    sx={{ color: "white", fontWeight: "bold", width: "12%" }}
+                  >
+                    Điểm/đơn vị
+                  </TableCell>
                   {canReport && (
                     <>
-                      <TableCell sx={{ color: "white", fontWeight: "bold", width: "12%" }}>Số lượng tự khai</TableCell>
-                      <TableCell sx={{ color: "white", fontWeight: "bold", width: "10%" }}>Quy đổi</TableCell>
-                      <TableCell sx={{ color: "white", fontWeight: "bold", width: "21%" }}>Minh chứng</TableCell>
+                      <TableCell
+                        sx={{
+                          color: "white",
+                          fontWeight: "bold",
+                          width: "12%",
+                        }}
+                      >
+                        Số lượng tự khai
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          color: "white",
+                          fontWeight: "bold",
+                          width: "10%",
+                        }}
+                      >
+                        Quy đổi
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          color: "white",
+                          fontWeight: "bold",
+                          width: "21%",
+                        }}
+                      >
+                        Minh chứng
+                      </TableCell>
                     </>
                   )}
                   {(isSubmitted || isCompleted) && (
                     <>
-                      <TableCell sx={{ color: "white", fontWeight: "bold", width: "10%" }}>Số lượng tự khai</TableCell>
-                      <TableCell sx={{ color: "white", fontWeight: "bold", width: "10%" }}>Điểm khai</TableCell>
-                      <TableCell sx={{ color: "white", fontWeight: "bold", width: "10%" }}>Tổng điểm nhiệm vụ</TableCell>
+                      <TableCell
+                        sx={{
+                          color: "white",
+                          fontWeight: "bold",
+                          width: "10%",
+                        }}
+                      >
+                        Số lượng tự khai
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          color: "white",
+                          fontWeight: "bold",
+                          width: "10%",
+                        }}
+                      >
+                        Điểm khai
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          color: "white",
+                          fontWeight: "bold",
+                          width: "10%",
+                        }}
+                      >
+                        Tổng điểm nhiệm vụ
+                      </TableCell>
                     </>
                   )}
-                  {(isPending || okr.status === 'NEGOTIATING') && (
-                    <TableCell sx={{ color: "white", fontWeight: "bold", width: "10%", textAlign: "center" }}>Đàm phán</TableCell>
+                  {(isPending || okr.status === "NEGOTIATING") && (
+                    <TableCell
+                      sx={{
+                        color: "white",
+                        fontWeight: "bold",
+                        width: "10%",
+                        textAlign: "center",
+                      }}
+                    >
+                      Đàm phán
+                    </TableCell>
                   )}
                 </TableRow>
               </TableHead>
@@ -793,35 +1064,97 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                   return (
                     <React.Fragment key={obj.id || oIndex}>
                       {isObjChanged && renderOldRow(oldObj, 2)}
-                      <TableRow sx={{ bgcolor: isObjChanged ? "#fef08a" : "#dbeafe" }}>
-                        <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>{obj.id}</TableCell>
-                        <TableCell sx={{ fontWeight: "bold" }}>{isObjChanged ? '[Mới] ' : ''}{obj.title}</TableCell>
-                        <TableCell sx={{ fontWeight: "bold" }}>{obj.maxScore}</TableCell>
+                      <TableRow
+                        sx={{ bgcolor: isObjChanged ? "#fef08a" : "#dbeafe" }}
+                      >
+                        <TableCell
+                          sx={{ fontWeight: "bold", fontSize: "1rem" }}
+                        >
+                          {obj.id}
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>
+                          {isObjChanged ? "[Mới] " : ""}
+                          {obj.title}
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>
+                          {obj.maxScore}
+                        </TableCell>
                         <TableCell></TableCell>
-                        {canReport && <><TableCell></TableCell><TableCell></TableCell><TableCell></TableCell></>}
+                        {canReport && (
+                          <>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                          </>
+                        )}
                         {(isSubmitted || isCompleted) && (
-                          <><TableCell></TableCell><TableCell></TableCell>
-                            <TableCell sx={{ fontWeight: "bold", color: "#15803d", fontSize: "1rem" }}>
+                          <>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                            <TableCell
+                              sx={{
+                                fontWeight: "bold",
+                                color: "#15803d",
+                                fontSize: "1rem",
+                              }}
+                            >
                               {calcObjectiveScore(obj)} / {obj.maxScore || 0}
                             </TableCell>
                           </>
                         )}
-                        {(isPending || okr.status === 'NEGOTIATING') && (
+                        {(isPending || okr.status === "NEGOTIATING") && (
                           <TableCell align="center">
-                            <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
-                              <IconButton size="small" onClick={() => handleOpenAddDialog('KR', obj.id)} title="Thêm tiêu chí">
+                            <Box
+                              sx={{
+                                display: "flex",
+                                gap: 1,
+                                justifyContent: "center",
+                              }}
+                            >
+                              <IconButton
+                                size="small"
+                                onClick={() =>
+                                  handleOpenAddDialog("KR", obj.id)
+                                }
+                                title="Thêm tiêu chí"
+                              >
                                 <Add fontSize="small" color="success" />
                               </IconButton>
                               {isObjChanged && (
-                                <IconButton size="small" onClick={() => handleUndoItem('OBJ', obj.id)} title="Hoàn tác thay đổi">
+                                <IconButton
+                                  size="small"
+                                  onClick={() => handleUndoItem("OBJ", obj.id)}
+                                  title="Hoàn tác thay đổi"
+                                >
                                   <Undo fontSize="small" color="primary" />
                                 </IconButton>
                               )}
-                              <IconButton size="small" onClick={() => handleOpenEditDialog('OBJ', obj.id)} title="Chỉnh sửa">
+                              <IconButton
+                                size="small"
+                                onClick={() =>
+                                  handleOpenEditDialog("OBJ", obj.id)
+                                }
+                                title="Chỉnh sửa"
+                              >
                                 <Edit fontSize="small" color="info" />
                               </IconButton>
-                              <IconButton size="small" onClick={() => setActiveChatId(activeChatId === obj.id ? null : obj.id)}>
-                                <Comment fontSize="small" color={(okr.proposedChanges?.[obj.id]?.length > 0 || localComments[obj.id]?.length > 0) ? "primary" : "inherit"} />
+                              <IconButton
+                                size="small"
+                                onClick={() =>
+                                  setActiveChatId(
+                                    activeChatId === obj.id ? null : obj.id,
+                                  )
+                                }
+                              >
+                                <Comment
+                                  fontSize="small"
+                                  color={
+                                    okr.proposedChanges?.[obj.id]?.length > 0 ||
+                                    localComments[obj.id]?.length > 0
+                                      ? "primary"
+                                      : "inherit"
+                                  }
+                                />
                               </IconButton>
                             </Box>
                           </TableCell>
@@ -830,7 +1163,10 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                       <NegotiationChat
                         itemId={obj.id}
                         activeChatId={activeChatId}
-                        history={[...(okr.proposedChanges?.[obj.id] || []), ...(localComments[obj.id] || [])]}
+                        history={[
+                          ...(okr.proposedChanges?.[obj.id] || []),
+                          ...(localComments[obj.id] || []),
+                        ]}
                         chatMessage={chatMessage}
                         setChatMessage={setChatMessage}
                         onSend={handleSendChat}
@@ -843,7 +1179,8 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                         const krKey = `${obj.id}-${kr.id}`;
                         const krQty = reportData[krKey]?.quantity || 0;
                         const krUnitScore = Number(kr.unitScore) || 0;
-                        const krCalcScore = krUnitScore > 0 ? krQty * krUnitScore : krQty;
+                        const krCalcScore =
+                          krUnitScore > 0 ? krQty * krUnitScore : krQty;
                         const existingReport = okr.selfReportData?.[krKey];
                         const oldKr = findOriginalItem(obj.id, kr.id);
                         const isKrChanged = hasChanged(kr, oldKr);
@@ -852,14 +1189,57 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                         return (
                           <React.Fragment key={`${oIndex}-${kIndex}`}>
                             {isKrChanged && renderOldRow(oldKr, 3)}
-                            <TableRow sx={{ bgcolor: (isKrNew || isKrChanged || kr.isEdited) ? "#fef08a" : "#f8fafc" }}>
-                              <TableCell sx={{ pl: 3, fontWeight: (isKrNew || isKrChanged || kr.isEdited) ? "bold" : "normal" }}>{kr.id}</TableCell>
-                              <TableCell sx={{ fontWeight: (isKrNew || isKrChanged || kr.isEdited) ? "bold" : "normal" }}>{isKrChanged ? '[Mới] ' : ''}{kr.title}</TableCell>
-                              <TableCell sx={{ fontWeight: (isKrNew || isKrChanged || kr.isEdited) ? "bold" : "normal" }}>{kr.maxScore || "—"}</TableCell>
+                            <TableRow
+                              sx={{
+                                bgcolor:
+                                  isKrNew || isKrChanged || kr.isEdited
+                                    ? "#fef08a"
+                                    : "#f8fafc",
+                              }}
+                            >
+                              <TableCell
+                                sx={{
+                                  pl: 3,
+                                  fontWeight:
+                                    isKrNew || isKrChanged || kr.isEdited
+                                      ? "bold"
+                                      : "normal",
+                                }}
+                              >
+                                {kr.id}
+                              </TableCell>
+                              <TableCell
+                                sx={{
+                                  fontWeight:
+                                    isKrNew || isKrChanged || kr.isEdited
+                                      ? "bold"
+                                      : "normal",
+                                }}
+                              >
+                                {isKrChanged ? "[Mới] " : ""}
+                                {kr.title}
+                              </TableCell>
+                              <TableCell
+                                sx={{
+                                  fontWeight:
+                                    isKrNew || isKrChanged || kr.isEdited
+                                      ? "bold"
+                                      : "normal",
+                                }}
+                              >
+                                {kr.maxScore || "—"}
+                              </TableCell>
                               <TableCell>
                                 {kr.unitScore ? (
-                                  <Chip label={`+${kr.unitScore}/${kr.unit || "đv"}`} size="small" color="primary" variant="outlined" />
-                                ) : "—"}
+                                  <Chip
+                                    label={`+${kr.unitScore}/${kr.unit || "đv"}`}
+                                    size="small"
+                                    color="primary"
+                                    variant="outlined"
+                                  />
+                                ) : (
+                                  "—"
+                                )}
                               </TableCell>
                               {canReport && (
                                 <>
@@ -868,48 +1248,136 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                       size="small"
                                       type="number"
                                       value={krQty || ""}
-                                      onChange={(e) => updateReport(krKey, "quantity", e.target.value)}
-                                      inputProps={{ min: 0, style: { textAlign: "center" } }}
+                                      onChange={(e) =>
+                                        updateReport(
+                                          krKey,
+                                          "quantity",
+                                          e.target.value,
+                                        )
+                                      }
+                                      inputProps={{
+                                        min: 0,
+                                        style: { textAlign: "center" },
+                                      }}
                                       sx={{ width: 80 }}
                                     />
                                   </TableCell>
-                                  <TableCell sx={{ fontWeight: "bold", color: "#2563eb" }}>{krCalcScore.toFixed(1)}</TableCell>
+                                  <TableCell
+                                    sx={{
+                                      fontWeight: "bold",
+                                      color: "#2563eb",
+                                    }}
+                                  >
+                                    {krCalcScore.toFixed(1)}
+                                  </TableCell>
                                   <TableCell>
                                     <TextField
                                       size="small"
                                       fullWidth
                                       placeholder="Link minh chứng..."
                                       value={reportData[krKey]?.evidence || ""}
-                                      onChange={(e) => updateReport(krKey, "evidence", e.target.value)}
+                                      onChange={(e) =>
+                                        updateReport(
+                                          krKey,
+                                          "evidence",
+                                          e.target.value,
+                                        )
+                                      }
                                     />
                                   </TableCell>
                                 </>
                               )}
                               {(isSubmitted || isCompleted) && (
                                 <>
-                                  <TableCell>{existingReport?.quantity || 0}</TableCell>
-                                  <TableCell sx={{ fontWeight: "bold", color: "#2563eb" }}>{existingReport?.score || 0}</TableCell>
+                                  <TableCell>
+                                    {existingReport?.quantity || 0}
+                                  </TableCell>
+                                  <TableCell
+                                    sx={{
+                                      fontWeight: "bold",
+                                      color: "#2563eb",
+                                    }}
+                                  >
+                                    {existingReport?.score || 0}
+                                  </TableCell>
                                   <TableCell></TableCell>
                                 </>
                               )}
-                              {(isPending || okr.status === 'NEGOTIATING') && (
+                              {(isPending || okr.status === "NEGOTIATING") && (
                                 <TableCell align="center">
-                                  <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
-                                    <IconButton size="small" onClick={() => handleOpenAddDialog('SUBKR', obj.id, kr.id)} title="Thêm tiêu chí con">
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      gap: 1,
+                                      justifyContent: "center",
+                                    }}
+                                  >
+                                    <IconButton
+                                      size="small"
+                                      onClick={() =>
+                                        handleOpenAddDialog(
+                                          "SUBKR",
+                                          obj.id,
+                                          kr.id,
+                                        )
+                                      }
+                                      title="Thêm tiêu chí con"
+                                    >
                                       <Add fontSize="small" color="success" />
                                     </IconButton>
                                     {isKrChanged && (
-                                      <IconButton size="small" onClick={() => handleUndoItem('KR', obj.id, kr.id)} title="Hoàn tác thay đổi">
-                                        <Undo fontSize="small" color="primary" />
+                                      <IconButton
+                                        size="small"
+                                        onClick={() =>
+                                          handleUndoItem("KR", obj.id, kr.id)
+                                        }
+                                        title="Hoàn tác thay đổi"
+                                      >
+                                        <Undo
+                                          fontSize="small"
+                                          color="primary"
+                                        />
                                       </IconButton>
                                     )}
-                                    <IconButton size="small" onClick={() => handleOpenEditDialog('KR', obj.id, kr.id)} title="Chỉnh sửa">
+                                    <IconButton
+                                      size="small"
+                                      onClick={() =>
+                                        handleOpenEditDialog(
+                                          "KR",
+                                          obj.id,
+                                          kr.id,
+                                        )
+                                      }
+                                      title="Chỉnh sửa"
+                                    >
                                       <Edit fontSize="small" color="info" />
                                     </IconButton>
-                                    <IconButton size="small" onClick={() => setActiveChatId(activeChatId === kr.id ? null : kr.id)}>
-                                      <Comment fontSize="small" color={(okr.proposedChanges?.[kr.id]?.length > 0 || localComments[kr.id]?.length > 0) ? "primary" : "inherit"} />
+                                    <IconButton
+                                      size="small"
+                                      onClick={() =>
+                                        setActiveChatId(
+                                          activeChatId === kr.id ? null : kr.id,
+                                        )
+                                      }
+                                    >
+                                      <Comment
+                                        fontSize="small"
+                                        color={
+                                          okr.proposedChanges?.[kr.id]?.length >
+                                            0 ||
+                                          localComments[kr.id]?.length > 0
+                                            ? "primary"
+                                            : "inherit"
+                                        }
+                                      />
                                     </IconButton>
-                                    <IconButton size="small" onClick={() => handleDeleteItem(obj.id, kr.id)} title="Xóa tiêu chí">
+                                    <IconButton
+                                      size="small"
+                                      onClick={() =>
+                                        handleDeleteItem(obj.id, kr.id)
+                                      }
+                                      title="Xóa tiêu chí"
+                                    >
                                       <Delete fontSize="small" color="error" />
                                     </IconButton>
                                   </Box>
@@ -919,7 +1387,10 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                             <NegotiationChat
                               itemId={kr.id}
                               activeChatId={activeChatId}
-                              history={[...(okr.proposedChanges?.[kr.id] || []), ...(localComments[kr.id] || [])]}
+                              history={[
+                                ...(okr.proposedChanges?.[kr.id] || []),
+                                ...(localComments[kr.id] || []),
+                              ]}
                               chatMessage={chatMessage}
                               setChatMessage={setChatMessage}
                               onSend={handleSendChat}
@@ -932,23 +1403,84 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                               const subKey = `${obj.id}-${kr.id}-${sub.id}`;
                               const subQty = reportData[subKey]?.quantity || 0;
                               const subUnitScore = Number(sub.unitScore) || 0;
-                              const subCalcScore = subUnitScore > 0 ? subQty * subUnitScore : subQty;
+                              const subCalcScore =
+                                subUnitScore > 0
+                                  ? subQty * subUnitScore
+                                  : subQty;
                               const existingSub = okr.selfReportData?.[subKey];
-                              const oldSub = findOriginalItem(obj.id, kr.id, sub.id);
+                              const oldSub = findOriginalItem(
+                                obj.id,
+                                kr.id,
+                                sub.id,
+                              );
                               const isSubChanged = hasChanged(sub, oldSub);
-                              const isSubNew = originalStructure ? !oldSub : false;
+                              const isSubNew = originalStructure
+                                ? !oldSub
+                                : false;
 
                               return (
-                                <React.Fragment key={`${oIndex}-${kIndex}-${sIndex}`}>
+                                <React.Fragment
+                                  key={`${oIndex}-${kIndex}-${sIndex}`}
+                                >
                                   {isSubChanged && renderOldRow(oldSub, 6)}
-                                  <TableRow sx={{ bgcolor: (isSubNew || isSubChanged || sub.isEdited) ? "#fef08a" : "inherit" }}>
-                                    <TableCell sx={{ pl: 6, fontSize: "0.85rem", fontWeight: (isSubNew || isSubChanged || sub.isEdited) ? "bold" : "normal" }}>{sub.id}</TableCell>
-                                    <TableCell sx={{ fontSize: "0.9rem", fontWeight: (isSubNew || isSubChanged || sub.isEdited) ? "bold" : "normal" }}>{isSubChanged ? '[Mới] ' : ''}{sub.title}</TableCell>
-                                    <TableCell sx={{ fontWeight: (isSubNew || isSubChanged || sub.isEdited) ? "bold" : "normal" }}>{sub.maxScore || "—"}</TableCell>
+                                  <TableRow
+                                    sx={{
+                                      bgcolor:
+                                        isSubNew || isSubChanged || sub.isEdited
+                                          ? "#fef08a"
+                                          : "inherit",
+                                    }}
+                                  >
+                                    <TableCell
+                                      sx={{
+                                        pl: 6,
+                                        fontSize: "0.85rem",
+                                        fontWeight:
+                                          isSubNew ||
+                                          isSubChanged ||
+                                          sub.isEdited
+                                            ? "bold"
+                                            : "normal",
+                                      }}
+                                    >
+                                      {sub.id}
+                                    </TableCell>
+                                    <TableCell
+                                      sx={{
+                                        fontSize: "0.9rem",
+                                        fontWeight:
+                                          isSubNew ||
+                                          isSubChanged ||
+                                          sub.isEdited
+                                            ? "bold"
+                                            : "normal",
+                                      }}
+                                    >
+                                      {isSubChanged ? "[Mới] " : ""}
+                                      {sub.title}
+                                    </TableCell>
+                                    <TableCell
+                                      sx={{
+                                        fontWeight:
+                                          isSubNew ||
+                                          isSubChanged ||
+                                          sub.isEdited
+                                            ? "bold"
+                                            : "normal",
+                                      }}
+                                    >
+                                      {sub.maxScore || "—"}
+                                    </TableCell>
                                     <TableCell>
                                       {sub.unitScore ? (
-                                        <Chip label={`+${sub.unitScore}/${sub.unit || "đv"}`} size="small" variant="outlined" />
-                                      ) : "—"}
+                                        <Chip
+                                          label={`+${sub.unitScore}/${sub.unit || "đv"}`}
+                                          size="small"
+                                          variant="outlined"
+                                        />
+                                      ) : (
+                                        "—"
+                                      )}
                                     </TableCell>
                                     {canReport && (
                                       <>
@@ -957,46 +1489,146 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                             size="small"
                                             type="number"
                                             value={subQty || ""}
-                                            onChange={(e) => updateReport(subKey, "quantity", e.target.value)}
-                                            inputProps={{ min: 0, style: { textAlign: "center" } }}
+                                            onChange={(e) =>
+                                              updateReport(
+                                                subKey,
+                                                "quantity",
+                                                e.target.value,
+                                              )
+                                            }
+                                            inputProps={{
+                                              min: 0,
+                                              style: { textAlign: "center" },
+                                            }}
                                             sx={{ width: 80 }}
                                           />
                                         </TableCell>
-                                        <TableCell sx={{ fontWeight: "bold", color: "#2563eb" }}>{subCalcScore.toFixed(1)}</TableCell>
+                                        <TableCell
+                                          sx={{
+                                            fontWeight: "bold",
+                                            color: "#2563eb",
+                                          }}
+                                        >
+                                          {subCalcScore.toFixed(1)}
+                                        </TableCell>
                                         <TableCell>
                                           <TextField
                                             size="small"
                                             fullWidth
                                             placeholder="Link..."
-                                            value={reportData[subKey]?.evidence || ""}
-                                            onChange={(e) => updateReport(subKey, "evidence", e.target.value)}
+                                            value={
+                                              reportData[subKey]?.evidence || ""
+                                            }
+                                            onChange={(e) =>
+                                              updateReport(
+                                                subKey,
+                                                "evidence",
+                                                e.target.value,
+                                              )
+                                            }
                                           />
                                         </TableCell>
                                       </>
                                     )}
                                     {(isSubmitted || isCompleted) && (
                                       <>
-                                        <TableCell>{existingSub?.quantity || 0}</TableCell>
-                                        <TableCell sx={{ fontWeight: "bold", color: "#2563eb" }}>{existingSub?.score || 0}</TableCell>
+                                        <TableCell>
+                                          {existingSub?.quantity || 0}
+                                        </TableCell>
+                                        <TableCell
+                                          sx={{
+                                            fontWeight: "bold",
+                                            color: "#2563eb",
+                                          }}
+                                        >
+                                          {existingSub?.score || 0}
+                                        </TableCell>
                                         <TableCell></TableCell>
                                       </>
                                     )}
-                                    {(isPending || okr.status === 'NEGOTIATING') && (
+                                    {(isPending ||
+                                      okr.status === "NEGOTIATING") && (
                                       <TableCell align="center">
-                                        <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
-                                          <IconButton size="small" onClick={() => handleOpenEditDialog('SUBKR', obj.id, kr.id, sub.id)} title="Chỉnh sửa">
-                                            <Edit fontSize="small" color="info" />
+                                        <Box
+                                          sx={{
+                                            display: "flex",
+                                            gap: 1,
+                                            justifyContent: "center",
+                                          }}
+                                        >
+                                          <IconButton
+                                            size="small"
+                                            onClick={() =>
+                                              handleOpenEditDialog(
+                                                "SUBKR",
+                                                obj.id,
+                                                kr.id,
+                                                sub.id,
+                                              )
+                                            }
+                                            title="Chỉnh sửa"
+                                          >
+                                            <Edit
+                                              fontSize="small"
+                                              color="info"
+                                            />
                                           </IconButton>
                                           {isSubChanged && (
-                                            <IconButton size="small" onClick={() => handleUndoItem('SUBKR', obj.id, kr.id, sub.id)} title="Hoàn tác thay đổi">
-                                              <Undo fontSize="small" color="primary" />
+                                            <IconButton
+                                              size="small"
+                                              onClick={() =>
+                                                handleUndoItem(
+                                                  "SUBKR",
+                                                  obj.id,
+                                                  kr.id,
+                                                  sub.id,
+                                                )
+                                              }
+                                              title="Hoàn tác thay đổi"
+                                            >
+                                              <Undo
+                                                fontSize="small"
+                                                color="primary"
+                                              />
                                             </IconButton>
                                           )}
-                                          <IconButton size="small" onClick={() => setActiveChatId(activeChatId === sub.id ? null : sub.id)}>
-                                            <Comment fontSize="small" color={(okr.proposedChanges?.[sub.id]?.length > 0 || localComments[sub.id]?.length > 0) ? "primary" : "inherit"} />
+                                          <IconButton
+                                            size="small"
+                                            onClick={() =>
+                                              setActiveChatId(
+                                                activeChatId === sub.id
+                                                  ? null
+                                                  : sub.id,
+                                              )
+                                            }
+                                          >
+                                            <Comment
+                                              fontSize="small"
+                                              color={
+                                                okr.proposedChanges?.[sub.id]
+                                                  ?.length > 0 ||
+                                                localComments[sub.id]?.length >
+                                                  0
+                                                  ? "primary"
+                                                  : "inherit"
+                                              }
+                                            />
                                           </IconButton>
-                                          <IconButton size="small" onClick={() => handleDeleteItem(obj.id, kr.id, sub.id)} title="Xóa tiêu chí con">
-                                            <Delete fontSize="small" color="error" />
+                                          <IconButton
+                                            size="small"
+                                            onClick={() =>
+                                              handleDeleteItem(
+                                                obj.id,
+                                                kr.id,
+                                                sub.id,
+                                              )
+                                            }
+                                            title="Xóa tiêu chí con"
+                                          >
+                                            <Delete
+                                              fontSize="small"
+                                              color="error"
+                                            />
                                           </IconButton>
                                         </Box>
                                       </TableCell>
@@ -1005,7 +1637,10 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                   <NegotiationChat
                                     itemId={sub.id}
                                     activeChatId={activeChatId}
-                                    history={[...(okr.proposedChanges?.[sub.id] || []), ...(localComments[sub.id] || [])]}
+                                    history={[
+                                      ...(okr.proposedChanges?.[sub.id] || []),
+                                      ...(localComments[sub.id] || []),
+                                    ]}
                                     chatMessage={chatMessage}
                                     setChatMessage={setChatMessage}
                                     onSend={handleSendChat}
@@ -1014,94 +1649,283 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                     status={okr.status}
                                   />
 
-                                  {sub.items?.map((subsub: any, ssIndex: number) => {
-                                    const subsubKey = `${obj.id}-${kr.id}-${sub.id}-${subsub.id}`;
-                                    const subsubQty = reportData[subsubKey]?.quantity || 0;
-                                    const subsubUnitScore = Number(subsub.unitScore) || 0;
-                                    const subsubCalcScore = subsubUnitScore > 0 ? subsubQty * subsubUnitScore : subsubQty;
-                                    const existingSubSub = okr.selfReportData?.[subsubKey];
-                                    const oldSubSub = findOriginalItem(obj.id, kr.id, sub.id, subsub.id);
-                                    const isSubSubChanged = hasChanged(subsub, oldSubSub);
-                                    const isSubSubNew = originalStructure ? !oldSubSub : false;
+                                  {sub.items?.map(
+                                    (subsub: any, ssIndex: number) => {
+                                      const subsubKey = `${obj.id}-${kr.id}-${sub.id}-${subsub.id}`;
+                                      const subsubQty =
+                                        reportData[subsubKey]?.quantity || 0;
+                                      const subsubUnitScore =
+                                        Number(subsub.unitScore) || 0;
+                                      const subsubCalcScore =
+                                        subsubUnitScore > 0
+                                          ? subsubQty * subsubUnitScore
+                                          : subsubQty;
+                                      const existingSubSub =
+                                        okr.selfReportData?.[subsubKey];
+                                      const oldSubSub = findOriginalItem(
+                                        obj.id,
+                                        kr.id,
+                                        sub.id,
+                                        subsub.id,
+                                      );
+                                      const isSubSubChanged = hasChanged(
+                                        subsub,
+                                        oldSubSub,
+                                      );
+                                      const isSubSubNew = originalStructure
+                                        ? !oldSubSub
+                                        : false;
 
-                                    return (
-                                      <React.Fragment key={`${oIndex}-${kIndex}-${sIndex}-${ssIndex}`}>
-                                        {isSubSubChanged && renderOldRow(oldSubSub, 9)}
-                                        <TableRow sx={{ bgcolor: (isSubSubNew || isSubSubChanged || subsub.isEdited) ? "#fef08a" : "#fffbeb" }}>
-                                          <TableCell sx={{ pl: 9, fontSize: "0.8rem", fontWeight: (isSubSubNew || isSubSubChanged || subsub.isEdited) ? "bold" : "normal" }}>{subsub.id}</TableCell>
-                                          <TableCell sx={{ fontSize: "0.85rem", fontWeight: (isSubSubNew || isSubSubChanged || subsub.isEdited) ? "bold" : "normal" }}>{isSubSubChanged ? '[Mới] ' : ''}{subsub.title}</TableCell>
-                                          <TableCell sx={{ fontWeight: (isSubSubNew || isSubSubChanged || subsub.isEdited) ? "bold" : "normal" }}>—</TableCell>
-                                          <TableCell>
-                                            {subsub.unitScore ? (
-                                              <Chip label={`+${subsub.unitScore}/${subsub.unit || "đv"}`} size="small" variant="outlined" sx={{ fontSize: "0.75rem" }} />
-                                            ) : "—"}
-                                          </TableCell>
-                                          {canReport && (
-                                            <>
-                                              <TableCell>
-                                                <TextField
-                                                  size="small"
-                                                  type="number"
-                                                  value={subsubQty || ""}
-                                                  onChange={(e) => updateReport(subsubKey, "quantity", e.target.value)}
-                                                  inputProps={{ min: 0, style: { textAlign: "center" } }}
-                                                  sx={{ width: 80 }}
-                                                />
-                                              </TableCell>
-                                              <TableCell sx={{ fontWeight: "bold", color: "#2563eb" }}>{subsubCalcScore.toFixed(1)}</TableCell>
-                                              <TableCell>
-                                                <TextField
-                                                  size="small"
-                                                  fullWidth
-                                                  placeholder="Link..."
-                                                  value={reportData[subsubKey]?.evidence || ""}
-                                                  onChange={(e) => updateReport(subsubKey, "evidence", e.target.value)}
-                                                />
-                                              </TableCell>
-                                            </>
-                                          )}
-                                          {(isSubmitted || isCompleted) && (
-                                            <>
-                                              <TableCell>{existingSubSub?.quantity || 0}</TableCell>
-                                              <TableCell sx={{ fontWeight: "bold", color: "#2563eb" }}>{existingSubSub?.score || 0}</TableCell>
-                                              <TableCell></TableCell>
-                                            </>
-                                          )}
-                                          {(isPending || okr.status === 'NEGOTIATING') && (
-                                            <TableCell align="center">
-                                              <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
-                                                <IconButton size="small" onClick={() => handleOpenEditDialog('SUBSUBKR', obj.id, kr.id, sub.id, subsub.id)} title="Chỉnh sửa">
-                                                  <Edit fontSize="small" color="info" />
-                                                </IconButton>
-                                                {isSubSubChanged && (
-                                                  <IconButton size="small" onClick={() => handleUndoItem('SUBSUBKR', obj.id, kr.id, sub.id, subsub.id)} title="Hoàn tác thay đổi">
-                                                    <Undo fontSize="small" color="primary" />
-                                                  </IconButton>
-                                                )}
-                                                <IconButton size="small" onClick={() => setActiveChatId(activeChatId === subsub.id ? null : subsub.id)}>
-                                                  <Comment fontSize="small" color={(okr.proposedChanges?.[subsub.id]?.length > 0 || localComments[subsub.id]?.length > 0) ? "primary" : "inherit"} />
-                                                </IconButton>
-                                                <IconButton size="small" onClick={() => handleDeleteItem(obj.id, kr.id, sub.id, subsub.id)} title="Xóa tiêu chí con">
-                                                  <Delete fontSize="small" color="error" />
-                                                </IconButton>
-                                              </Box>
+                                      return (
+                                        <React.Fragment
+                                          key={`${oIndex}-${kIndex}-${sIndex}-${ssIndex}`}
+                                        >
+                                          {isSubSubChanged &&
+                                            renderOldRow(oldSubSub, 9)}
+                                          <TableRow
+                                            sx={{
+                                              bgcolor:
+                                                isSubSubNew ||
+                                                isSubSubChanged ||
+                                                subsub.isEdited
+                                                  ? "#fef08a"
+                                                  : "#fffbeb",
+                                            }}
+                                          >
+                                            <TableCell
+                                              sx={{
+                                                pl: 9,
+                                                fontSize: "0.8rem",
+                                                fontWeight:
+                                                  isSubSubNew ||
+                                                  isSubSubChanged ||
+                                                  subsub.isEdited
+                                                    ? "bold"
+                                                    : "normal",
+                                              }}
+                                            >
+                                              {subsub.id}
                                             </TableCell>
-                                          )}
-                                        </TableRow>
-                                        <NegotiationChat
-                                          itemId={subsub.id}
-                                          activeChatId={activeChatId}
-                                          history={[...(okr.proposedChanges?.[subsub.id] || []), ...(localComments[subsub.id] || [])]}
-                                          chatMessage={chatMessage}
-                                          setChatMessage={setChatMessage}
-                                          onSend={handleSendChat}
-                                          loading={chatLoading}
-                                          colSpan={11}
-                                          status={okr.status}
-                                        />
-                                      </React.Fragment>
-                                    );
-                                  })}
+                                            <TableCell
+                                              sx={{
+                                                fontSize: "0.85rem",
+                                                fontWeight:
+                                                  isSubSubNew ||
+                                                  isSubSubChanged ||
+                                                  subsub.isEdited
+                                                    ? "bold"
+                                                    : "normal",
+                                              }}
+                                            >
+                                              {isSubSubChanged ? "[Mới] " : ""}
+                                              {subsub.title}
+                                            </TableCell>
+                                            <TableCell
+                                              sx={{
+                                                fontWeight:
+                                                  isSubSubNew ||
+                                                  isSubSubChanged ||
+                                                  subsub.isEdited
+                                                    ? "bold"
+                                                    : "normal",
+                                              }}
+                                            >
+                                              —
+                                            </TableCell>
+                                            <TableCell>
+                                              {subsub.unitScore ? (
+                                                <Chip
+                                                  label={`+${subsub.unitScore}/${subsub.unit || "đv"}`}
+                                                  size="small"
+                                                  variant="outlined"
+                                                  sx={{ fontSize: "0.75rem" }}
+                                                />
+                                              ) : (
+                                                "—"
+                                              )}
+                                            </TableCell>
+                                            {canReport && (
+                                              <>
+                                                <TableCell>
+                                                  <TextField
+                                                    size="small"
+                                                    type="number"
+                                                    value={subsubQty || ""}
+                                                    onChange={(e) =>
+                                                      updateReport(
+                                                        subsubKey,
+                                                        "quantity",
+                                                        e.target.value,
+                                                      )
+                                                    }
+                                                    inputProps={{
+                                                      min: 0,
+                                                      style: {
+                                                        textAlign: "center",
+                                                      },
+                                                    }}
+                                                    sx={{ width: 80 }}
+                                                  />
+                                                </TableCell>
+                                                <TableCell
+                                                  sx={{
+                                                    fontWeight: "bold",
+                                                    color: "#2563eb",
+                                                  }}
+                                                >
+                                                  {subsubCalcScore.toFixed(1)}
+                                                </TableCell>
+                                                <TableCell>
+                                                  <TextField
+                                                    size="small"
+                                                    fullWidth
+                                                    placeholder="Link..."
+                                                    value={
+                                                      reportData[subsubKey]
+                                                        ?.evidence || ""
+                                                    }
+                                                    onChange={(e) =>
+                                                      updateReport(
+                                                        subsubKey,
+                                                        "evidence",
+                                                        e.target.value,
+                                                      )
+                                                    }
+                                                  />
+                                                </TableCell>
+                                              </>
+                                            )}
+                                            {(isSubmitted || isCompleted) && (
+                                              <>
+                                                <TableCell>
+                                                  {existingSubSub?.quantity ||
+                                                    0}
+                                                </TableCell>
+                                                <TableCell
+                                                  sx={{
+                                                    fontWeight: "bold",
+                                                    color: "#2563eb",
+                                                  }}
+                                                >
+                                                  {existingSubSub?.score || 0}
+                                                </TableCell>
+                                                <TableCell></TableCell>
+                                              </>
+                                            )}
+                                            {(isPending ||
+                                              okr.status === "NEGOTIATING") && (
+                                              <TableCell align="center">
+                                                <Box
+                                                  sx={{
+                                                    display: "flex",
+                                                    gap: 1,
+                                                    justifyContent: "center",
+                                                  }}
+                                                >
+                                                  <IconButton
+                                                    size="small"
+                                                    onClick={() =>
+                                                      handleOpenEditDialog(
+                                                        "SUBSUBKR",
+                                                        obj.id,
+                                                        kr.id,
+                                                        sub.id,
+                                                        subsub.id,
+                                                      )
+                                                    }
+                                                    title="Chỉnh sửa"
+                                                  >
+                                                    <Edit
+                                                      fontSize="small"
+                                                      color="info"
+                                                    />
+                                                  </IconButton>
+                                                  {isSubSubChanged && (
+                                                    <IconButton
+                                                      size="small"
+                                                      onClick={() =>
+                                                        handleUndoItem(
+                                                          "SUBSUBKR",
+                                                          obj.id,
+                                                          kr.id,
+                                                          sub.id,
+                                                          subsub.id,
+                                                        )
+                                                      }
+                                                      title="Hoàn tác thay đổi"
+                                                    >
+                                                      <Undo
+                                                        fontSize="small"
+                                                        color="primary"
+                                                      />
+                                                    </IconButton>
+                                                  )}
+                                                  <IconButton
+                                                    size="small"
+                                                    onClick={() =>
+                                                      setActiveChatId(
+                                                        activeChatId ===
+                                                          subsub.id
+                                                          ? null
+                                                          : subsub.id,
+                                                      )
+                                                    }
+                                                  >
+                                                    <Comment
+                                                      fontSize="small"
+                                                      color={
+                                                        okr.proposedChanges?.[
+                                                          subsub.id
+                                                        ]?.length > 0 ||
+                                                        localComments[subsub.id]
+                                                          ?.length > 0
+                                                          ? "primary"
+                                                          : "inherit"
+                                                      }
+                                                    />
+                                                  </IconButton>
+                                                  <IconButton
+                                                    size="small"
+                                                    onClick={() =>
+                                                      handleDeleteItem(
+                                                        obj.id,
+                                                        kr.id,
+                                                        sub.id,
+                                                        subsub.id,
+                                                      )
+                                                    }
+                                                    title="Xóa tiêu chí con"
+                                                  >
+                                                    <Delete
+                                                      fontSize="small"
+                                                      color="error"
+                                                    />
+                                                  </IconButton>
+                                                </Box>
+                                              </TableCell>
+                                            )}
+                                          </TableRow>
+                                          <NegotiationChat
+                                            itemId={subsub.id}
+                                            activeChatId={activeChatId}
+                                            history={[
+                                              ...(okr.proposedChanges?.[
+                                                subsub.id
+                                              ] || []),
+                                              ...(localComments[subsub.id] ||
+                                                []),
+                                            ]}
+                                            chatMessage={chatMessage}
+                                            setChatMessage={setChatMessage}
+                                            onSend={handleSendChat}
+                                            loading={chatLoading}
+                                            colSpan={11}
+                                            status={okr.status}
+                                          />
+                                        </React.Fragment>
+                                      );
+                                    },
+                                  )}
                                 </React.Fragment>
                               );
                             })}
@@ -1116,20 +1940,83 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                 {deletedItems.length > 0 && (
                   <>
                     <TableRow>
-                      <TableCell colSpan={isSubmitted || isCompleted ? 7 : canReport ? 7 : 5} sx={{ bgcolor: "#fee2e2", fontWeight: "bold", textAlign: "center", color: "#b91c1c" }}>
+                      <TableCell
+                        colSpan={
+                          isSubmitted || isCompleted ? 7 : canReport ? 7 : 5
+                        }
+                        sx={{
+                          bgcolor: "#fee2e2",
+                          fontWeight: "bold",
+                          textAlign: "center",
+                          color: "#b91c1c",
+                        }}
+                      >
                         Các tiêu chí đã bị xóa
                       </TableCell>
                     </TableRow>
                     {deletedItems.map((delItem, idx) => (
                       <TableRow key={`del-${idx}`} sx={{ bgcolor: "#fef2f2" }}>
-                        <TableCell sx={{ pl: delItem.type === 'OBJ' ? 2 : delItem.type === 'KR' ? 4 : 8, textDecoration: "line-through", color: "error.main" }}>{delItem.id}</TableCell>
-                        <TableCell sx={{ textDecoration: "line-through", color: "error.main" }}>{delItem.title}</TableCell>
-                        <TableCell sx={{ textDecoration: "line-through", color: "error.main" }}>{delItem.maxScore || "—"}</TableCell>
-                        <TableCell sx={{ textDecoration: "line-through", color: "error.main" }}>{delItem.unitScore ? `+${delItem.unitScore}/${delItem.unit || 'đv'}` : '—'}</TableCell>
-                        {canReport && <><TableCell></TableCell><TableCell></TableCell><TableCell></TableCell></>}
-                        {(okr.status === "SUBMITTED" || okr.status === "COMPLETED") && <><TableCell></TableCell><TableCell></TableCell><TableCell></TableCell></>}
+                        <TableCell
+                          sx={{
+                            pl:
+                              delItem.type === "OBJ"
+                                ? 2
+                                : delItem.type === "KR"
+                                  ? 4
+                                  : 8,
+                            textDecoration: "line-through",
+                            color: "error.main",
+                          }}
+                        >
+                          {delItem.id}
+                        </TableCell>
+                        <TableCell
+                          sx={{
+                            textDecoration: "line-through",
+                            color: "error.main",
+                          }}
+                        >
+                          {delItem.title}
+                        </TableCell>
+                        <TableCell
+                          sx={{
+                            textDecoration: "line-through",
+                            color: "error.main",
+                          }}
+                        >
+                          {delItem.maxScore || "—"}
+                        </TableCell>
+                        <TableCell
+                          sx={{
+                            textDecoration: "line-through",
+                            color: "error.main",
+                          }}
+                        >
+                          {delItem.unitScore
+                            ? `+${delItem.unitScore}/${delItem.unit || "đv"}`
+                            : "—"}
+                        </TableCell>
+                        {canReport && (
+                          <>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                          </>
+                        )}
+                        {(okr.status === "SUBMITTED" ||
+                          okr.status === "COMPLETED") && (
+                          <>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                          </>
+                        )}
                         <TableCell align="center">
-                          <IconButton size="small" onClick={() => handleRestoreDeletedItem(delItem)} title="Khôi phục">
+                          <IconButton
+                            size="small"
+                            onClick={() => handleRestoreDeletedItem(delItem)}
+                            title="Khôi phục"
+                          >
                             <Undo fontSize="small" color="primary" />
                           </IconButton>
                         </TableCell>
@@ -1141,18 +2028,46 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
             </Table>
           </TableContainer>
 
-          {(isPending || okr.status === 'NEGOTIATING') && (
-            <Box sx={{ p: 2, display: "flex", justifyContent: "flex-end", bgcolor: "#f1f5f9" }}>
-              <Button variant="contained" color="success" startIcon={<Check />} onClick={handleAccept}>Tôi đồng ý Chấp nhận OKR này</Button>
+          {(isPending || okr.status === "NEGOTIATING") && (
+            <Box
+              sx={{
+                p: 2,
+                display: "flex",
+                justifyContent: "flex-end",
+                bgcolor: "#f1f5f9",
+              }}
+            >
+              <Button
+                variant="contained"
+                color="success"
+                startIcon={<Check />}
+                onClick={handleAccept}
+              >
+                Tôi đồng ý Chấp nhận OKR này
+              </Button>
             </Box>
           )}
 
           {canReport && (
-            <Box sx={{ p: 2, display: "flex", justifyContent: "flex-end", gap: 2, bgcolor: "#f1f5f9" }}>
+            <Box
+              sx={{
+                p: 2,
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: 2,
+                bgcolor: "#f1f5f9",
+              }}
+            >
               <Typography variant="body1" sx={{ flexGrow: 1, pt: 1 }}>
-                <strong>Tổng điểm tự khai: {totalSelfScore.toFixed(1)}</strong> / {maxScore} điểm
+                <strong>Tổng điểm tự khai: {totalSelfScore.toFixed(1)}</strong>{" "}
+                / {maxScore} điểm
               </Typography>
-              <Button variant="contained" startIcon={<Send />} onClick={handleSubmitReport} disabled={saving}>
+              <Button
+                variant="contained"
+                startIcon={<Send />}
+                onClick={handleSubmitReport}
+                disabled={saving}
+              >
                 {saving ? "Đang nộp..." : "Nộp bài tự khai"}
               </Button>
             </Box>
@@ -1161,7 +2076,8 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
           {isCompleted && (
             <Box sx={{ p: 2, bgcolor: "#f0fdf4" }}>
               <Alert severity="success">
-                <strong>Điểm cuối cùng: {okr.totalScore} điểm</strong> — Đã được Trưởng khoa duyệt.
+                <strong>Điểm cuối cùng: {okr.totalScore} điểm</strong> — Đã được
+                Trưởng khoa duyệt.
               </Alert>
             </Box>
           )}
@@ -1182,10 +2098,15 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
       />
 
       {/* Dialog Sửa Tiêu chí */}
-      <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)} maxWidth="sm" fullWidth>
+      <Dialog
+        open={openEditDialog}
+        onClose={() => setOpenEditDialog(false)}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle>Chỉnh sửa Tiêu chí</DialogTitle>
         <DialogContent dividers>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
             <TextField
               label="Nội dung tiêu chí"
               fullWidth
@@ -1199,7 +2120,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
               value={editCriteriaMaxScore}
               onChange={(e) => setEditCriteriaMaxScore(e.target.value)}
             />
-            <Box sx={{ display: 'flex', gap: 2 }}>
+            <Box sx={{ display: "flex", gap: 2 }}>
               <TextField
                 label="Điểm / Đơn vị"
                 type="number"
@@ -1219,7 +2140,9 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenEditDialog(false)}>Hủy</Button>
-          <Button variant="contained" onClick={handleSaveEditCriteria}>Lưu thay đổi</Button>
+          <Button variant="contained" onClick={handleSaveEditCriteria}>
+            Lưu thay đổi
+          </Button>
         </DialogActions>
       </Dialog>
     </Paper>
