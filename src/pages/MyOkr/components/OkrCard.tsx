@@ -784,6 +784,23 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
     return () => clearTimeout(timer);
   }, [reportData, hasDraftChanges, okr.status, okr.id, localStructure]);
 
+  const handleSaveDraftManual = async () => {
+    setDraftSaveStatus("saving");
+    try {
+      const enrichedReport = buildEnrichedReport();
+      await api.put(`/okrs/${okr.id}/draft-report`, {
+        selfReportData: enrichedReport,
+      });
+      setDraftSaveStatus("saved");
+      setHasDraftChanges(false);
+      showSuccess("Thành công", "Đã lưu nháp thành công.");
+    } catch (error) {
+      console.error("Lỗi khi lưu nháp", error);
+      setDraftSaveStatus("idle");
+      showError("Lỗi", "Không thể lưu nháp.");
+    }
+  };
+
   const handleSubmitReport = async () => {
     const ok = await confirmAction({
       title: "Nộp bài tự khai?",
@@ -924,6 +941,16 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
         >
           <Box>Chi tiết OKR: {okr.objective}</Box>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            {canReport && draftSaveStatus === "saving" && (
+              <Typography variant="caption" sx={{ color: "#fef08a", mr: 1 }}>
+                Đang lưu nháp...
+              </Typography>
+            )}
+            {canReport && draftSaveStatus === "saved" && (
+              <Typography variant="caption" sx={{ color: "#86efac", mr: 1 }}>
+                Đã lưu nháp
+              </Typography>
+            )}
             {(isPending || okr.status === "NEGOTIATING") && hasChanges && (
               <Button
                 variant="contained"
@@ -2054,14 +2081,34 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                 p: 2,
                 display: "flex",
                 justifyContent: "flex-end",
+                alignItems: "center",
                 gap: 2,
                 bgcolor: "#f1f5f9",
               }}
             >
-              <Typography variant="body1" sx={{ flexGrow: 1, pt: 1 }}>
+              <Typography variant="body1" sx={{ flexGrow: 1 }}>
                 <strong>Tổng điểm tự khai: {totalSelfScore.toFixed(1)}</strong>{" "}
                 / {maxScore} điểm
               </Typography>
+              {draftSaveStatus === "saving" && (
+                <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
+                  Đang lưu nháp...
+                </Typography>
+              )}
+              {draftSaveStatus === "saved" && (
+                <Typography variant="body2" color="success.main" sx={{ mr: 1 }}>
+                  Đã lưu nháp
+                </Typography>
+              )}
+              <Button
+                variant="outlined"
+                color="primary"
+                startIcon={<Save />}
+                onClick={handleSaveDraftManual}
+                disabled={draftSaveStatus === "saving"}
+              >
+                Lưu
+              </Button>
               <Button
                 variant="contained"
                 startIcon={<Send />}
