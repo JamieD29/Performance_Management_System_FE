@@ -2055,80 +2055,85 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
             </Table>
           </TableContainer>
 
-          {(isPending || okr.status === "NEGOTIATING") && (
-            <Box
-              sx={{
-                p: 2,
-                display: "flex",
-                justifyContent: "flex-end",
-                bgcolor: "#f1f5f9",
-              }}
-            >
-              <Button
-                variant="contained"
-                color="success"
-                startIcon={<Check />}
-                onClick={handleAccept}
-              >
-                Tôi đồng ý Chấp nhận OKR này
-              </Button>
-            </Box>
-          )}
-
-          {canReport && (
-            <Box
-              sx={{
-                p: 2,
-                display: "flex",
-                justifyContent: "flex-end",
-                alignItems: "center",
-                gap: 2,
-                bgcolor: "#f1f5f9",
-              }}
-            >
-              <Typography variant="body1" sx={{ flexGrow: 1 }}>
-                <strong>Tổng điểm tự khai: {totalSelfScore.toFixed(1)}</strong>{" "}
-                / {maxScore} điểm
-              </Typography>
-              {draftSaveStatus === "saving" && (
-                <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
-                  Đang lưu nháp...
-                </Typography>
-              )}
-              {draftSaveStatus === "saved" && (
-                <Typography variant="body2" color="success.main" sx={{ mr: 1 }}>
-                  Đã lưu nháp
-                </Typography>
-              )}
-              <Button
-                variant="outlined"
-                color="primary"
-                startIcon={<Save />}
-                onClick={handleSaveDraftManual}
-                disabled={draftSaveStatus === "saving"}
-              >
-                Lưu
-              </Button>
-              <Button
-                variant="contained"
-                startIcon={<Send />}
-                onClick={handleSubmitReport}
-                disabled={saving}
-              >
-                {saving ? "Đang nộp..." : "Nộp bài tự khai"}
-              </Button>
-            </Box>
-          )}
-
-          {isCompleted && (
-            <Box sx={{ p: 2, bgcolor: "#f0fdf4" }}>
-              <Alert severity="success">
-                <strong>Điểm cuối cùng: {okr.totalScore} điểm</strong> — Đã được
-                Trưởng khoa duyệt.
-              </Alert>
-            </Box>
-          )}
         </DialogContent>
+
+        {((isPending || okr.status === "NEGOTIATING") || canReport || isCompleted) && (
+          <DialogActions sx={{ p: 0, bgcolor: "#f1f5f9", display: "block" }}>
+            {(isPending || okr.status === "NEGOTIATING") && (
+              <Box
+                sx={{
+                  p: 2,
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  bgcolor: "#f1f5f9",
+                }}
+              >
+                <Button
+                  variant="contained"
+                  color="success"
+                  startIcon={<Check />}
+                  onClick={handleAccept}
+                >
+                  Tôi đồng ý Chấp nhận OKR này
+                </Button>
+              </Box>
+            )}
+
+            {canReport && (
+              <Box
+                sx={{
+                  p: 2,
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  alignItems: "center",
+                  gap: 2,
+                  bgcolor: "#f1f5f9",
+                }}
+              >
+                <Typography variant="body1" sx={{ flexGrow: 1 }}>
+                  <strong>Tổng điểm tự khai: {totalSelfScore.toFixed(1)}</strong>{" "}
+                  / {maxScore} điểm
+                </Typography>
+                {draftSaveStatus === "saving" && (
+                  <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
+                    Đang lưu nháp...
+                  </Typography>
+                )}
+                {draftSaveStatus === "saved" && (
+                  <Typography variant="body2" color="success.main" sx={{ mr: 1 }}>
+                    Đã lưu nháp
+                  </Typography>
+                )}
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  startIcon={<Save />}
+                  onClick={handleSaveDraftManual}
+                  disabled={draftSaveStatus === "saving"}
+                >
+                  Lưu
+                </Button>
+                <Button
+                  variant="contained"
+                  startIcon={<Send />}
+                  onClick={handleSubmitReport}
+                  disabled={saving}
+                >
+                  {saving ? "Đang nộp..." : "Nộp bài tự khai"}
+                </Button>
+              </Box>
+            )}
+
+            {isCompleted && (
+              <Box sx={{ p: 2, bgcolor: "#f0fdf4" }}>
+                <Alert severity="success">
+                  <strong>Điểm cuối cùng: {okr.totalScore} điểm</strong> — Đã được
+                  Trưởng khoa duyệt.
+                </Alert>
+              </Box>
+            )}
+          </DialogActions>
+        )}
       </Dialog>
 
       <AddCriteriaDialog
