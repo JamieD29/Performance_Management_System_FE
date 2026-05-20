@@ -37,13 +37,13 @@ export default function EvaluationStatus({ evaluation }: EvaluationStatusProps) 
       <Paper
         elevation={0}
         sx={{
-          p: 2,
+          p: 3,
           borderRadius: 3,
           border: "1px solid #e2e8f0",
           bgcolor: "white",
         }}
       >
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
             <FileCheck2 size={20} color="#1e3a8a" />
             <Typography variant="subtitle1" fontWeight="700" color="#1e293b">

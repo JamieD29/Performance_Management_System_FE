@@ -17,11 +17,11 @@ export default function DataEntryProgress({ progressList }: DataEntryProgressPro
   if (!progressList || progressList.length === 0) return null;
 
   return (
-    <Paper elevation={0} sx={{ p: 2, borderRadius: 3, border: "1px solid #e2e8f0", bgcolor: "white", height: "100%" }}>
-      <Typography variant="subtitle2" fontWeight="700" sx={{ mb: 1.5, color: "#1e293b" }}>
+    <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: "1px solid #e2e8f0", bgcolor: "white", height: "100%" }}>
+      <Typography variant="subtitle2" fontWeight="700" sx={{ mb: 3, color: "#1e293b" }}>
         📝 Tiến độ nhập liệu báo cáo
       </Typography>
-      <Stack spacing={2}>
+      <Stack spacing={3}>
         {progressList.map((item) => (
           <Box key={item.id}>
             <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>

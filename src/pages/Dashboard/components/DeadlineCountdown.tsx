@@ -14,7 +14,7 @@ export default function DeadlineCountdown({ daysLeft, label }: DeadlineCountdown
       <Paper
         elevation={0}
         sx={{
-          p: 2,
+          p: 2.5,
           borderRadius: 3,
           border: "1px solid #e2e8f0",
           bgcolor: "#f8fafc",
@@ -48,7 +48,7 @@ export default function DeadlineCountdown({ daysLeft, label }: DeadlineCountdown
       <Paper
         elevation={0}
         sx={{
-          p: 2,
+          p: 2.5,
           borderRadius: 3,
           bgcolor: config.bg,
           border: `1px solid ${config.border}`,

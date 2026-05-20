@@ -49,13 +49,13 @@ export default function ActionCard({ hasAction, message, route, label, status }:
       <Paper
         elevation={0}
         sx={{
-          p: 2,
+          p: 3,
           borderRadius: 3,
           bgcolor: style.bg,
           border: `1px solid ${style.border}`,
           display: "flex",
           flexDirection: "column",
-          gap: 1.5,
+          gap: 2,
           height: "100%",
           position: "relative",
           overflow: "hidden",

@@ -17,7 +17,7 @@ export default function OkrStepper({
     <Paper
       elevation={0}
       sx={{
-        p: 2,
+        p: 3,
         borderRadius: 3,
         border: "1px solid #e2e8f0",
         bgcolor: "white",
@@ -26,7 +26,7 @@ export default function OkrStepper({
       <Typography
         variant="subtitle1"
         fontWeight="700"
-        sx={{ mb: 2, color: "#1e293b" }}
+        sx={{ mb: 3, color: "#1e293b" }}
       >
         🚦 Tiến trình OKR của bạn
       </Typography>

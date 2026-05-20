@@ -59,13 +59,13 @@ export default function ObjectiveRadarChart({ evaluationData }: Props) {
   return (
     <Paper
       elevation={0}
-      sx={{ p: 2, borderRadius: 3, border: "1px solid #e2e8f0", bgcolor: "white", height: "100%" }}
+      sx={{ p: 3, borderRadius: 3, border: "1px solid #e2e8f0", bgcolor: "white", height: "100%" }}
     >
-      <Typography variant="subtitle2" fontWeight="700" sx={{ mb: 1.5, color: "#1e293b" }}>
+      <Typography variant="subtitle2" fontWeight="700" sx={{ mb: 2, color: "#1e293b" }}>
         🕸️ Phân tích Năng lực theo Nhiệm vụ
       </Typography>
 
-      <Box sx={{ width: "100%", height: 230 }}>
+      <Box sx={{ width: "100%", height: 260 }}>
         <ResponsiveContainer width="100%" height="100%">
           <RadarChart cx="50%" cy="50%" outerRadius="70%" data={chartData}>
             <PolarGrid stroke="#e2e8f0" />

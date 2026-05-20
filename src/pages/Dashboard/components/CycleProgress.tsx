@@ -19,13 +19,13 @@ export default function CycleProgress({ cycleName, progressPercent, endDate }: C
     <Paper
       elevation={0}
       sx={{
-        p: 2,
+        p: 2.5,
         borderRadius: 3,
         border: "1px solid #e2e8f0",
         bgcolor: "white",
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5 }}>
         <CalendarDays size={16} color="#64748b" />
         <Typography variant="caption" fontWeight="600" color="text.secondary">
           Tiến độ kỳ đánh giá

@@ -30,8 +30,8 @@ export default function WelcomeHeader({
   return (
     <Box
       sx={{
-        mb: 2,
-        p: 2.5,
+        mb: 4,
+        p: 3,
         borderRadius: 4,
         background: "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #60a5fa 100%)",
         color: "white",
@@ -89,7 +89,7 @@ export default function WelcomeHeader({
             variant="h4"
             fontWeight="800"
             sx={{
-              mb: 0.5,
+              mb: 1,
               letterSpacing: "-0.02em",
             }}
           >
