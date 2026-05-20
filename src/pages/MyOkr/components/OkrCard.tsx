@@ -299,11 +299,42 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
   }, [okr.selfReportData, okr.keyResults]);
 
   const calcTotalScore = () => {
-    let total = 0;
-    Object.values(reportData).forEach((item) => {
-      total += Number(item.quantity) || 0;
+    let grandTotal = 0;
+    localStructure.forEach((obj: any) => {
+      let objRawScore = 0;
+      const maxObjScore = Number(obj.maxScore) || 0;
+
+      obj.items?.forEach((kr: any) => {
+        const krKey = `${obj.id}-${kr.id}`;
+        const krQty = reportData[krKey]?.quantity || 0;
+        const krUnitScore = Number(kr.unitScore) || 0;
+        const krCalcScore = krUnitScore > 0 ? krQty * krUnitScore : krQty;
+        const krCappedScore = Math.min(krCalcScore, Number(kr.maxScore) || Infinity);
+        objRawScore += krCappedScore;
+
+        kr.items?.forEach((sub: any) => {
+          const subKey = `${obj.id}-${kr.id}-${sub.id}`;
+          const subQty = reportData[subKey]?.quantity || 0;
+          const subUnitScore = Number(sub.unitScore) || 0;
+          const subCalcScore = subUnitScore > 0 ? subQty * subUnitScore : subQty;
+          const subCappedScore = Math.min(subCalcScore, Number(sub.maxScore) || Infinity);
+          objRawScore += subCappedScore;
+
+          sub.items?.forEach((subsub: any) => {
+            const subsubKey = `${obj.id}-${kr.id}-${sub.id}-${subsub.id}`;
+            const subsubQty = reportData[subsubKey]?.quantity || 0;
+            const subsubUnitScore = Number(subsub.unitScore) || 0;
+            const subsubCalcScore = subsubUnitScore > 0 ? subsubQty * subsubUnitScore : subsubQty;
+            const subsubCappedScore = Math.min(subsubCalcScore, Number(subsub.maxScore) || Infinity);
+            objRawScore += subsubCappedScore;
+          });
+        });
+      });
+
+      const objScore = maxObjScore > 0 ? Math.min(objRawScore, maxObjScore) : objRawScore;
+      grandTotal += objScore;
     });
-    return total;
+    return grandTotal;
   };
 
   const calcMaxScore = () => {
@@ -849,10 +880,17 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
     }
   };
 
-  const totalSelfScore = calcTotalScore();
+  const totalSelfScore =
+    okr.status === "SUBMITTED" || okr.status === "COMPLETED"
+      ? (okr.totalScore || 0)
+      : calcTotalScore();
+  const displayScore =
+    okr.managerScore != null
+      ? okr.managerScore
+      : totalSelfScore;
   const maxScore = calcMaxScore();
   const progressPercent =
-    maxScore > 0 ? Math.min((totalSelfScore / maxScore) * 100, 100) : 0;
+    maxScore > 0 ? Math.min((displayScore / maxScore) * 100, 100) : 0;
 
   return (
     <Paper
@@ -899,7 +937,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
             )}
             {(isAccepted || isSubmitted || isCompleted) && (
               <Chip
-                label={`Điểm: ${okr.totalScore || totalSelfScore}/${maxScore}`}
+                label={`Điểm: ${displayScore}/${maxScore}`}
                 size="small"
                 color="primary"
                 variant="outlined"
