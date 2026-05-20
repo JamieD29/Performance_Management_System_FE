@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -79,6 +79,18 @@ export default function OkrManagerTree({
       : null,
   );
   const originalStructure = localOriginalStructure;
+
+  // Sync state khi okr prop thay đổi (fix: useState chỉ dùng initial value lần đầu mount)
+  useEffect(() => {
+    setLocalStructure(Array.isArray(okr.keyResults) ? okr.keyResults : []);
+    setLocalOriginalStructure(
+      okr.proposedChanges?.originalStructure
+        ? JSON.parse(JSON.stringify(okr.proposedChanges.originalStructure))
+        : null,
+    );
+    setHasChanges(false);
+    setLocalComments({});
+  }, [okr.keyResults, okr.proposedChanges]);
 
   const findOriginalItem = (
     objId: string,
@@ -165,20 +177,82 @@ export default function OkrManagerTree({
 
   const deletedItems: any[] = [];
   if (originalStructure) {
-    const flatten = (items: any[]) => {
-      let result: any[] = [];
-      items.forEach((i) => {
-        result.push(i);
-        if (i.items) result = result.concat(flatten(i.items));
-      });
-      return result;
-    };
-    const oldFlat = flatten(originalStructure);
-    const newFlat = flatten(localStructure);
-    oldFlat.forEach((o) => {
-      if (!newFlat.find((n) => n.id === o.id)) {
-        deletedItems.push(o);
+    originalStructure.forEach((oldObj: any) => {
+      const newObj = localStructure.find(
+        (o: any) => String(o.id) === String(oldObj.id),
+      );
+      if (!newObj) {
+        deletedItems.push({ ...oldObj, type: "OBJ", objId: oldObj.id });
+        // Liệt kê tất cả con của OBJ bị xóa
+        oldObj.items?.forEach((childKr: any) => {
+          deletedItems.push({ ...childKr, type: "KR", objId: oldObj.id, krId: childKr.id });
+          childKr.items?.forEach((childSub: any) => {
+            deletedItems.push({ ...childSub, type: "SUBKR", objId: oldObj.id, krId: childKr.id, subId: childSub.id });
+            childSub.items?.forEach((childSubSub: any) => {
+              deletedItems.push({ ...childSubSub, type: "SUBSUBKR", objId: oldObj.id, krId: childKr.id, subId: childSub.id, subsubId: childSubSub.id });
+            });
+          });
+        });
+        return;
       }
+
+      oldObj.items?.forEach((oldKr: any) => {
+        const newKr = newObj.items?.find(
+          (k: any) => String(k.id) === String(oldKr.id),
+        );
+        if (!newKr) {
+          deletedItems.push({
+            ...oldKr,
+            type: "KR",
+            objId: oldObj.id,
+            krId: oldKr.id,
+          });
+          // Liệt kê tất cả con của KR bị xóa
+          oldKr.items?.forEach((childSub: any) => {
+            deletedItems.push({ ...childSub, type: "SUBKR", objId: oldObj.id, krId: oldKr.id, subId: childSub.id });
+            childSub.items?.forEach((childSubSub: any) => {
+              deletedItems.push({ ...childSubSub, type: "SUBSUBKR", objId: oldObj.id, krId: oldKr.id, subId: childSub.id, subsubId: childSubSub.id });
+            });
+          });
+          return;
+        }
+
+        oldKr.items?.forEach((oldSub: any) => {
+          const newSub = newKr.items?.find(
+            (s: any) => String(s.id) === String(oldSub.id),
+          );
+          if (!newSub) {
+            deletedItems.push({
+              ...oldSub,
+              type: "SUBKR",
+              objId: oldObj.id,
+              krId: oldKr.id,
+              subId: oldSub.id,
+            });
+            // Liệt kê tất cả con của SubKR bị xóa
+            oldSub.items?.forEach((childSubSub: any) => {
+              deletedItems.push({ ...childSubSub, type: "SUBSUBKR", objId: oldObj.id, krId: oldKr.id, subId: oldSub.id, subsubId: childSubSub.id });
+            });
+            return;
+          }
+
+          oldSub.items?.forEach((oldSubSub: any) => {
+            const newSubSub = newSub.items?.find(
+              (ss: any) => String(ss.id) === String(oldSubSub.id),
+            );
+            if (!newSubSub) {
+              deletedItems.push({
+                ...oldSubSub,
+                type: "SUBSUBKR",
+                objId: oldObj.id,
+                krId: oldKr.id,
+                subId: oldSub.id,
+                subsubId: oldSubSub.id,
+              });
+            }
+          });
+        });
+      });
     });
   }
 
@@ -419,79 +493,48 @@ export default function OkrManagerTree({
     setHasChanges(true);
   };
 
-  const handleRestoreDeletedItem = (idToRestore: string) => {
-    const parts = String(idToRestore).split(".");
-    let oldItem: any = null;
-    if (parts.length === 1) {
-      oldItem = findOriginalItem(parts[0]);
-    } else if (parts.length === 2) {
-      oldItem = findOriginalItem(parts[0], parts[0] + "." + parts[1]);
-    } else if (parts.length === 3) {
-      oldItem = findOriginalItem(
-        parts[0],
-        parts[0] + "." + parts[1],
-        parts[0] + "." + parts[1] + "." + parts[2],
-      );
-    } else if (parts.length === 4) {
-      oldItem = findOriginalItem(
-        parts[0],
-        parts[0] + "." + parts[1],
-        parts[0] + "." + parts[1] + "." + parts[2],
-        idToRestore,
-      );
-    }
+  const handleRestoreDeletedItem = (delItem: any) => {
+    const { type, objId, krId, subId, subsubId } = delItem;
+    const oldItem = findOriginalItem(objId, krId, subId, subsubId);
     if (!oldItem) return;
 
     const newStructure = JSON.parse(JSON.stringify(localStructure));
 
-    if (parts.length === 2) {
-      const objId = parts[0];
+    if (type === "OBJ") {
+      newStructure.push(JSON.parse(JSON.stringify(oldItem)));
+      newStructure.sort((a: any, b: any) =>
+        String(a.id).localeCompare(String(b.id)),
+      );
+    } else if (type === "KR") {
       const obj = newStructure.find((o: any) => String(o.id) === String(objId));
       if (obj) {
         if (!obj.items) obj.items = [];
         obj.items.push(JSON.parse(JSON.stringify(oldItem)));
-        obj.items.sort((a: any, b: any) => {
-          const numA = parseFloat(a.id.split(".").slice(1).join("."));
-          const numB = parseFloat(b.id.split(".").slice(1).join("."));
-          return numA - numB;
-        });
+        obj.items.sort((a: any, b: any) => parseFloat(a.id) - parseFloat(b.id));
       }
-    } else if (parts.length === 3) {
-      const objId = parts[0];
-      const krId = parts[0] + "." + parts[1];
+    } else if (type === "SUBKR") {
       const obj = newStructure.find((o: any) => String(o.id) === String(objId));
       if (obj) {
         const kr = obj.items?.find((k: any) => String(k.id) === String(krId));
         if (kr) {
           if (!kr.items) kr.items = [];
           kr.items.push(JSON.parse(JSON.stringify(oldItem)));
-          kr.items.sort((a: any, b: any) => {
-            const numA = parseFloat(a.id.split(".").slice(2).join("."));
-            const numB = parseFloat(b.id.split(".").slice(2).join("."));
-            return numA - numB;
-          });
+          kr.items.sort(
+            (a: any, b: any) => parseFloat(a.id) - parseFloat(b.id),
+          );
         }
       }
-    } else if (parts.length === 4) {
-      const objId = parts[0];
-      const krId = parts[0] + "." + parts[1];
-      const subId = parts[0] + "." + parts[1] + "." + parts[2];
+    } else if (type === "SUBSUBKR") {
       const obj = newStructure.find((o: any) => String(o.id) === String(objId));
       if (obj) {
         const kr = obj.items?.find((k: any) => String(k.id) === String(krId));
-        if (kr) {
-          const sub = kr.items?.find(
-            (s: any) => String(s.id) === String(subId),
+        const sub = kr?.items?.find((s: any) => String(s.id) === String(subId));
+        if (sub) {
+          if (!sub.items) sub.items = [];
+          sub.items.push(JSON.parse(JSON.stringify(oldItem)));
+          sub.items.sort((a: any, b: any) =>
+            String(a.id).localeCompare(String(b.id)),
           );
-          if (sub) {
-            if (!sub.items) sub.items = [];
-            sub.items.push(JSON.parse(JSON.stringify(oldItem)));
-            sub.items.sort((a: any, b: any) => {
-              const numA = parseFloat(a.id.split(".").slice(3).join("."));
-              const numB = parseFloat(b.id.split(".").slice(3).join("."));
-              return numA - numB;
-            });
-          }
         }
       }
     }
@@ -626,35 +669,32 @@ export default function OkrManagerTree({
     setHasChanges(true);
   };
 
-  const handleAcceptDeleteOriginalItem = (idToRestore: string) => {
+  const handleAcceptDeleteOriginalItem = (delItem: any) => {
     if (!localOriginalStructure) return;
+    const { type, objId, krId, subId } = delItem;
     const newOrig = JSON.parse(JSON.stringify(localOriginalStructure));
-    const parts = String(idToRestore).split(".");
 
-    if (parts.length === 2) {
-      const objId = parts[0];
+    if (type === "OBJ") {
+      const idx = newOrig.findIndex((o: any) => String(o.id) === String(objId));
+      if (idx !== -1) newOrig.splice(idx, 1);
+    } else if (type === "KR") {
       const obj = newOrig.find((o: any) => String(o.id) === String(objId));
       if (obj && obj.items) {
         obj.items = obj.items.filter(
-          (k: any) => String(k.id) !== String(idToRestore),
+          (k: any) => String(k.id) !== String(krId),
         );
       }
-    } else if (parts.length === 3) {
-      const objId = parts[0];
-      const krId = parts[0] + "." + parts[1];
+    } else if (type === "SUBKR") {
       const obj = newOrig.find((o: any) => String(o.id) === String(objId));
       if (obj) {
         const kr = obj.items?.find((k: any) => String(k.id) === String(krId));
         if (kr && kr.items) {
           kr.items = kr.items.filter(
-            (s: any) => String(s.id) !== String(idToRestore),
+            (s: any) => String(s.id) !== String(subId),
           );
         }
       }
-    } else if (parts.length === 4) {
-      const objId = parts[0];
-      const krId = parts[0] + "." + parts[1];
-      const subId = parts[0] + "." + parts[1] + "." + parts[2];
+    } else if (type === "SUBSUBKR") {
       const obj = newOrig.find((o: any) => String(o.id) === String(objId));
       if (obj) {
         const kr = obj.items?.find((k: any) => String(k.id) === String(krId));
@@ -664,7 +704,7 @@ export default function OkrManagerTree({
           );
           if (sub && sub.items) {
             sub.items = sub.items.filter(
-              (ss: any) => String(ss.id) !== String(idToRestore),
+              (ss: any) => String(ss.id) !== String(delItem.subsubId),
             );
           }
         }
@@ -1455,11 +1495,13 @@ export default function OkrManagerTree({
                     <TableCell
                       sx={{
                         pl:
-                          delItem.id.split(".").length === 1
+                          delItem.type === "OBJ"
                             ? 2
-                            : delItem.id.split(".").length === 2
-                              ? 4
-                              : 8,
+                            : delItem.type === "KR"
+                              ? 3
+                              : delItem.type === "SUBKR"
+                                ? 6
+                                : 9,
                         textDecoration: "line-through",
                         color: "error.main",
                       }}
@@ -1503,7 +1545,7 @@ export default function OkrManagerTree({
                         <IconButton
                           size="small"
                           onClick={() =>
-                            handleAcceptDeleteOriginalItem(delItem.id)
+                            handleAcceptDeleteOriginalItem(delItem)
                           }
                           title="Chấp nhận xóa"
                         >
@@ -1511,7 +1553,7 @@ export default function OkrManagerTree({
                         </IconButton>
                         <IconButton
                           size="small"
-                          onClick={() => handleRestoreDeletedItem(delItem.id)}
+                          onClick={() => handleRestoreDeletedItem(delItem)}
                           title="Khôi phục"
                         >
                           <Undo fontSize="small" color="primary" />
