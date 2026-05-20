@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Box,
   Container,
@@ -26,14 +27,15 @@ import EvaluationFormManagerTab from "./components/EvaluationFormManagerTab";
 
 export default function DepartmentOKR() {
   const [tabValue, setTabValue] = useState(0);
+  const { t } = useTranslation();
 
   // Tab definitions
   const TABS = [
-    { label: "Templates OKR", icon: <FileText size={18} /> },
-    { label: "Gán OKR", icon: <UserPlus size={18} /> },
-    { label: "Duyệt đề xuất", icon: <CheckCircle size={18} /> },
-    { label: "Báo cáo OKR", icon: <BarChart3 size={18} /> },
-    { label: "Xét duyệt Phiếu", icon: <FileCheck2 size={18} /> },
+    { labelKey: "departmentOkr.tabs.templates", icon: <FileText size={18} /> },
+    { labelKey: "departmentOkr.tabs.assign", icon: <UserPlus size={18} /> },
+    { labelKey: "departmentOkr.tabs.approveProposals", icon: <CheckCircle size={18} /> },
+    { labelKey: "departmentOkr.tabs.reports", icon: <BarChart3 size={18} /> },
+    { labelKey: "departmentOkr.tabs.approveForms", icon: <FileCheck2 size={18} /> },
   ];
 
   return (
@@ -44,9 +46,9 @@ export default function DepartmentOKR() {
           sx={{ display: "flex", alignItems: "center", gap: 0.5, fontWeight: 500 }}
         >
           <Building2 size={18} />
-          Bộ môn
+          {t("departmentOkr.breadcrumbDepartment")}
         </Typography>
-        <Typography color="text.primary" fontWeight={600}>Quản lý OKR</Typography>
+        <Typography color="text.primary" fontWeight={600}>{t("departmentOkr.title")}</Typography>
       </Breadcrumbs>
 
       <Box sx={{ mb: 4, display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -55,10 +57,10 @@ export default function DepartmentOKR() {
           WebkitBackgroundClip: "text",
           WebkitTextFillColor: "transparent"
         }}>
-          Quản lý OKR
+          {t("departmentOkr.title")}
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Quản lý thư viện mục tiêu, gán OKR, duyệt đề xuất và theo dõi tiến độ của bộ môn.
+          {t("departmentOkr.description")}
         </Typography>
       </Box>
 
@@ -125,7 +127,7 @@ export default function DepartmentOKR() {
                   )}
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1, zIndex: 2, position: "relative" }}>
                     {tab.icon}
-                    <span>{tab.label}</span>
+                    <span>{t(tab.labelKey)}</span>
                   </Box>
                 </Box>
               }

@@ -36,6 +36,7 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
   const structure = reportData?.keyResults || [];
   const selfReportData = reportData?.selfReportData || {};
   const isCompleted = reportData?.status === "COMPLETED";
+  const isEditable = reportData?.status === "SUBMITTED";
 
   useEffect(() => {
     if (reportData) {
@@ -188,7 +189,7 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
             </Typography>
           </Box>
           
-          {!isCompleted && (
+          {isEditable && (
             <Box sx={{ ml: "auto", display: "flex", gap: 1 }}>
               <Tooltip title="Đồng ý toàn bộ số lượng do nhân sự tự khai">
                 <Button variant="outlined" size="small" onClick={handleCopySelfScore}>
@@ -244,7 +245,7 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
                       <TableCell align="center">—</TableCell>
                       <TableCell align="center">—</TableCell>
                       <TableCell align="center" sx={{ fontWeight: "bold", color: "#1C4D8D" }}>
-                        {mgrObjScore.toFixed(1)} / {obj.maxScore || 0}
+                        {reportData.status === "ACCEPTED" ? "—" : `${mgrObjScore.toFixed(1)} / ${obj.maxScore || 0}`}
                       </TableCell>
                     </TableRow>
 
@@ -281,8 +282,10 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
                             </TableCell>
                             
                             <TableCell align="center">
-                              {isCompleted ? (
-                                <Typography fontWeight="bold" color="#1C4D8D">{mgrQty}</Typography>
+                              {!isEditable ? (
+                                <Typography fontWeight="bold" color="#1C4D8D">
+                                  {reportData.status === "ACCEPTED" ? "—" : mgrQty}
+                                </Typography>
                               ) : (
                                 <TextField 
                                   size="small"
@@ -295,7 +298,9 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
                                 />
                               )}
                             </TableCell>
-                            <TableCell align="center" sx={{ fontWeight: "bold", color: "#1C4D8D" }}>{mgrCalcScore.toFixed(1)}</TableCell>
+                            <TableCell align="center" sx={{ fontWeight: "bold", color: "#1C4D8D" }}>
+                              {reportData.status === "ACCEPTED" ? "—" : mgrCalcScore.toFixed(1)}
+                            </TableCell>
                           </TableRow>
 
                           {/* Sub-KRs */}
@@ -331,8 +336,10 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
                                    </TableCell>
                                    
                                    <TableCell align="center">
-                                     {isCompleted ? (
-                                       <Typography fontWeight="bold" color="#1C4D8D">{mgrSubQty}</Typography>
+                                     {!isEditable ? (
+                                       <Typography fontWeight="bold" color="#1C4D8D">
+                                         {reportData.status === "ACCEPTED" ? "—" : mgrSubQty}
+                                       </Typography>
                                      ) : (
                                        <TextField 
                                          size="small"
@@ -345,7 +352,9 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
                                        />
                                      )}
                                    </TableCell>
-                                   <TableCell align="center" sx={{ fontWeight: "bold", color: "#1C4D8D" }}>{mgrSubCalcScore.toFixed(1)}</TableCell>
+                                   <TableCell align="center" sx={{ fontWeight: "bold", color: "#1C4D8D" }}>
+                                     {reportData.status === "ACCEPTED" ? "—" : mgrSubCalcScore.toFixed(1)}
+                                   </TableCell>
                                  </TableRow>
 
                                  {/* Sub-Sub-KRs */}
@@ -380,21 +389,25 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
                                        </TableCell>
                                        
                                        <TableCell align="center">
-                                         {isCompleted ? (
-                                           <Typography fontWeight="bold" color="#1C4D8D">{mgrSubSubQty}</Typography>
-                                         ) : (
-                                           <TextField 
-                                             size="small"
-                                             type="number"
-                                             variant="outlined"
-                                             value={mgrSubSubQty}
-                                             onChange={(e) => updateManagerQuantity(subsubKey, e.target.value)}
-                                             inputProps={{ min: 0, style: { textAlign: 'center', fontWeight: 'bold', color: '#1C4D8D', padding: '4px' } }}
-                                             sx={{ width: "60px", bgcolor: "#fff" }}
-                                           />
-                                         )}
-                                       </TableCell>
-                                       <TableCell align="center" sx={{ fontWeight: "bold", color: "#1C4D8D" }}>{mgrSubSubCalcScore.toFixed(1)}</TableCell>
+                                          {!isEditable ? (
+                                            <Typography fontWeight="bold" color="#1C4D8D">
+                                              {reportData.status === "ACCEPTED" ? "—" : mgrSubSubQty}
+                                            </Typography>
+                                          ) : (
+                                            <TextField 
+                                              size="small"
+                                              type="number"
+                                              variant="outlined"
+                                              value={mgrSubSubQty}
+                                              onChange={(e) => updateManagerQuantity(subsubKey, e.target.value)}
+                                              inputProps={{ min: 0, style: { textAlign: 'center', fontWeight: 'bold', color: '#1C4D8D', padding: '4px' } }}
+                                              sx={{ width: "60px", bgcolor: "#fff" }}
+                                            />
+                                          )}
+                                        </TableCell>
+                                        <TableCell align="center" sx={{ fontWeight: "bold", color: "#1C4D8D" }}>
+                                          {reportData.status === "ACCEPTED" ? "—" : mgrSubSubCalcScore.toFixed(1)}
+                                        </TableCell>
                                      </TableRow>
                                    );
                                  })}
@@ -423,7 +436,7 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
                 </TableCell>
                 <TableCell align="center">
                   <Typography fontWeight="bold" color="#1C4D8D" fontSize="1.2rem">
-                    {isCompleted ? (reportData.managerScore?.toFixed(1) || 0) : calculateTotalManagerScore().toFixed(1)}
+                    {reportData.status === "ACCEPTED" ? "—" : (isCompleted ? (reportData.managerScore?.toFixed(1) || 0) : calculateTotalManagerScore().toFixed(1))}
                   </Typography>
                 </TableCell>
               </TableRow>
@@ -436,7 +449,7 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
       <Divider />
       <DialogActions sx={{ p: 2 }}>
         <Button onClick={onClose} color="inherit">Hủy / Đóng</Button>
-        {!isCompleted && (
+        {isEditable && (
           <Button 
             variant="contained" 
             color="primary" 

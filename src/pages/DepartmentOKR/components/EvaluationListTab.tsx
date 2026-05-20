@@ -27,11 +27,8 @@ import {
 } from "@mui/material";
 import {
   CheckCircle,
-  Assessment,
   Description,
   Search,
-  CheckBoxOutlineBlank,
-  CheckBox,
 } from "@mui/icons-material";
 import EvaluationDetailsDialog from "./EvaluationDetailsDialog";
 import { api } from "../../../services/api";
@@ -44,7 +41,7 @@ export default function EvaluationListTab() {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   // Filters
-  const [tabValue, setTabValue] = useState(0); // 0: SUBMITTED, 1: COMPLETED
+  const [tabValue, setTabValue] = useState(0); // 0: ACCEPTED, 1: SUBMITTED, 2: COMPLETED
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("ALL");
   const [selectedRowIds, setSelectedRowIds] = useState<string[]>([]);
@@ -56,7 +53,12 @@ export default function EvaluationListTab() {
   const fetchEvaluations = async () => {
     setLoading(true);
     try {
-      const endpoint = tabValue === 0 ? "/okrs/submitted" : "/okrs/completed";
+      let endpoint = "/okrs/accepted";
+      if (tabValue === 1) {
+        endpoint = "/okrs/submitted";
+      } else if (tabValue === 2) {
+        endpoint = "/okrs/completed";
+      }
       const res = await api.get(endpoint);
       setReports(res.data || []);
     } catch (error) {
@@ -184,10 +186,13 @@ export default function EvaluationListTab() {
             sx={{ borderRight: 1, borderColor: "divider", pr: 2 }}
           >
             <Tab
-              label={`Cần đánh giá (${reports.filter((r) => r.status === "PENDING_EVALUATION").length})`}
+              label={tabValue === 0 ? `Đang thực hiện (${reports.length})` : "Đang thực hiện"}
             />
             <Tab
-              label={`Lịch sử Đã duyệt (${reports.filter((r) => r.status === "EVALUATED").length})`}
+              label={tabValue === 1 ? `Cần đánh giá (${reports.length})` : "Cần đánh giá"}
+            />
+            <Tab
+              label={tabValue === 2 ? `Lịch sử Đã duyệt (${reports.length})` : "Lịch sử Đã duyệt"}
             />
           </Tabs>
 
@@ -222,7 +227,7 @@ export default function EvaluationListTab() {
           </FormControl>
 
           {/* Bulk Action Button */}
-          {tabValue === 0 && selectedRowIds.length > 0 && (
+          {tabValue === 1 && selectedRowIds.length > 0 && (
             <Button
               variant="contained"
               color="success"
@@ -250,7 +255,7 @@ export default function EvaluationListTab() {
           <Table>
             <TableHead sx={{ bgcolor: "#f8fafc" }}>
               <TableRow>
-                {tabValue === 0 && (
+                {tabValue === 1 && (
                   <TableCell padding="checkbox">
                     <Checkbox
                       color="primary"
@@ -337,7 +342,7 @@ export default function EvaluationListTab() {
                       selected={isItemSelected}
                       sx={{ transition: "all 0.2s ease" }}
                     >
-                      {tabValue === 0 && (
+                      {tabValue === 1 && (
                         <TableCell padding="checkbox">
                           <Checkbox
                             color="primary"
@@ -427,6 +432,13 @@ export default function EvaluationListTab() {
                           <Chip
                             label="Đã đánh giá"
                             color="success"
+                            size="small"
+                            sx={{ fontWeight: 500 }}
+                          />
+                        ) : report.status === "ACCEPTED" ? (
+                          <Chip
+                            label="Đang thực hiện"
+                            color="info"
                             size="small"
                             sx={{ fontWeight: 500 }}
                           />

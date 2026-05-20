@@ -26,6 +26,7 @@ import {
   Home,
 } from "lucide-react";
 import { api } from "../../services/api"; // Đảm bảo import đúng axios instance
+import { useTranslation } from "react-i18next";
 
 // Interface khớp với DB của bạn
 interface Department {
@@ -39,6 +40,7 @@ interface Department {
 }
 
 export default function DepartmentOverview() {
+  const { t } = useTranslation();
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(false);
   
@@ -90,7 +92,7 @@ export default function DepartmentOverview() {
         sx={{ display: "flex", alignItems: "center" }}
       >
         <Home size={16} style={{ marginRight: 4 }} />
-        Trang chủ
+        {t("departmentOverview.home")}
       </Link>
       <Link
         underline="hover"
@@ -102,7 +104,7 @@ export default function DepartmentOverview() {
         }}
         aria-current={!selectedDept ? "page" : undefined}
       >
-        Bộ môn
+        {t("departmentOverview.departments")}
       </Link>
       {selectedDept && (
         <Typography color="text.primary">{selectedDept.name}</Typography>
@@ -118,10 +120,10 @@ export default function DepartmentOverview() {
 
         <Box sx={{ mb: 4 }}>
           <Typography variant="h4" fontWeight="bold" sx={{ color: "#1e293b" }}>
-            Tổng quan bộ môn
+            {t("departmentOverview.title")}
           </Typography>
           <Typography color="text.secondary">
-            Danh sách các bộ môn trực thuộc khoa ({departments.length})
+            {t("departmentOverview.listDescription", { count: departments.length })}
           </Typography>
         </Box>
 
@@ -201,7 +203,7 @@ export default function DepartmentOverview() {
                           }}
                         >
                           <Users size={16} />
-                          <span>{dept.memberCount || 0} nhân sự</span>
+                          <span>{t("departmentOverview.members", { count: dept.memberCount || 0 })}</span>
                         </Box>
                         <Box
                           sx={{
@@ -214,7 +216,7 @@ export default function DepartmentOverview() {
                         >
                           <Briefcase size={16} />
                           <span className="truncate">
-                            Trưởng BM: {dept.headOfDeptName || "Chưa cập nhật"}
+                            {t("departmentOverview.headOfDept")}: {dept.headOfDeptName || t("departmentOverview.notUpdated")}
                           </span>
                         </Box>
                       </Box>
@@ -225,7 +227,7 @@ export default function DepartmentOverview() {
             ) : (
               <Grid size={{ xs: 12 }}>
                 <Typography align="center" color="text.secondary">
-                  Chưa có dữ liệu bộ môn.
+                  {t("departmentOverview.noData")}
                 </Typography>
               </Grid>
             )}
@@ -248,7 +250,7 @@ export default function DepartmentOverview() {
         onClick={() => handleSelectDept(null)}
         sx={{ mb: 2, color: "#64748b", display: { xs: "flex", md: "none" } }}
       >
-        Quay lại
+        {t("departmentOverview.back")}
       </Button>
 
       <Box
@@ -264,7 +266,7 @@ export default function DepartmentOverview() {
             {selectedDept.name}
           </Typography>
           <Typography color="text.secondary">
-            Báo cáo hiệu suất & Thống kê
+            {t("departmentOverview.reportsAndStats")}
           </Typography>
         </Box>
         <Avatar
@@ -291,7 +293,7 @@ export default function DepartmentOverview() {
                 <Users size={24} color="#3b82f6" />
               </Box>
               <Typography fontWeight="bold" color="#1e3a8a">
-                Nhân sự
+                {t("departmentOverview.personnel")}
               </Typography>
             </Box>
             {/* Dùng data thật hoặc fallback */}
@@ -303,7 +305,7 @@ export default function DepartmentOverview() {
               {selectedDept.memberCount || 0}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              Giảng viên / Cán bộ
+              {t("departmentOverview.facultyAndStaff")}
             </Typography>
           </Paper>
         </Grid>
@@ -322,7 +324,7 @@ export default function DepartmentOverview() {
                 <TrendingUp size={24} color="#16a34a" />
               </Box>
               <Typography fontWeight="bold" color="#14532d">
-                KPI Trung bình
+                {t("departmentOverview.averageKpi")}
               </Typography>
             </Box>
             <Typography
@@ -333,7 +335,7 @@ export default function DepartmentOverview() {
               --
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              Chờ dữ liệu kỳ đánh giá
+              {t("departmentOverview.awaitingData")}
             </Typography>
           </Paper>
         </Grid>
@@ -352,7 +354,7 @@ export default function DepartmentOverview() {
                 <AlertCircle size={24} color="#ea580c" />
               </Box>
               <Typography fontWeight="bold" color="#7c2d12">
-                Cần xử lý
+                {t("departmentOverview.requiresAction")}
               </Typography>
             </Box>
             <Typography
@@ -363,7 +365,7 @@ export default function DepartmentOverview() {
               0
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              Hồ sơ chờ duyệt
+              {t("departmentOverview.pendingApproval")}
             </Typography>
           </Paper>
         </Grid>
@@ -377,7 +379,7 @@ export default function DepartmentOverview() {
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 3 }}>
           <BarChart3 size={20} className="text-gray-500" />
           <Typography variant="h6" fontWeight="bold">
-            Tiến độ (Demo Chart)
+            {t("departmentOverview.progressDemo")}
           </Typography>
         </Box>
         <Box
@@ -392,8 +394,7 @@ export default function DepartmentOverview() {
           }}
         >
           <Typography color="text.secondary">
-            Biểu đồ sẽ hiển thị khi có dữ liệu đánh giá chi tiết của{" "}
-            {selectedDept.code}.
+            {t("departmentOverview.chartPlaceholder", { code: selectedDept.code })}
           </Typography>
         </Box>
       </Paper>

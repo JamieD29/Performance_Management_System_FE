@@ -41,5 +41,55 @@
     "description": "The page you are looking for does not exist, or the organizational domain has been removed from the system.",
     "goBack": "Go Back",
     "goHome": "Go to Home"
+  },
+  "departmentOverview": {
+    "title": "Department Overview",
+    "listDescription": "List of departments under the faculty ({{count}})",
+    "home": "Home",
+    "departments": "Departments",
+    "members": "{{count}} personnel",
+    "headOfDept": "Head of Dept",
+    "notUpdated": "Not updated",
+    "noData": "No department data available.",
+    "back": "Back",
+    "reportsAndStats": "Performance Reports & Statistics",
+    "personnel": "Personnel",
+    "facultyAndStaff": "Faculty / Staff",
+    "averageKpi": "Average KPI",
+    "awaitingData": "Awaiting evaluation data",
+    "requiresAction": "Requires Action",
+    "pendingApproval": "Pending approval",
+    "progressDemo": "Progress (Demo Chart)",
+    "chartPlaceholder": "The chart will be displayed when detailed evaluation data is available for {{code}}."
+  },
+  "departmentOkr": {
+    "breadcrumbDepartment": "Department",
+    "title": "OKR Management",
+    "description": "Manage objectives library, assign OKRs, approve proposals, and track department progress.",
+    "tabs": {
+      "templates": "Templates OKR",
+      "assign": "Assign OKR",
+      "approveProposals": "Approve Proposals",
+      "reports": "OKR Reports",
+      "approveForms": "Approve Forms"
+    }
+  },
+  "departmentMaster": {
+    "breadcrumbs": {
+      "department": "Department",
+      "personnel": "Personnel"
+    },
+    "title": "Departments & Units",
+    "subtitle": "Select a unit to view and manage personnel ({{count}} units)",
+    "searchPlaceholder": "Search department...",
+    "addBtn": "Add Department",
+    "noDescription": "No description available",
+    "members": "{{count}} personnel",
+    "optionsTooltip": "Options",
+    "noDepartmentsFound": "No departments found",
+    "trySearchOther": "Try searching with other keywords",
+    "noDataInSystem": "No department data in the system",
+    "edit": "Edit",
+    "delete": "Delete"
   }
 }

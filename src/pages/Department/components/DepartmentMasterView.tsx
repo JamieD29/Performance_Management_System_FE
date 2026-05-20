@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Box,
   Typography,
@@ -82,6 +83,7 @@ export default function DepartmentMasterView({
   onDeleteDept,
   onRefresh,
 }: DepartmentMasterViewProps) {
+  const { t } = useTranslation();
   const [deptSearch, setDeptSearch] = useState("");
   const [openAddModal, setOpenAddModal] = useState(false);
   const [editDeptData, setEditDeptData] = useState<Department | null>(null);
@@ -140,9 +142,9 @@ export default function DepartmentMasterView({
           sx={{ display: "flex", alignItems: "center" }}
         >
           <School sx={{ mr: 0.5 }} fontSize="inherit" />
-          Bộ môn
+          {t("departmentMaster.breadcrumbs.department")}
         </Typography>
-        <Typography color="text.primary">Nhân sự</Typography>
+        <Typography color="text.primary">{t("departmentMaster.breadcrumbs.personnel")}</Typography>
       </Breadcrumbs>
 
       {/* HEADER & SEARCH */}
@@ -158,17 +160,17 @@ export default function DepartmentMasterView({
       >
         <Box>
           <Typography variant="h4" fontWeight="bold" sx={{ color: "#1e293b" }}>
-            Danh sách đơn vị / Bộ môn
+            {t("departmentMaster.title")}
           </Typography>
           <Typography color="text.secondary">
-            Chọn đơn vị để xem và quản lý nhân sự ({departments.length} đơn vị)
+            {t("departmentMaster.subtitle", { count: departments.length })}
           </Typography>
         </Box>
 
         <Box sx={{ display: "flex", gap: 2 }}>
           <TextField
             size="small"
-            placeholder="Tìm kiếm bộ môn..."
+            placeholder={t("departmentMaster.searchPlaceholder")}
             value={deptSearch}
             onChange={(e) => setDeptSearch(e.target.value)}
             InputProps={{
@@ -203,7 +205,7 @@ export default function DepartmentMasterView({
                 boxShadow: "0 2px 8px rgba(30, 41, 59, 0.3)",
               }}
             >
-              Thêm bộ môn
+              {t("departmentMaster.addBtn")}
             </Button>
           )}
         </Box>
@@ -318,7 +320,7 @@ export default function DepartmentMasterView({
                             overflow: "hidden",
                           }}
                         >
-                          {dept.description || "Chưa có mô tả đơn vị"}
+                          {dept.description || t("departmentMaster.noDescription")}
                         </Typography>
                       </Box>
                       <ChevronRight
@@ -350,13 +352,13 @@ export default function DepartmentMasterView({
                       >
                         <Users size={14} />
                         <Typography variant="caption" fontWeight={600}>
-                          {dept.memberCount || 0} nhân sự
+                          {t("departmentMaster.members", { count: dept.memberCount || 0 })}
                         </Typography>
                       </Box>
 
                       {isAdmin && (
                         <Box sx={{ display: "flex", gap: 0, mr: -1 }}>
-                          <Tooltip title="Tùy chọn">
+                          <Tooltip title={t("departmentMaster.optionsTooltip")}>
                             <IconButton
                               size="small"
                               onClick={(e) => handleMenuClick(e, dept)}
@@ -395,12 +397,12 @@ export default function DepartmentMasterView({
             style={{ color: "#cbd5e1", margin: "0 auto 16px" }}
           />
           <Typography variant="h6" color="text.secondary" fontWeight={500}>
-            Không tìm thấy bộ môn nào
+            {t("departmentMaster.noDepartmentsFound")}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
             {deptSearch
-              ? "Thử tìm kiếm với từ khóa khác"
-              : "Chưa có dữ liệu bộ môn trong hệ thống"}
+              ? t("departmentMaster.trySearchOther")
+              : t("departmentMaster.noDataInSystem")}
           </Typography>
         </Paper>
       )}
@@ -428,7 +430,7 @@ export default function DepartmentMasterView({
           <ListItemIcon>
             <Edit fontSize="small" sx={{ color: "#64748b" }} />
           </ListItemIcon>
-          <ListItemText>Chỉnh sửa</ListItemText>
+          <ListItemText>{t("departmentMaster.edit")}</ListItemText>
         </MenuItem>
         <MenuItem
           onClick={(e) => {
@@ -442,7 +444,7 @@ export default function DepartmentMasterView({
           <ListItemIcon>
             <Delete fontSize="small" color="error" />
           </ListItemIcon>
-          <ListItemText sx={{ color: "error.main" }}>Xóa</ListItemText>
+          <ListItemText sx={{ color: "error.main" }}>{t("departmentMaster.delete")}</ListItemText>
         </MenuItem>
       </Menu>
 

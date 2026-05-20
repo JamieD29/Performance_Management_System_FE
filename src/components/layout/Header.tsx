@@ -119,17 +119,17 @@ export default function Header({
             component="span"
             sx={{ color: "#64748b", fontWeight: 400 }}
           >
-            | {t("common.systemName")}
+            | {user?.department?.name || t("common.systemName")}
           </Typography>
         </Typography>
 
-        <Button 
+        <Button
           onClick={() => i18n.changeLanguage(i18n.language === 'vi' ? 'en' : 'vi')}
           variant="outlined"
           size="small"
-          sx={{ 
-            borderRadius: "20px", 
-            textTransform: "none", 
+          sx={{
+            borderRadius: "20px",
+            textTransform: "none",
             bgcolor: "#f8fafc",
             fontWeight: "bold",
             color: "#1976d2",

@@ -41,5 +41,55 @@
     "description": "Trang bạn đang tìm kiếm không tồn tại, hoặc tên miền tổ chức (Domain) đã bị xóa khỏi hệ thống.",
     "goBack": "Quay lại",
     "goHome": "Về trang chủ"
+  },
+  "departmentOverview": {
+    "title": "Tổng quan bộ môn",
+    "listDescription": "Danh sách các bộ môn trực thuộc khoa ({{count}})",
+    "home": "Trang chủ",
+    "departments": "Bộ môn",
+    "members": "{{count}} nhân sự",
+    "headOfDept": "Trưởng BM",
+    "notUpdated": "Chưa cập nhật",
+    "noData": "Chưa có dữ liệu bộ môn.",
+    "back": "Quay lại",
+    "reportsAndStats": "Báo cáo hiệu suất & Thống kê",
+    "personnel": "Nhân sự",
+    "facultyAndStaff": "Giảng viên / Cán bộ",
+    "averageKpi": "KPI Trung bình",
+    "awaitingData": "Chờ dữ liệu kỳ đánh giá",
+    "requiresAction": "Cần xử lý",
+    "pendingApproval": "Hồ sơ chờ duyệt",
+    "progressDemo": "Tiến độ (Demo Chart)",
+    "chartPlaceholder": "Biểu đồ sẽ hiển thị khi có dữ liệu đánh giá chi tiết của {{code}}."
+  },
+  "departmentOkr": {
+    "breadcrumbDepartment": "Bộ môn",
+    "title": "Quản lý OKR",
+    "description": "Quản lý thư viện mục tiêu, gán OKR, duyệt đề xuất và theo dõi tiến độ của bộ môn.",
+    "tabs": {
+      "templates": "Templates OKR",
+      "assign": "Gán OKR",
+      "approveProposals": "Duyệt đề xuất",
+      "reports": "Báo cáo OKR",
+      "approveForms": "Xét duyệt Phiếu"
+    }
+  },
+  "departmentMaster": {
+    "breadcrumbs": {
+      "department": "Bộ môn",
+      "personnel": "Nhân sự"
+    },
+    "title": "Danh sách đơn vị / Bộ môn",
+    "subtitle": "Chọn đơn vị để xem và quản lý nhân sự ({{count}} đơn vị)",
+    "searchPlaceholder": "Tìm kiếm bộ môn...",
+    "addBtn": "Thêm bộ môn",
+    "noDescription": "Chưa có mô tả đơn vị",
+    "members": "{{count}} nhân sự",
+    "optionsTooltip": "Tùy chọn",
+    "noDepartmentsFound": "Không tìm thấy bộ môn nào",
+    "trySearchOther": "Thử tìm kiếm với từ khóa khác",
+    "noDataInSystem": "Chưa có dữ liệu bộ môn trong hệ thống",
+    "edit": "Chỉnh sửa",
+    "delete": "Xóa"
   }
 }
