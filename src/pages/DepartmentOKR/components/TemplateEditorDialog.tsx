@@ -195,7 +195,7 @@ export default function TemplateEditorDialog({
             required
             variant="outlined"
           />
-          <FormControl sx={{ minWidth: 250 }}>
+          {/* <FormControl sx={{ minWidth: 250 }}>
             <InputLabel>Chức vụ áp dụng</InputLabel>
             <Select
               value={positionId}
@@ -207,7 +207,7 @@ export default function TemplateEditorDialog({
                 <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>
               ))}
             </Select>
-          </FormControl>
+          </FormControl> */}
           <FormControl sx={{ minWidth: 250 }}>
             <InputLabel>Chức danh áp dụng</InputLabel>
             <Select
@@ -252,48 +252,48 @@ export default function TemplateEditorDialog({
             <TableBody>
               {structure.map((obj, oIndex) => (
                 <React.Fragment key={obj.id || oIndex}>
-                  <ObjectiveRow 
-                    obj={obj} 
-                    idx={oIndex} 
-                    updateItem={updateItem} 
-                    handleAddKR={handleAddKR} 
-                    handleDeleteObjective={handleDeleteObjective} 
-                    setNonNeg={setNonNeg} 
+                  <ObjectiveRow
+                    obj={obj}
+                    idx={oIndex}
+                    updateItem={updateItem}
+                    handleAddKR={handleAddKR}
+                    handleDeleteObjective={handleDeleteObjective}
+                    setNonNeg={setNonNeg}
                   />
                   {obj.items?.map((kr: any, kIndex: number) => (
                     <React.Fragment key={kr.id || kIndex}>
-                      <KeyResultRow 
-                        kr={kr} 
-                        oIdx={oIndex} 
-                        kIdx={kIndex} 
-                        updateItem={updateItem} 
-                        handleAddSubKR={handleAddSubKR} 
-                        handleDeleteKR={handleDeleteKR} 
-                        setNonNeg={setNonNeg} 
+                      <KeyResultRow
+                        kr={kr}
+                        oIdx={oIndex}
+                        kIdx={kIndex}
+                        updateItem={updateItem}
+                        handleAddSubKR={handleAddSubKR}
+                        handleDeleteKR={handleDeleteKR}
+                        setNonNeg={setNonNeg}
                       />
                       {kr.items?.map((sub: any, sIndex: number) => (
                         <React.Fragment key={sub.id || sIndex}>
-                          <SubKRRow 
-                            sub={sub} 
-                            oIdx={oIndex} 
-                            kIdx={kIndex} 
-                            sIdx={sIndex} 
-                            updateItem={updateItem} 
-                            handleAddSubSubKR={handleAddSubSubKR} 
-                            handleDeleteSubKR={handleDeleteSubKR} 
-                            setNonNeg={setNonNeg} 
+                          <SubKRRow
+                            sub={sub}
+                            oIdx={oIndex}
+                            kIdx={kIndex}
+                            sIdx={sIndex}
+                            updateItem={updateItem}
+                            handleAddSubSubKR={handleAddSubSubKR}
+                            handleDeleteSubKR={handleDeleteSubKR}
+                            setNonNeg={setNonNeg}
                           />
                           {sub.items?.map((item: any, ssIndex: number) => (
-                            <SubSubKRRow 
+                            <SubSubKRRow
                               key={item.id || ssIndex}
-                              item={item} 
-                              oIdx={oIndex} 
-                              kIdx={kIndex} 
-                              sIdx={sIndex} 
-                              ssIdx={ssIndex} 
-                              updateItem={updateItem} 
-                              handleDeleteSubSubKR={handleDeleteSubSubKR} 
-                              setNonNeg={setNonNeg} 
+                              item={item}
+                              oIdx={oIndex}
+                              kIdx={kIndex}
+                              sIdx={sIndex}
+                              ssIdx={ssIndex}
+                              updateItem={updateItem}
+                              handleDeleteSubSubKR={handleDeleteSubSubKR}
+                              setNonNeg={setNonNeg}
                             />
                           ))}
                         </React.Fragment>
