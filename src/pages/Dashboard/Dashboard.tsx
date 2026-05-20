@@ -73,8 +73,8 @@ export default function Dashboard() {
         sx={{
           display: "grid",
           gridTemplateColumns: { xs: "1fr", md: "1fr 300px" },
-          gap: 3,
-          mb: 4,
+          gap: 2,
+          mb: 2,
         }}
       >
         <ActionCard
@@ -110,7 +110,7 @@ export default function Dashboard() {
 
       {/* === SECTION 3: OKR Progress Stepper === */}
       {hasOkr && (
-        <Box sx={{ mb: 4 }}>
+        <Box sx={{ mb: 2 }}>
           <OkrStepper
             currentStep={computed.currentStepIndex}
             isRejected={primaryOkr?.status === "REJECTED"}
@@ -120,7 +120,7 @@ export default function Dashboard() {
 
       {/* === SECTION 3.5: Data Entry Progress === */}
       {hasOkr && data.dataEntryProgress && data.dataEntryProgress.length > 0 && primaryOkr?.status !== "COMPLETED" && (
-        <Box sx={{ mb: 4 }}>
+        <Box sx={{ mb: 2 }}>
           <DataEntryProgress progressList={data.dataEntryProgress} />
         </Box>
       )}
@@ -130,9 +130,9 @@ export default function Dashboard() {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "320px 1fr" },
-            gap: 3,
-            mb: 4,
+            gridTemplateColumns: { xs: "1fr", md: "280px 1fr" },
+            gap: 2,
+            mb: 2,
           }}
         >
           <ScoreGauge
@@ -151,7 +151,7 @@ export default function Dashboard() {
 
       {/* === SECTION 5: Evaluation Status (Phiếu đánh giá) === */}
       {evaluation && isCompleted && (
-        <Box sx={{ mb: 4 }}>
+        <Box sx={{ mb: 2 }}>
           <EvaluationStatus evaluation={evaluation} />
         </Box>
       )}

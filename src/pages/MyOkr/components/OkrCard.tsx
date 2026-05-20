@@ -205,6 +205,16 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
       );
       if (!newObj) {
         deletedItems.push({ ...oldObj, type: "OBJ", objId: oldObj.id });
+        // Liệt kê tất cả con của OBJ bị xóa
+        oldObj.items?.forEach((childKr: any) => {
+          deletedItems.push({ ...childKr, type: "KR", objId: oldObj.id, krId: childKr.id });
+          childKr.items?.forEach((childSub: any) => {
+            deletedItems.push({ ...childSub, type: "SUBKR", objId: oldObj.id, krId: childKr.id, subId: childSub.id });
+            childSub.items?.forEach((childSubSub: any) => {
+              deletedItems.push({ ...childSubSub, type: "SUBSUBKR", objId: oldObj.id, krId: childKr.id, subId: childSub.id, subsubId: childSubSub.id });
+            });
+          });
+        });
         return;
       }
 
@@ -218,6 +228,13 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
             type: "KR",
             objId: oldObj.id,
             krId: oldKr.id,
+          });
+          // Liệt kê tất cả con của KR bị xóa
+          oldKr.items?.forEach((childSub: any) => {
+            deletedItems.push({ ...childSub, type: "SUBKR", objId: oldObj.id, krId: oldKr.id, subId: childSub.id });
+            childSub.items?.forEach((childSubSub: any) => {
+              deletedItems.push({ ...childSubSub, type: "SUBSUBKR", objId: oldObj.id, krId: oldKr.id, subId: childSub.id, subsubId: childSubSub.id });
+            });
           });
           return;
         }
@@ -233,6 +250,10 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
               objId: oldObj.id,
               krId: oldKr.id,
               subId: oldSub.id,
+            });
+            // Liệt kê tất cả con của SubKR bị xóa
+            oldSub.items?.forEach((childSubSub: any) => {
+              deletedItems.push({ ...childSubSub, type: "SUBSUBKR", objId: oldObj.id, krId: oldKr.id, subId: oldSub.id, subsubId: childSubSub.id });
             });
             return;
           }

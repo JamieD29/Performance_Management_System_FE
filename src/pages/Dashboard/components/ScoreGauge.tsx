@@ -33,7 +33,7 @@ export default function ScoreGauge({
   const colors = getScoreColor(percentage);
 
   // SVG gauge parameters
-  const size = 160;
+  const size = 140;
   const strokeWidth = 14;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -46,7 +46,7 @@ export default function ScoreGauge({
     <Paper
       elevation={0}
       sx={{
-        p: 3,
+        p: 2,
         borderRadius: 3,
         border: `1px solid ${colors.border}`,
         bgcolor: colors.bg,
@@ -59,13 +59,13 @@ export default function ScoreGauge({
       <Typography
         variant="subtitle2"
         fontWeight="700"
-        sx={{ mb: 2, color: "#1e293b" }}
+        sx={{ mb: 1.5, color: "#1e293b" }}
       >
         📊 {isPrimary ? "Điểm TK chấm" : "Điểm tự khai"}
       </Typography>
 
       {/* SVG Gauge */}
-      <Box sx={{ position: "relative", width: size, height: size, mb: 1 }}>
+      <Box sx={{ position: "relative", width: size, height: size, mb: 0.5 }}>
         <svg
           width={size}
           height={size}
