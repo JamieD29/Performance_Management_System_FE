@@ -405,6 +405,7 @@ export default function AssignTemplateDialog({
                   <TableCell>Email</TableCell>
                   <TableCell>Bộ môn</TableCell>
                   <TableCell>Chức vụ quản lý</TableCell>
+                  <TableCell>Chức danh nghề nghiệp</TableCell>
                   <TableCell>Phiên bản gán</TableCell>
                 </TableRow>
               </TableHead>
@@ -412,7 +413,7 @@ export default function AssignTemplateDialog({
                 {loadingUsers ? (
                   <TableRow>
                     <TableCell
-                      colSpan={6}
+                      colSpan={7}
                       align="center"
                       sx={{ py: 3, color: "text.secondary" }}
                     >
@@ -422,7 +423,7 @@ export default function AssignTemplateDialog({
                 ) : filteredUsers.length === 0 ? (
                   <TableRow>
                     <TableCell
-                      colSpan={6}
+                      colSpan={7}
                       align="center"
                       sx={{ py: 3, color: "text.secondary" }}
                     >
@@ -488,6 +489,19 @@ export default function AssignTemplateDialog({
                             label={user.managementPosition.name}
                             size="small"
                             color="secondary"
+                          />
+                        ) : (
+                          <Typography variant="caption" color="text.secondary">
+                            —
+                          </Typography>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {user.jobTitle ? (
+                          <Chip
+                            label={user.jobTitle}
+                            size="small"
+                            color="info"
                           />
                         ) : (
                           <Typography variant="caption" color="text.secondary">
