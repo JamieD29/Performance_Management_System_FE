@@ -35,7 +35,6 @@ import {
   Pause,
   Calendar,
   ArrowRight,
-  Trash2,
 } from "lucide-react";
 import { api } from "../../../services/api";
 import { showSuccess, showError, showWarning, confirmAction } from "../../../utils/swal";
@@ -170,29 +169,6 @@ export default function CycleManagement() {
       }
     } catch (error) {
       showError("Lỗi", "Không thể cập nhật trạng thái.");
-    }
-  };
-
-  const handleDelete = async (id: string, cycle: any) => {
-    const confirmed = await confirmAction({
-      title: "Xác nhận xóa?",
-      text: `Bạn có chắc chắn muốn xóa kỳ đánh giá "${cycle.name}" không? Thao tác này không thể hoàn tác.`,
-      icon: "warning",
-      confirmText: "Đồng ý xóa",
-      cancelText: "Hủy bỏ",
-      confirmColor: "#ef4444",
-    });
-    if (!confirmed) return;
-
-    try {
-      await api.delete(`${RESOURCE_PATH}/admin/cycles/${id}`);
-      fetchCycles();
-      showSuccess("Thành công!", "Đã xóa kỳ đánh giá.");
-    } catch (error: any) {
-      const msg =
-        error?.response?.data?.message ||
-        "Không thể xóa kỳ đánh giá. Vui lòng thử lại.";
-      showError("Lỗi", msg);
     }
   };
 
@@ -339,32 +315,16 @@ export default function CycleManagement() {
                           />
                         </TableCell>
                         <TableCell align="center">
-                          <Box className="flex justify-center gap-2">
-                            <Button
-                              size="small"
-                              color={cycle.status === "OPEN" ? "error" : "success"}
-                              startIcon={
-                                cycle.status === "OPEN" ? <Pause size={14} /> : <Play size={14} />
-                              }
-                              onClick={() => toggleStatus(cycle.id, cycle.status, cycle)}
-                            >
-                              {cycle.status === "OPEN" ? "Đóng kỳ" : "Mở kỳ"}
-                            </Button>
-                            <Button
-                              size="small"
-                              color="error"
-                              variant="outlined"
-                              onClick={() => handleDelete(cycle.id, cycle)}
-                              disabled={cycle.status === "OPEN"}
-                              title={
-                                cycle.status === "OPEN"
-                                  ? "Không thể xóa kỳ đang hoạt động"
-                                  : "Xóa kỳ đánh giá"
-                              }
-                            >
-                              <Trash2 size={14} />
-                            </Button>
-                          </Box>
+                          <Button
+                            size="small"
+                            color={cycle.status === "OPEN" ? "error" : "success"}
+                            startIcon={
+                              cycle.status === "OPEN" ? <Pause size={14} /> : <Play size={14} />
+                            }
+                            onClick={() => toggleStatus(cycle.id, cycle.status, cycle)}
+                          >
+                            {cycle.status === "OPEN" ? "Đóng kỳ" : "Mở kỳ"}
+                          </Button>
                         </TableCell>
                       </TableRow>
                     );
