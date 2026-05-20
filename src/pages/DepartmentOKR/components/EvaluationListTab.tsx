@@ -401,10 +401,21 @@ export default function EvaluationListTab() {
                             fontWeight: "bold",
                           }}
                         >
-                          {report.managerScore != null
-                            ? report.managerScore
-                            : report.totalScore}
-                          %
+                          {(() => {
+                            const rowMaxScore = (report.keyResults || []).reduce(
+                              (sum: number, obj: any) => sum + (Number(obj.maxScore) || 0),
+                              0
+                            );
+                            const rowScore =
+                              report.managerScore != null
+                                ? report.managerScore
+                                : (report.totalScore || 0);
+                            const rowProgressPercent =
+                              rowMaxScore > 0
+                                ? Math.min((rowScore / rowMaxScore) * 100, 100)
+                                : 0;
+                            return `${rowProgressPercent.toFixed(0)}%`;
+                          })()}
                         </Box>
                       </TableCell>
                       <TableCell align="center">
