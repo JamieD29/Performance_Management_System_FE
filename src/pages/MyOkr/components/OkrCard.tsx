@@ -136,7 +136,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
     if (!oldItem) return false;
     return (
       String(newItem.title || "").trim() !==
-        String(oldItem.title || "").trim() ||
+      String(oldItem.title || "").trim() ||
       Number(newItem.maxScore || 0) !== Number(oldItem.maxScore || 0) ||
       Number(newItem.unitScore || 0) !== Number(oldItem.unitScore || 0) ||
       String(newItem.unit || "").trim() !== String(oldItem.unit || "").trim()
@@ -285,7 +285,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
 
   const isCycleStarted = okr.cycle?.startDate
     ? new Date(new Date().setHours(0, 0, 0, 0)) >=
-      new Date(new Date(okr.cycle.startDate).setHours(0, 0, 0, 0))
+    new Date(new Date(okr.cycle.startDate).setHours(0, 0, 0, 0))
     : true;
 
   const canReport = isAccepted && isCycleStarted;
@@ -928,13 +928,31 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
               }
               size="small"
             />
-            {okr.deadline && (
-              <Chip
-                label={`Deadline: ${new Date(okr.deadline).toLocaleDateString("vi-VN")}`}
-                size="small"
-                variant="outlined"
-              />
-            )}
+            {(() => {
+              if (okr.deadline) {
+                const isNegotiationExpired = new Date() > new Date(okr.deadline);
+                if (!isNegotiationExpired) {
+                  return (
+                    <Chip
+                      label={`Deadline đàm phán: ${new Date(okr.deadline).toLocaleDateString("vi-VN")}`}
+                      size="small"
+                      variant="outlined"
+                      color="warning"
+                    />
+                  );
+                }
+              }
+              if (okr.cycle?.endDate) {
+                return (
+                  <Chip
+                    label={`Hạn của Kỳ diễn ra: ${new Date(okr.cycle.endDate).toLocaleDateString("vi-VN")}`}
+                    size="small"
+                    variant="outlined"
+                  />
+                );
+              }
+              return null;
+            })()}
             {(isAccepted || isSubmitted || isCompleted) && (
               <Chip
                 label={`Điểm: ${displayScore}/${maxScore}`}
@@ -1236,7 +1254,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                   fontSize="small"
                                   color={
                                     okr.proposedChanges?.[obj.id]?.length > 0 ||
-                                    localComments[obj.id]?.length > 0
+                                      localComments[obj.id]?.length > 0
                                       ? "primary"
                                       : "inherit"
                                   }
@@ -1451,7 +1469,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                         color={
                                           okr.proposedChanges?.[kr.id]?.length >
                                             0 ||
-                                          localComments[kr.id]?.length > 0
+                                            localComments[kr.id]?.length > 0
                                             ? "primary"
                                             : "inherit"
                                         }
@@ -1523,8 +1541,8 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                         fontSize: "0.85rem",
                                         fontWeight:
                                           isSubNew ||
-                                          isSubChanged ||
-                                          sub.isEdited
+                                            isSubChanged ||
+                                            sub.isEdited
                                             ? "bold"
                                             : "normal",
                                       }}
@@ -1536,8 +1554,8 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                         fontSize: "0.9rem",
                                         fontWeight:
                                           isSubNew ||
-                                          isSubChanged ||
-                                          sub.isEdited
+                                            isSubChanged ||
+                                            sub.isEdited
                                             ? "bold"
                                             : "normal",
                                       }}
@@ -1549,8 +1567,8 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                       sx={{
                                         fontWeight:
                                           isSubNew ||
-                                          isSubChanged ||
-                                          sub.isEdited
+                                            isSubChanged ||
+                                            sub.isEdited
                                             ? "bold"
                                             : "normal",
                                       }}
@@ -1634,91 +1652,91 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                     )}
                                     {(isPending ||
                                       okr.status === "NEGOTIATING") && (
-                                      <TableCell align="center">
-                                        <Box
-                                          sx={{
-                                            display: "flex",
-                                            gap: 1,
-                                            justifyContent: "center",
-                                          }}
-                                        >
-                                          <IconButton
-                                            size="small"
-                                            onClick={() =>
-                                              handleOpenEditDialog(
-                                                "SUBKR",
-                                                obj.id,
-                                                kr.id,
-                                                sub.id,
-                                              )
-                                            }
-                                            title="Chỉnh sửa"
+                                        <TableCell align="center">
+                                          <Box
+                                            sx={{
+                                              display: "flex",
+                                              gap: 1,
+                                              justifyContent: "center",
+                                            }}
                                           >
-                                            <Edit
-                                              fontSize="small"
-                                              color="info"
-                                            />
-                                          </IconButton>
-                                          {isSubChanged && (
                                             <IconButton
                                               size="small"
                                               onClick={() =>
-                                                handleUndoItem(
+                                                handleOpenEditDialog(
                                                   "SUBKR",
                                                   obj.id,
                                                   kr.id,
                                                   sub.id,
                                                 )
                                               }
-                                              title="Hoàn tác thay đổi"
+                                              title="Chỉnh sửa"
                                             >
-                                              <Undo
+                                              <Edit
                                                 fontSize="small"
-                                                color="primary"
+                                                color="info"
                                               />
                                             </IconButton>
-                                          )}
-                                          <IconButton
-                                            size="small"
-                                            onClick={() =>
-                                              setActiveChatId(
-                                                activeChatId === sub.id
-                                                  ? null
-                                                  : sub.id,
-                                              )
-                                            }
-                                          >
-                                            <Comment
-                                              fontSize="small"
-                                              color={
-                                                okr.proposedChanges?.[sub.id]
-                                                  ?.length > 0 ||
-                                                localComments[sub.id]?.length >
-                                                  0
-                                                  ? "primary"
-                                                  : "inherit"
+                                            {isSubChanged && (
+                                              <IconButton
+                                                size="small"
+                                                onClick={() =>
+                                                  handleUndoItem(
+                                                    "SUBKR",
+                                                    obj.id,
+                                                    kr.id,
+                                                    sub.id,
+                                                  )
+                                                }
+                                                title="Hoàn tác thay đổi"
+                                              >
+                                                <Undo
+                                                  fontSize="small"
+                                                  color="primary"
+                                                />
+                                              </IconButton>
+                                            )}
+                                            <IconButton
+                                              size="small"
+                                              onClick={() =>
+                                                setActiveChatId(
+                                                  activeChatId === sub.id
+                                                    ? null
+                                                    : sub.id,
+                                                )
                                               }
-                                            />
-                                          </IconButton>
-                                          <IconButton
-                                            size="small"
-                                            onClick={() =>
-                                              handleDeleteItem(
-                                                obj.id,
-                                                kr.id,
-                                                sub.id,
-                                              )
-                                            }
-                                            title="Xóa tiêu chí con"
-                                          >
-                                            <Delete
-                                              fontSize="small"
-                                              color="error"
-                                            />
-                                          </IconButton>
-                                        </Box>
-                                      </TableCell>
-                                    )}
+                                            >
+                                              <Comment
+                                                fontSize="small"
+                                                color={
+                                                  okr.proposedChanges?.[sub.id]
+                                                    ?.length > 0 ||
+                                                    localComments[sub.id]?.length >
+                                                    0
+                                                    ? "primary"
+                                                    : "inherit"
+                                                }
+                                              />
+                                            </IconButton>
+                                            <IconButton
+                                              size="small"
+                                              onClick={() =>
+                                                handleDeleteItem(
+                                                  obj.id,
+                                                  kr.id,
+                                                  sub.id,
+                                                )
+                                              }
+                                              title="Xóa tiêu chí con"
+                                            >
+                                              <Delete
+                                                fontSize="small"
+                                                color="error"
+                                              />
+                                            </IconButton>
+                                          </Box>
+                                        </TableCell>
+                                      )}
                                   </TableRow>
                                   <NegotiationChat
                                     itemId={sub.id}
@@ -1772,8 +1790,8 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                             sx={{
                                               bgcolor:
                                                 isSubSubNew ||
-                                                isSubSubChanged ||
-                                                subsub.isEdited
+                                                  isSubSubChanged ||
+                                                  subsub.isEdited
                                                   ? "#fef08a"
                                                   : "#fffbeb",
                                             }}
@@ -1784,8 +1802,8 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                                 fontSize: "0.8rem",
                                                 fontWeight:
                                                   isSubSubNew ||
-                                                  isSubSubChanged ||
-                                                  subsub.isEdited
+                                                    isSubSubChanged ||
+                                                    subsub.isEdited
                                                     ? "bold"
                                                     : "normal",
                                               }}
@@ -1797,8 +1815,8 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                                 fontSize: "0.85rem",
                                                 fontWeight:
                                                   isSubSubNew ||
-                                                  isSubSubChanged ||
-                                                  subsub.isEdited
+                                                    isSubSubChanged ||
+                                                    subsub.isEdited
                                                     ? "bold"
                                                     : "normal",
                                               }}
@@ -1810,8 +1828,8 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                               sx={{
                                                 fontWeight:
                                                   isSubSubNew ||
-                                                  isSubSubChanged ||
-                                                  subsub.isEdited
+                                                    isSubSubChanged ||
+                                                    subsub.isEdited
                                                     ? "bold"
                                                     : "normal",
                                               }}
@@ -1900,37 +1918,18 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                             )}
                                             {(isPending ||
                                               okr.status === "NEGOTIATING") && (
-                                              <TableCell align="center">
-                                                <Box
-                                                  sx={{
-                                                    display: "flex",
-                                                    gap: 1,
-                                                    justifyContent: "center",
-                                                  }}
-                                                >
-                                                  <IconButton
-                                                    size="small"
-                                                    onClick={() =>
-                                                      handleOpenEditDialog(
-                                                        "SUBSUBKR",
-                                                        obj.id,
-                                                        kr.id,
-                                                        sub.id,
-                                                        subsub.id,
-                                                      )
-                                                    }
-                                                    title="Chỉnh sửa"
+                                                <TableCell align="center">
+                                                  <Box
+                                                    sx={{
+                                                      display: "flex",
+                                                      gap: 1,
+                                                      justifyContent: "center",
+                                                    }}
                                                   >
-                                                    <Edit
-                                                      fontSize="small"
-                                                      color="info"
-                                                    />
-                                                  </IconButton>
-                                                  {isSubSubChanged && (
                                                     <IconButton
                                                       size="small"
                                                       onClick={() =>
-                                                        handleUndoItem(
+                                                        handleOpenEditDialog(
                                                           "SUBSUBKR",
                                                           obj.id,
                                                           kr.id,
@@ -1938,58 +1937,77 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                                           subsub.id,
                                                         )
                                                       }
-                                                      title="Hoàn tác thay đổi"
+                                                      title="Chỉnh sửa"
                                                     >
-                                                      <Undo
+                                                      <Edit
                                                         fontSize="small"
-                                                        color="primary"
+                                                        color="info"
                                                       />
                                                     </IconButton>
-                                                  )}
-                                                  <IconButton
-                                                    size="small"
-                                                    onClick={() =>
-                                                      setActiveChatId(
-                                                        activeChatId ===
-                                                          subsub.id
-                                                          ? null
-                                                          : subsub.id,
-                                                      )
-                                                    }
-                                                  >
-                                                    <Comment
-                                                      fontSize="small"
-                                                      color={
-                                                        okr.proposedChanges?.[
-                                                          subsub.id
-                                                        ]?.length > 0 ||
-                                                        localComments[subsub.id]
-                                                          ?.length > 0
-                                                          ? "primary"
-                                                          : "inherit"
+                                                    {isSubSubChanged && (
+                                                      <IconButton
+                                                        size="small"
+                                                        onClick={() =>
+                                                          handleUndoItem(
+                                                            "SUBSUBKR",
+                                                            obj.id,
+                                                            kr.id,
+                                                            sub.id,
+                                                            subsub.id,
+                                                          )
+                                                        }
+                                                        title="Hoàn tác thay đổi"
+                                                      >
+                                                        <Undo
+                                                          fontSize="small"
+                                                          color="primary"
+                                                        />
+                                                      </IconButton>
+                                                    )}
+                                                    <IconButton
+                                                      size="small"
+                                                      onClick={() =>
+                                                        setActiveChatId(
+                                                          activeChatId ===
+                                                            subsub.id
+                                                            ? null
+                                                            : subsub.id,
+                                                        )
                                                       }
-                                                    />
-                                                  </IconButton>
-                                                  <IconButton
-                                                    size="small"
-                                                    onClick={() =>
-                                                      handleDeleteItem(
-                                                        obj.id,
-                                                        kr.id,
-                                                        sub.id,
-                                                        subsub.id,
-                                                      )
-                                                    }
-                                                    title="Xóa tiêu chí con"
-                                                  >
-                                                    <Delete
-                                                      fontSize="small"
-                                                      color="error"
-                                                    />
-                                                  </IconButton>
-                                                </Box>
-                                              </TableCell>
-                                            )}
+                                                    >
+                                                      <Comment
+                                                        fontSize="small"
+                                                        color={
+                                                          okr.proposedChanges?.[
+                                                            subsub.id
+                                                          ]?.length > 0 ||
+                                                            localComments[subsub.id]
+                                                              ?.length > 0
+                                                            ? "primary"
+                                                            : "inherit"
+                                                        }
+                                                      />
+                                                    </IconButton>
+                                                    <IconButton
+                                                      size="small"
+                                                      onClick={() =>
+                                                        handleDeleteItem(
+                                                          obj.id,
+                                                          kr.id,
+                                                          sub.id,
+                                                          subsub.id,
+                                                        )
+                                                      }
+                                                      title="Xóa tiêu chí con"
+                                                    >
+                                                      <Delete
+                                                        fontSize="small"
+                                                        color="error"
+                                                      />
+                                                    </IconButton>
+                                                  </Box>
+                                                </TableCell>
+                                              )}
                                           </TableRow>
                                           <NegotiationChat
                                             itemId={subsub.id}
@@ -2091,12 +2109,12 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                         )}
                         {(okr.status === "SUBMITTED" ||
                           okr.status === "COMPLETED") && (
-                          <>
-                            <TableCell></TableCell>
-                            <TableCell></TableCell>
-                            <TableCell></TableCell>
-                          </>
-                        )}
+                            <>
+                              <TableCell></TableCell>
+                              <TableCell></TableCell>
+                              <TableCell></TableCell>
+                            </>
+                          )}
                         <TableCell align="center">
                           <IconButton
                             size="small"
