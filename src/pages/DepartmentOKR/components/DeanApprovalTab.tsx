@@ -42,6 +42,7 @@ export default function DeanApprovalTab() {
   const [rejectDialog, setRejectDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("ALL");
+  const [selectedCycle, setSelectedCycle] = useState("ALL");
 
   useEffect(() => {
     fetchPending();
@@ -55,15 +56,25 @@ export default function DeanApprovalTab() {
       const matchesDept =
         selectedDepartment === "ALL" ||
         okr.user?.department?.name === selectedDepartment;
-      return matchesSearch && matchesDept;
+      const matchesCycle =
+        selectedCycle === "ALL" ||
+        okr.cycle?.name === selectedCycle;
+      return matchesSearch && matchesDept && matchesCycle;
     });
-  }, [pendingOkrs, searchQuery, selectedDepartment]);
+  }, [pendingOkrs, searchQuery, selectedDepartment, selectedCycle]);
 
   const departmentOptions = useMemo(() => {
     const depts = new Set(
       pendingOkrs.map((r) => r.user?.department?.name).filter(Boolean),
     );
     return ["ALL", ...Array.from(depts)];
+  }, [pendingOkrs]);
+
+  const cycleOptions = useMemo(() => {
+    const cycles = new Set(
+      pendingOkrs.map((r) => r.cycle?.name).filter(Boolean),
+    );
+    return ["ALL", ...Array.from(cycles)];
   }, [pendingOkrs]);
 
   const groupedByCycle = useMemo(() => {
@@ -181,6 +192,21 @@ export default function DeanApprovalTab() {
               {departmentOptions.map((dept) => (
                 <MenuItem key={dept} value={dept}>
                   {dept === "ALL" ? "Tất cả Bộ môn" : dept}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl size="small" sx={{ minWidth: 200 }}>
+            <InputLabel>Kỳ đánh giá</InputLabel>
+            <Select
+              value={selectedCycle}
+              label="Kỳ đánh giá"
+              onChange={(e) => setSelectedCycle(e.target.value)}
+            >
+              {cycleOptions.map((cycle) => (
+                <MenuItem key={cycle} value={cycle}>
+                  {cycle === "ALL" ? "Tất cả các kỳ" : cycle}
                 </MenuItem>
               ))}
             </Select>

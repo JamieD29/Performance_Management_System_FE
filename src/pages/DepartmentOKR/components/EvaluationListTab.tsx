@@ -51,6 +51,7 @@ export default function EvaluationListTab() {
   const [tabValue, setTabValue] = useState(0); // 0: ACCEPTED, 1: SUBMITTED, 2: COMPLETED
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("ALL");
+  const [selectedCycle, setSelectedCycle] = useState("ALL");
   const [selectedRowIds, setSelectedRowIds] = useState<string[]>([]);
 
   useEffect(() => {
@@ -89,6 +90,14 @@ export default function EvaluationListTab() {
     return ["ALL", ...Array.from(depts)];
   }, [reports]);
 
+  // Các tùy chọn kỳ đánh giá từ dữ liệu thực tế
+  const cycleOptions = useMemo(() => {
+    const cycles = new Set(
+      reports.map((r) => r.cycle?.name).filter(Boolean),
+    );
+    return ["ALL", ...Array.from(cycles)];
+  }, [reports]);
+
   // Lọc dữ liệu
   const filteredReports = useMemo(() => {
     return reports.filter((report) => {
@@ -102,9 +111,14 @@ export default function EvaluationListTab() {
         selectedDepartment === "ALL" ||
         report.user?.department?.name === selectedDepartment;
 
-      return matchesSearch && matchesDept;
+      // 3. Lọc theo Kỳ đánh giá
+      const matchesCycle =
+        selectedCycle === "ALL" ||
+        report.cycle?.name === selectedCycle;
+
+      return matchesSearch && matchesDept && matchesCycle;
     });
-  }, [reports, searchQuery, selectedDepartment]);
+  }, [reports, searchQuery, selectedDepartment, selectedCycle]);
 
   // Group reports by Evaluation Cycle
   const groupedByCycle = useMemo(() => {
@@ -221,6 +235,7 @@ export default function EvaluationListTab() {
             onChange={(_, v) => {
               setTabValue(v);
               setSelectedRowIds([]);
+              setSelectedCycle("ALL");
             }}
             sx={{ borderRight: 1, borderColor: "divider", pr: 2 }}
           >
@@ -260,6 +275,21 @@ export default function EvaluationListTab() {
               {departmentOptions.map((dept) => (
                 <MenuItem key={dept as string} value={dept as string}>
                   {dept === "ALL" ? "Tất cả Bộ môn" : (dept as string)}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl size="small" sx={{ minWidth: 200 }}>
+            <InputLabel>Kỳ đánh giá</InputLabel>
+            <Select
+              value={selectedCycle}
+              label="Kỳ đánh giá"
+              onChange={(e) => setSelectedCycle(e.target.value)}
+            >
+              {cycleOptions.map((cycle) => (
+                <MenuItem key={cycle as string} value={cycle as string}>
+                  {cycle === "ALL" ? "Tất cả các kỳ" : (cycle as string)}
                 </MenuItem>
               ))}
             </Select>
