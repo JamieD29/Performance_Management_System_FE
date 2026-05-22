@@ -166,15 +166,34 @@ export default function DeanApprovalTab() {
                     <Typography
                       variant="body2"
                       sx={{
-                        maxWidth: 200,
+                        maxWidth: 250,
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap",
                       }}
                     >
-                      {okr.proposedChanges
-                        ? `${Object.keys(okr.proposedChanges).length} mục có trao đổi`
-                        : "Xem chi tiết..."}
+                      {(() => {
+                        if (!okr.proposedChanges || Object.keys(okr.proposedChanges).length === 0) {
+                          return "Xem chi tiết...";
+                        }
+                        let exchangeCount = 0;
+                        let commentCount = 0;
+                        for (const messages of Object.values(okr.proposedChanges)) {
+                          const senders = new Set((messages as any[]).map((m: any) => m.sender));
+                          if (senders.has("USER") && senders.has("MANAGER")) {
+                            exchangeCount++;
+                          } else {
+                            commentCount++;
+                          }
+                        }
+                        if (exchangeCount > 0) {
+                          return `${exchangeCount} mục đang trao đổi`;
+                        }
+                        if (commentCount > 0) {
+                          return `Có nhận xét trên ${commentCount} mục`;
+                        }
+                        return "Xem chi tiết...";
+                      })()}
                     </Typography>
                   </TableCell>
                   <TableCell align="right">
