@@ -179,20 +179,31 @@ export default function DeanApprovalTab() {
                         let exchangeCount = 0;
                         let commentCount = 0;
                         for (const messages of Object.values(okr.proposedChanges)) {
-                          const senders = new Set((messages as any[]).map((m: any) => m.sender));
+                          const msgs = messages as any[];
+                          if (msgs.length === 0) continue;
+                          const senders = new Set(msgs.map((m: any) => m.sender));
+                          const lastSender = msgs[msgs.length - 1]?.sender;
                           if (senders.has("USER") && senders.has("MANAGER")) {
-                            exchangeCount++;
+                            // Trao đổi 2 chiều: chỉ tính "đang trao đổi" nếu tin cuối là USER (chờ Manager xử lý)
+                            if (lastSender === "USER") {
+                              exchangeCount++;
+                            }
+                            // Nếu tin cuối là MANAGER → đã phản hồi, không tính
                           } else {
-                            commentCount++;
+                            // Chỉ 1 phía nhắn → nhận xét
+                            if (lastSender === "USER") {
+                              commentCount++;
+                            }
+                            // Nếu chỉ MANAGER nhắn → không cần hiện
                           }
                         }
                         if (exchangeCount > 0) {
-                          return `${exchangeCount} mục đang trao đổi`;
+                          return `${exchangeCount} mục chờ xử lý`;
                         }
                         if (commentCount > 0) {
                           return `Có nhận xét trên ${commentCount} mục`;
                         }
-                        return "Xem chi tiết...";
+                        return "Đã phản hồi tất cả";
                       })()}
                     </Typography>
                   </TableCell>
