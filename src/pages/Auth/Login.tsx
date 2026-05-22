@@ -12,6 +12,11 @@ import {
   Paper,
   Stack,
   Fade,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
 import { School as SchoolIcon } from "@mui/icons-material";
 import { useTranslation, Trans } from "react-i18next";
@@ -57,6 +62,18 @@ export default function Login() {
   const [allowedDomains, setAllowedDomains] = useState<string[]>([]);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+
+  // State phục vụ việc bypass đăng nhập cho tester và tự động hóa
+  const [showMock, setShowMock] = useState(() => {
+    // Mặc định hiện trên localhost để dev/test nhanh chóng
+    return (
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1"
+    );
+  });
+  const [mockEmail, setMockEmail] = useState("");
+  const [mockRole, setMockRole] = useState("USER");
+  const [mockPosition, setMockPosition] = useState("");
 
   // URL Backend
   const BACKEND_URL =
@@ -156,6 +173,41 @@ export default function Login() {
     setError("");
     setIsMsLoading(true);
     window.location.href = `${BACKEND_URL}/auth/microsoft`;
+  };
+
+  const handleMockLogin = async () => {
+    if (!mockEmail) {
+      setError("Vui lòng nhập Email để thực hiện Mock Login.");
+      return;
+    }
+    setError("");
+    setIsLoading(true);
+    try {
+      const res = await api.post("/auth/bypass", {
+        email: mockEmail.trim(),
+        role: mockRole,
+        name: mockEmail.split("@")[0],
+        managementPositionSlug: mockPosition || undefined,
+      });
+
+      const { access_token, user } = res.data;
+      sessionStorage.setItem("authToken", access_token);
+      sessionStorage.setItem("user", JSON.stringify(user));
+
+      // Kiểm tra xem profile đã hoàn tất chưa
+      const profileCompleted = user.jobTitle || user.profileCompleted;
+      const destination = profileCompleted ? "/dashboard" : "/profile-setup";
+
+      navigate(destination, { replace: true });
+    } catch (err: any) {
+      console.error("Mock Login Error:", err);
+      setError(
+        "Bypass Login thất bại: " +
+          (err.response?.data?.message || err.message)
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -395,6 +447,73 @@ export default function Login() {
                   ) : (
                     t("login.restrictedMessage")
                   )}
+                </Typography>
+              </Box>
+
+              {showMock && (
+                <Box sx={{ mt: 3, p: 2.5, border: "1px dashed #3b82f6", borderRadius: "12px", bgcolor: "#f8fafc" }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: "bold", color: "#1e3a8a", mb: 1.5, display: "flex", alignItems: "center", gap: 1 }}>
+                    🧪 Tester Bypass / Mock Login
+                  </Typography>
+                  <Stack spacing={1.5}>
+                    <TextField
+                      id="mock-email-input"
+                      size="small"
+                      label="Mock Email"
+                      placeholder="VD: dean@hcmus.edu.vn"
+                      value={mockEmail}
+                      onChange={(e) => setMockEmail(e.target.value)}
+                      fullWidth
+                    />
+                    <FormControl size="small" fullWidth>
+                      <InputLabel id="mock-role-label">Mock Role</InputLabel>
+                      <Select
+                        labelId="mock-role-label"
+                        id="mock-role-select"
+                        value={mockRole}
+                        label="Mock Role"
+                        onChange={(e) => setMockRole(e.target.value)}
+                      >
+                        <MenuItem value="USER">User (Giảng viên / Nhân sự)</MenuItem>
+                        <MenuItem value="ADMIN">Admin</MenuItem>
+                      </Select>
+                    </FormControl>
+                    <FormControl size="small" fullWidth>
+                      <InputLabel id="mock-position-label">Mock Chức vụ quản lý</InputLabel>
+                      <Select
+                        labelId="mock-position-label"
+                        id="mock-position-select"
+                        value={mockPosition}
+                        label="Mock Chức vụ quản lý"
+                        onChange={(e) => setMockPosition(e.target.value)}
+                      >
+                        <MenuItem value="">Không có (Nhân sự thường)</MenuItem>
+                        <MenuItem value="DEAN">Trưởng khoa (DEAN)</MenuItem>
+                        <MenuItem value="VICE_DEAN">Phó khoa (VICE_DEAN)</MenuItem>
+                      </Select>
+                    </FormControl>
+                    <Button
+                      id="mock-login-button"
+                      variant="contained"
+                      color="info"
+                      onClick={handleMockLogin}
+                      disabled={isLoading || isMsLoading}
+                      fullWidth
+                      sx={{ textTransform: "none", fontWeight: "bold", borderRadius: "8px" }}
+                    >
+                      Đăng nhập Tester
+                    </Button>
+                  </Stack>
+                </Box>
+              )}
+
+              <Box sx={{ mt: 2, textAlign: "center" }}>
+                <Typography
+                  variant="caption"
+                  sx={{ color: "text.secondary", cursor: "pointer", "&:hover": { textDecoration: "underline" } }}
+                  onClick={() => setShowMock(!showMock)}
+                >
+                  {showMock ? "Ẩn công cụ Tester" : "Hiện công cụ Tester (Bypass Login)"}
                 </Typography>
               </Box>
             </Paper>
