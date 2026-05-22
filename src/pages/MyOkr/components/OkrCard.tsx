@@ -892,6 +892,16 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
   const progressPercent =
     maxScore > 0 ? Math.min((displayScore / maxScore) * 100, 100) : 0;
 
+  const getButtonLabel = () => {
+    if (okr.status === "PENDING" || okr.status === "NEGOTIATING") {
+      return "Đàm phán & Chỉnh sửa";
+    }
+    if (canReport) {
+      return "Khai báo điểm & Minh chứng";
+    }
+    return "Xem chi tiết";
+  };
+
   return (
     <Paper
       sx={{
@@ -976,28 +986,134 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
           )}
           <Button
             size="small"
-            variant="outlined"
-            color="primary"
-            onClick={() => setExpanded(!expanded)}
-            endIcon={expanded ? <ExpandLess /> : <ExpandMore />}
+            variant={(okr.status === "PENDING" || okr.status === "NEGOTIATING" || canReport) ? "contained" : "outlined"}
+            color={
+              (okr.status === "PENDING" || okr.status === "NEGOTIATING")
+                ? "warning"
+                : canReport
+                ? "primary"
+                : "inherit"
+            }
+            onClick={() => setExpanded(true)}
+            sx={{ textTransform: "none", fontWeight: "bold" }}
           >
-            {expanded ? "Thu gọn" : "Xem chi tiết"}
+            {getButtonLabel()}
           </Button>
         </Box>
       </Box>
 
       {(canReport || isSubmitted || isCompleted) && (
-        <Box sx={{ px: 2, pb: 1 }}>
+        <Box sx={{ px: 2, py: 1.5, borderTop: "1px solid #f1f5f9" }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 0.5 }}>
+            <Typography variant="caption" color="text.secondary" fontWeight="500">
+              Tiến độ hoàn thành:
+            </Typography>
+            <Typography variant="caption" fontWeight="bold" color="primary.main">
+              {progressPercent.toFixed(0)}% ({displayScore.toFixed(1)}/{maxScore} điểm)
+            </Typography>
+          </Box>
           <LinearProgress
             variant="determinate"
             value={progressPercent}
-            sx={{ height: 8, borderRadius: 4 }}
+            sx={{ height: 6, borderRadius: 3 }}
           />
-          <Typography variant="caption" color="text.secondary">
-            {progressPercent.toFixed(0)}% hoàn thành
-          </Typography>
         </Box>
       )}
+
+      {/* Basic Structure Info */}
+      <Box sx={{ p: 2, borderTop: "1px solid #f1f5f9", bgcolor: "#fafafa" }}>
+        <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1.5, fontWeight: "bold", display: "flex", alignItems: "center", gap: 0.5 }}>
+          📋 Khung OKR giao trong kỳ:
+        </Typography>
+        {localStructure.map((obj: any, idx: number) => (
+          <Box key={obj.id || idx} sx={{ mb: 2, "&:last-child": { mb: 0 } }}>
+            {/* Objective row */}
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1, bgcolor: "#eff6ff", p: 1, borderRadius: 1.5 }}>
+              <Typography variant="subtitle2" fontWeight="bold" color="#1e3a8a" sx={{ fontSize: "0.85rem" }}>
+                {obj.id}. {obj.title}
+              </Typography>
+              <Chip 
+                label={`Tối đa: ${obj.maxScore} điểm`} 
+                size="small" 
+                color="primary" 
+                variant="outlined"
+                sx={{ height: 20, fontSize: "0.7rem", fontWeight: "bold", bgcolor: "white" }} 
+              />
+            </Box>
+            
+            {/* Key Results and below */}
+            <Box sx={{ pl: 1, display: "flex", flexDirection: "column", gap: 1 }}>
+              {obj.items?.map((kr: any) => (
+                <Box key={kr.id} sx={{ display: "flex", flexDirection: "column", gap: 0.5, borderBottom: "1px dashed #f1f5f9", pb: 0.5 }}>
+                  {/* KR Row */}
+                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                    <Typography variant="body2" color="text.primary" sx={{ fontSize: "0.8rem", lineHeight: 1.4 }}>
+                      <strong>{kr.id}</strong> {kr.title}
+                    </Typography>
+                    <Box sx={{ display: "flex", gap: 1, alignItems: "center", ml: 2, flexShrink: 0 }}>
+                      {kr.unitScore ? (
+                        <Chip
+                          label={`+${kr.unitScore}/${kr.unit || "đv"}`}
+                          size="small"
+                          sx={{ height: 16, fontSize: "0.6rem", color: "text.secondary", bgcolor: "#f1f5f9" }}
+                        />
+                      ) : null}
+                      {kr.maxScore ? (
+                        <Typography variant="caption" fontWeight="bold" color="text.secondary" sx={{ minWidth: 50, textAlign: "right", fontSize: "0.7rem" }}>
+                          {kr.maxScore} đ
+                        </Typography>
+                      ) : null}
+                    </Box>
+                  </Box>
+
+                  {/* Sub-KRs */}
+                  {kr.items?.map((sub: any) => (
+                    <Box key={sub.id} sx={{ pl: 2, display: "flex", flexDirection: "column", gap: 0.5 }}>
+                      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.75rem", lineHeight: 1.4 }}>
+                          <strong>{sub.id}</strong> {sub.title}
+                        </Typography>
+                        <Box sx={{ display: "flex", gap: 1, alignItems: "center", ml: 2, flexShrink: 0 }}>
+                          {sub.unitScore ? (
+                            <Chip
+                              label={`+${sub.unitScore}/${sub.unit || "đv"}`}
+                              size="small"
+                              sx={{ height: 14, fontSize: "0.58rem", color: "text.secondary", bgcolor: "#f1f5f9" }}
+                            />
+                          ) : null}
+                          {sub.maxScore ? (
+                            <Typography variant="caption" color="text.secondary" sx={{ minWidth: 50, textAlign: "right", fontSize: "0.7rem" }}>
+                              {sub.maxScore} đ
+                            </Typography>
+                          ) : null}
+                        </Box>
+                      </Box>
+
+                      {/* Sub-Sub-KRs */}
+                      {sub.items?.map((subsub: any) => (
+                        <Box key={subsub.id} sx={{ pl: 2, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                          <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.72rem", fontStyle: "italic", lineHeight: 1.4 }}>
+                            <strong>{subsub.id}</strong> {subsub.title}
+                          </Typography>
+                          <Box sx={{ display: "flex", gap: 1, alignItems: "center", ml: 2, flexShrink: 0 }}>
+                            {subsub.unitScore ? (
+                              <Chip
+                                label={`+${subsub.unitScore}/${subsub.unit || "đv"}`}
+                                size="small"
+                                sx={{ height: 12, fontSize: "0.55rem", color: "text.secondary", bgcolor: "#f1f5f9" }}
+                              />
+                            ) : null}
+                          </Box>
+                        </Box>
+                      ))}
+                    </Box>
+                  ))}
+                </Box>
+              ))}
+            </Box>
+          </Box>
+        ))}
+      </Box>
 
       {/* Expanded Dialog */}
       <Dialog

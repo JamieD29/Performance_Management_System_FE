@@ -50,7 +50,7 @@ export default function AssignTemplateDialog({
   const [userAssignments, setUserAssignments] = useState<Record<string, string>>({});
   const [variants, setVariants] = useState<any[]>([]);
   const [openVariantEditor, setOpenVariantEditor] = useState(false);
-  
+
   const [selectedCycleId, setSelectedCycleId] = useState("");
   const [deadline, setDeadline] = useState("");
   const [loading, setLoading] = useState(false);
@@ -309,8 +309,8 @@ export default function AssignTemplateDialog({
                 InputLabelProps={{ shrink: true }}
                 helperText="Thời gian để nhân sự điều chỉnh và chốt OKR trước khi kỳ bắt đầu."
                 inputProps={{
-                  max: cycles.find(c => c.id === selectedCycleId)?.startDate 
-                    ? new Date(cycles.find(c => c.id === selectedCycleId).startDate).toISOString().split('T')[0] 
+                  max: cycles.find(c => c.id === selectedCycleId)?.startDate
+                    ? new Date(cycles.find(c => c.id === selectedCycleId).startDate).toISOString().split('T')[0]
                     : undefined
                 }}
               />
@@ -371,7 +371,7 @@ export default function AssignTemplateDialog({
                 </Select>
               </FormControl>
 
-              <FormControl size="small" sx={{ minWidth: 200, flex: 1 }}>
+              {/* <FormControl size="small" sx={{ minWidth: 200, flex: 1 }}>
                 <InputLabel>Chức vụ quản lý</InputLabel>
                 <Select
                   value={filterPositionId}
@@ -385,7 +385,7 @@ export default function AssignTemplateDialog({
                     </MenuItem>
                   ))}
                 </Select>
-              </FormControl>
+              </FormControl> */}
 
               <FormControl size="small" sx={{ minWidth: 200, flex: 1 }}>
                 <InputLabel>Chức danh nghề nghiệp</InputLabel>
@@ -493,8 +493,8 @@ export default function AssignTemplateDialog({
                       hover
                       selected={!!userAssignments[user.id]}
                       onClick={() => {
-                         if (userAssignments[user.id]) handleAssignVariant(user.id, "");
-                         else handleAssignVariant(user.id, "base");
+                        if (userAssignments[user.id]) handleAssignVariant(user.id, "");
+                        else handleAssignVariant(user.id, "base");
                       }}
                       sx={{ cursor: "pointer" }}
                     >
@@ -502,8 +502,8 @@ export default function AssignTemplateDialog({
                         <Checkbox
                           checked={!!userAssignments[user.id]}
                           onChange={(e) => {
-                             if (e.target.checked) handleAssignVariant(user.id, "base");
-                             else handleAssignVariant(user.id, "");
+                            if (e.target.checked) handleAssignVariant(user.id, "base");
+                            else handleAssignVariant(user.id, "");
                           }}
                           onClick={(e) => e.stopPropagation()}
                           size="small"

@@ -26,7 +26,11 @@ import EvaluationListTab from "./components/EvaluationListTab";
 import EvaluationFormManagerTab from "./components/EvaluationFormManagerTab";
 
 export default function DepartmentOKR() {
-  const [tabValue, setTabValue] = useState(0);
+  const [tabValue, setTabValue] = useState(() => {
+    const savedTab = localStorage.getItem("department_okr_tab");
+    const index = savedTab ? parseInt(savedTab, 10) : 0;
+    return index >= 0 && index < 5 ? index : 0;
+  });
   const { t } = useTranslation();
 
   // Tab definitions
@@ -77,7 +81,10 @@ export default function DepartmentOKR() {
       }}>
         <Tabs 
           value={tabValue} 
-          onChange={(_, v) => setTabValue(v)}
+          onChange={(_, v) => {
+            setTabValue(v);
+            localStorage.setItem("department_okr_tab", v.toString());
+          }}
           variant="fullWidth"
           TabIndicatorProps={{
             style: { display: "none" } // Ẩn đường kẻ gạch chân mặc định
