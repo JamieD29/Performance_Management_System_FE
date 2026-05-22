@@ -24,8 +24,11 @@ import {
   Avatar,
   Checkbox,
   Alert,
+  TablePagination,
+  InputAdornment,
+  IconButton,
 } from "@mui/material";
-import { Send, PersonSearch, SelectAll, Deselect, AddCircleOutline } from "@mui/icons-material";
+import { Send, PersonSearch, SelectAll, Deselect, AddCircleOutline, Search, Clear } from "@mui/icons-material";
 import { api } from "../../../services/api";
 import { showWarning, showSuccess, showError } from "../../../utils/swal";
 import { performanceService } from "../../../services/performanceService";
@@ -56,12 +59,21 @@ export default function AssignTemplateDialog({
   const [filterDepartmentId, setFilterDepartmentId] = useState("");
   const [filterPositionId, setFilterPositionId] = useState("");
   const [filterJobTitle, setFilterJobTitle] = useState("");
+  const [searchName, setSearchName] = useState("");
+
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  useEffect(() => {
+    setPage(0);
+  }, [filterDepartmentId, filterPositionId, filterJobTitle, searchName]);
 
   useEffect(() => {
     if (open && template) {
       setFilterPositionId(template?.positionId || "");
       setFilterJobTitle(template?.jobTitle || "");
       setFilterDepartmentId("");
+      setSearchName("");
       loadData();
       setVariants([{ id: "base", title: "Phiên bản Gốc (Mặc định)", structure: template.structure }]);
       setUserAssignments({});
@@ -164,8 +176,16 @@ export default function AssignTemplateDialog({
     if (filterDepartmentId && user.department?.id !== filterDepartmentId) return false;
     if (filterPositionId && user.managementPosition?.id !== filterPositionId) return false;
     if (filterJobTitle && user.jobTitle !== filterJobTitle) return false;
+    if (searchName) {
+      const searchLower = searchName.toLowerCase();
+      const nameMatch = user.name?.toLowerCase().includes(searchLower);
+      const emailMatch = user.email?.toLowerCase().includes(searchLower);
+      if (!nameMatch && !emailMatch) return false;
+    }
     return true;
   });
+
+  const paginatedUsers = filteredUsers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   // Unique options for filters
   const departments = Array.from(new Set(users.map((u) => u.department?.id))).filter(Boolean).map((id) => users.find((u) => u.department?.id === id)?.department);
@@ -173,7 +193,17 @@ export default function AssignTemplateDialog({
   const jobTitles = Array.from(new Set(users.map((u) => u.jobTitle))).filter(Boolean);
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="xl"
+      fullWidth
+      PaperProps={{
+        sx: {
+          borderRadius: 3,
+        },
+      }}
+    >
       <DialogTitle
         sx={{
           color: "#1e3a8a",
@@ -296,6 +326,31 @@ export default function AssignTemplateDialog({
               <Chip label="Tùy chọn" size="small" variant="outlined" color="default" sx={{ fontSize: "0.7rem" }} />
             </Typography>
             <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+              <TextField
+                size="small"
+                label="Tìm kiếm theo tên, email..."
+                variant="outlined"
+                value={searchName}
+                onChange={(e) => setSearchName(e.target.value)}
+                sx={{ minWidth: 250, flex: 1.5 }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Search fontSize="small" />
+                    </InputAdornment>
+                  ),
+                  endAdornment: searchName && (
+                    <IconButton
+                      aria-label="clear search"
+                      onClick={() => setSearchName("")}
+                      edge="end"
+                      size="small"
+                    >
+                      <Clear fontSize="small" />
+                    </IconButton>
+                  ),
+                }}
+              />
               <FormControl size="small" sx={{ minWidth: 200, flex: 1 }}>
                 <InputLabel>Bộ môn</InputLabel>
                 <Select
@@ -432,7 +487,7 @@ export default function AssignTemplateDialog({
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredUsers.map((user: any) => (
+                  paginatedUsers.map((user: any) => (
                     <TableRow
                       key={user.id}
                       hover
@@ -535,64 +590,83 @@ export default function AssignTemplateDialog({
             </Table>
           </TableContainer>
 
-          {/* Selection Summary */}
-          {Object.keys(userAssignments).length > 0 && (
-            <Box
-              sx={{
-                mt: 2,
-                p: 1.5,
-                bgcolor: "#f0fdf4",
-                borderRadius: 1,
-                border: "1px solid #bbf7d0",
-              }}
-            >
-              <Typography variant="body2" color="success.main">
-                ✅ Đã chọn <strong>{Object.keys(userAssignments).length}</strong> nhân sự:
-              </Typography>
-              <Box
-                sx={{ display: "flex", gap: 0.5, flexWrap: "wrap", mt: 0.5 }}
-              >
-                {Object.keys(userAssignments).slice(0, 10).map((id) => {
-                  const user = users.find((u) => u.id === id);
-                  const varName = variants.find(v => v.id === userAssignments[id])?.title;
-                  return (
-                    <Chip
-                      key={id}
-                      label={`${user?.name || user?.email || id} (${varName})`}
-                      size="small"
-                      color="success"
-                      variant="outlined"
-                      onDelete={() => handleAssignVariant(id, "")}
-                    />
-                  );
-                })}
-                {Object.keys(userAssignments).length > 10 && (
-                  <Chip
-                    label={`+${Object.keys(userAssignments).length - 10} người khác`}
-                    size="small"
-                    color="default"
-                  />
-                )}
-              </Box>
-            </Box>
-          )}
+          <TablePagination
+            rowsPerPageOptions={[10, 25, 50]}
+            component="div"
+            count={filteredUsers.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={(e, newPage) => setPage(newPage)}
+            onRowsPerPageChange={(e) => {
+              setRowsPerPage(parseInt(e.target.value, 10));
+              setPage(0);
+            }}
+            labelRowsPerPage="Số dòng mỗi trang:"
+            labelDisplayedRows={({ from, to, count }) =>
+              `${from}–${to} trong ${count !== -1 ? count : `hơn ${to}`}`
+            }
+          />
+
         </Box>
       </DialogContent>
 
-      <DialogActions sx={{ p: 3 }}>
-        <Button onClick={onClose} color="inherit">
-          Hủy
-        </Button>
-        <Button
-          variant="contained"
-          onClick={handleAssign}
-          disabled={Object.keys(userAssignments).length === 0 || !selectedCycleId || loading}
-          startIcon={<Send />}
-        >
-          {loading
-            ? "Đang giao..."
-            : `Giao OKR cho ${Object.keys(userAssignments).length || ""} Nhân sự`}
-        </Button>
+      <DialogActions sx={{ p: 3, flexDirection: "column", alignItems: "stretch", gap: 2 }}>
+        {/* Selection Summary */}
+        {Object.keys(userAssignments).length > 0 && (
+          <Box
+            sx={{
+              p: 1.5,
+              bgcolor: "#f0fdf4",
+              borderRadius: 1,
+              border: "1px solid #bbf7d0",
+            }}
+          >
+            <Typography variant="body2" color="success.main" sx={{ mb: 1 }}>
+              ✅ Đã chọn <strong>{Object.keys(userAssignments).length}</strong> nhân sự:
+            </Typography>
+            <Box
+              sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}
+            >
+              {Object.keys(userAssignments).slice(0, 10).map((id) => {
+                const user = users.find((u) => u.id === id);
+                const varName = variants.find(v => v.id === userAssignments[id])?.title;
+                return (
+                  <Chip
+                    key={id}
+                    label={`${user?.name || user?.email || id} (${varName})`}
+                    size="small"
+                    color="success"
+                    variant="outlined"
+                    onDelete={() => handleAssignVariant(id, "")}
+                  />
+                );
+              })}
+              {Object.keys(userAssignments).length > 10 && (
+                <Chip
+                  label={`+${Object.keys(userAssignments).length - 10} người khác`}
+                  size="small"
+                  color="default"
+                />
+              )}
+            </Box>
+          </Box>
+        )}
+
+        <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
+          <Button onClick={onClose} color="inherit">
+            Hủy
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleAssign}
+            disabled={Object.keys(userAssignments).length === 0 || !selectedCycleId || loading}
+            startIcon={<Send />}
+          >
+            {loading
+              ? "Đang giao..."
+              : `Giao OKR cho ${Object.keys(userAssignments).length || ""} Nhân sự`}
+          </Button>
+        </Box>
       </DialogActions>
 
       {openVariantEditor && (
