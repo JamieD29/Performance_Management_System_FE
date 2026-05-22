@@ -738,6 +738,25 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
     }
   };
 
+  const handleSendForApproval = async () => {
+    const ok = await confirmAction({
+      title: "Gửi yêu cầu duyệt?",
+      text: "Xác nhận gửi yêu cầu duyệt OKR này lên Trưởng khoa/Quản lý.",
+      icon: "question",
+      confirmText: "Gửi yêu cầu",
+      confirmColor: "#3b82f6",
+    });
+    if (!ok) return;
+    try {
+      await api.put(`/okrs/${okr.id}/send-for-approval`);
+      onRefresh();
+      showSuccess("Thành công", "Đã gửi yêu cầu duyệt OKR.");
+    } catch (error) {
+      console.error(error);
+      showError("Lỗi", "Có lỗi xảy ra khi gửi yêu cầu duyệt OKR.");
+    }
+  };
+
   const handleSendChat = async (itemId: string) => {
     if (!chatMessage.trim()) return;
     setChatLoading(true);
@@ -1380,7 +1399,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                 onClick={handleSubmitChanges}
                 startIcon={<Save />}
               >
-                Gửi thay đổi
+                Gửi thay đổi & Yêu cầu duyệt
               </Button>
             )}
             <IconButton
@@ -2486,9 +2505,20 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                   p: 2,
                   display: "flex",
                   justifyContent: "flex-end",
+                  gap: 2,
                   bgcolor: "#f1f5f9",
                 }}
               >
+                {isPending && (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={<Send />}
+                    onClick={handleSendForApproval}
+                  >
+                    Gửi yêu cầu duyệt đề xuất
+                  </Button>
+                )}
                 <Button
                   variant="contained"
                   color="success"
