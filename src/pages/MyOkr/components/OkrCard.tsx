@@ -21,7 +21,6 @@ import {
   TextField,
   DialogActions,
 } from "@mui/material";
-import {
   Check,
   ExpandMore,
   ExpandLess,
@@ -33,6 +32,8 @@ import {
   Delete,
   Edit,
   Undo,
+  Launch,
+  Forum,
 } from "@mui/icons-material";
 import { api } from "../../../services/api";
 import { confirmAction, showSuccess, showError } from "../../../utils/swal";
@@ -1021,98 +1022,309 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
       )}
 
       {/* Basic Structure Info */}
-      <Box sx={{ p: 2, borderTop: "1px solid #f1f5f9", bgcolor: "#fafafa" }}>
-        <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1.5, fontWeight: "bold", display: "flex", alignItems: "center", gap: 0.5 }}>
+      <Box sx={{ p: 2.5, borderTop: "1px solid #f1f5f9", bgcolor: "#fafafa" }}>
+        <Typography 
+          variant="subtitle2" 
+          color="#334155" 
+          sx={{ mb: 2, fontWeight: "bold", display: "flex", alignItems: "center", gap: 1, fontSize: "0.9rem" }}
+        >
           📋 Khung OKR giao trong kỳ:
         </Typography>
-        {localStructure.map((obj: any, idx: number) => (
-          <Box key={obj.id || idx} sx={{ mb: 2, "&:last-child": { mb: 0 } }}>
-            {/* Objective row */}
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1, bgcolor: "#eff6ff", p: 1, borderRadius: 1.5 }}>
-              <Typography variant="subtitle2" fontWeight="bold" color="#1e3a8a" sx={{ fontSize: "0.85rem" }}>
-                {obj.id}. {obj.title}
-              </Typography>
-              <Chip 
-                label={`Tối đa: ${obj.maxScore} điểm`} 
-                size="small" 
-                color="primary" 
-                variant="outlined"
-                sx={{ height: 20, fontSize: "0.7rem", fontWeight: "bold", bgcolor: "white" }} 
-              />
-            </Box>
-            
-            {/* Key Results and below */}
-            <Box sx={{ pl: 1, display: "flex", flexDirection: "column", gap: 1 }}>
-              {obj.items?.map((kr: any) => (
-                <Box key={kr.id} sx={{ display: "flex", flexDirection: "column", gap: 0.5, borderBottom: "1px dashed #f1f5f9", pb: 0.5 }}>
-                  {/* KR Row */}
-                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                    <Typography variant="body2" color="text.primary" sx={{ fontSize: "0.8rem", lineHeight: 1.4 }}>
-                      <strong>{kr.id}</strong> {kr.title}
-                    </Typography>
-                    <Box sx={{ display: "flex", gap: 1, alignItems: "center", ml: 2, flexShrink: 0 }}>
-                      {kr.unitScore ? (
-                        <Chip
-                          label={`+${kr.unitScore}/${kr.unit || "đv"}`}
-                          size="small"
-                          sx={{ height: 16, fontSize: "0.6rem", color: "text.secondary", bgcolor: "#f1f5f9" }}
-                        />
-                      ) : null}
-                      {kr.maxScore ? (
-                        <Typography variant="caption" fontWeight="bold" color="text.secondary" sx={{ minWidth: 50, textAlign: "right", fontSize: "0.7rem" }}>
-                          {kr.maxScore} đ
-                        </Typography>
-                      ) : null}
-                    </Box>
-                  </Box>
 
-                  {/* Sub-KRs */}
-                  {kr.items?.map((sub: any) => (
-                    <Box key={sub.id} sx={{ pl: 2, display: "flex", flexDirection: "column", gap: 0.5 }}>
-                      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.75rem", lineHeight: 1.4 }}>
-                          <strong>{sub.id}</strong> {sub.title}
-                        </Typography>
-                        <Box sx={{ display: "flex", gap: 1, alignItems: "center", ml: 2, flexShrink: 0 }}>
-                          {sub.unitScore ? (
+        {localStructure.map((obj: any, idx: number) => {
+          const objCommentsCount = (okr.proposedChanges?.[obj.id]?.length || 0) + (localComments[obj.id]?.length || 0);
+
+          return (
+            <Box key={obj.id || idx} sx={{ mb: 3, "&:last-child": { mb: 0 } }}>
+              {/* Objective row */}
+              <Box 
+                sx={{ 
+                  display: "flex", 
+                  justifyContent: "space-between", 
+                  alignItems: "center", 
+                  mb: 1.5, 
+                  bgcolor: "#eff6ff", 
+                  p: 1.5, 
+                  borderRadius: 2,
+                  borderLeft: "4px solid #2563eb",
+                  boxShadow: "0 1px 2px rgba(0,0,0,0.05)"
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Typography variant="subtitle2" fontWeight="bold" color="#1e3a8a" sx={{ fontSize: "0.9rem" }}>
+                    {obj.id}. {obj.title}
+                  </Typography>
+                  {objCommentsCount > 0 && (
+                    <Chip
+                      icon={<Forum sx={{ fontSize: "0.8rem !important" }} />}
+                      label={`${objCommentsCount} phản hồi`}
+                      size="small"
+                      color="warning"
+                      sx={{ height: 20, fontSize: "0.65rem", fontWeight: "bold" }}
+                    />
+                  )}
+                </Box>
+                <Chip 
+                  label={`Tối đa: ${obj.maxScore} điểm`} 
+                  size="small" 
+                  color="primary" 
+                  sx={{ height: 24, fontSize: "0.75rem", fontWeight: "bold", bgcolor: "#1e3a8a" }} 
+                />
+              </Box>
+              
+              {/* Key Results and below */}
+              <Box sx={{ pl: 1, display: "flex", flexDirection: "column", gap: 1.5 }}>
+                {obj.items?.map((kr: any) => {
+                  const krKey = `${obj.id}-${kr.id}`;
+                  const krData = reportData[krKey];
+                  const krQty = krData?.quantity || 0;
+                  const krUnitScore = Number(kr.unitScore) || 0;
+                  const krCalcScore = krUnitScore > 0 ? krQty * krUnitScore : krQty;
+                  const krCappedScore = Math.min(krCalcScore, Number(kr.maxScore) || Infinity);
+                  const krScore = krData?.score != null ? krData.score : krCappedScore;
+
+                  const krCommentsCount = (okr.proposedChanges?.[kr.id]?.length || 0) + (localComments[kr.id]?.length || 0);
+                  const hasReport = krQty > 0 || (krData?.evidence);
+
+                  return (
+                    <Box 
+                      key={kr.id} 
+                      sx={{ 
+                        pl: 2, 
+                        borderLeft: "2px solid #cbd5e1",
+                        display: "flex", 
+                        flexDirection: "column", 
+                        gap: 0.5 
+                      }}
+                    >
+                      {/* KR Row */}
+                      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 1 }}>
+                        <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1, flex: 1, minWidth: "250px" }}>
+                          <Typography variant="body2" color="text.primary" sx={{ fontSize: "0.85rem", lineHeight: 1.5 }}>
+                            <strong>{kr.id}</strong> {kr.title}
+                          </Typography>
+                          
+                          {krCommentsCount > 0 && (
                             <Chip
-                              label={`+${sub.unitScore}/${sub.unit || "đv"}`}
+                              icon={<Forum sx={{ fontSize: "0.75rem !important" }} />}
+                              label={`${krCommentsCount}`}
                               size="small"
-                              sx={{ height: 14, fontSize: "0.58rem", color: "text.secondary", bgcolor: "#f1f5f9" }}
+                              color="warning"
+                              variant="outlined"
+                              sx={{ height: 16, fontSize: "0.6rem", fontWeight: "bold", ml: 0.5 }}
+                            />
+                          )}
+                        </Box>
+                        
+                        {/* Target & Score Info */}
+                        <Box sx={{ display: "flex", gap: 1, alignItems: "center", flexShrink: 0 }}>
+                          {kr.unitScore ? (
+                            <Chip
+                              label={`+${kr.unitScore}/${kr.unit || "đv"}`}
+                              size="small"
+                              sx={{ height: 18, fontSize: "0.65rem", color: "#475569", bgcolor: "#e2e8f0", fontWeight: "500" }}
                             />
                           ) : null}
-                          {sub.maxScore ? (
-                            <Typography variant="caption" color="text.secondary" sx={{ minWidth: 50, textAlign: "right", fontSize: "0.7rem" }}>
-                              {sub.maxScore} đ
-                            </Typography>
+                          {kr.maxScore ? (
+                            <Chip
+                              label={`Tối đa: ${kr.maxScore}đ`}
+                              size="small"
+                              variant="outlined"
+                              sx={{ height: 18, fontSize: "0.65rem", color: "#475569", fontWeight: "500" }}
+                            />
                           ) : null}
                         </Box>
                       </Box>
 
-                      {/* Sub-Sub-KRs */}
-                      {sub.items?.map((subsub: any) => (
-                        <Box key={subsub.id} sx={{ pl: 2, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                          <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.72rem", fontStyle: "italic", lineHeight: 1.4 }}>
-                            <strong>{subsub.id}</strong> {subsub.title}
+                      {/* Display Self-Report Info if exists */}
+                      {hasReport && (okr.status === "ACCEPTED" || okr.status === "SUBMITTED" || okr.status === "COMPLETED") && (
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, pl: 2, py: 0.25, flexWrap: "wrap" }}>
+                          <Typography variant="caption" sx={{ color: "#16a34a", fontWeight: "600", bgcolor: "#f0fdf4", px: 1, py: 0.25, borderRadius: 1 }}>
+                            Đã khai: {krQty} {kr.unit || "đv"} {kr.unitScore ? `(-> ${krScore.toFixed(1)}đ)` : `(-> ${krScore}đ)`}
                           </Typography>
-                          <Box sx={{ display: "flex", gap: 1, alignItems: "center", ml: 2, flexShrink: 0 }}>
-                            {subsub.unitScore ? (
-                              <Chip
-                                label={`+${subsub.unitScore}/${subsub.unit || "đv"}`}
-                                size="small"
-                                sx={{ height: 12, fontSize: "0.55rem", color: "text.secondary", bgcolor: "#f1f5f9" }}
-                              />
-                            ) : null}
-                          </Box>
+                          {krData?.evidence && (
+                            <Chip
+                              icon={<Launch sx={{ fontSize: "0.7rem !important" }} />}
+                              label="Xem minh chứng"
+                              size="small"
+                              component="a"
+                              href={krData.evidence.startsWith("http") ? krData.evidence : `https://${krData.evidence}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              clickable
+                              sx={{ height: 18, fontSize: "0.65rem", bgcolor: "#ecfdf5", color: "#065f46", border: "1px solid #a7f3d0", cursor: "pointer" }}
+                            />
+                          )}
                         </Box>
-                      ))}
+                      )}
+
+                      {/* Sub-KRs */}
+                      {kr.items?.map((sub: any) => {
+                        const subKey = `${obj.id}-${kr.id}-${sub.id}`;
+                        const subData = reportData[subKey];
+                        const subQty = subData?.quantity || 0;
+                        const subUnitScore = Number(sub.unitScore) || 0;
+                        const subCalcScore = subUnitScore > 0 ? subQty * subUnitScore : subQty;
+                        const subCappedScore = Math.min(subCalcScore, Number(sub.maxScore) || Infinity);
+                        const subScore = subData?.score != null ? subData.score : subCappedScore;
+
+                        const subCommentsCount = (okr.proposedChanges?.[sub.id]?.length || 0) + (localComments[sub.id]?.length || 0);
+                        const hasSubReport = subQty > 0 || (subData?.evidence);
+
+                        return (
+                          <Box 
+                            key={sub.id} 
+                            sx={{ 
+                              pl: 2.5, 
+                              borderLeft: "2px solid #e2e8f0",
+                              display: "flex", 
+                              flexDirection: "column", 
+                              gap: 0.5,
+                              mt: 0.5
+                            }}
+                          >
+                            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 1 }}>
+                              <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1, flex: 1, minWidth: "220px" }}>
+                                <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8rem", lineHeight: 1.5 }}>
+                                  <strong>{sub.id}</strong> {sub.title}
+                                </Typography>
+                                {subCommentsCount > 0 && (
+                                  <Chip
+                                    icon={<Forum sx={{ fontSize: "0.75rem !important" }} />}
+                                    label={`${subCommentsCount}`}
+                                    size="small"
+                                    color="warning"
+                                    variant="outlined"
+                                    sx={{ height: 16, fontSize: "0.6rem", fontWeight: "bold", ml: 0.5 }}
+                                  />
+                                )}
+                              </Box>
+                              
+                              <Box sx={{ display: "flex", gap: 1, alignItems: "center", flexShrink: 0 }}>
+                                {sub.unitScore ? (
+                                  <Chip
+                                    label={`+${sub.unitScore}/${sub.unit || "đv"}`}
+                                    size="small"
+                                    sx={{ height: 16, fontSize: "0.6rem", color: "#64748b", bgcolor: "#f1f5f9" }}
+                                  />
+                                ) : null}
+                                {sub.maxScore ? (
+                                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.7rem", fontWeight: "500" }}>
+                                    Tối đa: {sub.maxScore}đ
+                                  </Typography>
+                                ) : null}
+                              </Box>
+                            </Box>
+
+                            {/* Display Sub self-report */}
+                            {hasSubReport && (okr.status === "ACCEPTED" || okr.status === "SUBMITTED" || okr.status === "COMPLETED") && (
+                              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, pl: 2, py: 0.25, flexWrap: "wrap" }}>
+                                <Typography variant="caption" sx={{ color: "#16a34a", fontWeight: "600", bgcolor: "#f0fdf4", px: 0.75, py: 0.25, borderRadius: 0.5 }}>
+                                  Đã khai: {subQty} {sub.unit || "đv"} {sub.unitScore ? `(-> ${subScore.toFixed(1)}đ)` : `(-> ${subScore}đ)`}
+                                </Typography>
+                                {subData?.evidence && (
+                                  <Chip
+                                    icon={<Launch sx={{ fontSize: "0.65rem !important" }} />}
+                                    label="Xem minh chứng"
+                                    size="small"
+                                    component="a"
+                                    href={subData.evidence.startsWith("http") ? subData.evidence : `https://${subData.evidence}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    clickable
+                                    sx={{ height: 16, fontSize: "0.6rem", bgcolor: "#ecfdf5", color: "#065f46", border: "1px solid #a7f3d0", cursor: "pointer" }}
+                                  />
+                                )}
+                              </Box>
+                            )}
+
+                            {/* Sub-Sub-KRs */}
+                            {sub.items?.map((subsub: any) => {
+                              const subsubKey = `${obj.id}-${kr.id}-${sub.id}-${subsub.id}`;
+                              const subsubData = reportData[subsubKey];
+                              const subsubQty = subsubData?.quantity || 0;
+                              const subsubUnitScore = Number(subsub.unitScore) || 0;
+                              const subsubCalcScore = subsubUnitScore > 0 ? subsubQty * subsubUnitScore : subsubQty;
+                              const subsubCappedScore = Math.min(subsubCalcScore, Number(subsub.maxScore) || Infinity);
+                              const subsubScore = subsubData?.score != null ? subsubData.score : subsubCappedScore;
+
+                              const subsubCommentsCount = (okr.proposedChanges?.[subsub.id]?.length || 0) + (localComments[subsub.id]?.length || 0);
+                              const hasSubSubReport = subsubQty > 0 || (subsubData?.evidence);
+
+                              return (
+                                <Box 
+                                  key={subsub.id} 
+                                  sx={{ 
+                                    pl: 2.5, 
+                                    borderLeft: "2px dashed #cbd5e1",
+                                    display: "flex", 
+                                    flexDirection: "column", 
+                                    gap: 0.5,
+                                    mt: 0.5
+                                  }}
+                                >
+                                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 1 }}>
+                                    <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1, flex: 1, minWidth: "200px" }}>
+                                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.78rem", fontStyle: "italic", lineHeight: 1.5 }}>
+                                        <strong>{subsub.id}</strong> {subsub.title}
+                                      </Typography>
+                                      {subsubCommentsCount > 0 && (
+                                        <Chip
+                                          icon={<Forum sx={{ fontSize: "0.75rem !important" }} />}
+                                          label={`${subsubCommentsCount}`}
+                                          size="small"
+                                          color="warning"
+                                          variant="outlined"
+                                          sx={{ height: 14, fontSize: "0.55rem", fontWeight: "bold", ml: 0.5 }}
+                                        />
+                                      )}
+                                    </Box>
+                                    
+                                    <Box sx={{ display: "flex", gap: 1, alignItems: "center", flexShrink: 0 }}>
+                                      {subsub.unitScore ? (
+                                        <Chip
+                                          label={`+${subsub.unitScore}/${subsub.unit || "đv"}`}
+                                          size="small"
+                                          sx={{ height: 14, fontSize: "0.55rem", color: "#64748b", bgcolor: "#f8fafc" }}
+                                        />
+                                      ) : null}
+                                    </Box>
+                                  </Box>
+
+                                  {/* Display Sub-Sub self-report */}
+                                  {hasSubSubReport && (okr.status === "ACCEPTED" || okr.status === "SUBMITTED" || okr.status === "COMPLETED") && (
+                                    <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, pl: 2, py: 0.25, flexWrap: "wrap" }}>
+                                      <Typography variant="caption" sx={{ color: "#16a34a", fontWeight: "600", bgcolor: "#f0fdf4", px: 0.75, py: 0.25, borderRadius: 0.5, fontSize: "0.7rem" }}>
+                                        Đã khai: {subsubQty} {subsub.unit || "đv"} {subsub.unitScore ? `(-> ${subsubScore.toFixed(1)}đ)` : `(-> ${subsubScore}đ)`}
+                                      </Typography>
+                                      {subsubData?.evidence && (
+                                        <Chip
+                                          icon={<Launch sx={{ fontSize: "0.6rem !important" }} />}
+                                          label="Xem minh chứng"
+                                          size="small"
+                                          component="a"
+                                          href={subsubData.evidence.startsWith("http") ? subsubData.evidence : `https://${subsubData.evidence}`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          clickable
+                                          sx={{ height: 14, fontSize: "0.55rem", bgcolor: "#ecfdf5", color: "#065f46", border: "1px solid #a7f3d0", cursor: "pointer" }}
+                                        />
+                                      )}
+                                    </Box>
+                                  )}
+                                </Box>
+                              );
+                            })}
+                          </Box>
+                        );
+                      })}
                     </Box>
-                  ))}
-                </Box>
-              ))}
+                  );
+                })}
+              </Box>
             </Box>
-          </Box>
-        ))}
+          );
+        })}
       </Box>
 
       {/* Expanded Dialog */}

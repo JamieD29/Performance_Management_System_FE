@@ -117,9 +117,6 @@ export default function MyOkrPage() {
               label="Chọn Kỳ đánh giá"
               onChange={(e) => setSelectedCycleId(e.target.value as string)}
             >
-              <MenuItem value="">
-                <em>-- Tất cả các kỳ --</em>
-              </MenuItem>
               {sortedCycles.map((c: any) => (
                 <MenuItem key={c.id} value={c.id}>
                   {c.name} {c.status === "OPEN" ? "(Đang mở)" : "(Đã đóng)"}
