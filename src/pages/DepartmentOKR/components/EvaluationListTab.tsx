@@ -24,11 +24,16 @@ import {
   FormControl,
   InputLabel,
   CircularProgress,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Alert,
 } from "@mui/material";
 import {
   CheckCircle,
   Description,
   Search,
+  ExpandMore,
 } from "@mui/icons-material";
 import EvaluationDetailsDialog from "./EvaluationDetailsDialog";
 import { api } from "../../../services/api";
@@ -93,14 +98,40 @@ export default function EvaluationListTab() {
     });
   }, [reports, searchQuery, selectedDepartment]);
 
+  // Group reports by Evaluation Cycle
+  const groupedByCycle = useMemo(() => {
+    const groups: Record<string, any[]> = {};
+    filteredReports.forEach((report) => {
+      const cycleName = report.cycle?.name || "Kỳ mặc định";
+      if (!groups[cycleName]) groups[cycleName] = [];
+      groups[cycleName].push(report);
+    });
+    return groups;
+  }, [filteredReports]);
+
   // Handle Selection
-  const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.checked) {
-      const newSelected = filteredReports.map((n) => n.id);
-      setSelectedRowIds(newSelected);
-      return;
+  const handleSelectCycleClick = (cycleReports: any[], checked: boolean) => {
+    const cycleIds = cycleReports.map((r) => r.id);
+    if (checked) {
+      setSelectedRowIds((prev) => {
+        const next = [...prev];
+        cycleIds.forEach((id) => {
+          if (!next.includes(id)) next.push(id);
+        });
+        return next;
+      });
+    } else {
+      setSelectedRowIds((prev) => prev.filter((id) => !cycleIds.includes(id)));
     }
-    setSelectedRowIds([]);
+  };
+
+  const getCycleSelectionStatus = (cycleReports: any[]) => {
+    const cycleIds = cycleReports.map((r) => r.id);
+    const selectedInCycle = cycleIds.filter((id) => selectedRowIds.includes(id));
+    return {
+      allSelected: cycleReports.length > 0 && selectedInCycle.length === cycleReports.length,
+      indeterminate: selectedInCycle.length > 0 && selectedInCycle.length < cycleReports.length,
+    };
   };
 
   const handleRowClick = (id: string) => {
@@ -246,264 +277,291 @@ export default function EvaluationListTab() {
         <Box sx={{ display: "flex", justifyContent: "center", p: 5 }}>
           <CircularProgress />
         </Box>
+      ) : reports.length === 0 ? (
+        <Alert severity="success" sx={{ borderRadius: 2 }}>
+          {tabValue === 0
+            ? "Không có báo cáo nào đang thực hiện."
+            : tabValue === 1
+            ? "Không có báo cáo nào cần đánh giá."
+            : "Không có lịch sử đánh giá."}
+        </Alert>
+      ) : Object.keys(groupedByCycle).length === 0 ? (
+        <Alert severity="info" sx={{ borderRadius: 2 }}>
+          Không tìm thấy báo cáo nào khớp với điều kiện lọc.
+        </Alert>
       ) : (
-        <TableContainer
-          component={Paper}
-          elevation={0}
-          sx={{ border: "1px solid #e2e8f0", borderRadius: 2 }}
-        >
-          <Table>
-            <TableHead sx={{ bgcolor: "#f8fafc" }}>
-              <TableRow>
-                {tabValue === 1 && (
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      color="primary"
-                      indeterminate={
-                        selectedRowIds.length > 0 &&
-                        selectedRowIds.length < filteredReports.length
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          {Object.entries(groupedByCycle).map(([cycleName, cycleReports]) => {
+            const { allSelected, indeterminate } = getCycleSelectionStatus(cycleReports);
+            return (
+              <Accordion
+                key={cycleName}
+                defaultExpanded
+                elevation={0}
+                sx={{
+                  border: "1px solid #e2e8f0",
+                  borderRadius: "8px !important",
+                  overflow: "hidden",
+                  "&:before": { display: "none" },
+                }}
+              >
+                <AccordionSummary
+                  expandIcon={<ExpandMore />}
+                  sx={{
+                    bgcolor: "#f8fafc",
+                    borderBottom: "1px solid #e2e8f0",
+                    py: 1,
+                  }}
+                >
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                    <Typography variant="subtitle1" fontWeight="700" color="#1e3a8a">
+                      {cycleName}
+                    </Typography>
+                    <Chip
+                      label={
+                        tabValue === 0
+                          ? `${cycleReports.length} đang thực hiện`
+                          : tabValue === 1
+                          ? `${cycleReports.length} cần đánh giá`
+                          : `${cycleReports.length} đã duyệt`
                       }
-                      checked={
-                        filteredReports.length > 0 &&
-                        selectedRowIds.length === filteredReports.length
-                      }
-                      onChange={handleSelectAllClick}
+                      size="small"
+                      color={tabValue === 1 ? "warning" : tabValue === 2 ? "success" : "info"}
+                      sx={{ fontWeight: "bold" }}
                     />
-                  </TableCell>
-                )}
-                <TableCell sx={{ fontWeight: "bold", color: "#1e293b" }}>
-                  Nhân sự
-                </TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#1e293b" }}>
-                  Bộ môn
-                </TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#1e293b" }}>
-                  Kỳ đánh giá
-                </TableCell>
-                <TableCell
-                  sx={{
-                    fontWeight: "bold",
-                    color: "#1e293b",
-                    textAlign: "center",
-                  }}
-                >
-                  % OKR Hoàn thành
-                </TableCell>
-                <TableCell
-                  sx={{
-                    fontWeight: "bold",
-                    color: "#1e293b",
-                    textAlign: "center",
-                  }}
-                >
-                  Điểm Tự Khai (Tổng)
-                </TableCell>
-                <TableCell
-                  sx={{
-                    fontWeight: "bold",
-                    color: "#1e293b",
-                    textAlign: "center",
-                  }}
-                >
-                  Điểm Q.Lý Duyệt (Tổng)
-                </TableCell>
-                <TableCell
-                  sx={{
-                    fontWeight: "bold",
-                    color: "#1e293b",
-                    textAlign: "center",
-                  }}
-                >
-                  Trạng thái
-                </TableCell>
-                <TableCell
-                  align="right"
-                  sx={{ fontWeight: "bold", color: "#1e293b" }}
-                >
-                  Thao tác
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredReports.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={8}
-                    align="center"
-                    sx={{ py: 4, color: "text.secondary" }}
-                  >
-                    Không có báo cáo nào khớp với điều kiện lọc.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filteredReports.map((report) => {
-                  const isItemSelected = isSelected(report.id);
-                  return (
-                    <TableRow
-                      key={report.id}
-                      hover
-                      selected={isItemSelected}
-                      sx={{ transition: "all 0.2s ease" }}
-                    >
-                      {tabValue === 1 && (
-                        <TableCell padding="checkbox">
-                          <Checkbox
-                            color="primary"
-                            checked={isItemSelected}
-                            onChange={() => handleRowClick(report.id)}
-                          />
-                        </TableCell>
-                      )}
-                      <TableCell>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 1.5,
-                          }}
-                        >
-                          <Avatar
-                            sx={{ bgcolor: "#1C4D8D", width: 36, height: 36 }}
-                          >
-                            {report.user?.name?.[0] || "?"}
-                          </Avatar>
-                          <Box>
-                            <Typography
-                              variant="body2"
-                              fontWeight={600}
-                              color="#0f172a"
-                            >
-                              {report.user?.name || "No name"}
-                            </Typography>
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                            >
-                              {report.user?.email}
-                            </Typography>
-                          </Box>
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          label={report.user?.department?.name || "N/A"}
-                          size="small"
-                          variant="outlined"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          label={report.cycle?.name || "Kỳ mặc định"}
-                          size="small"
-                          color="secondary"
-                          variant="outlined"
-                          sx={{ fontWeight: 500, borderColor: "#a855f7", color: "#7c3aed" }}
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        <Box
-                          sx={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            bgcolor: "#ecfdf5",
-                            color: "#059669",
-                            px: 1.5,
-                            py: 0.5,
-                            borderRadius: 2,
-                            fontWeight: "bold",
-                          }}
-                        >
-                          {(() => {
-                            const rowMaxScore = (report.keyResults || []).reduce(
-                              (sum: number, obj: any) => sum + (Number(obj.maxScore) || 0),
-                              0
-                            );
-                            const rowScore =
-                              report.managerScore != null
-                                ? report.managerScore
-                                : (report.totalScore || 0);
-                            const rowProgressPercent =
-                              rowMaxScore > 0
-                                ? Math.min((rowScore / rowMaxScore) * 100, 100)
-                                : 0;
-                            return `${rowProgressPercent.toFixed(0)}%`;
-                          })()}
-                        </Box>
-                      </TableCell>
-                      <TableCell align="center">
-                        <Typography fontWeight={600} color="text.secondary">
-                          {report.totalScore?.toFixed(1) || 0}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="center">
-                        {report.status === "COMPLETED" ? (
-                          <Typography fontWeight={700} color="#1C4D8D">
-                            {report.managerScore?.toFixed(1) || 0}
-                          </Typography>
-                        ) : (
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            fontStyle="italic"
-                          >
-                            Chưa chấm
-                          </Typography>
-                        )}
-                      </TableCell>
-                      <TableCell align="center">
-                        {report.status === "COMPLETED" ? (
-                          <Chip
-                            label="Đã đánh giá"
-                            color="success"
-                            size="small"
-                            sx={{ fontWeight: 500 }}
-                          />
-                        ) : report.status === "ACCEPTED" ? (
-                          <Chip
-                            label="Đang thực hiện"
-                            color="info"
-                            size="small"
-                            sx={{ fontWeight: 500 }}
-                          />
-                        ) : (
-                          <Chip
-                            label="Chờ đánh giá"
-                            color="warning"
-                            size="small"
-                            sx={{ fontWeight: 500 }}
-                          />
-                        )}
-                      </TableCell>
-                      <TableCell align="right">
-                        <Tooltip title="Đánh giá chi tiết">
-                          <IconButton
-                            color="primary"
-                            onClick={() => {
-                              setSelectedReport(report);
-                              setDialogOpen(true);
+                  </Box>
+                </AccordionSummary>
+                <AccordionDetails sx={{ p: 0 }}>
+                  <TableContainer component={Paper} elevation={0} sx={{ borderRadius: 0 }}>
+                    <Table>
+                      <TableHead sx={{ bgcolor: "#f8fafc" }}>
+                        <TableRow>
+                          {tabValue === 1 && (
+                            <TableCell padding="checkbox">
+                              <Checkbox
+                                color="primary"
+                                indeterminate={indeterminate}
+                                checked={allSelected}
+                                onChange={(e) =>
+                                  handleSelectCycleClick(cycleReports, e.target.checked)
+                                }
+                              />
+                            </TableCell>
+                          )}
+                          <TableCell sx={{ fontWeight: "bold", color: "#1e293b" }}>
+                            Nhân sự
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: "bold", color: "#1e293b" }}>
+                            Bộ môn
+                          </TableCell>
+                          <TableCell
+                            sx={{
+                              fontWeight: "bold",
+                              color: "#1e293b",
+                              textAlign: "center",
                             }}
                           >
-                            <Description />
-                          </IconButton>
-                        </Tooltip>
-                        {report.status === "SUBMITTED" && (
-                          <Tooltip title="Chấp nhận điểm tự khai">
-                            <IconButton
-                              color="success"
-                              onClick={() => handleQuickApproveSingle(report)}
+                            % OKR Hoàn thành
+                          </TableCell>
+                          <TableCell
+                            sx={{
+                              fontWeight: "bold",
+                              color: "#1e293b",
+                              textAlign: "center",
+                            }}
+                          >
+                            Điểm Tự Khai (Tổng)
+                          </TableCell>
+                          <TableCell
+                            sx={{
+                              fontWeight: "bold",
+                              color: "#1e293b",
+                              textAlign: "center",
+                            }}
+                          >
+                            Điểm Q.Lý Duyệt (Tổng)
+                          </TableCell>
+                          <TableCell
+                            sx={{
+                              fontWeight: "bold",
+                              color: "#1e293b",
+                              textAlign: "center",
+                            }}
+                          >
+                            Trạng thái
+                          </TableCell>
+                          <TableCell
+                            align="right"
+                            sx={{ fontWeight: "bold", color: "#1e293b" }}
+                          >
+                            Thao tác
+                          </TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {cycleReports.map((report) => {
+                          const isItemSelected = isSelected(report.id);
+                          return (
+                            <TableRow
+                              key={report.id}
+                              hover
+                              selected={isItemSelected}
+                              sx={{ transition: "all 0.2s ease" }}
                             >
-                              <CheckCircle />
-                            </IconButton>
-                          </Tooltip>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
+                              {tabValue === 1 && (
+                                <TableCell padding="checkbox">
+                                  <Checkbox
+                                    color="primary"
+                                    checked={isItemSelected}
+                                    onChange={() => handleRowClick(report.id)}
+                                  />
+                                </TableCell>
+                              )}
+                              <TableCell>
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 1.5,
+                                  }}
+                                >
+                                  <Avatar
+                                    sx={{ bgcolor: "#1C4D8D", width: 36, height: 36 }}
+                                  >
+                                    {report.user?.name?.[0] || "?"}
+                                  </Avatar>
+                                  <Box>
+                                    <Typography
+                                      variant="body2"
+                                      fontWeight={600}
+                                      color="#0f172a"
+                                    >
+                                      {report.user?.name || "No name"}
+                                    </Typography>
+                                    <Typography
+                                      variant="caption"
+                                      color="text.secondary"
+                                    >
+                                      {report.user?.email}
+                                    </Typography>
+                                  </Box>
+                                </Box>
+                              </TableCell>
+                              <TableCell>
+                                <Chip
+                                  label={report.user?.department?.name || "N/A"}
+                                  size="small"
+                                  variant="outlined"
+                                />
+                              </TableCell>
+                              <TableCell align="center">
+                                <Box
+                                  sx={{
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    bgcolor: "#ecfdf5",
+                                    color: "#059669",
+                                    px: 1.5,
+                                    py: 0.5,
+                                    borderRadius: 2,
+                                    fontWeight: "bold",
+                                  }}
+                                >
+                                  {(() => {
+                                    const rowMaxScore = (report.keyResults || []).reduce(
+                                      (sum: number, obj: any) => sum + (Number(obj.maxScore) || 0),
+                                      0
+                                    );
+                                    const rowScore =
+                                      report.managerScore != null
+                                        ? report.managerScore
+                                        : (report.totalScore || 0);
+                                    const rowProgressPercent =
+                                      rowMaxScore > 0
+                                        ? Math.min((rowScore / rowMaxScore) * 100, 100)
+                                        : 0;
+                                    return `${rowProgressPercent.toFixed(0)}%`;
+                                  })()}
+                                </Box>
+                              </TableCell>
+                              <TableCell align="center">
+                                <Typography fontWeight={600} color="text.secondary">
+                                  {report.totalScore?.toFixed(1) || 0}
+                                </Typography>
+                              </TableCell>
+                              <TableCell align="center">
+                                {report.status === "COMPLETED" ? (
+                                  <Typography fontWeight={700} color="#1C4D8D">
+                                    {report.managerScore?.toFixed(1) || 0}
+                                  </Typography>
+                                ) : (
+                                  <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                    fontStyle="italic"
+                                  >
+                                    Chưa chấm
+                                  </Typography>
+                                )}
+                              </TableCell>
+                              <TableCell align="center">
+                                {report.status === "COMPLETED" ? (
+                                  <Chip
+                                    label="Đã đánh giá"
+                                    color="success"
+                                    size="small"
+                                    sx={{ fontWeight: 500 }}
+                                  />
+                                ) : report.status === "ACCEPTED" ? (
+                                  <Chip
+                                    label="Đang thực hiện"
+                                    color="info"
+                                    size="small"
+                                    sx={{ fontWeight: 500 }}
+                                  />
+                                ) : (
+                                  <Chip
+                                    label="Chờ đánh giá"
+                                    color="warning"
+                                    size="small"
+                                    sx={{ fontWeight: 500 }}
+                                  />
+                                )}
+                              </TableCell>
+                              <TableCell align="right">
+                                <Tooltip title="Đánh giá chi tiết">
+                                  <IconButton
+                                    color="primary"
+                                    onClick={() => {
+                                      setSelectedReport(report);
+                                      setDialogOpen(true);
+                                    }}
+                                  >
+                                    <Description />
+                                  </IconButton>
+                                </Tooltip>
+                                {report.status === "SUBMITTED" && (
+                                  <Tooltip title="Chấp nhận điểm tự khai">
+                                    <IconButton
+                                      color="success"
+                                      onClick={() => handleQuickApproveSingle(report)}
+                                    >
+                                      <CheckCircle />
+                                    </IconButton>
+                                  </Tooltip>
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </AccordionDetails>
+              </Accordion>
+            );
+          })}
+        </Box>
       )}
 
       {/* Dialog Đánh giá chi tiết */}

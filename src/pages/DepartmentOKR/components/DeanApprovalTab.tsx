@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Box,
   Typography,
@@ -20,8 +20,16 @@ import {
   Alert,
   Avatar,
   IconButton,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  InputAdornment,
 } from "@mui/material";
-import { Check, Close, Visibility } from "@mui/icons-material";
+import { Check, Close, Visibility, ExpandMore, Search } from "@mui/icons-material";
 import { api } from "../../../services/api";
 import { confirmAction, showSuccess, showError } from "../../../utils/swal";
 import OkrManagerTree from "./OkrManagerTree";
@@ -32,10 +40,41 @@ export default function DeanApprovalTab() {
   const [selectedOkr, setSelectedOkr] = useState<any>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [rejectDialog, setRejectDialog] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedDepartment, setSelectedDepartment] = useState("ALL");
 
   useEffect(() => {
     fetchPending();
   }, []);
+
+  const filteredOkrs = useMemo(() => {
+    return pendingOkrs.filter((okr) => {
+      const matchesSearch =
+        (okr.user?.name?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
+        (okr.user?.email?.toLowerCase() || "").includes(searchQuery.toLowerCase());
+      const matchesDept =
+        selectedDepartment === "ALL" ||
+        okr.user?.department?.name === selectedDepartment;
+      return matchesSearch && matchesDept;
+    });
+  }, [pendingOkrs, searchQuery, selectedDepartment]);
+
+  const departmentOptions = useMemo(() => {
+    const depts = new Set(
+      pendingOkrs.map((r) => r.user?.department?.name).filter(Boolean),
+    );
+    return ["ALL", ...Array.from(depts)];
+  }, [pendingOkrs]);
+
+  const groupedByCycle = useMemo(() => {
+    const groups: Record<string, any[]> = {};
+    filteredOkrs.forEach((okr) => {
+      const cycleName = okr.cycle?.name || "Kỳ mặc định";
+      if (!groups[cycleName]) groups[cycleName] = [];
+      groups[cycleName].push(okr);
+    });
+    return groups;
+  }, [filteredOkrs]);
 
   const fetchPending = async () => {
     try {
@@ -95,162 +134,232 @@ export default function DeanApprovalTab() {
 
   return (
     <Box>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-        <Typography variant="h6" color="text.secondary">
-          Đề xuất điều chỉnh OKR chờ duyệt
+      <Box sx={{ mb: 4, display: "flex", flexDirection: "column", gap: 1 }}>
+        <Typography variant="h5" fontWeight="bold" color="#1e3a8a">
+          Duyệt Đề Xuất Điều Chỉnh OKR
         </Typography>
-        <Chip label={pendingOkrs.length} color="warning" size="small" />
+        <Typography variant="body2" color="text.secondary">
+          Xem và phản hồi các đề xuất điều chỉnh mục tiêu, chỉ tiêu từ nhân sự trong khoa.
+        </Typography>
       </Box>
+
+      {/* Control Panel: Search & Filters */}
+      <Paper
+        elevation={0}
+        sx={{ p: 2, mb: 3, border: "1px solid #e2e8f0", borderRadius: 2 }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            gap: 2,
+            alignItems: "center",
+            flexWrap: "wrap",
+          }}
+        >
+          <TextField
+            size="small"
+            placeholder="Tìm theo Tên hoặc Email..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search fontSize="small" />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ minWidth: 250 }}
+          />
+
+          <FormControl size="small" sx={{ minWidth: 200 }}>
+            <InputLabel>Bộ môn / Phòng ban</InputLabel>
+            <Select
+              value={selectedDepartment}
+              label="Bộ môn / Phòng ban"
+              onChange={(e) => setSelectedDepartment(e.target.value)}
+            >
+              {departmentOptions.map((dept) => (
+                <MenuItem key={dept} value={dept}>
+                  {dept === "ALL" ? "Tất cả Bộ môn" : dept}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
+      </Paper>
 
       {pendingOkrs.length === 0 ? (
         <Alert severity="success" sx={{ borderRadius: 2 }}>
           Không có đề xuất nào đang chờ duyệt.
         </Alert>
+      ) : Object.keys(groupedByCycle).length === 0 ? (
+        <Alert severity="info" sx={{ borderRadius: 2 }}>
+          Không tìm thấy đề xuất nào khớp với điều kiện lọc.
+        </Alert>
       ) : (
-        <TableContainer
-          component={Paper}
-          elevation={0}
-          sx={{ border: "1px solid #e2e8f0" }}
-        >
-          <Table>
-            <TableHead sx={{ bgcolor: "#f1f5f9" }}>
-              <TableRow>
-                <TableCell sx={{ fontWeight: "bold" }}>Nhân sự</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>Bộ môn</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>Kỳ đánh giá</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>Mục tiêu</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>Trạng thái</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>
-                  Nội dung đề xuất
-                </TableCell>
-                <TableCell align="right" sx={{ fontWeight: "bold" }}>
-                  Thao tác
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {pendingOkrs.map((okr) => (
-                <TableRow key={okr.id} hover>
-                  <TableCell>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      <Avatar
-                        src={okr.user?.avatarUrl}
-                        sx={{ width: 28, height: 28 }}
-                      >
-                        {(okr.user?.name ||
-                          okr.user?.email)?.[0]?.toUpperCase()}
-                      </Avatar>
-                      <Box>
-                        <Typography variant="body2" fontWeight={500}>
-                          {okr.user?.name || "(Chưa đặt tên)"}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {okr.user?.email}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </TableCell>
-                  <TableCell>{okr.user?.department?.name || "—"}</TableCell>
-                  <TableCell>
-                    <Chip
-                      label={okr.cycle?.name || "Kỳ mặc định"}
-                      size="small"
-                      color="secondary"
-                      variant="outlined"
-                      sx={{ fontWeight: 500, borderColor: "#a855f7", color: "#7c3aed" }}
-                    />
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 500 }}>
-                    {okr.objective}
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={okr.status === "NEGOTIATING" ? "Chờ bạn duyệt" : "Chờ nhân sự phản hồi"}
-                      size="small"
-                      color={okr.status === "NEGOTIATING" ? "warning" : "info"}
-                      variant={okr.status === "NEGOTIATING" ? "filled" : "outlined"}
-                      sx={{ fontWeight: 600 }}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        maxWidth: 250,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {(() => {
-                        if (!okr.proposedChanges || Object.keys(okr.proposedChanges).length === 0) {
-                          return "Xem chi tiết...";
-                        }
-                        let exchangeCount = 0;
-                        let commentCount = 0;
-                        for (const messages of Object.values(okr.proposedChanges)) {
-                          const msgs = messages as any[];
-                          if (msgs.length === 0) continue;
-                          const senders = new Set(msgs.map((m: any) => m.sender));
-                          const lastSender = msgs[msgs.length - 1]?.sender;
-                          if (senders.has("USER") && senders.has("MANAGER")) {
-                            // Trao đổi 2 chiều: chỉ tính "đang trao đổi" nếu tin cuối là USER (chờ Manager xử lý)
-                            if (lastSender === "USER") {
-                              exchangeCount++;
-                            }
-                            // Nếu tin cuối là MANAGER → đã phản hồi, không tính
-                          } else {
-                            // Chỉ 1 phía nhắn → nhận xét
-                            if (lastSender === "USER") {
-                              commentCount++;
-                            }
-                            // Nếu chỉ MANAGER nhắn → không cần hiện
-                          }
-                        }
-                        if (exchangeCount > 0) {
-                          return `${exchangeCount} mục chờ xử lý`;
-                        }
-                        if (commentCount > 0) {
-                          return `Có nhận xét trên ${commentCount} mục`;
-                        }
-                        return "Đã phản hồi tất cả";
-                      })()}
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="right">
-                    <Button
-                      size="small"
-                      startIcon={<Visibility />}
-                      onClick={() => viewDetails(okr)}
-                      sx={{ mr: 1 }}
-                    >
-                      Chi tiết & Sửa
-                    </Button>
-                    <Button
-                      size="small"
-                      variant="contained"
-                      color="success"
-                      startIcon={<Check />}
-                      onClick={() => handleApprove(okr.id)}
-                      sx={{ mr: 1 }}
-                    >
-                      Duyệt
-                    </Button>
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      color="error"
-                      startIcon={<Close />}
-                      onClick={() => openReject(okr)}
-                    >
-                      Từ chối
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          {Object.entries(groupedByCycle).map(([cycleName, okrs]) => (
+            <Accordion
+              key={cycleName}
+              defaultExpanded
+              elevation={0}
+              sx={{
+                border: "1px solid #e2e8f0",
+                borderRadius: "8px !important",
+                overflow: "hidden",
+                "&:before": { display: "none" },
+              }}
+            >
+              <AccordionSummary
+                expandIcon={<ExpandMore />}
+                sx={{
+                  bgcolor: "#f8fafc",
+                  borderBottom: "1px solid #e2e8f0",
+                  py: 1,
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                  <Typography variant="subtitle1" fontWeight="700" color="#1e3a8a">
+                    {cycleName}
+                  </Typography>
+                  <Chip
+                    label={`${okrs.length} đề xuất`}
+                    size="small"
+                    color="warning"
+                    sx={{ fontWeight: "bold" }}
+                  />
+                </Box>
+              </AccordionSummary>
+              <AccordionDetails sx={{ p: 0 }}>
+                <TableContainer component={Paper} elevation={0} sx={{ borderRadius: 0 }}>
+                  <Table>
+                    <TableHead sx={{ bgcolor: "#f1f5f9" }}>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: "bold" }}>Nhân sự</TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>Bộ môn</TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>Mục tiêu</TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>Trạng thái</TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>Nội dung đề xuất</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: "bold" }}>Thao tác</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {okrs.map((okr) => (
+                        <TableRow key={okr.id} hover>
+                          <TableCell>
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                              <Avatar
+                                src={okr.user?.avatarUrl}
+                                sx={{ width: 28, height: 28 }}
+                              >
+                                {(okr.user?.name || okr.user?.email)?.[0]?.toUpperCase()}
+                              </Avatar>
+                              <Box>
+                                <Typography variant="body2" fontWeight={500}>
+                                  {okr.user?.name || "(Chưa đặt tên)"}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                  {okr.user?.email}
+                                </Typography>
+                              </Box>
+                            </Box>
+                          </TableCell>
+                          <TableCell>{okr.user?.department?.name || "—"}</TableCell>
+                          <TableCell sx={{ fontWeight: 500 }}>
+                            {okr.objective}
+                          </TableCell>
+                          <TableCell>
+                            <Chip
+                              label={okr.status === "NEGOTIATING" ? "Chờ bạn duyệt" : "Chờ nhân sự phản hồi"}
+                              size="small"
+                              color={okr.status === "NEGOTIATING" ? "warning" : "info"}
+                              variant={okr.status === "NEGOTIATING" ? "filled" : "outlined"}
+                              sx={{ fontWeight: 600 }}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                maxWidth: 250,
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {(() => {
+                                if (!okr.proposedChanges || Object.keys(okr.proposedChanges).length === 0) {
+                                  return "Xem chi tiết...";
+                                }
+                                let exchangeCount = 0;
+                                let commentCount = 0;
+                                for (const messages of Object.values(okr.proposedChanges)) {
+                                  const msgs = messages as any[];
+                                  if (msgs.length === 0) continue;
+                                  const senders = new Set(msgs.map((m: any) => m.sender));
+                                  const lastSender = msgs[msgs.length - 1]?.sender;
+                                  if (senders.has("USER") && senders.has("MANAGER")) {
+                                    // Trao đổi 2 chiều: chỉ tính "đang trao đổi" nếu tin cuối là USER (chờ Manager xử lý)
+                                    if (lastSender === "USER") {
+                                      exchangeCount++;
+                                    }
+                                    // Nếu tin cuối là MANAGER → đã phản hồi, không tính
+                                  } else {
+                                    // Chỉ 1 phía nhắn → nhận xét
+                                    if (lastSender === "USER") {
+                                      commentCount++;
+                                    }
+                                    // Nếu chỉ MANAGER nhắn → không cần hiện
+                                  }
+                                }
+                                if (exchangeCount > 0) {
+                                  return `${exchangeCount} mục chờ xử lý`;
+                                }
+                                if (commentCount > 0) {
+                                  return `Có nhận xét trên ${commentCount} mục`;
+                                }
+                                return "Đã phản hồi tất cả";
+                              })()}
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="right">
+                            <Button
+                              size="small"
+                              startIcon={<Visibility />}
+                              onClick={() => viewDetails(okr)}
+                              sx={{ mr: 1 }}
+                            >
+                              Chi tiết & Sửa
+                            </Button>
+                            <Button
+                              size="small"
+                              variant="contained"
+                              color="success"
+                              startIcon={<Check />}
+                              onClick={() => handleApprove(okr.id)}
+                              sx={{ mr: 1 }}
+                            >
+                              Duyệt
+                            </Button>
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              color="error"
+                              startIcon={<Close />}
+                              onClick={() => openReject(okr)}
+                            >
+                              Từ chối
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </AccordionDetails>
+            </Accordion>
+          ))}
+        </Box>
       )}
 
       {/* View Details Dialog - shows per-objective comments */}
