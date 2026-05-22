@@ -133,7 +133,7 @@ export default function OkrManagerTree({
     if (!oldItem) return false;
     return (
       String(newItem.title || "").trim() !==
-        String(oldItem.title || "").trim() ||
+      String(oldItem.title || "").trim() ||
       Number(newItem.maxScore || 0) !== Number(oldItem.maxScore || 0) ||
       Number(newItem.unitScore || 0) !== Number(oldItem.unitScore || 0) ||
       String(newItem.unit || "").trim() !== String(oldItem.unit || "").trim()
@@ -275,7 +275,6 @@ export default function OkrManagerTree({
         [itemId]: [...(prev[itemId] || []), newMessage],
       }));
       setChatMessage("");
-      onRefresh();
     } catch (error: any) {
       console.error("Lỗi gửi tin nhắn đàm phán", error);
       showError("Lỗi", error?.response?.data?.message || "Không thể gửi tin nhắn.");
@@ -835,9 +834,9 @@ export default function OkrManagerTree({
               boxShadow: 1,
             }}
           >
-            <Typography variant="subtitle2" sx={{ mb: 1, color: "#92400e" }}>
+            {/* <Typography variant="subtitle2" sx={{ mb: 1, color: "#92400e" }}>
               Đàm phán mục: {itemId}
-            </Typography>
+            </Typography> */}
             {history.length > 0 ? (
               <Box sx={{ mb: 2, maxHeight: 150, overflowY: "auto" }}>
                 {history.map((msg: any, idx: number) => (
@@ -1001,7 +1000,7 @@ export default function OkrManagerTree({
                             fontSize="small"
                             color={
                               okr.proposedChanges?.[obj.id]?.length > 0 ||
-                              localComments[obj.id]?.length > 0
+                                localComments[obj.id]?.length > 0
                                 ? "warning"
                                 : "inherit"
                             }
@@ -1117,7 +1116,7 @@ export default function OkrManagerTree({
                                   fontSize="small"
                                   color={
                                     okr.proposedChanges?.[kr.id]?.length > 0 ||
-                                    localComments[kr.id]?.length > 0
+                                      localComments[kr.id]?.length > 0
                                       ? "warning"
                                       : "inherit"
                                   }
@@ -1211,43 +1210,43 @@ export default function OkrManagerTree({
                                     {(isSubChanged ||
                                       isSubNew ||
                                       sub.isEdited) && (
-                                      <>
-                                        <IconButton
-                                          size="small"
-                                          onClick={() =>
-                                            handleAcceptItem(
-                                              "SUBKR",
-                                              obj.id,
-                                              kr.id,
-                                              sub.id,
-                                            )
-                                          }
-                                          title="Chấp nhận thay đổi"
-                                        >
-                                          <Check
-                                            fontSize="small"
-                                            color="success"
-                                          />
-                                        </IconButton>
-                                        <IconButton
-                                          size="small"
-                                          onClick={() =>
-                                            handleUndoItem(
-                                              "SUBKR",
-                                              obj.id,
-                                              kr.id,
-                                              sub.id,
-                                            )
-                                          }
-                                          title="Hoàn tác thay đổi"
-                                        >
-                                          <Undo
-                                            fontSize="small"
-                                            color="primary"
-                                          />
-                                        </IconButton>
-                                      </>
-                                    )}
+                                        <>
+                                          <IconButton
+                                            size="small"
+                                            onClick={() =>
+                                              handleAcceptItem(
+                                                "SUBKR",
+                                                obj.id,
+                                                kr.id,
+                                                sub.id,
+                                              )
+                                            }
+                                            title="Chấp nhận thay đổi"
+                                          >
+                                            <Check
+                                              fontSize="small"
+                                              color="success"
+                                            />
+                                          </IconButton>
+                                          <IconButton
+                                            size="small"
+                                            onClick={() =>
+                                              handleUndoItem(
+                                                "SUBKR",
+                                                obj.id,
+                                                kr.id,
+                                                sub.id,
+                                              )
+                                            }
+                                            title="Hoàn tác thay đổi"
+                                          >
+                                            <Undo
+                                              fontSize="small"
+                                              color="primary"
+                                            />
+                                          </IconButton>
+                                        </>
+                                      )}
                                     <IconButton
                                       size="small"
                                       onClick={() =>
@@ -1263,7 +1262,7 @@ export default function OkrManagerTree({
                                         color={
                                           okr.proposedChanges?.[sub.id]
                                             ?.length > 0 ||
-                                          localComments[sub.id]?.length > 0
+                                            localComments[sub.id]?.length > 0
                                             ? "warning"
                                             : "inherit"
                                         }
@@ -1310,8 +1309,8 @@ export default function OkrManagerTree({
                                         sx={{
                                           bgcolor:
                                             isSubSubNew ||
-                                            isSubSubChanged ||
-                                            subsub.isEdited
+                                              isSubSubChanged ||
+                                              subsub.isEdited
                                               ? "#fef08a"
                                               : "#fffbeb",
                                         }}
@@ -1322,8 +1321,8 @@ export default function OkrManagerTree({
                                             fontSize: "0.8rem",
                                             fontWeight:
                                               isSubSubNew ||
-                                              isSubSubChanged ||
-                                              subsub.isEdited
+                                                isSubSubChanged ||
+                                                subsub.isEdited
                                                 ? "bold"
                                                 : "normal",
                                           }}
@@ -1335,8 +1334,8 @@ export default function OkrManagerTree({
                                             fontSize: "0.85rem",
                                             fontWeight:
                                               isSubSubNew ||
-                                              isSubSubChanged ||
-                                              subsub.isEdited
+                                                isSubSubChanged ||
+                                                subsub.isEdited
                                                 ? "bold"
                                                 : "normal",
                                           }}
@@ -1348,8 +1347,8 @@ export default function OkrManagerTree({
                                           sx={{
                                             fontWeight:
                                               isSubSubNew ||
-                                              isSubSubChanged ||
-                                              subsub.isEdited
+                                                isSubSubChanged ||
+                                                subsub.isEdited
                                                 ? "bold"
                                                 : "normal",
                                           }}
@@ -1390,45 +1389,45 @@ export default function OkrManagerTree({
                                             {(isSubSubChanged ||
                                               isSubSubNew ||
                                               subsub.isEdited) && (
-                                              <>
-                                                <IconButton
-                                                  size="small"
-                                                  onClick={() =>
-                                                    handleAcceptItem(
-                                                      "SUBSUBKR",
-                                                      obj.id,
-                                                      kr.id,
-                                                      sub.id,
-                                                      subsub.id,
-                                                    )
-                                                  }
-                                                  title="Chấp nhận thay đổi"
-                                                >
-                                                  <Check
-                                                    fontSize="small"
-                                                    color="success"
-                                                  />
-                                                </IconButton>
-                                                <IconButton
-                                                  size="small"
-                                                  onClick={() =>
-                                                    handleUndoItem(
-                                                      "SUBSUBKR",
-                                                      obj.id,
-                                                      kr.id,
-                                                      sub.id,
-                                                      subsub.id,
-                                                    )
-                                                  }
-                                                  title="Hoàn tác thay đổi"
-                                                >
-                                                  <Undo
-                                                    fontSize="small"
-                                                    color="primary"
-                                                  />
-                                                </IconButton>
-                                              </>
-                                            )}
+                                                <>
+                                                  <IconButton
+                                                    size="small"
+                                                    onClick={() =>
+                                                      handleAcceptItem(
+                                                        "SUBSUBKR",
+                                                        obj.id,
+                                                        kr.id,
+                                                        sub.id,
+                                                        subsub.id,
+                                                      )
+                                                    }
+                                                    title="Chấp nhận thay đổi"
+                                                  >
+                                                    <Check
+                                                      fontSize="small"
+                                                      color="success"
+                                                    />
+                                                  </IconButton>
+                                                  <IconButton
+                                                    size="small"
+                                                    onClick={() =>
+                                                      handleUndoItem(
+                                                        "SUBSUBKR",
+                                                        obj.id,
+                                                        kr.id,
+                                                        sub.id,
+                                                        subsub.id,
+                                                      )
+                                                    }
+                                                    title="Hoàn tác thay đổi"
+                                                  >
+                                                    <Undo
+                                                      fontSize="small"
+                                                      color="primary"
+                                                    />
+                                                  </IconButton>
+                                                </>
+                                              )}
                                             <IconButton
                                               size="small"
                                               onClick={() =>
@@ -1445,8 +1444,8 @@ export default function OkrManagerTree({
                                                   okr.proposedChanges?.[
                                                     subsub.id
                                                   ]?.length > 0 ||
-                                                  localComments[subsub.id]
-                                                    ?.length > 0
+                                                    localComments[subsub.id]
+                                                      ?.length > 0
                                                     ? "warning"
                                                     : "inherit"
                                                 }

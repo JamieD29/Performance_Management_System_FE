@@ -775,8 +775,6 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
         [itemId]: [...(prev[itemId] || []), newMessage],
       }));
       setChatMessage("");
-      // Refresh để cập nhật trạng thái NEGOTIATING
-      onRefresh();
     } catch (error: any) {
       console.error("Lỗi gửi tin nhắn đàm phán", error);
       showError("Lỗi", error?.response?.data?.message || "Không thể gửi tin nhắn.");
