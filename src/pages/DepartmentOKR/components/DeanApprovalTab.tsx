@@ -118,6 +118,7 @@ export default function DeanApprovalTab() {
                 <TableCell sx={{ fontWeight: "bold" }}>Nhân sự</TableCell>
                 <TableCell sx={{ fontWeight: "bold" }}>Bộ môn</TableCell>
                 <TableCell sx={{ fontWeight: "bold" }}>Mục tiêu</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Trạng thái</TableCell>
                 <TableCell sx={{ fontWeight: "bold" }}>
                   Nội dung đề xuất
                 </TableCell>
@@ -151,6 +152,15 @@ export default function DeanApprovalTab() {
                   <TableCell>{okr.user?.department?.name || "—"}</TableCell>
                   <TableCell sx={{ fontWeight: 500 }}>
                     {okr.objective}
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label={okr.status === "NEGOTIATING" ? "Chờ bạn duyệt" : "Chờ nhân sự phản hồi"}
+                      size="small"
+                      color={okr.status === "NEGOTIATING" ? "warning" : "info"}
+                      variant={okr.status === "NEGOTIATING" ? "filled" : "outlined"}
+                      sx={{ fontWeight: 600 }}
+                    />
                   </TableCell>
                   <TableCell>
                     <Typography
