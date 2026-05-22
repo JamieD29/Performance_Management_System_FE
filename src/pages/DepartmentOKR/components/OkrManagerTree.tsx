@@ -834,9 +834,9 @@ export default function OkrManagerTree({
               boxShadow: 1,
             }}
           >
-            {/* <Typography variant="subtitle2" sx={{ mb: 1, color: "#92400e" }}>
-              Đàm phán mục: {itemId}
-            </Typography> */}
+            <Typography variant="subtitle2" sx={{ mb: 1, color: "#92400e" }}>
+              Nội dung trao đổi:
+            </Typography>
             {history.length > 0 ? (
               <Box sx={{ mb: 2, maxHeight: 150, overflowY: "auto" }}>
                 {history.map((msg: any, idx: number) => (

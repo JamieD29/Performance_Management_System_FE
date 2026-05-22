@@ -39,7 +39,8 @@ const NegotiationChat: React.FC<NegotiationChatProps> = ({
       <TableCell colSpan={colSpan} sx={{ p: 0, bgcolor: "#f1f5f9" }}>
         <Box sx={{ p: 2, borderLeft: "3px solid #3b82f6", ml: 2, bgcolor: "#fff", mb: 2, mt: 1, borderRadius: 1, boxShadow: 1 }}>
           <Typography variant="subtitle2" sx={{ mb: 1, color: "#1e3a8a" }}>
-            Đàm phán mục: {itemId}
+            Nội dung trao đổi:
+
           </Typography>
           {history.length > 0 ? (
             <Box sx={{ mb: 2, maxHeight: 150, overflowY: "auto" }}>
@@ -57,21 +58,21 @@ const NegotiationChat: React.FC<NegotiationChatProps> = ({
               Chưa có trao đổi nào. Bạn có thể đề xuất chỉnh sửa chỉ tiêu/điểm tại đây.
             </Typography>
           )}
-          
+
           {(status === 'PENDING' || status === 'NEGOTIATING') && (
             <Box sx={{ display: 'flex', gap: 1 }}>
-              <TextField 
-                size="small" 
-                fullWidth 
-                placeholder="Nhập đề xuất điều chỉnh..." 
-                value={chatMessage} 
-                onChange={(e) => setChatMessage(e.target.value)} 
-                onKeyDown={(e) => { if(e.key === 'Enter') onSend(itemId); }}
+              <TextField
+                size="small"
+                fullWidth
+                placeholder="Nhập đề xuất điều chỉnh..."
+                value={chatMessage}
+                onChange={(e) => setChatMessage(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') onSend(itemId); }}
               />
-              <Button 
-                variant="contained" 
-                disabled={loading || !chatMessage.trim()} 
-                onClick={() => onSend(itemId)} 
+              <Button
+                variant="contained"
+                disabled={loading || !chatMessage.trim()}
+                onClick={() => onSend(itemId)}
                 startIcon={<Send />}
               >
                 Gửi

@@ -277,6 +277,9 @@ export default function EvaluationListTab() {
                 <TableCell sx={{ fontWeight: "bold", color: "#1e293b" }}>
                   Bộ môn
                 </TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#1e293b" }}>
+                  Kỳ đánh giá
+                </TableCell>
                 <TableCell
                   sx={{
                     fontWeight: "bold",
@@ -386,6 +389,15 @@ export default function EvaluationListTab() {
                           label={report.user?.department?.name || "N/A"}
                           size="small"
                           variant="outlined"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={report.cycle?.name || "Kỳ mặc định"}
+                          size="small"
+                          color="secondary"
+                          variant="outlined"
+                          sx={{ fontWeight: 500, borderColor: "#a855f7", color: "#7c3aed" }}
                         />
                       </TableCell>
                       <TableCell align="center">
