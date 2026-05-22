@@ -40,7 +40,9 @@ import { api } from "../../../services/api";
 import { showInfo, showError } from "../../../utils/swal";
 
 export default function EvaluationListTab() {
-  const [reports, setReports] = useState<any[]>([]);
+  const [acceptedReports, setAcceptedReports] = useState<any[]>([]);
+  const [submittedReports, setSubmittedReports] = useState<any[]>([]);
+  const [completedReports, setCompletedReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedReport, setSelectedReport] = useState<any>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -53,25 +55,31 @@ export default function EvaluationListTab() {
 
   useEffect(() => {
     fetchEvaluations();
-  }, [tabValue]);
+  }, []);
 
   const fetchEvaluations = async () => {
     setLoading(true);
     try {
-      let endpoint = "/okrs/accepted";
-      if (tabValue === 1) {
-        endpoint = "/okrs/submitted";
-      } else if (tabValue === 2) {
-        endpoint = "/okrs/completed";
-      }
-      const res = await api.get(endpoint);
-      setReports(res.data || []);
+      const [acceptedRes, submittedRes, completedRes] = await Promise.all([
+        api.get("/okrs/accepted"),
+        api.get("/okrs/submitted"),
+        api.get("/okrs/completed"),
+      ]);
+      setAcceptedReports(acceptedRes.data || []);
+      setSubmittedReports(submittedRes.data || []);
+      setCompletedReports(completedRes.data || []);
     } catch (error) {
       console.error("Error fetching evaluations", error);
     } finally {
       setLoading(false);
     }
   };
+
+  const reports = useMemo(() => {
+    if (tabValue === 0) return acceptedReports;
+    if (tabValue === 1) return submittedReports;
+    return completedReports;
+  }, [tabValue, acceptedReports, submittedReports, completedReports]);
 
   // Các tùy chọn phòng ban từ dữ liệu thực tế
   const departmentOptions = useMemo(() => {
@@ -217,13 +225,13 @@ export default function EvaluationListTab() {
             sx={{ borderRight: 1, borderColor: "divider", pr: 2 }}
           >
             <Tab
-              label={tabValue === 0 ? `Đang thực hiện (${reports.length})` : "Đang thực hiện"}
+              label={`Đang thực hiện (${acceptedReports.length})`}
             />
             <Tab
-              label={tabValue === 1 ? `Cần đánh giá (${reports.length})` : "Cần đánh giá"}
+              label={`Cần đánh giá (${submittedReports.length})`}
             />
             <Tab
-              label={tabValue === 2 ? `Lịch sử Đã duyệt (${reports.length})` : "Lịch sử Đã duyệt"}
+              label={`Lịch sử Đã duyệt (${completedReports.length})`}
             />
           </Tabs>
 
