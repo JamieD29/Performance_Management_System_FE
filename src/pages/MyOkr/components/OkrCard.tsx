@@ -740,17 +740,32 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
 
   const handleSendChat = async (itemId: string) => {
     if (!chatMessage.trim()) return;
-    const newMessage = {
-      message: chatMessage,
-      sender: "USER",
-      createdAt: new Date().toISOString(),
-    };
-    setLocalComments((prev) => ({
-      ...prev,
-      [itemId]: [...(prev[itemId] || []), newMessage],
-    }));
-    setChatMessage("");
-    setHasChanges(true);
+    setChatLoading(true);
+    try {
+      const res = await api.post(`/okrs/${okr.id}/chat`, {
+        itemId,
+        sender: "USER",
+        message: chatMessage,
+      });
+      // Cập nhật local state để hiển thị tin nhắn ngay
+      const newMessage = {
+        message: chatMessage,
+        sender: "USER",
+        createdAt: new Date().toISOString(),
+      };
+      setLocalComments((prev) => ({
+        ...prev,
+        [itemId]: [...(prev[itemId] || []), newMessage],
+      }));
+      setChatMessage("");
+      // Refresh để cập nhật trạng thái NEGOTIATING
+      onRefresh();
+    } catch (error: any) {
+      console.error("Lỗi gửi tin nhắn đàm phán", error);
+      showError("Lỗi", error?.response?.data?.message || "Không thể gửi tin nhắn.");
+    } finally {
+      setChatLoading(false);
+    }
   };
 
   const updateReport = (

@@ -258,17 +258,30 @@ export default function OkrManagerTree({
 
   const handleSendChat = async (itemId: string) => {
     if (!chatMessage.trim()) return;
-    const newMessage = {
-      message: chatMessage,
-      sender: "MANAGER",
-      createdAt: new Date().toISOString(),
-    };
-    setLocalComments((prev) => ({
-      ...prev,
-      [itemId]: [...(prev[itemId] || []), newMessage],
-    }));
-    setChatMessage("");
-    setHasChanges(true);
+    setChatLoading(true);
+    try {
+      await api.post(`/okrs/${okr.id}/chat`, {
+        itemId,
+        sender: "MANAGER",
+        message: chatMessage,
+      });
+      const newMessage = {
+        message: chatMessage,
+        sender: "MANAGER",
+        createdAt: new Date().toISOString(),
+      };
+      setLocalComments((prev) => ({
+        ...prev,
+        [itemId]: [...(prev[itemId] || []), newMessage],
+      }));
+      setChatMessage("");
+      onRefresh();
+    } catch (error: any) {
+      console.error("Lỗi gửi tin nhắn đàm phán", error);
+      showError("Lỗi", error?.response?.data?.message || "Không thể gửi tin nhắn.");
+    } finally {
+      setChatLoading(false);
+    }
   };
 
   const handleOpenAddDialog = (

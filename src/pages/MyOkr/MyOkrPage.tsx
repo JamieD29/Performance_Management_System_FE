@@ -97,6 +97,11 @@ export default function MyOkrPage() {
       o.status === "ACCEPTED" || o.status === "SUBMITTED" || o.status === "COMPLETED"
     );
 
+  const acceptedOkrDate = filteredOkrs
+    .map((o) => o.acceptedAt)
+    .filter(Boolean)
+    .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0];
+
   return (
     <Container maxWidth="xl" sx={{ py: 2 }}>
       <Box sx={{ mb: 3, display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 2 }}>
@@ -166,7 +171,7 @@ export default function MyOkrPage() {
                       ✅ Hoàn tất đàm phán
                     </Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
-                      Đã chốt OKR ngày {new Date(selectedCycleDeadline).toLocaleDateString("vi-VN")}
+                      Đã chốt OKR ngày {acceptedOkrDate ? new Date(acceptedOkrDate).toLocaleDateString("vi-VN") : new Date(selectedCycleDeadline).toLocaleDateString("vi-VN")}
                     </Typography>
                   </>
                 ) : (
