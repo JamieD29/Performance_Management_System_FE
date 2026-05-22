@@ -23,8 +23,6 @@ import {
 } from "@mui/material";
 import {
   Check,
-  ExpandMore,
-  ExpandLess,
   Comment,
   Send,
   Save,
@@ -55,7 +53,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
 
   // Self-report state
   const [reportData, setReportData] = useState<
-    Record<string, { quantity: number; evidence: string }>
+    Record<string, { quantity: number; evidence: string; score?: number }>
   >({});
   const [saving, setSaving] = useState(false);
   const [hasDraftChanges, setHasDraftChanges] = useState(false);
@@ -761,7 +759,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
     if (!chatMessage.trim()) return;
     setChatLoading(true);
     try {
-      const res = await api.post(`/okrs/${okr.id}/chat`, {
+      await api.post(`/okrs/${okr.id}/chat`, {
         itemId,
         sender: "USER",
         message: chatMessage,

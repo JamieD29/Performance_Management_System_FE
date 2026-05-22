@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Container,
@@ -37,8 +37,8 @@ export default function MyOkrPage() {
 
       // Auto select the newest cycle if not yet selected
       if (data.length > 0) {
-        const cycles = Array.from(
-          new Map(
+        const cycles: any[] = Array.from(
+          new Map<string, any>(
             data
               .map((okr: any) => okr.cycle)
               .filter(Boolean)
@@ -64,8 +64,8 @@ export default function MyOkrPage() {
   };
 
   // Extract unique cycles
-  const cycles = Array.from(
-    new Map(
+  const cycles: any[] = Array.from(
+    new Map<string, any>(
       okrs
         .map((okr) => okr.cycle)
         .filter(Boolean)
