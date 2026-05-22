@@ -90,6 +90,13 @@ export default function MyOkrPage() {
   const pendingCount = filteredOkrs.filter((o) => o.status === "PENDING").length;
   const acceptedCount = filteredOkrs.filter((o) => o.status === "ACCEPTED").length;
 
+  // Đàm phán hoàn tất nếu tất cả OKR trong kỳ đã được duyệt (không còn PENDING/NEGOTIATING)
+  const isNegotiationComplete =
+    filteredOkrs.length > 0 &&
+    filteredOkrs.every((o) =>
+      o.status === "ACCEPTED" || o.status === "SUBMITTED" || o.status === "COMPLETED"
+    );
+
   return (
     <Container maxWidth="xl" sx={{ py: 2 }}>
       <Box sx={{ mb: 3, display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 2 }}>
@@ -153,12 +160,25 @@ export default function MyOkrPage() {
             
             {selectedCycleDeadline && (
               <Box sx={{ textAlign: { xs: "left", sm: "right" } }}>
-                <Typography variant="caption" fontWeight="bold" color="#b45309" display="block">
-                  ⏳ Hạn chót đàm phán & chốt OKR:
-                </Typography>
-                <Typography variant="subtitle1" fontWeight="extrabold" color="#b45309">
-                  {new Date(selectedCycleDeadline).toLocaleDateString("vi-VN")}
-                </Typography>
+                {isNegotiationComplete ? (
+                  <>
+                    <Typography variant="caption" fontWeight="bold" color="#15803d" display="block">
+                      ✅ Hoàn tất đàm phán
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
+                      Đã chốt OKR ngày {new Date(selectedCycleDeadline).toLocaleDateString("vi-VN")}
+                    </Typography>
+                  </>
+                ) : (
+                  <>
+                    <Typography variant="caption" fontWeight="bold" color="#b45309" display="block">
+                      ⏳ Hạn chót đàm phán & chốt OKR:
+                    </Typography>
+                    <Typography variant="subtitle1" fontWeight="extrabold" color="#b45309">
+                      {new Date(selectedCycleDeadline).toLocaleDateString("vi-VN")}
+                    </Typography>
+                  </>
+                )}
               </Box>
             )}
           </Box>

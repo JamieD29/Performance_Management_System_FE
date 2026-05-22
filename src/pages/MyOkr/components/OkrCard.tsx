@@ -940,7 +940,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
               }
               size="small"
             />
-            {(() => {
+            {/* {(() => {
               if (okr.deadline) {
                 const isNegotiationExpired = new Date() > new Date(okr.deadline);
                 if (!isNegotiationExpired) {
@@ -964,7 +964,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                 );
               }
               return null;
-            })()}
+            })()} */}
             {(isAccepted || isSubmitted || isCompleted) && (
               <Chip
                 label={`Điểm: ${displayScore}/${maxScore}`}
@@ -993,8 +993,8 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
               (okr.status === "PENDING" || okr.status === "NEGOTIATING")
                 ? "warning"
                 : canReport
-                ? "primary"
-                : "inherit"
+                  ? "primary"
+                  : "inherit"
             }
             onClick={() => setExpanded(true)}
             sx={{ textTransform: "none", fontWeight: "bold" }}
@@ -1024,9 +1024,9 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
 
       {/* Basic Structure Info */}
       <Box sx={{ p: 2.5, borderTop: "1px solid #f1f5f9", bgcolor: "#fafafa" }}>
-        <Typography 
-          variant="subtitle2" 
-          color="#334155" 
+        <Typography
+          variant="subtitle2"
+          color="#334155"
           sx={{ mb: 2, fontWeight: "bold", display: "flex", alignItems: "center", gap: 1, fontSize: "0.9rem" }}
         >
           📋 Khung OKR giao trong kỳ:
@@ -1038,14 +1038,14 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
           return (
             <Box key={obj.id || idx} sx={{ mb: 3, "&:last-child": { mb: 0 } }}>
               {/* Objective row */}
-              <Box 
-                sx={{ 
-                  display: "flex", 
-                  justifyContent: "space-between", 
-                  alignItems: "center", 
-                  mb: 1.5, 
-                  bgcolor: "#eff6ff", 
-                  p: 1.5, 
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  mb: 1.5,
+                  bgcolor: "#eff6ff",
+                  p: 1.5,
                   borderRadius: 2,
                   borderLeft: "4px solid #2563eb",
                   boxShadow: "0 1px 2px rgba(0,0,0,0.05)"
@@ -1065,14 +1065,14 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                     />
                   )}
                 </Box>
-                <Chip 
-                  label={`Tối đa: ${obj.maxScore} điểm`} 
-                  size="small" 
-                  color="primary" 
-                  sx={{ height: 24, fontSize: "0.75rem", fontWeight: "bold", bgcolor: "#1e3a8a" }} 
+                <Chip
+                  label={`Tối đa: ${obj.maxScore} điểm`}
+                  size="small"
+                  color="primary"
+                  sx={{ height: 24, fontSize: "0.75rem", fontWeight: "bold", bgcolor: "#1e3a8a" }}
                 />
               </Box>
-              
+
               {/* Key Results and below */}
               <Box sx={{ pl: 1, display: "flex", flexDirection: "column", gap: 1.5 }}>
                 {obj.items?.map((kr: any) => {
@@ -1088,14 +1088,14 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                   const hasReport = krQty > 0 || (krData?.evidence);
 
                   return (
-                    <Box 
-                      key={kr.id} 
-                      sx={{ 
-                        pl: 2, 
+                    <Box
+                      key={kr.id}
+                      sx={{
+                        pl: 2,
                         borderLeft: "2px solid #cbd5e1",
-                        display: "flex", 
-                        flexDirection: "column", 
-                        gap: 0.5 
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 0.5
                       }}
                     >
                       {/* KR Row */}
@@ -1104,7 +1104,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                           <Typography variant="body2" color="text.primary" sx={{ fontSize: "0.85rem", lineHeight: 1.5 }}>
                             <strong>{kr.id}</strong> {kr.title}
                           </Typography>
-                          
+
                           {krCommentsCount > 0 && (
                             <Chip
                               icon={<Forum sx={{ fontSize: "0.75rem !important" }} />}
@@ -1116,7 +1116,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                             />
                           )}
                         </Box>
-                        
+
                         {/* Target & Score Info */}
                         <Box sx={{ display: "flex", gap: 1, alignItems: "center", flexShrink: 0 }}>
                           {kr.unitScore ? (
@@ -1173,13 +1173,13 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                         const hasSubReport = subQty > 0 || (subData?.evidence);
 
                         return (
-                          <Box 
-                            key={sub.id} 
-                            sx={{ 
-                              pl: 2.5, 
+                          <Box
+                            key={sub.id}
+                            sx={{
+                              pl: 2.5,
                               borderLeft: "2px solid #e2e8f0",
-                              display: "flex", 
-                              flexDirection: "column", 
+                              display: "flex",
+                              flexDirection: "column",
                               gap: 0.5,
                               mt: 0.5
                             }}
@@ -1200,7 +1200,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                   />
                                 )}
                               </Box>
-                              
+
                               <Box sx={{ display: "flex", gap: 1, alignItems: "center", flexShrink: 0 }}>
                                 {sub.unitScore ? (
                                   <Chip
@@ -1253,13 +1253,13 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                               const hasSubSubReport = subsubQty > 0 || (subsubData?.evidence);
 
                               return (
-                                <Box 
-                                  key={subsub.id} 
-                                  sx={{ 
-                                    pl: 2.5, 
+                                <Box
+                                  key={subsub.id}
+                                  sx={{
+                                    pl: 2.5,
                                     borderLeft: "2px dashed #cbd5e1",
-                                    display: "flex", 
-                                    flexDirection: "column", 
+                                    display: "flex",
+                                    flexDirection: "column",
                                     gap: 0.5,
                                     mt: 0.5
                                   }}
@@ -1280,7 +1280,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                         />
                                       )}
                                     </Box>
-                                    
+
                                     <Box sx={{ display: "flex", gap: 1, alignItems: "center", flexShrink: 0 }}>
                                       {subsub.unitScore ? (
                                         <Chip
