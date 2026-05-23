@@ -171,8 +171,13 @@ export default function MyEvaluationPage() {
           <Typography>Đang tải Phiếu Đánh Giá...</Typography>
         </Paper>
       ) : !form ? (
-        <Paper sx={{ p: 4, borderRadius: 2, border: "1px solid #e2e8f0", textAlign: "center" }}>
-          <Typography>Chưa có dữ liệu Phiếu Đánh Giá cho kỳ này.</Typography>
+        <Paper sx={{ p: 4, borderRadius: 2, border: "1px solid #e2e8f0", textAlign: "center", py: 6 }}>
+          <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
+            Không có dữ liệu Phiếu Đánh Giá
+          </Typography>
+          <Typography color="text.secondary">
+            Bạn không có OKR được giao hoặc thực hiện trong kỳ đánh giá này.
+          </Typography>
         </Paper>
       ) : (
         <>
