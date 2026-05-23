@@ -366,6 +366,40 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
     return max > 0 ? Math.min(total, max) : total;
   };
 
+  const getManagerData = (key: string, kr: any) => {
+    const mgrReport = okr.managerReportData || {};
+    const qty = mgrReport[key]?.quantity || 0;
+    const unitScore = Number(kr.unitScore) || 0;
+    const score = Math.min(
+      unitScore > 0 ? qty * unitScore : qty,
+      Number(kr.maxScore) || Infinity
+    );
+    return { quantity: qty, score };
+  };
+
+  const calcObjectiveManagerScore = (obj: any) => {
+    let total = 0;
+    obj.items?.forEach((kr: any) => {
+      const krKey = `${obj.id}-${kr.id}`;
+      const krData = getManagerData(krKey, kr);
+      total += krData.score;
+
+      kr.items?.forEach((sub: any) => {
+        const subKey = `${obj.id}-${kr.id}-${sub.id}`;
+        const subData = getManagerData(subKey, sub);
+        total += subData.score;
+
+        sub.items?.forEach((subsub: any) => {
+          const subsubKey = `${obj.id}-${kr.id}-${sub.id}-${subsub.id}`;
+          const subsubData = getManagerData(subsubKey, subsub);
+          total += subsubData.score;
+        });
+      });
+    });
+    const max = Number(obj.maxScore) || 0;
+    return max > 0 ? Math.min(total, max) : total;
+  };
+
   const handleOpenAddDialog = (
     type: "KR" | "SUBKR",
     objId: string,
@@ -941,11 +975,11 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
           bgcolor: "#f8fafc",
         }}
       >
-        <Box sx={{ flex: 1 }}>
-          <Typography variant="h6" fontWeight="bold" color="#1e3a8a">
-            {okr.objective}
-          </Typography>
-          <Box sx={{ display: "flex", gap: 1, mt: 0.5, flexWrap: "wrap" }}>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1.5, mb: 0.5 }}>
+            <Typography variant="h6" fontWeight="bold" color="#1e3a8a" sx={{ lineHeight: 1.2, wordBreak: "break-word" }}>
+              {okr.objective}
+            </Typography>
             <Chip
               label={
                 isAccepted && !isCycleStarted
@@ -957,8 +991,25 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                   ? "warning"
                   : statusConfig[okr.status]?.color || "default"
               }
-              size="small"
+              size={okr.status === "COMPLETED" ? "medium" : "small"}
+              sx={
+                okr.status === "COMPLETED"
+                  ? {
+                      fontWeight: "bold",
+                      fontSize: "0.85rem",
+                      px: 1.5,
+                      py: 0.5,
+                      boxShadow: "0 2px 8px rgba(46, 125, 50, 0.25)",
+                      color: "#fff",
+                      bgcolor: "#2e7d32",
+                      flexShrink: 0,
+                      mt: 0.25,
+                    }
+                  : { fontWeight: 500, flexShrink: 0, mt: 0.25 }
+              }
             />
+          </Box>
+          <Box sx={{ display: "flex", gap: 1, mt: 0.5, flexWrap: "wrap" }}>
             {okr.createdAt && (
               <Chip
                 icon={<CalendarMonth sx={{ fontSize: "0.85rem !important" }} />}
@@ -994,14 +1045,49 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
               }
               return null;
             })()} */}
-            {(isAccepted || isSubmitted || isCompleted) && (
+            {isCompleted ? (
+              <>
+                <Chip
+                  label={`Tự chấm: ${totalSelfScore.toFixed(1)}/${maxScore}đ`}
+                  size="small"
+                  color="info"
+                  variant="outlined"
+                  sx={{ fontWeight: "bold" }}
+                />
+                <Chip
+                  label={`QL chấm: ${okr.managerScore?.toFixed(1) || 0}/${maxScore}đ`}
+                  size="small"
+                  color="success"
+                  variant="contained"
+                  sx={{ fontWeight: "bold", bgcolor: "#2e7d32", color: "#fff" }}
+                />
+              </>
+            ) : isSubmitted ? (
+              <>
+                <Chip
+                  label={`Tự chấm: ${totalSelfScore.toFixed(1)}/${maxScore}đ`}
+                  size="small"
+                  color="info"
+                  variant="outlined"
+                  sx={{ fontWeight: "bold" }}
+                />
+                <Chip
+                  label="Chờ QL chấm"
+                  size="small"
+                  color="warning"
+                  variant="outlined"
+                  sx={{ fontWeight: "bold" }}
+                />
+              </>
+            ) : isAccepted ? (
               <Chip
-                label={`Điểm: ${displayScore}/${maxScore}`}
+                label={`Điểm dự kiến: ${totalSelfScore.toFixed(1)}/${maxScore}đ`}
                 size="small"
                 color="primary"
                 variant="outlined"
+                sx={{ fontWeight: "bold" }}
               />
-            )}
+            ) : null}
           </Box>
         </Box>
         <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
@@ -1017,16 +1103,28 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
           )}
           <Button
             size="small"
-            variant={(okr.status === "PENDING" || okr.status === "NEGOTIATING" || canReport) ? "contained" : "outlined"}
+            variant={(okr.status === "PENDING" || okr.status === "NEGOTIATING" || canReport || okr.status === "COMPLETED") ? "contained" : "outlined"}
             color={
               (okr.status === "PENDING" || okr.status === "NEGOTIATING")
                 ? "warning"
-                : canReport
-                  ? "primary"
-                  : "inherit"
+                : okr.status === "COMPLETED"
+                  ? "success"
+                  : canReport
+                    ? "primary"
+                    : "inherit"
             }
             onClick={() => setExpanded(true)}
-            sx={{ textTransform: "none", fontWeight: "bold" }}
+            sx={{ 
+              textTransform: "none", 
+              fontWeight: "bold",
+              ...(okr.status === "COMPLETED" && {
+                bgcolor: "#2e7d32",
+                color: "#fff",
+                "&:hover": {
+                  bgcolor: "#1b5e20"
+                }
+              })
+            }}
           >
             {getButtonLabel()}
           </Button>
@@ -1101,251 +1199,6 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                   sx={{ height: 24, fontSize: "0.75rem", fontWeight: "bold", bgcolor: "#1e3a8a" }}
                 />
               </Box>
-
-              {/* Key Results and below */}
-              <Box sx={{ pl: 1, display: "flex", flexDirection: "column", gap: 1.5 }}>
-                {obj.items?.map((kr: any) => {
-                  const krKey = `${obj.id}-${kr.id}`;
-                  const krData = reportData[krKey];
-                  const krQty = krData?.quantity || 0;
-                  const krUnitScore = Number(kr.unitScore) || 0;
-                  const krCalcScore = krUnitScore > 0 ? krQty * krUnitScore : krQty;
-                  const krCappedScore = Math.min(krCalcScore, Number(kr.maxScore) || Infinity);
-                  const krScore = krData?.score != null ? krData.score : krCappedScore;
-
-                  const krCommentsCount = (okr.proposedChanges?.[kr.id]?.length || 0) + (localComments[kr.id]?.length || 0);
-                  const hasReport = krQty > 0 || (krData?.evidence);
-
-                  return (
-                    <Box
-                      key={kr.id}
-                      sx={{
-                        pl: 2,
-                        borderLeft: "2px solid #cbd5e1",
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 0.5
-                      }}
-                    >
-                      {/* KR Row */}
-                      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 1 }}>
-                        <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1, flex: 1, minWidth: "250px" }}>
-                          <Typography variant="body2" color="text.primary" sx={{ fontSize: "0.85rem", lineHeight: 1.5 }}>
-                            <strong>{kr.id}</strong> {kr.title}
-                          </Typography>
-
-                          {krCommentsCount > 0 && (
-                            <Chip
-                              icon={<Forum sx={{ fontSize: "0.75rem !important" }} />}
-                              label={`${krCommentsCount}`}
-                              size="small"
-                              color="warning"
-                              variant="outlined"
-                              sx={{ height: 16, fontSize: "0.6rem", fontWeight: "bold", ml: 0.5 }}
-                            />
-                          )}
-                        </Box>
-
-                        {/* Target & Score Info */}
-                        <Box sx={{ display: "flex", gap: 1, alignItems: "center", flexShrink: 0 }}>
-                          {kr.unitScore ? (
-                            <Chip
-                              label={`+${kr.unitScore}/${kr.unit || "đv"}`}
-                              size="small"
-                              sx={{ height: 18, fontSize: "0.65rem", color: "#475569", bgcolor: "#e2e8f0", fontWeight: "500" }}
-                            />
-                          ) : null}
-                          {kr.maxScore ? (
-                            <Chip
-                              label={`Tối đa: ${kr.maxScore}đ`}
-                              size="small"
-                              variant="outlined"
-                              sx={{ height: 18, fontSize: "0.65rem", color: "#475569", fontWeight: "500" }}
-                            />
-                          ) : null}
-                        </Box>
-                      </Box>
-
-                      {/* Display Self-Report Info if exists */}
-                      {hasReport && (okr.status === "ACCEPTED" || okr.status === "SUBMITTED" || okr.status === "COMPLETED") && (
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, pl: 2, py: 0.25, flexWrap: "wrap" }}>
-                          <Typography variant="caption" sx={{ color: "#16a34a", fontWeight: "600", bgcolor: "#f0fdf4", px: 1, py: 0.25, borderRadius: 1 }}>
-                            Đã khai: {krQty} {kr.unit || "đv"} {kr.unitScore ? `(-> ${krScore.toFixed(1)}đ)` : `(-> ${krScore}đ)`}
-                          </Typography>
-                          {krData?.evidence && (
-                            <Chip
-                              icon={<Launch sx={{ fontSize: "0.7rem !important" }} />}
-                              label="Xem minh chứng"
-                              size="small"
-                              component="a"
-                              href={krData.evidence.startsWith("http") ? krData.evidence : `https://${krData.evidence}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              clickable
-                              sx={{ height: 18, fontSize: "0.65rem", bgcolor: "#ecfdf5", color: "#065f46", border: "1px solid #a7f3d0", cursor: "pointer" }}
-                            />
-                          )}
-                        </Box>
-                      )}
-
-                      {/* Sub-KRs */}
-                      {kr.items?.map((sub: any) => {
-                        const subKey = `${obj.id}-${kr.id}-${sub.id}`;
-                        const subData = reportData[subKey];
-                        const subQty = subData?.quantity || 0;
-                        const subUnitScore = Number(sub.unitScore) || 0;
-                        const subCalcScore = subUnitScore > 0 ? subQty * subUnitScore : subQty;
-                        const subCappedScore = Math.min(subCalcScore, Number(sub.maxScore) || Infinity);
-                        const subScore = subData?.score != null ? subData.score : subCappedScore;
-
-                        const subCommentsCount = (okr.proposedChanges?.[sub.id]?.length || 0) + (localComments[sub.id]?.length || 0);
-                        const hasSubReport = subQty > 0 || (subData?.evidence);
-
-                        return (
-                          <Box
-                            key={sub.id}
-                            sx={{
-                              pl: 2.5,
-                              borderLeft: "2px solid #e2e8f0",
-                              display: "flex",
-                              flexDirection: "column",
-                              gap: 0.5,
-                              mt: 0.5
-                            }}
-                          >
-                            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 1 }}>
-                              <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1, flex: 1, minWidth: "220px" }}>
-                                <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8rem", lineHeight: 1.5 }}>
-                                  <strong>{sub.id}</strong> {sub.title}
-                                </Typography>
-                                {subCommentsCount > 0 && (
-                                  <Chip
-                                    icon={<Forum sx={{ fontSize: "0.75rem !important" }} />}
-                                    label={`${subCommentsCount}`}
-                                    size="small"
-                                    color="warning"
-                                    variant="outlined"
-                                    sx={{ height: 16, fontSize: "0.6rem", fontWeight: "bold", ml: 0.5 }}
-                                  />
-                                )}
-                              </Box>
-
-                              <Box sx={{ display: "flex", gap: 1, alignItems: "center", flexShrink: 0 }}>
-                                {sub.unitScore ? (
-                                  <Chip
-                                    label={`+${sub.unitScore}/${sub.unit || "đv"}`}
-                                    size="small"
-                                    sx={{ height: 16, fontSize: "0.6rem", color: "#64748b", bgcolor: "#f1f5f9" }}
-                                  />
-                                ) : null}
-                                {sub.maxScore ? (
-                                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.7rem", fontWeight: "500" }}>
-                                    Tối đa: {sub.maxScore}đ
-                                  </Typography>
-                                ) : null}
-                              </Box>
-                            </Box>
-
-                            {/* Display Sub self-report */}
-                            {hasSubReport && (okr.status === "ACCEPTED" || okr.status === "SUBMITTED" || okr.status === "COMPLETED") && (
-                              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, pl: 2, py: 0.25, flexWrap: "wrap" }}>
-                                <Typography variant="caption" sx={{ color: "#16a34a", fontWeight: "600", bgcolor: "#f0fdf4", px: 0.75, py: 0.25, borderRadius: 0.5 }}>
-                                  Đã khai: {subQty} {sub.unit || "đv"} {sub.unitScore ? `(-> ${subScore.toFixed(1)}đ)` : `(-> ${subScore}đ)`}
-                                </Typography>
-                                {subData?.evidence && (
-                                  <Chip
-                                    icon={<Launch sx={{ fontSize: "0.65rem !important" }} />}
-                                    label="Xem minh chứng"
-                                    size="small"
-                                    component="a"
-                                    href={subData.evidence.startsWith("http") ? subData.evidence : `https://${subData.evidence}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    clickable
-                                    sx={{ height: 16, fontSize: "0.6rem", bgcolor: "#ecfdf5", color: "#065f46", border: "1px solid #a7f3d0", cursor: "pointer" }}
-                                  />
-                                )}
-                              </Box>
-                            )}
-
-                            {/* Sub-Sub-KRs */}
-                            {sub.items?.map((subsub: any) => {
-                              const subsubKey = `${obj.id}-${kr.id}-${sub.id}-${subsub.id}`;
-                              const subsubData = reportData[subsubKey];
-                              const subsubQty = subsubData?.quantity || 0;
-                              const subsubUnitScore = Number(subsub.unitScore) || 0;
-                              const subsubCalcScore = subsubUnitScore > 0 ? subsubQty * subsubUnitScore : subsubQty;
-                              const subsubCappedScore = Math.min(subsubCalcScore, Number(subsub.maxScore) || Infinity);
-                              const subsubScore = subsubData?.score != null ? subsubData.score : subsubCappedScore;
-
-                              const subsubCommentsCount = (okr.proposedChanges?.[subsub.id]?.length || 0) + (localComments[subsub.id]?.length || 0);
-                              const hasSubSubReport = subsubQty > 0 || (subsubData?.evidence);
-
-                              return (
-                                <Box
-                                  key={subsub.id}
-                                  sx={{
-                                    pl: 2.5,
-                                    borderLeft: "2px dashed #cbd5e1",
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    gap: 0.5,
-                                    mt: 0.5
-                                  }}
-                                >
-                                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 1 }}>
-                                    <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1, flex: 1, minWidth: "200px" }}>
-                                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.78rem", fontStyle: "italic", lineHeight: 1.5 }}>
-                                        <strong>{subsub.id}</strong> {subsub.title}
-                                      </Typography>
-                                      {subsubCommentsCount > 0 && (
-                                        <Chip
-                                          icon={<Forum sx={{ fontSize: "0.75rem !important" }} />}
-                                          label={`${subsubCommentsCount}`}
-                                          size="small"
-                                          color="warning"
-                                          variant="outlined"
-                                          sx={{ height: 14, fontSize: "0.55rem", fontWeight: "bold", ml: 0.5 }}
-                                        />
-                                      )}
-                                    </Box>
-
-                                    <Box sx={{ display: "flex", gap: 1, alignItems: "center", flexShrink: 0 }}>
-                                      {subsub.unitScore ? (
-                                        <Chip
-                                          label={`+${subsub.unitScore}/${subsub.unit || "đv"}`}
-                                          size="small"
-                                          sx={{ height: 14, fontSize: "0.55rem", color: "#64748b", bgcolor: "#f8fafc" }}
-                                        />
-                                      ) : null}
-                                    </Box>
-                                  </Box>
-
-                                  {/* Display Sub-Sub self-report */}
-                                  {hasSubSubReport && (okr.status === "ACCEPTED" || okr.status === "SUBMITTED" || okr.status === "COMPLETED") && (
-                                    <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, pl: 2, py: 0.25, flexWrap: "wrap" }}>
-                                      <Typography variant="caption" sx={{ color: "#16a34a", fontWeight: "600", bgcolor: "#f0fdf4", px: 0.75, py: 0.25, borderRadius: 0.5, fontSize: "0.7rem" }}>
-                                        Đã khai: {subsubQty} {subsub.unit || "đv"} {subsub.unitScore ? `(-> ${subsubScore.toFixed(1)}đ)` : `(-> ${subsubScore}đ)`}
-                                      </Typography>
-                                      {subsubData?.evidence && (
-                                        <Chip
-                                          icon={<Launch sx={{ fontSize: "0.6rem !important" }} />}
-                                          label="Xem minh chứng"
-                                          size="small"
-                                          component="a"
-                                          href={subsubData.evidence.startsWith("http") ? subsubData.evidence : `https://${subsubData.evidence}`}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          clickable
-                                          sx={{ height: 14, fontSize: "0.55rem", bgcolor: "#ecfdf5", color: "#065f46", border: "1px solid #a7f3d0", cursor: "pointer" }}
-                                        />
-                                      )}
-                                    </Box>
-                                  )}
-                                </Box>
-                              );
-                            })}
-                          </Box>
                         );
                       })}
                     </Box>
@@ -1479,28 +1332,41 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                         sx={{
                           color: "white",
                           fontWeight: "bold",
-                          width: "10%",
+                          width: "8%",
+                          textAlign: "center",
                         }}
                       >
-                        Số lượng tự khai
+                        S.Lượng Tự Khai
                       </TableCell>
                       <TableCell
                         sx={{
                           color: "white",
                           fontWeight: "bold",
-                          width: "10%",
+                          width: "8%",
+                          textAlign: "center",
                         }}
                       >
-                        Điểm khai
+                        Điểm Tự Khai
                       </TableCell>
                       <TableCell
                         sx={{
                           color: "white",
                           fontWeight: "bold",
-                          width: "10%",
+                          width: "8%",
+                          textAlign: "center",
                         }}
                       >
-                        Tổng điểm nhiệm vụ
+                        S.Lượng QL Chốt
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          color: "white",
+                          fontWeight: "bold",
+                          width: "8%",
+                          textAlign: "center",
+                        }}
+                      >
+                        Điểm QL Chốt
                       </TableCell>
                     </>
                   )}
@@ -1551,16 +1417,29 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                         )}
                         {(isSubmitted || isCompleted) && (
                           <>
-                            <TableCell></TableCell>
-                            <TableCell></TableCell>
+                            <TableCell align="center">—</TableCell>
                             <TableCell
+                              align="center"
                               sx={{
                                 fontWeight: "bold",
-                                color: "#15803d",
-                                fontSize: "1rem",
+                                color: "#475569",
                               }}
                             >
                               {calcObjectiveScore(obj)} / {obj.maxScore || 0}
+                            </TableCell>
+                            <TableCell align="center">—</TableCell>
+                            <TableCell
+                              align="center"
+                              sx={{
+                                fontWeight: "bold",
+                                color: "#15803d",
+                              }}
+                            >
+                              {okr.status === "COMPLETED" ? (
+                                `${calcObjectiveManagerScore(obj)} / ${obj.maxScore || 0}`
+                              ) : (
+                                "—"
+                              )}
                             </TableCell>
                           </>
                         )}
@@ -1751,10 +1630,11 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                               )}
                               {(isSubmitted || isCompleted) && (
                                 <>
-                                  <TableCell>
+                                  <TableCell align="center">
                                     {existingReport?.quantity || 0}
                                   </TableCell>
                                   <TableCell
+                                    align="center"
                                     sx={{
                                       fontWeight: "bold",
                                       color: "#2563eb",
@@ -1762,7 +1642,26 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                   >
                                     {existingReport?.score || 0}
                                   </TableCell>
-                                  <TableCell></TableCell>
+                                  <TableCell align="center">
+                                    {okr.status === "COMPLETED" ? (
+                                      getManagerData(krKey, kr).quantity
+                                    ) : (
+                                      "—"
+                                    )}
+                                  </TableCell>
+                                  <TableCell
+                                    align="center"
+                                    sx={{
+                                      fontWeight: "bold",
+                                      color: "#16a34a",
+                                    }}
+                                  >
+                                    {okr.status === "COMPLETED" ? (
+                                      getManagerData(krKey, kr).score.toFixed(1)
+                                    ) : (
+                                      "—"
+                                    )}
+                                  </TableCell>
                                 </>
                               )}
                               {(isPending || okr.status === "NEGOTIATING") && (
@@ -1994,10 +1893,11 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                     )}
                                     {(isSubmitted || isCompleted) && (
                                       <>
-                                        <TableCell>
+                                        <TableCell align="center">
                                           {existingSub?.quantity || 0}
                                         </TableCell>
                                         <TableCell
+                                          align="center"
                                           sx={{
                                             fontWeight: "bold",
                                             color: "#2563eb",
@@ -2005,7 +1905,26 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                         >
                                           {existingSub?.score || 0}
                                         </TableCell>
-                                        <TableCell></TableCell>
+                                        <TableCell align="center">
+                                          {okr.status === "COMPLETED" ? (
+                                            getManagerData(subKey, sub).quantity
+                                          ) : (
+                                            "—"
+                                          )}
+                                        </TableCell>
+                                        <TableCell
+                                          align="center"
+                                          sx={{
+                                            fontWeight: "bold",
+                                            color: "#16a34a",
+                                          }}
+                                        >
+                                          {okr.status === "COMPLETED" ? (
+                                            getManagerData(subKey, sub).score.toFixed(1)
+                                          ) : (
+                                            "—"
+                                          )}
+                                        </TableCell>
                                       </>
                                     )}
                                     {(isPending ||
@@ -2259,11 +2178,11 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                             )}
                                             {(isSubmitted || isCompleted) && (
                                               <>
-                                                <TableCell>
-                                                  {existingSubSub?.quantity ||
-                                                    0}
+                                                <TableCell align="center">
+                                                  {existingSubSub?.quantity || 0}
                                                 </TableCell>
                                                 <TableCell
+                                                  align="center"
                                                   sx={{
                                                     fontWeight: "bold",
                                                     color: "#2563eb",
@@ -2271,7 +2190,26 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                                 >
                                                   {existingSubSub?.score || 0}
                                                 </TableCell>
-                                                <TableCell></TableCell>
+                                                <TableCell align="center">
+                                                  {okr.status === "COMPLETED" ? (
+                                                    getManagerData(subsubKey, subsub).quantity
+                                                  ) : (
+                                                    "—"
+                                                  )}
+                                                </TableCell>
+                                                <TableCell
+                                                  align="center"
+                                                  sx={{
+                                                    fontWeight: "bold",
+                                                    color: "#16a34a",
+                                                  }}
+                                                >
+                                                  {okr.status === "COMPLETED" ? (
+                                                    getManagerData(subsubKey, subsub).score.toFixed(1)
+                                                  ) : (
+                                                    "—"
+                                                  )}
+                                                </TableCell>
                                               </>
                                             )}
                                             {(isPending ||
