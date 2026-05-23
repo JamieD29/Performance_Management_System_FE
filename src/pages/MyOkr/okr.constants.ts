@@ -6,6 +6,6 @@ export const statusConfig: Record<
   NEGOTIATING: { label: "Đang đàm phán", color: "info" },
   ACCEPTED: { label: "Đã chấp nhận — Sẵn sàng tự khai", color: "success" },
   SUBMITTED: { label: "Đã nộp bài — Chờ duyệt", color: "info" },
-  COMPLETED: { label: "Hoàn tất", color: "default" },
+  COMPLETED: { label: "Hoàn tất", color: "success" },
   REJECTED: { label: "Bị từ chối", color: "error" },
 };
