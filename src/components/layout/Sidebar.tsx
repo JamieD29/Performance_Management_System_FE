@@ -638,28 +638,6 @@ export default function Sidebar({
                     fontSize: "0.95rem",
                   }}
                 />
-                {/* Beta badge */}
-                <Box
-                  component="span"
-                  sx={{
-                    position: "absolute",
-                    top: 4,
-                    right: 8,
-                    bgcolor: "#ef4444",
-                    color: "#fff",
-                    fontSize: "0.58rem",
-                    fontWeight: 800,
-                    px: 0.6,
-                    py: 0.1,
-                    borderRadius: "4px",
-                    lineHeight: 1.4,
-                    letterSpacing: "0.5px",
-                    opacity: collapsed ? 0 : 1,
-                    transition: "opacity 0.2s ease",
-                  }}
-                >
-                  BETA
-                </Box>
               </ListItemButton>
             </Tooltip>
           </Box>

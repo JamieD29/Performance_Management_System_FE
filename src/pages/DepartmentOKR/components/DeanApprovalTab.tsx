@@ -31,7 +31,7 @@ import {
 } from "@mui/material";
 import { Check, Close, Visibility, ExpandMore, Search } from "@mui/icons-material";
 import { api } from "../../../services/api";
-import { confirmAction, showSuccess, showError } from "../../../utils/swal";
+import { confirmAction, showSuccess, showError, showInfo } from "../../../utils/swal";
 import OkrManagerTree from "./OkrManagerTree";
 
 export default function DeanApprovalTab() {
@@ -107,7 +107,11 @@ export default function DeanApprovalTab() {
     if (!ok) return;
     try {
       await api.put(`/okrs/${okrId}/dean-approve`);
-      showSuccess("Thành công!", "Đã duyệt đề xuất.");
+      await showSuccess("Thành công!", "Đã duyệt đề xuất.");
+      await showInfo(
+        "Theo dõi tiến độ",
+        "OKR đã được chốt. Bạn có thể theo dõi tiến độ thực hiện của nhân sự tại tab \"Đánh giá / Báo cáo OKR\"."
+      );
       fetchPending();
     } catch (error) {
       console.error("Error approving", error);
@@ -264,6 +268,7 @@ export default function DeanApprovalTab() {
                         <TableCell sx={{ fontWeight: "bold" }}>Nhân sự</TableCell>
                         <TableCell sx={{ fontWeight: "bold" }}>Bộ môn</TableCell>
                         <TableCell sx={{ fontWeight: "bold" }}>Mục tiêu</TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>Ngày giao</TableCell>
                         <TableCell sx={{ fontWeight: "bold" }}>Trạng thái</TableCell>
                         <TableCell sx={{ fontWeight: "bold" }}>Nội dung đề xuất</TableCell>
                         <TableCell align="right" sx={{ fontWeight: "bold" }}>Thao tác</TableCell>
@@ -293,6 +298,13 @@ export default function DeanApprovalTab() {
                           <TableCell>{okr.user?.department?.name || "—"}</TableCell>
                           <TableCell sx={{ fontWeight: 500 }}>
                             {okr.objective}
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body2" color="text.secondary">
+                              {okr.createdAt
+                                ? new Date(okr.createdAt).toLocaleDateString("vi-VN")
+                                : "—"}
+                            </Typography>
                           </TableCell>
                           <TableCell>
                             <Chip
@@ -419,6 +431,16 @@ export default function DeanApprovalTab() {
               </Typography>
               <Typography variant="body1" fontWeight={500}>
                 {selectedOkr?.user?.name || selectedOkr?.user?.email || "—"}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="subtitle2" color="text.secondary">
+                Ngày giao OKR:
+              </Typography>
+              <Typography variant="body1" fontWeight={500}>
+                {selectedOkr?.createdAt
+                  ? new Date(selectedOkr.createdAt).toLocaleDateString("vi-VN")
+                  : "—"}
               </Typography>
             </Box>
             <Box>

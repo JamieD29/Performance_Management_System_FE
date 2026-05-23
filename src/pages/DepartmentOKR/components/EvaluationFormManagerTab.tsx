@@ -26,6 +26,7 @@ export default function EvaluationFormManagerTab() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("ALL");
+  const [selectedCycle, setSelectedCycle] = useState("ALL");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedReport, setSelectedReport] = useState<any>(null);
 
@@ -50,14 +51,20 @@ export default function EvaluationFormManagerTab() {
     return ["ALL", ...Array.from(depts)];
   }, [reports]);
 
+  const cycleOptions = useMemo(() => {
+    const cycles = new Set(reports.map(r => r.cycle?.name).filter(Boolean));
+    return ["ALL", ...Array.from(cycles)];
+  }, [reports]);
+
   const filteredReports = useMemo(() => {
     return reports.filter((report) => {
       const matchesSearch = report.user?.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             report.user?.email?.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesDept = selectedDepartment === "ALL" || report.user?.department?.name === selectedDepartment;
-      return matchesSearch && matchesDept && report.status !== "PENDING_EVALUATION"; // Chỉ hiện đã nộp
+      const matchesCycle = selectedCycle === "ALL" || report.cycle?.name === selectedCycle;
+      return matchesSearch && matchesDept && matchesCycle && report.status !== "PENDING_EVALUATION"; // Chỉ hiện đã nộp
     });
-  }, [reports, searchQuery, selectedDepartment]);
+  }, [reports, searchQuery, selectedDepartment, selectedCycle]);
 
   const handleOpenDialog = (report: any) => {
     setSelectedReport(report);
@@ -110,6 +117,19 @@ export default function EvaluationFormManagerTab() {
             </MenuItem>
           ))}
         </TextField>
+        <TextField
+          select
+          size="small"
+          value={selectedCycle}
+          onChange={(e) => setSelectedCycle(e.target.value)}
+          sx={{ minWidth: 200, bgcolor: "#fff" }}
+        >
+          {cycleOptions.map((option) => (
+            <MenuItem key={option} value={option}>
+              {option === "ALL" ? "Tất cả Kỳ đánh giá" : option}
+            </MenuItem>
+          ))}
+        </TextField>
       </Box>
 
       {loading ? (
@@ -121,6 +141,7 @@ export default function EvaluationFormManagerTab() {
               <TableRow>
                 <TableCell sx={{ fontWeight: "bold" }}>Nhân sự</TableCell>
                 <TableCell sx={{ fontWeight: "bold" }}>Bộ môn</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Kỳ đánh giá</TableCell>
                 <TableCell sx={{ fontWeight: "bold" }}>Tổng Điểm Tính (OKR)</TableCell>
                 <TableCell sx={{ fontWeight: "bold" }}>NV Xếp Loại</TableCell>
                 <TableCell sx={{ fontWeight: "bold" }}>QL Kết Luận</TableCell>
@@ -147,6 +168,9 @@ export default function EvaluationFormManagerTab() {
                     </Box>
                   </TableCell>
                   <TableCell>{report.user?.department?.name || "N/A"}</TableCell>
+                  <TableCell>
+                    <Chip label={report.cycle?.name || "Kỳ mặc định"} size="small" variant="outlined" />
+                  </TableCell>
                   <TableCell>
                     <Typography fontWeight="bold" color="#2563eb">{report.selfScoreTotal?.toFixed(1) || 0}</Typography>
                   </TableCell>

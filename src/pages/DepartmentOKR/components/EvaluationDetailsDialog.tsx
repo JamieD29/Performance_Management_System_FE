@@ -32,7 +32,7 @@ interface EvaluationDetailsDialogProps {
 
 export default function EvaluationDetailsDialog({ open, reportData, onClose, onSave }: EvaluationDetailsDialogProps) {
   const [managerData, setManagerData] = useState<Record<string, { quantity: number; evidence?: string; score?: number }>>({});
-  
+
   const structure = reportData?.keyResults || [];
   const selfReportData = reportData?.selfReportData || {};
   const isCompleted = reportData?.status === "COMPLETED";
@@ -78,7 +78,7 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
         const maxScore = Number(kr.maxScore) || 0;
         const targetQty = maxScore > 0 ? Math.ceil(maxScore / unitScore) : (newData[krKey]?.quantity || 1);
         newData[krKey] = { ...newData[krKey], quantity: targetQty };
-        
+
         kr.items?.forEach((sub: any) => {
           const subKey = `${obj.id}-${kr.id}-${sub.id}`;
           const subUnitScore = Number(sub.unitScore) || 1;
@@ -171,9 +171,9 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
         </Box>
         <IconButton onClick={onClose} size="small"><Close /></IconButton>
       </DialogTitle>
-      
+
       <Divider />
-      
+
       <DialogContent sx={{ bgcolor: "#f8fafc", p: 3 }}>
         {/* User Info Header */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3, p: 2, bgcolor: "#fff", borderRadius: 2, border: "1px solid #e2e8f0" }}>
@@ -188,7 +188,7 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
               Bộ môn: {reportData.user?.department?.name || "N/A"} • Email: {reportData.user?.email}
             </Typography>
           </Box>
-          
+
           {isEditable && (
             <Box sx={{ ml: "auto", display: "flex", gap: 1 }}>
               <Tooltip title="Đồng ý toàn bộ số lượng do nhân sự tự khai">
@@ -216,13 +216,13 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
               <TableRow>
                 <TableCell sx={{ fontWeight: "bold", width: "5%" }}>STT</TableCell>
                 <TableCell sx={{ fontWeight: "bold", width: "25%" }}>Tiêu chí / Nhiệm vụ</TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold", width: "8%" }}>Điểm<br/>Tối đa</TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold", width: "8%" }}>Hệ số<br/>Điểm</TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold", width: "8%", color: "#64748b" }}>S.Lượng<br/>Tự Khai</TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold", width: "8%", color: "#64748b" }}>Điểm<br/>Tự Khai</TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold", width: "8%" }}>Điểm<br />Tối đa</TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold", width: "8%" }}>Hệ số<br />Điểm</TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold", width: "8%", color: "#64748b" }}>S.Lượng<br />Tự Khai</TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold", width: "8%", color: "#64748b" }}>Điểm<br />Tự Khai</TableCell>
                 <TableCell align="center" sx={{ fontWeight: "bold", width: "12%" }}>Minh chứng</TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold", width: "10%", color: "#1C4D8D" }}>S.Lượng<br/>Q.Lý Duyệt</TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold", width: "8%", color: "#1C4D8D" }}>Điểm<br/>Q.Lý</TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold", width: "10%", color: "#1C4D8D" }}>S.Lượng<br />Q.Lý Duyệt</TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold", width: "8%", color: "#1C4D8D" }}>Điểm<br />Q.Lý</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -253,7 +253,7 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
                     {obj.items?.map((kr: any, kIndex: number) => {
                       const krKey = `${obj.id}-${kr.id}`;
                       const selfKrObj = selfReportData[krKey] || {};
-                      
+
                       const mgrQty = managerData[krKey]?.quantity || 0;
                       const mgrCalcScore = Math.min(
                         (Number(kr.unitScore) > 0 ? mgrQty * Number(kr.unitScore) : mgrQty),
@@ -280,14 +280,14 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
                                 </Tooltip>
                               ) : "—"}
                             </TableCell>
-                            
+
                             <TableCell align="center">
                               {!isEditable ? (
                                 <Typography fontWeight="bold" color="#1C4D8D">
                                   {reportData.status === "ACCEPTED" ? "—" : mgrQty}
                                 </Typography>
                               ) : (
-                                <TextField 
+                                <TextField
                                   size="small"
                                   type="number"
                                   variant="outlined"
@@ -307,113 +307,113 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
                           {kr.items?.map((sub: any, sIndex: number) => {
                             const subKey = `${obj.id}-${kr.id}-${sub.id}`;
                             const selfSubObj = selfReportData[subKey] || {};
-                            
+
                             const mgrSubQty = managerData[subKey]?.quantity || 0;
                             const mgrSubCalcScore = Math.min(
                               (Number(sub.unitScore) > 0 ? mgrSubQty * Number(sub.unitScore) : mgrSubQty),
                               Number(sub.maxScore) || Infinity
                             );
 
-                             return (
-                               <React.Fragment key={`${oIndex}-${kIndex}-${sIndex}`}>
-                                 <TableRow>
-                                   <TableCell sx={{ pl: 6, fontSize: "0.85rem" }}>{sub.id}</TableCell>
-                                   <TableCell sx={{ fontSize: "0.9rem" }}>{sub.title}</TableCell>
-                                   <TableCell align="center">{sub.maxScore}</TableCell>
-                                   <TableCell align="center">
-                                     {sub.unitScore ? <Chip label={`+${sub.unitScore}/${sub.unit || "đv"}`} size="small" variant="outlined" /> : "—"}
-                                   </TableCell>
-                                   <TableCell align="center" sx={{ color: "#64748b" }}>{selfSubObj.quantity || 0}</TableCell>
-                                   <TableCell align="center" sx={{ color: "#64748b" }}>{selfSubObj.score?.toFixed(1) || 0}</TableCell>
-                                   <TableCell align="center">
-                                     {selfSubObj.evidence ? (
-                                       <Tooltip title={selfSubObj.evidence}>
-                                         <Button size="small" variant="text" href={selfSubObj.evidence} target="_blank" sx={{ minWidth: 0, textTransform: 'none' }}>
-                                           Link
-                                         </Button>
-                                       </Tooltip>
-                                     ) : "—"}
-                                   </TableCell>
-                                   
-                                   <TableCell align="center">
-                                     {!isEditable ? (
-                                       <Typography fontWeight="bold" color="#1C4D8D">
-                                         {reportData.status === "ACCEPTED" ? "—" : mgrSubQty}
-                                       </Typography>
-                                     ) : (
-                                       <TextField 
-                                         size="small"
-                                         type="number"
-                                         variant="outlined"
-                                         value={mgrSubQty}
-                                         onChange={(e) => updateManagerQuantity(subKey, e.target.value)}
-                                         inputProps={{ min: 0, style: { textAlign: 'center', fontWeight: 'bold', color: '#1C4D8D', padding: '4px' } }}
-                                         sx={{ width: "60px", bgcolor: "#fff" }}
-                                       />
-                                     )}
-                                   </TableCell>
-                                   <TableCell align="center" sx={{ fontWeight: "bold", color: "#1C4D8D" }}>
-                                     {reportData.status === "ACCEPTED" ? "—" : mgrSubCalcScore.toFixed(1)}
-                                   </TableCell>
-                                 </TableRow>
+                            return (
+                              <React.Fragment key={`${oIndex}-${kIndex}-${sIndex}`}>
+                                <TableRow>
+                                  <TableCell sx={{ pl: 6, fontSize: "0.85rem" }}>{sub.id}</TableCell>
+                                  <TableCell sx={{ fontSize: "0.9rem" }}>{sub.title}</TableCell>
+                                  <TableCell align="center">{sub.maxScore}</TableCell>
+                                  <TableCell align="center">
+                                    {sub.unitScore ? <Chip label={`+${sub.unitScore}/${sub.unit || "đv"}`} size="small" variant="outlined" /> : "—"}
+                                  </TableCell>
+                                  <TableCell align="center" sx={{ color: "#64748b" }}>{selfSubObj.quantity || 0}</TableCell>
+                                  <TableCell align="center" sx={{ color: "#64748b" }}>{selfSubObj.score?.toFixed(1) || 0}</TableCell>
+                                  <TableCell align="center">
+                                    {selfSubObj.evidence ? (
+                                      <Tooltip title={selfSubObj.evidence}>
+                                        <Button size="small" variant="text" href={selfSubObj.evidence} target="_blank" sx={{ minWidth: 0, textTransform: 'none' }}>
+                                          Link
+                                        </Button>
+                                      </Tooltip>
+                                    ) : "—"}
+                                  </TableCell>
 
-                                 {/* Sub-Sub-KRs */}
-                                 {sub.items?.map((subsub: any, ssIndex: number) => {
-                                   const subsubKey = `${obj.id}-${kr.id}-${sub.id}-${subsub.id}`;
-                                   const selfSubSubObj = selfReportData[subsubKey] || {};
-                                   
-                                   const mgrSubSubQty = managerData[subsubKey]?.quantity || 0;
-                                   const mgrSubSubCalcScore = Math.min(
-                                     (Number(subsub.unitScore) > 0 ? mgrSubSubQty * Number(subsub.unitScore) : mgrSubSubQty),
-                                     Number(subsub.maxScore) || Infinity
-                                   );
+                                  <TableCell align="center">
+                                    {!isEditable ? (
+                                      <Typography fontWeight="bold" color="#1C4D8D">
+                                        {reportData.status === "ACCEPTED" ? "—" : mgrSubQty}
+                                      </Typography>
+                                    ) : (
+                                      <TextField
+                                        size="small"
+                                        type="number"
+                                        variant="outlined"
+                                        value={mgrSubQty}
+                                        onChange={(e) => updateManagerQuantity(subKey, e.target.value)}
+                                        inputProps={{ min: 0, style: { textAlign: 'center', fontWeight: 'bold', color: '#1C4D8D', padding: '4px' } }}
+                                        sx={{ width: "60px", bgcolor: "#fff" }}
+                                      />
+                                    )}
+                                  </TableCell>
+                                  <TableCell align="center" sx={{ fontWeight: "bold", color: "#1C4D8D" }}>
+                                    {reportData.status === "ACCEPTED" ? "—" : mgrSubCalcScore.toFixed(1)}
+                                  </TableCell>
+                                </TableRow>
 
-                                   return (
-                                     <TableRow key={`${oIndex}-${kIndex}-${sIndex}-${ssIndex}`} sx={{ bgcolor: "#fffbeb" }}>
-                                       <TableCell sx={{ pl: 9, fontSize: "0.8rem" }}>{subsub.id}</TableCell>
-                                       <TableCell sx={{ fontSize: "0.85rem" }}>{subsub.title}</TableCell>
-                                       <TableCell align="center">—</TableCell>
-                                       <TableCell align="center">
-                                         {subsub.unitScore ? <Chip label={`+${subsub.unitScore}/${subsub.unit || "đv"}`} size="small" variant="outlined" sx={{ fontSize: "0.75rem" }} /> : "—"}
-                                       </TableCell>
-                                       <TableCell align="center" sx={{ color: "#64748b" }}>{selfSubSubObj.quantity || 0}</TableCell>
-                                       <TableCell align="center" sx={{ color: "#64748b" }}>{selfSubSubObj.score?.toFixed(1) || 0}</TableCell>
-                                       <TableCell align="center">
-                                         {selfSubSubObj.evidence ? (
-                                           <Tooltip title={selfSubSubObj.evidence}>
-                                             <Button size="small" variant="text" href={selfSubSubObj.evidence} target="_blank" sx={{ minWidth: 0, textTransform: 'none' }}>
-                                               Link
-                                             </Button>
-                                           </Tooltip>
-                                         ) : "—"}
-                                       </TableCell>
-                                       
-                                       <TableCell align="center">
-                                          {!isEditable ? (
-                                            <Typography fontWeight="bold" color="#1C4D8D">
-                                              {reportData.status === "ACCEPTED" ? "—" : mgrSubSubQty}
-                                            </Typography>
-                                          ) : (
-                                            <TextField 
-                                              size="small"
-                                              type="number"
-                                              variant="outlined"
-                                              value={mgrSubSubQty}
-                                              onChange={(e) => updateManagerQuantity(subsubKey, e.target.value)}
-                                              inputProps={{ min: 0, style: { textAlign: 'center', fontWeight: 'bold', color: '#1C4D8D', padding: '4px' } }}
-                                              sx={{ width: "60px", bgcolor: "#fff" }}
-                                            />
-                                          )}
-                                        </TableCell>
-                                        <TableCell align="center" sx={{ fontWeight: "bold", color: "#1C4D8D" }}>
-                                          {reportData.status === "ACCEPTED" ? "—" : mgrSubSubCalcScore.toFixed(1)}
-                                        </TableCell>
-                                     </TableRow>
-                                   );
-                                 })}
-                               </React.Fragment>
-                             );
-                           })}
+                                {/* Sub-Sub-KRs */}
+                                {sub.items?.map((subsub: any, ssIndex: number) => {
+                                  const subsubKey = `${obj.id}-${kr.id}-${sub.id}-${subsub.id}`;
+                                  const selfSubSubObj = selfReportData[subsubKey] || {};
+
+                                  const mgrSubSubQty = managerData[subsubKey]?.quantity || 0;
+                                  const mgrSubSubCalcScore = Math.min(
+                                    (Number(subsub.unitScore) > 0 ? mgrSubSubQty * Number(subsub.unitScore) : mgrSubSubQty),
+                                    Number(subsub.maxScore) || Infinity
+                                  );
+
+                                  return (
+                                    <TableRow key={`${oIndex}-${kIndex}-${sIndex}-${ssIndex}`} sx={{ bgcolor: "#fffbeb" }}>
+                                      <TableCell sx={{ pl: 9, fontSize: "0.8rem" }}>{subsub.id}</TableCell>
+                                      <TableCell sx={{ fontSize: "0.85rem" }}>{subsub.title}</TableCell>
+                                      <TableCell align="center">—</TableCell>
+                                      <TableCell align="center">
+                                        {subsub.unitScore ? <Chip label={`+${subsub.unitScore}/${subsub.unit || "đv"}`} size="small" variant="outlined" sx={{ fontSize: "0.75rem" }} /> : "—"}
+                                      </TableCell>
+                                      <TableCell align="center" sx={{ color: "#64748b" }}>{selfSubSubObj.quantity || 0}</TableCell>
+                                      <TableCell align="center" sx={{ color: "#64748b" }}>{selfSubSubObj.score?.toFixed(1) || 0}</TableCell>
+                                      <TableCell align="center">
+                                        {selfSubSubObj.evidence ? (
+                                          <Tooltip title={selfSubSubObj.evidence}>
+                                            <Button size="small" variant="text" href={selfSubSubObj.evidence} target="_blank" sx={{ minWidth: 0, textTransform: 'none' }}>
+                                              Link
+                                            </Button>
+                                          </Tooltip>
+                                        ) : "—"}
+                                      </TableCell>
+
+                                      <TableCell align="center">
+                                        {!isEditable ? (
+                                          <Typography fontWeight="bold" color="#1C4D8D">
+                                            {reportData.status === "ACCEPTED" ? "—" : mgrSubSubQty}
+                                          </Typography>
+                                        ) : (
+                                          <TextField
+                                            size="small"
+                                            type="number"
+                                            variant="outlined"
+                                            value={mgrSubSubQty}
+                                            onChange={(e) => updateManagerQuantity(subsubKey, e.target.value)}
+                                            inputProps={{ min: 0, style: { textAlign: 'center', fontWeight: 'bold', color: '#1C4D8D', padding: '4px' } }}
+                                            sx={{ width: "60px", bgcolor: "#fff" }}
+                                          />
+                                        )}
+                                      </TableCell>
+                                      <TableCell align="center" sx={{ fontWeight: "bold", color: "#1C4D8D" }}>
+                                        {reportData.status === "ACCEPTED" ? "—" : mgrSubSubCalcScore.toFixed(1)}
+                                      </TableCell>
+                                    </TableRow>
+                                  );
+                                })}
+                              </React.Fragment>
+                            );
+                          })}
                         </React.Fragment>
                       );
                     })}
@@ -448,12 +448,12 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
 
       <Divider />
       <DialogActions sx={{ p: 2 }}>
-        <Button onClick={onClose} color="inherit">Hủy / Đóng</Button>
+        {/* <Button onClick={onClose} color="inherit">Hủy / Đóng</Button> */}
         {isEditable && (
-          <Button 
-            variant="contained" 
-            color="primary" 
-            startIcon={<Save />} 
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<Save />}
             onClick={handleSave}
             sx={{ px: 3 }}
           >

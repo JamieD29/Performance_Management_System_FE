@@ -19,6 +19,9 @@ import {
   Divider,
   Alert,
   Container,
+  Select,
+  MenuItem,
+  InputLabel,
 } from "@mui/material";
 import { Send, FactCheck } from "@mui/icons-material";
 import { api } from "../../services/api";
@@ -28,27 +31,56 @@ export default function MyEvaluationPage() {
   const [form, setForm] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [cycles, setCycles] = useState<any[]>([]);
+  const [selectedCycleId, setSelectedCycleId] = useState<string>("");
 
   // Form entries for Section III
   const [selfComment, setSelfComment] = useState("");
   const [selfRating, setSelfRating] = useState("");
 
   useEffect(() => {
-    fetchForm();
+    fetchCycles();
   }, []);
 
-  const fetchForm = async () => {
+  const fetchCycles = async () => {
+    try {
+      const res = await api.get("/performance/cycles");
+      const list = res.data || [];
+      setCycles(list);
+      const active = list.find((c: any) => c.status === "OPEN") || list[0];
+      if (active) {
+        setSelectedCycleId(active.id);
+      } else {
+        fetchForm("");
+      }
+    } catch (e) {
+      console.error(e);
+      fetchForm("");
+    }
+  };
+
+  useEffect(() => {
+    if (selectedCycleId) {
+      fetchForm(selectedCycleId);
+    }
+  }, [selectedCycleId]);
+
+  const fetchForm = async (cycleId: string) => {
     setLoading(true);
     try {
-      const res = await api.get("/okrs/evaluations/my");
+      const res = await api.get(`/okrs/evaluations/my${cycleId ? `?cycleId=${cycleId}` : ""}`);
       const data = res.data;
       setForm(data);
       if (data) {
         setSelfComment(data.selfComment || "");
         setSelfRating(data.selfRating || "");
+      } else {
+        setSelfComment("");
+        setSelfRating("");
       }
     } catch (e) {
       console.error(e);
+      setForm(null);
     } finally {
       setLoading(false);
     }
@@ -73,9 +105,10 @@ export default function MyEvaluationPage() {
       await api.post("/okrs/evaluations/my/submit", {
         selfComment,
         selfRating,
+        cycleId: selectedCycleId,
       });
       showSuccess("Thành công!", "Nộp Phiếu Đánh Giá thành công.");
-      fetchForm();
+      fetchForm(selectedCycleId);
     } catch (e) {
       console.error(e);
       showError("Lỗi", "Lỗi khi nộp phiếu. Vui lòng thử lại.");
@@ -84,56 +117,83 @@ export default function MyEvaluationPage() {
     }
   };
 
-  if (loading) return (
-    <Container maxWidth="xl" sx={{ py: 2 }}>
-      <Typography>Đang tải Phiếu Đánh Giá...</Typography>
-    </Container>
-  );
-  if (!form) return (
-    <Container maxWidth="xl" sx={{ py: 2 }}>
-      <Typography>Chưa có dữ liệu Phiếu Đánh Giá.</Typography>
-    </Container>
-  );
+  const isSubmitted = form?.status === "SUBMITTED" || form?.status === "EVALUATED";
+  const isEvaluated = form?.status === "EVALUATED";
 
-  const isSubmitted = form.status === "SUBMITTED" || form.status === "EVALUATED";
-  const isEvaluated = form.status === "EVALUATED";
-
-  const user = form.user || {};
+  const user = form?.user || {};
 
   return (
     <Container maxWidth="xl" sx={{ py: 2 }}>
-      <Box sx={{ mb: 3 }}>
-        <Typography
-          variant="h4"
-          fontWeight="bold"
-          color="#1e3a8a"
-          sx={{ display: "flex", alignItems: "center", gap: 1 }}
-        >
-          <FactCheck /> Hồ Sơ Tự Đánh Giá
-        </Typography>
-        <Typography color="text.secondary">
-          Kiểm tra kết quả tự động từ OKR và nộp Phiếu Đánh Giá Xếp Loại cuối kỳ.
-        </Typography>
+      <Box
+        sx={{
+          mb: 3,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 2,
+        }}
+      >
+        <Box>
+          <Typography
+            variant="h4"
+            fontWeight="bold"
+            color="#1e3a8a"
+            sx={{ display: "flex", alignItems: "center", gap: 1 }}
+          >
+            <FactCheck /> Hồ Sơ Tự Đánh Giá
+          </Typography>
+          <Typography color="text.secondary">
+            Kiểm tra kết quả tự động từ OKR và nộp Phiếu Đánh Giá Xếp Loại cuối kỳ.
+          </Typography>
+        </Box>
+
+        {cycles.length > 0 && (
+          <FormControl size="small" sx={{ minWidth: 240, bgcolor: "#fff" }}>
+            <InputLabel>Chọn kỳ đánh giá</InputLabel>
+            <Select
+              value={selectedCycleId}
+              label="Chọn kỳ đánh giá"
+              onChange={(e) => setSelectedCycleId(e.target.value)}
+            >
+              {cycles.map((c) => (
+                <MenuItem key={c.id} value={c.id}>
+                  {c.name} {c.status === "OPEN" ? "(Đang mở)" : "(Đã đóng)"}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        )}
       </Box>
 
-      {isEvaluated && (
-        <Alert severity="success" sx={{ mb: 3 }}>
-          Phiếu Đánh Giá của bạn đã được Quản lý cấp báo duyệt và xếp loại kết quả cuối cùng.
-        </Alert>
-      )}
-      {form.status === "SUBMITTED" && (
-        <Alert severity="warning" sx={{ mb: 3 }}>
-          Phiếu Đánh Giá đã được nộp và đang chờ Quản lý duyệt.
-        </Alert>
-      )}
+      {loading ? (
+        <Paper sx={{ p: 4, borderRadius: 2, border: "1px solid #e2e8f0", textAlign: "center" }}>
+          <Typography>Đang tải Phiếu Đánh Giá...</Typography>
+        </Paper>
+      ) : !form ? (
+        <Paper sx={{ p: 4, borderRadius: 2, border: "1px solid #e2e8f0", textAlign: "center" }}>
+          <Typography>Chưa có dữ liệu Phiếu Đánh Giá cho kỳ này.</Typography>
+        </Paper>
+      ) : (
+        <>
+          {isEvaluated && (
+            <Alert severity="success" sx={{ mb: 3 }}>
+              Phiếu Đánh Giá của bạn đã được Quản lý cấp báo duyệt và xếp loại kết quả cuối cùng.
+            </Alert>
+          )}
+          {form.status === "SUBMITTED" && (
+            <Alert severity="warning" sx={{ mb: 3 }}>
+              Phiếu Đánh Giá đã được nộp và đang chờ Quản lý duyệt.
+            </Alert>
+          )}
 
-      <Paper sx={{ p: 4, borderRadius: 2, border: "1px solid #e2e8f0" }}>
-        <Typography variant="h5" align="center" fontWeight="bold" sx={{ mb: 1, textTransform: "uppercase" }}>
-          Phiếu Đánh Giá, Xếp Loại Chất Lượng Viên Chức
-        </Typography>
-        <Typography variant="subtitle1" align="center" fontWeight="bold" sx={{ mb: 4 }}>
-          Năm: {new Date().getFullYear()}
-        </Typography>
+          <Paper sx={{ p: 4, borderRadius: 2, border: "1px solid #e2e8f0" }}>
+            <Typography variant="h5" align="center" fontWeight="bold" sx={{ mb: 1, textTransform: "uppercase" }}>
+              Phiếu Đánh Giá, Xếp Loại Chất Lượng Viên Chức
+            </Typography>
+            <Typography variant="subtitle1" align="center" fontWeight="bold" sx={{ mb: 4, color: "text.secondary" }}>
+              Kỳ đánh giá: {form.cycle?.name || "Kỳ mặc định"}
+            </Typography>
 
         {/* PHẦN I */}
         <Typography variant="h6" fontWeight="bold" color="#1e3a8a" sx={{ mb: 2 }}>
@@ -296,6 +356,8 @@ export default function MyEvaluationPage() {
           </Box>
         )}
       </Paper>
-    </Container>
+    </>
+  )}
+</Container>
   );
 }

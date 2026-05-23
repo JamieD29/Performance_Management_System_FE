@@ -161,6 +161,19 @@ export default function MyOkrPage() {
                 {" → "} 
                 {selectedCycle.endDate ? new Date(selectedCycle.endDate).toLocaleDateString("vi-VN") : "N/A"}
               </Typography>
+              {filteredOkrs.length > 0 && filteredOkrs[0]?.createdAt && (
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
+                  📅 Ngày được giao OKR:{" "}
+                  <strong>
+                    {new Date(
+                      filteredOkrs
+                        .map((o) => o.createdAt)
+                        .filter(Boolean)
+                        .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())[0]
+                    ).toLocaleDateString("vi-VN")}
+                  </strong>
+                </Typography>
+              )}
             </Box>
             
             {selectedCycleDeadline && (

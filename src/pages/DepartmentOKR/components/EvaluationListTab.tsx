@@ -399,6 +399,15 @@ export default function EvaluationListTab() {
                               textAlign: "center",
                             }}
                           >
+                            Ngày giao
+                          </TableCell>
+                          <TableCell
+                            sx={{
+                              fontWeight: "bold",
+                              color: "#1e293b",
+                              textAlign: "center",
+                            }}
+                          >
                             % OKR Hoàn thành
                           </TableCell>
                           <TableCell
@@ -491,6 +500,13 @@ export default function EvaluationListTab() {
                                   size="small"
                                   variant="outlined"
                                 />
+                              </TableCell>
+                              <TableCell align="center">
+                                <Typography variant="body2" color="text.secondary">
+                                  {report.createdAt
+                                    ? new Date(report.createdAt).toLocaleDateString("vi-VN")
+                                    : "—"}
+                                </Typography>
                               </TableCell>
                               <TableCell align="center">
                                 <Box

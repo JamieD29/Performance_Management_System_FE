@@ -33,6 +33,7 @@ import {
   Undo,
   Launch,
   Forum,
+  CalendarMonth,
 } from "@mui/icons-material";
 import { api } from "../../../services/api";
 import { confirmAction, showSuccess, showError } from "../../../utils/swal";
@@ -60,6 +61,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
   const [draftSaveStatus, setDraftSaveStatus] = useState<
     "idle" | "saving" | "saved"
   >("idle");
+  const [draftSavedAt, setDraftSavedAt] = useState<string | null>(null);
 
   // Add KR/SubKR State
   const [openAddDialog, setOpenAddDialog] = useState(false);
@@ -846,27 +848,12 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
     return enrichedReport;
   };
 
-  // Auto-save draft effect
+  // Reset trạng thái "Đã lưu" khi user thay đổi dữ liệu
   useEffect(() => {
-    if (!hasDraftChanges || okr.status !== "ACCEPTED") return;
-
-    const timer = setTimeout(async () => {
-      setDraftSaveStatus("saving");
-      try {
-        const enrichedReport = buildEnrichedReport();
-        await api.put(`/okrs/${okr.id}/draft-report`, {
-          selfReportData: enrichedReport,
-        });
-        setDraftSaveStatus("saved");
-        setHasDraftChanges(false);
-      } catch (error) {
-        console.error("Lỗi khi lưu nháp", error);
-        setDraftSaveStatus("idle");
-      }
-    }, 1500); // Auto-save after 1.5s of no typing
-
-    return () => clearTimeout(timer);
-  }, [reportData, hasDraftChanges, okr.status, okr.id, localStructure]);
+    if (hasDraftChanges && draftSaveStatus === "saved") {
+      setDraftSaveStatus("idle");
+    }
+  }, [hasDraftChanges]);
 
   const handleSaveDraftManual = async () => {
     setDraftSaveStatus("saving");
@@ -875,9 +862,11 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
       await api.put(`/okrs/${okr.id}/draft-report`, {
         selfReportData: enrichedReport,
       });
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
+      setDraftSavedAt(timeStr);
       setDraftSaveStatus("saved");
       setHasDraftChanges(false);
-      showSuccess("Thành công", "Đã lưu nháp thành công.");
     } catch (error) {
       console.error("Lỗi khi lưu nháp", error);
       setDraftSaveStatus("idle");
@@ -970,6 +959,16 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
               }
               size="small"
             />
+            {okr.createdAt && (
+              <Chip
+                icon={<CalendarMonth sx={{ fontSize: "0.85rem !important" }} />}
+                label={`Ngày giao: ${new Date(okr.createdAt).toLocaleDateString("vi-VN")}`}
+                size="small"
+                variant="outlined"
+                color="default"
+                sx={{ fontWeight: 500 }}
+              />
+            )}
             {/* {(() => {
               if (okr.deadline) {
                 const isNegotiationExpired = new Date() > new Date(okr.deadline);
@@ -1008,12 +1007,12 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
         <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
           {draftSaveStatus === "saving" && (
             <Typography variant="caption" color="text.secondary" sx={{ mr: 1 }}>
-              Đang lưu nháp...
+              Đang lưu...
             </Typography>
           )}
-          {draftSaveStatus === "saved" && (
+          {draftSaveStatus === "saved" && draftSavedAt && (
             <Typography variant="caption" color="success.main" sx={{ mr: 1 }}>
-              Đã lưu nháp
+              ✓ Đã lưu lúc {draftSavedAt}
             </Typography>
           )}
           <Button
@@ -1379,12 +1378,12 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             {canReport && draftSaveStatus === "saving" && (
               <Typography variant="caption" sx={{ color: "#fef08a", mr: 1 }}>
-                Đang lưu nháp...
+                Đang lưu...
               </Typography>
             )}
-            {canReport && draftSaveStatus === "saved" && (
+            {canReport && draftSaveStatus === "saved" && draftSavedAt && (
               <Typography variant="caption" sx={{ color: "#86efac", mr: 1 }}>
-                Đã lưu nháp
+                ✓ Đã lưu lúc {draftSavedAt}
               </Typography>
             )}
             {(isPending || okr.status === "NEGOTIATING") && hasChanges && (
@@ -2543,12 +2542,12 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                 </Typography>
                 {draftSaveStatus === "saving" && (
                   <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
-                    Đang lưu nháp...
+                    Đang lưu...
                   </Typography>
                 )}
-                {draftSaveStatus === "saved" && (
+                {draftSaveStatus === "saved" && draftSavedAt && (
                   <Typography variant="body2" color="success.main" sx={{ mr: 1 }}>
-                    Đã lưu nháp
+                    ✓ Đã lưu lúc {draftSavedAt}
                   </Typography>
                 )}
                 <Button
