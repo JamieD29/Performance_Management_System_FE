@@ -447,19 +447,63 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
       </DialogContent>
 
       <Divider />
-      <DialogActions sx={{ p: 2 }}>
-        {/* <Button onClick={onClose} color="inherit">Hủy / Đóng</Button> */}
-        {isEditable && (
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<Save />}
-            onClick={handleSave}
-            sx={{ px: 3 }}
-          >
-            Chốt Điểm Đánh Giá
+      <DialogActions sx={{ p: 2, display: "flex", justifyContent: "space-between", alignItems: "center", bgcolor: "#fff", borderBottomLeftRadius: 12, borderBottomRightRadius: 12 }}>
+        <Box sx={{ display: "flex", gap: 3, alignItems: "center" }}>
+          {/* Employee total score */}
+          <Box sx={{ 
+            display: "flex", 
+            alignItems: "center", 
+            gap: 1.5, 
+            px: 2, 
+            py: 1, 
+            bgcolor: "#fff7ed", 
+            border: "1px solid #ffedd5", 
+            borderRadius: "8px" 
+          }}>
+            <Typography variant="body2" fontWeight={600} color="#b45309">
+              TỔNG ĐIỂM TỰ ĐÁNH GIÁ:
+            </Typography>
+            <Typography variant="subtitle1" fontWeight={700} color="#c2410c">
+              {reportData.totalScore?.toFixed(1) || 0}
+            </Typography>
+          </Box>
+
+          {/* Manager final score */}
+          <Box sx={{ 
+            display: "flex", 
+            alignItems: "center", 
+            gap: 1.5, 
+            px: 2, 
+            py: 1, 
+            bgcolor: "#f0fdf4", 
+            border: "1px solid #dcfce7", 
+            borderRadius: "8px" 
+          }}>
+            <Typography variant="body2" fontWeight={600} color="#15803d">
+              ĐIỂM QUẢN LÝ CHỐT:
+            </Typography>
+            <Typography variant="h6" fontWeight={800} color="#166534">
+              {reportData.status === "ACCEPTED" ? "—" : (isCompleted ? (reportData.managerScore?.toFixed(1) || 0) : calculateTotalManagerScore().toFixed(1))}
+            </Typography>
+          </Box>
+        </Box>
+
+        <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
+          <Button onClick={onClose} variant="outlined" color="inherit">
+            Hủy / Đóng
           </Button>
-        )}
+          {isEditable && (
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<Save />}
+              onClick={handleSave}
+              sx={{ px: 3, fontWeight: "bold" }}
+            >
+              Chốt Điểm Đánh Giá
+            </Button>
+          )}
+        </Box>
       </DialogActions>
     </Dialog>
   );
