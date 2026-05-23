@@ -1075,7 +1075,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                   sx={{ fontWeight: "bold" }}
                 />
                 <Chip
-                  label="Chờ QL chấm"
+                  label="Chờ chấm điểm"
                   size="small"
                   color="warning"
                   variant="outlined"
