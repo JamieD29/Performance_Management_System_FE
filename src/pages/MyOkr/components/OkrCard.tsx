@@ -998,22 +998,22 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
               sx={
                 okr.status === "COMPLETED"
                   ? {
-                      fontWeight: "bold",
-                      fontSize: "0.85rem",
-                      px: 1.5,
-                      py: 0.5,
-                      boxShadow: "0 2px 8px rgba(46, 125, 50, 0.25)",
-                      color: "#fff",
-                      bgcolor: "#2e7d32",
-                      flexShrink: 0,
-                      mt: 0.25,
-                    }
+                    fontWeight: "bold",
+                    fontSize: "0.85rem",
+                    px: 1.5,
+                    py: 0.5,
+                    boxShadow: "0 2px 8px rgba(46, 125, 50, 0.25)",
+                    color: "#fff",
+                    bgcolor: "#2e7d32",
+                    flexShrink: 0,
+                    mt: 0.25,
+                  }
                   : { fontWeight: 500, flexShrink: 0, mt: 0.25 }
               }
             />
           </Box>
           <Box sx={{ display: "flex", gap: 1, mt: 0.5, flexWrap: "wrap" }}>
-            {okr.createdAt && (
+            {/* {okr.createdAt && (
               <Chip
                 icon={<CalendarMonth sx={{ fontSize: "0.85rem !important" }} />}
                 label={`Ngày giao: ${new Date(okr.createdAt).toLocaleDateString("vi-VN")}`}
@@ -1022,7 +1022,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                 color="default"
                 sx={{ fontWeight: 500 }}
               />
-            )}
+            )} */}
             {/* {(() => {
               if (okr.deadline) {
                 const isNegotiationExpired = new Date() > new Date(okr.deadline);
@@ -1117,8 +1117,8 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                     : "inherit"
             }
             onClick={() => setExpanded(true)}
-            sx={{ 
-              textTransform: "none", 
+            sx={{
+              textTransform: "none",
               fontWeight: "bold",
               ...(okr.status === "COMPLETED" && {
                 bgcolor: "#2e7d32",
