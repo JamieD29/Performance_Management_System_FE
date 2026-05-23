@@ -189,9 +189,12 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
             <TableCell></TableCell>
             <TableCell></TableCell>
             <TableCell></TableCell>
+            <TableCell></TableCell>
           </>
         )}
-        <TableCell align="center"></TableCell>
+        {(okr.status === "PENDING" || okr.status === "NEGOTIATING") && (
+          <TableCell align="center"></TableCell>
+        )}
       </TableRow>
     );
   };
@@ -1058,7 +1061,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                   label={`QL chấm: ${okr.managerScore?.toFixed(1) || 0}/${maxScore}đ`}
                   size="small"
                   color="success"
-                  variant="contained"
+                  variant="filled"
                   sx={{ fontWeight: "bold", bgcolor: "#2e7d32", color: "#fff" }}
                 />
               </>
@@ -1198,12 +1201,6 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                   color="primary"
                   sx={{ height: 24, fontSize: "0.75rem", fontWeight: "bold", bgcolor: "#1e3a8a" }}
                 />
-              </Box>
-                        );
-                      })}
-                    </Box>
-                  );
-                })}
               </Box>
             </Box>
           );
@@ -2342,7 +2339,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                     <TableRow>
                       <TableCell
                         colSpan={
-                          isSubmitted || isCompleted ? 7 : canReport ? 7 : 5
+                          isSubmitted || isCompleted ? 8 : canReport ? 7 : 5
                         }
                         sx={{
                           bgcolor: "#fee2e2",
@@ -2409,17 +2406,20 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                               <TableCell></TableCell>
                               <TableCell></TableCell>
                               <TableCell></TableCell>
+                              <TableCell></TableCell>
                             </>
                           )}
-                        <TableCell align="center">
-                          <IconButton
-                            size="small"
-                            onClick={() => handleRestoreDeletedItem(delItem)}
-                            title="Khôi phục"
-                          >
-                            <Undo fontSize="small" color="primary" />
-                          </IconButton>
-                        </TableCell>
+                        {(isPending || okr.status === "NEGOTIATING") && (
+                          <TableCell align="center">
+                            <IconButton
+                              size="small"
+                              onClick={() => handleRestoreDeletedItem(delItem)}
+                              title="Khôi phục"
+                            >
+                              <Undo fontSize="small" color="primary" />
+                            </IconButton>
+                          </TableCell>
+                        )}
                       </TableRow>
                     ))}
                   </>
