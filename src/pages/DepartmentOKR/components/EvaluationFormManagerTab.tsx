@@ -15,8 +15,11 @@ import {
   TextField,
   MenuItem,
   Avatar,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from "@mui/material";
-import { CheckCircle } from "@mui/icons-material";
+import { CheckCircle, ExpandMore } from "@mui/icons-material";
 import { api } from "../../../services/api";
 import { showError } from "../../../utils/swal";
 import EvaluationFormManagerDialog from "./EvaluationFormManagerDialog";
@@ -65,6 +68,16 @@ export default function EvaluationFormManagerTab() {
       return matchesSearch && matchesDept && matchesCycle && report.status !== "PENDING_EVALUATION"; // Chỉ hiện đã nộp
     });
   }, [reports, searchQuery, selectedDepartment, selectedCycle]);
+
+  const groupedByCycle = useMemo(() => {
+    const groups: Record<string, any[]> = {};
+    filteredReports.forEach((report) => {
+      const cycleName = report.cycle?.name || "Kỳ mặc định";
+      if (!groups[cycleName]) groups[cycleName] = [];
+      groups[cycleName].push(report);
+    });
+    return groups;
+  }, [filteredReports]);
 
   const handleOpenDialog = (report: any) => {
     setSelectedReport(report);
@@ -134,82 +147,119 @@ export default function EvaluationFormManagerTab() {
 
       {loading ? (
         <Typography>Đang tải dữ liệu...</Typography>
+      ) : filteredReports.length === 0 ? (
+        <Paper sx={{ p: 4, borderRadius: 2, border: "1px solid #e2e8f0", textAlign: "center" }}>
+          <Typography color="text.secondary">
+            Không có phiếu đánh giá nào đang chờ duyệt.
+          </Typography>
+        </Paper>
       ) : (
-        <TableContainer component={Paper} elevation={0} sx={{ border: "1px solid #e2e8f0" }}>
-          <Table size="small">
-            <TableHead sx={{ bgcolor: "#f8fafc" }}>
-              <TableRow>
-                <TableCell sx={{ fontWeight: "bold" }}>Nhân sự</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>Bộ môn</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>Kỳ đánh giá</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>Tổng Điểm Tính (OKR)</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>NV Xếp Loại</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>QL Kết Luận</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>Trạng thái</TableCell>
-                <TableCell align="right" sx={{ fontWeight: "bold" }}>Thao tác</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredReports.map((report) => (
-                <TableRow hover key={report.id}>
-                  <TableCell>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                      <Avatar sx={{ width: 32, height: 32, bgcolor: "#1C4D8D", fontSize: "0.9rem" }}>
-                        {report.user?.name?.[0] || "?"}
-                      </Avatar>
-                      <Box>
-                        <Typography variant="body2" fontWeight="bold">
-                          {report.user?.name}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {report.user?.email}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </TableCell>
-                  <TableCell>{report.user?.department?.name || "N/A"}</TableCell>
-                  <TableCell>
-                    <Chip label={report.cycle?.name || "Kỳ mặc định"} size="small" variant="outlined" />
-                  </TableCell>
-                  <TableCell>
-                    <Typography fontWeight="bold" color="#2563eb">{report.selfScoreTotal?.toFixed(1) || 0}</Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Chip label={getRatingLabel(report.selfRating)} variant="outlined" color={report.selfRating === 'EXCELLENT' ? 'success' : report.selfRating === 'POOR' ? 'error' : 'primary'} size="small"/>
-                  </TableCell>
-                  <TableCell>
-                    {report.status === "EVALUATED" ? (
-                      <Chip label={getRatingLabel(report.managerRating)} color={report.managerRating === 'EXCELLENT' ? 'success' : report.managerRating === 'POOR' ? 'error' : 'primary'} size="small"/>
-                    ) : (
-                      <Typography variant="body2" fontStyle="italic" color="text.secondary">Chưa đánh giá</Typography>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {report.status === "EVALUATED" ? (
-                      <Chip label="Đã hoàn tất" color="success" size="small" />
-                    ) : (
-                      <Chip label="Chờ duyệt" color="warning" size="small" />
-                    )}
-                  </TableCell>
-                  <TableCell align="right">
-                    <Tooltip title="Xem & Đánh giá">
-                      <IconButton color="primary" onClick={() => handleOpenDialog(report)}>
-                        <CheckCircle />
-                      </IconButton>
-                    </Tooltip>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {filteredReports.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={7} align="center" sx={{ py: 3, color: "text.secondary" }}>
-                    Không có phiếu đánh giá nào đang chờ duyệt.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          {Object.entries(groupedByCycle).map(([cycleName, cycleReports]) => (
+            <Accordion
+              key={cycleName}
+              defaultExpanded
+              elevation={0}
+              sx={{
+                border: "1px solid #e2e8f0",
+                borderRadius: "8px !important",
+                overflow: "hidden",
+                "&:before": { display: "none" },
+              }}
+            >
+              <AccordionSummary
+                expandIcon={<ExpandMore />}
+                sx={{
+                  bgcolor: "#f8fafc",
+                  borderBottom: "1px solid #e2e8f0",
+                  py: 1,
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                  <Typography variant="subtitle1" fontWeight="700" color="#1e3a8a">
+                    {cycleName}
+                  </Typography>
+                  <Chip
+                    label={`${cycleReports.length} phiếu`}
+                    size="small"
+                    color="primary"
+                    sx={{ fontWeight: "bold" }}
+                  />
+                </Box>
+              </AccordionSummary>
+              <AccordionDetails sx={{ p: 0 }}>
+                <TableContainer component={Paper} elevation={0} sx={{ borderRadius: 0 }}>
+                  <Table size="small">
+                    <TableHead sx={{ bgcolor: "#f8fafc" }}>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: "bold" }}>Nhân sự</TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>Bộ môn</TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>Kỳ đánh giá</TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>Tổng Điểm Tính (OKR)</TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>NV Xếp Loại</TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>QL Kết Luận</TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>Trạng thái</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: "bold" }}>Thao tác</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {cycleReports.map((report) => (
+                        <TableRow hover key={report.id}>
+                          <TableCell>
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                              <Avatar sx={{ width: 32, height: 32, bgcolor: "#1C4D8D", fontSize: "0.9rem" }}>
+                                {report.user?.name?.[0] || "?"}
+                              </Avatar>
+                              <Box>
+                                <Typography variant="body2" fontWeight="bold">
+                                  {report.user?.name}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                  {report.user?.email}
+                                </Typography>
+                              </Box>
+                            </Box>
+                          </TableCell>
+                          <TableCell>{report.user?.department?.name || "N/A"}</TableCell>
+                          <TableCell>
+                            <Chip label={report.cycle?.name || "Kỳ mặc định"} size="small" variant="outlined" />
+                          </TableCell>
+                          <TableCell>
+                            <Typography fontWeight="bold" color="#2563eb">{report.selfScoreTotal?.toFixed(1) || 0}</Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Chip label={getRatingLabel(report.selfRating)} variant="outlined" color={report.selfRating === 'EXCELLENT' ? 'success' : report.selfRating === 'POOR' ? 'error' : 'primary'} size="small"/>
+                          </TableCell>
+                          <TableCell>
+                            {report.status === "EVALUATED" ? (
+                              <Chip label={getRatingLabel(report.managerRating)} color={report.managerRating === 'EXCELLENT' ? 'success' : report.managerRating === 'POOR' ? 'error' : 'primary'} size="small"/>
+                            ) : (
+                              <Typography variant="body2" fontStyle="italic" color="text.secondary">Chưa đánh giá</Typography>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {report.status === "EVALUATED" ? (
+                              <Chip label="Đã hoàn tất" color="success" size="small" />
+                            ) : (
+                              <Chip label="Chờ duyệt" color="warning" size="small" />
+                            )}
+                          </TableCell>
+                          <TableCell align="right">
+                            <Tooltip title="Xem & Đánh giá">
+                              <IconButton color="primary" onClick={() => handleOpenDialog(report)}>
+                                <CheckCircle />
+                              </IconButton>
+                            </Tooltip>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </AccordionDetails>
+            </Accordion>
+          ))}
+        </Box>
       )}
 
       {dialogOpen && (
