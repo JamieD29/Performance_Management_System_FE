@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Box,
   Typography,
@@ -26,6 +26,7 @@ import EvaluationFormManagerDialog from "./EvaluationFormManagerDialog";
 
 export default function EvaluationFormManagerTab() {
   const [reports, setReports] = useState<any[]>([]);
+  const [allCycles, setAllCycles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("ALL");
@@ -35,6 +36,7 @@ export default function EvaluationFormManagerTab() {
 
   useEffect(() => {
     fetchEvaluations();
+    fetchCycles();
   }, []);
 
   const fetchEvaluations = async () => {
@@ -49,14 +51,18 @@ export default function EvaluationFormManagerTab() {
     }
   };
 
+  const fetchCycles = async () => {
+    try {
+      const res = await api.get("/performance/cycles");
+      setAllCycles(res.data || []);
+    } catch (error) {
+      console.error("Error fetching cycles", error);
+    }
+  };
+
   const departmentOptions = useMemo(() => {
     const depts = new Set(reports.map(r => r.user?.department?.name).filter(Boolean));
     return ["ALL", ...Array.from(depts)];
-  }, [reports]);
-
-  const cycleOptions = useMemo(() => {
-    const cycles = new Set(reports.map(r => r.cycle?.name).filter(Boolean));
-    return ["ALL", ...Array.from(cycles)];
   }, [reports]);
 
   const filteredReports = useMemo(() => {
@@ -137,9 +143,10 @@ export default function EvaluationFormManagerTab() {
           onChange={(e) => setSelectedCycle(e.target.value)}
           sx={{ minWidth: 200, bgcolor: "#fff" }}
         >
-          {cycleOptions.map((option) => (
-            <MenuItem key={option} value={option}>
-              {option === "ALL" ? "Tất cả Kỳ đánh giá" : option}
+          <MenuItem value="ALL">Tất cả Kỳ đánh giá</MenuItem>
+          {allCycles.map((c) => (
+            <MenuItem key={c.id} value={c.name}>
+              {c.name}
             </MenuItem>
           ))}
         </TextField>

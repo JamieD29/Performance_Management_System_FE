@@ -43,6 +43,7 @@ export default function EvaluationListTab() {
   const [acceptedReports, setAcceptedReports] = useState<any[]>([]);
   const [submittedReports, setSubmittedReports] = useState<any[]>([]);
   const [completedReports, setCompletedReports] = useState<any[]>([]);
+  const [allCycles, setAllCycles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedReport, setSelectedReport] = useState<any>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -56,6 +57,7 @@ export default function EvaluationListTab() {
 
   useEffect(() => {
     fetchEvaluations();
+    fetchCycles();
   }, []);
 
   const fetchEvaluations = async () => {
@@ -76,6 +78,15 @@ export default function EvaluationListTab() {
     }
   };
 
+  const fetchCycles = async () => {
+    try {
+      const res = await api.get("/performance/cycles");
+      setAllCycles(res.data || []);
+    } catch (error) {
+      console.error("Error fetching cycles", error);
+    }
+  };
+
   const reports = useMemo(() => {
     if (tabValue === 0) return acceptedReports;
     if (tabValue === 1) return submittedReports;
@@ -88,14 +99,6 @@ export default function EvaluationListTab() {
       reports.map((r) => r.user?.department?.name).filter(Boolean),
     );
     return ["ALL", ...Array.from(depts)];
-  }, [reports]);
-
-  // Các tùy chọn kỳ đánh giá từ dữ liệu thực tế
-  const cycleOptions = useMemo(() => {
-    const cycles = new Set(
-      reports.map((r) => r.cycle?.name).filter(Boolean),
-    );
-    return ["ALL", ...Array.from(cycles)];
   }, [reports]);
 
   // Lọc dữ liệu
@@ -287,9 +290,10 @@ export default function EvaluationListTab() {
               label="Kỳ đánh giá"
               onChange={(e) => setSelectedCycle(e.target.value)}
             >
-              {cycleOptions.map((cycle) => (
-                <MenuItem key={cycle as string} value={cycle as string}>
-                  {cycle === "ALL" ? "Tất cả các kỳ" : (cycle as string)}
+              <MenuItem value="ALL">Tất cả các kỳ</MenuItem>
+              {allCycles.map((c) => (
+                <MenuItem key={c.id} value={c.name}>
+                  {c.name}
                 </MenuItem>
               ))}
             </Select>
