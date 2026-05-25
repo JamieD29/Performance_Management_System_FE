@@ -68,7 +68,7 @@ export default function Sidebar({
   // ==========================================
   // 1. USER & ROLE
   // ==========================================
-  const userStr = sessionStorage.getItem("user");
+  const userStr = localStorage.getItem("user");
   const user = userStr ? JSON.parse(userStr) : {};
   const rawRoles = user.roles || [];
 

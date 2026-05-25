@@ -32,13 +32,13 @@ import MainLayout from '../layouts/MainLayout';
 
 // 1. Hook check đăng nhập
 function useAuth() {
-  const authToken = sessionStorage.getItem('authToken');
+  const authToken = localStorage.getItem('authToken');
   return !!authToken;
 }
 
 // 2. Component bảo vệ Admin
 function AdminRoute({ children }: { children: React.ReactNode }) {
-  const userStr = sessionStorage.getItem('user');
+  const userStr = localStorage.getItem('user');
   const user = userStr ? JSON.parse(userStr) : {};
   const rawRoles = user.roles || [];
 
@@ -60,7 +60,7 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 
 // 2b. Component bảo vệ route quản lý (Admin HOẶC có chức vụ quản lý)
 function ManagerRoute({ children }: { children: React.ReactNode }) {
-  const userStr = sessionStorage.getItem('user');
+  const userStr = localStorage.getItem('user');
   const user = userStr ? JSON.parse(userStr) : {};
   const rawRoles = user.roles || [];
 
@@ -89,7 +89,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
     return <Navigate to="/login" state={{ from: location }} replace />;
 
   // Kiểm tra profile đã hoàn tất chưa
-  const userStr = sessionStorage.getItem('user');
+  const userStr = localStorage.getItem('user');
   const user = userStr ? JSON.parse(userStr) : null;
 
   // Logic kiểm tra hoàn tất: hồ sơ đã đánh dấu xong HOẶC có đủ các thông tin cốt lõi

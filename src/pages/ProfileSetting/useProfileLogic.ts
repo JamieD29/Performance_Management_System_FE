@@ -80,10 +80,10 @@ export const useProfileLogic = () => {
     return departments.find((d) => d.id === id)?.name || id || "Chưa cập nhật";
   };
 
-  // --- Hàm đồng bộ dữ liệu vào sessionStorage (Để Header/Sidebar cập nhật theo) ---
+  // --- Hàm đồng bộ dữ liệu vào localStorage (Để Header/Sidebar cập nhật theo) ---
   const syncToSession = (data: any) => {
     try {
-      const storedUser = sessionStorage.getItem("user");
+      const storedUser = localStorage.getItem("user");
       if (storedUser) {
         const user = JSON.parse(storedUser);
         const updatedUser = {
@@ -101,7 +101,7 @@ export const useProfileLogic = () => {
               )
             : user.roles,
         };
-        sessionStorage.setItem("user", JSON.stringify(updatedUser));
+        localStorage.setItem("user", JSON.stringify(updatedUser));
       }
     } catch (e) {
       console.error("Sync session failed", e);

@@ -33,7 +33,7 @@ export default function NotificationBell() {
 
   const fetchNotifications = useCallback(async () => {
     try {
-      const token = sessionStorage.getItem("authToken");
+      const token = localStorage.getItem("authToken");
       if (!token) return;
       const res = await api.get("/notifications/all");
       const data: NotificationItem[] = Array.isArray(res.data) ? res.data : [];

@@ -88,14 +88,14 @@ export default function Login() {
 
     if (accessToken) {
       setIsLoading(true);
-      sessionStorage.setItem("authToken", accessToken);
-      if (refreshToken) sessionStorage.setItem("refreshToken", refreshToken);
+      localStorage.setItem("authToken", accessToken);
+      if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
 
       let parsedUser: any = null;
       if (userParam) {
         try {
           parsedUser = JSON.parse(decodeURIComponent(userParam));
-          sessionStorage.setItem("user", JSON.stringify(parsedUser));
+          localStorage.setItem("user", JSON.stringify(parsedUser));
         } catch (e) {
           console.error("Parse user error:", e);
         }
@@ -191,8 +191,8 @@ export default function Login() {
       });
 
       const { access_token, user } = res.data;
-      sessionStorage.setItem("authToken", access_token);
-      sessionStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("authToken", access_token);
+      localStorage.setItem("user", JSON.stringify(user));
 
       // Kiểm tra xem profile đã hoàn tất chưa
       const profileCompleted = user.jobTitle || user.profileCompleted;

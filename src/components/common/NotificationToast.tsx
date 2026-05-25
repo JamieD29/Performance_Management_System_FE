@@ -35,7 +35,7 @@ export default function NotificationToast() {
 
   const fetchNotifications = useCallback(async () => {
     try {
-      const token = sessionStorage.getItem("authToken");
+      const token = localStorage.getItem("authToken");
       if (!token) return;
 
       const res = await api.get("/notifications");

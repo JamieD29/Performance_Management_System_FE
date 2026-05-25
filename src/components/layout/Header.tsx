@@ -65,7 +65,7 @@ export default function Header({
       console.log("Lỗi báo Backend (bỏ qua)");
     } finally {
       // 1. Dọn sạch ổ cứng
-      sessionStorage.clear();
+      localStorage.clear();
       localStorage.clear();
       if (typeof setAnchorEl === "function") setAnchorEl(null);
 

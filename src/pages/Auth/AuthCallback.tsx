@@ -39,8 +39,8 @@ export default function AuthCallback() {
         const user = JSON.parse(decodeURIComponent(userParam));
 
         // Store authentication data
-        sessionStorage.setItem("authToken", token);
-        sessionStorage.setItem("user", JSON.stringify(user));
+        localStorage.setItem("authToken", token);
+        localStorage.setItem("user", JSON.stringify(user));
 
         // Redirect based on first user status & profile completeness
         if (isFirstUser) {

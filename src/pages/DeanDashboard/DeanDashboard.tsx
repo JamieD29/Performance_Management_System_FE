@@ -21,7 +21,7 @@ export default function DeanDashboard() {
   // Lấy user từ session
   let userName = "Trưởng khoa";
   try {
-    const userStr = sessionStorage.getItem("user");
+    const userStr = localStorage.getItem("user");
     const user = userStr ? JSON.parse(userStr) : {};
     userName = user.name || "Trưởng khoa";
   } catch {

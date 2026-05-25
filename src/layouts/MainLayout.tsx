@@ -20,7 +20,7 @@ export default function MainLayout() {
 
   let user: any = {};
   try {
-    const userStr = sessionStorage.getItem("user");
+    const userStr = localStorage.getItem("user");
     user = userStr ? JSON.parse(userStr) : {};
   } catch (e) {
     user = {};

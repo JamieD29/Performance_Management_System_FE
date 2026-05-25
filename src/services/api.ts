@@ -21,7 +21,7 @@ interface ApiErrorData {
 // Request Interceptor
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = sessionStorage.getItem("authToken");
+    const token = localStorage.getItem("authToken");
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -43,8 +43,8 @@ api.interceptors.response.use(
       status === 401 ||
       (status === 404 && message?.includes("User with ID"))
     ) {
-      sessionStorage.removeItem("authToken");
-      sessionStorage.removeItem("user");
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("user");
       window.location.href = "/login";
     }
     return Promise.reject(error);

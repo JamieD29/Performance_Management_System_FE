@@ -67,7 +67,7 @@ export default function ProfileSetup() {
   // Fetch departments and set initial user data on mount
   useEffect(() => {
     // Load initial user data from session
-    const storedUser = sessionStorage.getItem("user");
+    const storedUser = localStorage.getItem("user");
     if (storedUser) {
       try {
         const user = JSON.parse(storedUser);
@@ -164,7 +164,7 @@ export default function ProfileSetup() {
       });
 
       // Update session user
-      const storedUser = sessionStorage.getItem("user");
+      const storedUser = localStorage.getItem("user");
       if (storedUser) {
         const user = JSON.parse(storedUser);
         user.staffCode = formData.staffCode;
@@ -176,7 +176,7 @@ export default function ProfileSetup() {
         user.email = formData.email;
         user.profileCompleted = true;
         user.department = { id: formData.departmentId, name: selectedDeptName };
-        sessionStorage.setItem("user", JSON.stringify(user));
+        localStorage.setItem("user", JSON.stringify(user));
       }
 
       setConfirmOpen(false);

@@ -40,7 +40,7 @@ export default function AdminSettings() {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const userInfo = sessionStorage.getItem("user");
+    const userInfo = localStorage.getItem("user");
     if (userInfo) {
       const user: User = JSON.parse(userInfo);
       const rawRoles = Array.isArray(user.roles) ? user.roles : [];

@@ -27,7 +27,7 @@ export default function DepartmentPage() {
   };
 
   // --- User / Role ---
-  const userStr = sessionStorage.getItem("user");
+  const userStr = localStorage.getItem("user");
   const loggedInUser = userStr ? JSON.parse(userStr) : null;
   const rawRoles = loggedInUser?.roles || [];
   const userRoles = Array.isArray(rawRoles)

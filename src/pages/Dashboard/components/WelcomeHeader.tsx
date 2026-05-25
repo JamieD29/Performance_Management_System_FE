@@ -12,7 +12,7 @@ export default function WelcomeHeader({
   cycleStatus,
 }: WelcomeHeaderProps) {
   // Lấy user từ session
-  const userStr = sessionStorage.getItem("user");
+  const userStr = localStorage.getItem("user");
   const user = userStr ? JSON.parse(userStr) : {};
 
   const getGreeting = () => {
