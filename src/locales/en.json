@@ -20,6 +20,7 @@
   },
   "sidebar": {
     "dashboard": "Dashboard",
+    "deanDashboard": "Manager Dashboard",
     "myOkr": "My OKRs",
     "evaluationForm": "Evaluation Form",
     "departmentGroup": "Department",

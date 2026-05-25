@@ -27,6 +27,7 @@ import {
   ChevronUp,
   ClipboardCheck,
   FileCheck2,
+  BarChart3,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -235,6 +236,11 @@ export default function Sidebar({
   // 4. POPOVER SUB-MENUS (collapsed mode)
   // ==========================================
   const deptSubItems = [
+    {
+      label: t("sidebar.deanDashboard"),
+      path: "/dean-dashboard",
+      icon: <BarChart3 size={18} />,
+    },
     {
       label: t("sidebar.overview"),
       path: "/departments/overview",
@@ -647,6 +653,61 @@ export default function Sidebar({
           {/* ── NHÓM BỘ MÔN (Chỉ hiển thị cho Admin hoặc User có chức vụ quản lý) ── */}
           {!canManage ? null : isAdmin ? (
             <>
+              {/* Dashboard Quản lý */}
+              <Box sx={{ px: collapsed ? 0.5 : 1, mb: 1.5 }}>
+                <Tooltip title={collapsed ? t("sidebar.deanDashboard") : ""} placement="right" arrow>
+                  <ListItemButton
+                    onClick={() => handleNavigate("/dean-dashboard")}
+                    sx={{
+                      ...getItemStyles("/dean-dashboard"),
+                      bgcolor: isActive("/dean-dashboard")
+                        ? "#BDE8F5"
+                        : "rgba(255, 255, 255, 0.1)",
+                      color: isActive("/dean-dashboard") ? colors.bg : colors.textBright,
+                      boxShadow: isActive("/dean-dashboard")
+                        ? "0 4px 12px rgba(0, 0, 0, 0.2)"
+                        : "none",
+                      borderRadius: "16px",
+                      border: "1px solid rgba(255, 255, 255, 0.2)",
+                      mb: 0,
+                      mx: 0,
+                      py: 1.2,
+                      "& .MuiListItemIcon-root": {
+                        color: isActive("/dean-dashboard") ? colors.bg : colors.accent2,
+                      },
+                      "&:hover": {
+                        bgcolor: isActive("/dean-dashboard")
+                          ? "#BDE8F5"
+                          : "rgba(255, 255, 255, 0.2)",
+                        transform: collapsed ? "none" : "translateY(-2px)",
+                        boxShadow: "0 8px 16px rgba(0, 0, 0, 0.2)",
+                      },
+                      "&::before": { display: "none" },
+                    }}
+                  >
+                    <ListItemIcon
+                      sx={{ ...getIconStyles("/dean-dashboard"), color: "inherit" }}
+                    >
+                      <BarChart3 size={21} />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={t("sidebar.deanDashboard")}
+                      sx={{
+                        opacity: collapsed ? 0 : 1,
+                        width: collapsed ? 0 : "auto",
+                        transition: `opacity 0.2s ease, width ${TRANSITION_DURATION} ${TRANSITION_EASING}`,
+                        overflow: "hidden",
+                        whiteSpace: "nowrap",
+                      }}
+                      primaryTypographyProps={{
+                        fontWeight: isActive("/dean-dashboard") ? 700 : 600,
+                        fontSize: "0.95rem",
+                      }}
+                    />
+                  </ListItemButton>
+                </Tooltip>
+              </Box>
+
               {/* Overview */}
               <Box sx={{ px: collapsed ? 0.5 : 1, mb: 1.5 }}>
                 <Tooltip title={collapsed ? t("sidebar.overview") : ""} placement="right" arrow>
@@ -818,6 +879,19 @@ export default function Sidebar({
               {!collapsed && (
                 <Collapse in={openDept} timeout={300} unmountOnExit>
                   <List component="div" disablePadding>
+                    <ListItemButton
+                      sx={{ ...getItemStyles("/dean-dashboard"), pl: 4 }}
+                      onClick={() => handleNavigate("/dean-dashboard")}
+                    >
+                      <ListItemIcon sx={getIconStyles("/dean-dashboard")}>
+                        <BarChart3 size={18} />
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={t("sidebar.deanDashboard")}
+                        primaryTypographyProps={{ fontSize: "0.92rem" }}
+                      />
+                    </ListItemButton>
+
                     <ListItemButton
                       sx={{ ...getItemStyles("/departments/overview"), pl: 4 }}
                       onClick={() => handleNavigate("/departments/overview")}

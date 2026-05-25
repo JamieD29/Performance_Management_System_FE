@@ -20,6 +20,7 @@
   },
   "sidebar": {
     "dashboard": "Bảng Điều Khiển",
+    "deanDashboard": "Dashboard Quản lý",
     "myOkr": "OKR Của tôi",
     "evaluationForm": "Phiếu Đánh Giá",
     "departmentGroup": "Bộ môn",

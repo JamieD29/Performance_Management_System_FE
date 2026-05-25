@@ -25,6 +25,7 @@ const DepartmentOverview = React.lazy(
 );
 const MyOkrPage = React.lazy(() => import('../pages/MyOkr/MyOkrPage'));
 const MyEvaluationPage = React.lazy(() => import('../pages/MyEvaluation/MyEvaluationPage'));
+const DeanDashboard = React.lazy(() => import('../pages/DeanDashboard/DeanDashboard'));
 
 // Non-lazy (always needed for layout)
 import MainLayout from '../layouts/MainLayout';
@@ -173,6 +174,8 @@ export default function AppRoutes() {
 
         {/* 3. GROUP BỘ MÔN (Chỉ cho Admin hoặc User có chức vụ quản lý) */}
         {/* Tổng quan */}
+        {/* Dashboard Quản lý (Trưởng khoa) */}
+        <Route path="/dean-dashboard" element={<ManagerRoute><DeanDashboard /></ManagerRoute>} />
         <Route path="/departments/overview" element={<ManagerRoute><DepartmentOverview /></ManagerRoute>} />
         {/* OKR Bộ môn */}
         <Route path="/departments/okr" element={<ManagerRoute><DepartmentOKR /></ManagerRoute>} />
