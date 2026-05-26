@@ -123,7 +123,7 @@ export default function NotificationToast() {
       TransitionComponent={SlideTransition}
       TransitionProps={{ onExited: handleExited }}
       anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      sx={{ maxWidth: 400, cursor: "pointer" }}
+      sx={{ maxWidth: 400, cursor: "pointer", mt: 2 }}
       onClick={() => {
         handleClose();
       }}
@@ -146,23 +146,26 @@ export default function NotificationToast() {
         }
         sx={{
           width: "100%",
-          borderRadius: 3,
-          boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
-          bgcolor: "#1e3a8a",
-          "& .MuiAlert-icon": { color: "#93c5fd" },
+          borderRadius: "16px",
+          bgcolor: "rgba(15, 23, 42, 0.95)", // Slate đậm kết hợp Glassmorphism
+          backdropFilter: "blur(12px)",
+          border: "1px solid rgba(148, 163, 184, 0.25)", // Viền xám sáng tăng độ nổi bật
+          boxShadow: "0 20px 40px -15px rgba(15, 23, 42, 0.5), 0 0 25px rgba(59, 130, 246, 0.2)", // Đổ bóng kép cực kỳ cao cấp kèm hiệu ứng phát sáng xanh nhẹ
+          color: "#f8fafc",
+          "& .MuiAlert-icon": { color: "#60a5fa" }, // Icon màu xanh dương tươi sáng
           "& .MuiAlert-message": { width: "100%" },
         }}
       >
-        <AlertTitle sx={{ fontWeight: 700, fontSize: 14 }}>
+        <AlertTitle sx={{ fontWeight: 700, fontSize: 14, color: "#ffffff" }}>
           Thông báo mới
         </AlertTitle>
-        <Typography variant="body2" sx={{ opacity: 0.95, fontSize: 13 }}>
+        <Typography variant="body2" sx={{ opacity: 0.95, fontSize: 13, color: "#f1f5f9" }}>
           {currentNotification.message}
         </Typography>
         {notifications.length > 1 && (
           <Typography
             variant="caption"
-            sx={{ opacity: 0.7, mt: 0.5, display: "block" }}
+            sx={{ opacity: 0.7, mt: 0.5, display: "block", color: "#94a3b8" }}
           >
             +{notifications.length - 1} thông báo khác
           </Typography>
