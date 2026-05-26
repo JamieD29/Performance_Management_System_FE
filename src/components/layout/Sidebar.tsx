@@ -653,6 +653,57 @@ export default function Sidebar({
           {/* ── NHÓM BỘ MÔN (Chỉ hiển thị cho Admin hoặc User có chức vụ quản lý) ── */}
           {!canManage ? null : isAdmin ? (
             <>
+              {/* Admin Dashboard */}
+              <Box sx={{ px: collapsed ? 0.5 : 1, mb: 1.5 }}>
+                <Tooltip title={collapsed ? "Admin Dashboard" : ""} placement="right" arrow>
+                  <ListItemButton
+                    onClick={() => handleNavigate("/admin-dashboard")}
+                    sx={{
+                      ...getItemStyles("/admin-dashboard"),
+                      bgcolor: isActive("/admin-dashboard")
+                        ? "#FFD60A"
+                        : "rgba(255, 214, 10, 0.12)",
+                      color: isActive("/admin-dashboard") ? colors.bg : "#FFD60A",
+                      boxShadow: isActive("/admin-dashboard")
+                        ? "0 4px 12px rgba(255,214,10,0.3)"
+                        : "none",
+                      borderRadius: "16px",
+                      border: "1px solid rgba(255, 214, 10, 0.3)",
+                      mb: 0,
+                      mx: 0,
+                      py: 1.2,
+                      "&:hover": {
+                        bgcolor: "rgba(255, 214, 10, 0.2)",
+                        transform: collapsed ? "none" : "translateY(-2px)",
+                        boxShadow: "0 8px 16px rgba(255,214,10,0.2)",
+                        color: "#FFD60A",
+                      },
+                      "&::before": { display: "none" },
+                    }}
+                  >
+                    <ListItemIcon
+                      sx={{ ...getIconStyles("/admin-dashboard"), color: "inherit", minWidth: collapsed ? "unset" : 38 }}
+                    >
+                      <LayoutDashboard size={21} />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary="Admin Dashboard"
+                      sx={{
+                        opacity: collapsed ? 0 : 1,
+                        width: collapsed ? 0 : "auto",
+                        transition: `opacity 0.2s ease, width ${TRANSITION_DURATION} ${TRANSITION_EASING}`,
+                        overflow: "hidden",
+                        whiteSpace: "nowrap",
+                      }}
+                      primaryTypographyProps={{
+                        fontWeight: isActive("/admin-dashboard") ? 700 : 600,
+                        fontSize: "0.95rem",
+                      }}
+                    />
+                  </ListItemButton>
+                </Tooltip>
+              </Box>
+
               {/* Dashboard Quản lý */}
               <Box sx={{ px: collapsed ? 0.5 : 1, mb: 1.5 }}>
                 <Tooltip title={collapsed ? t("sidebar.deanDashboard") : ""} placement="right" arrow>
