@@ -103,6 +103,11 @@ export default function NotificationToast() {
   const getNotificationLink = (message: string): string => {
     const msg = message.toLowerCase();
 
+    // 0. Phản hồi đàm phán từ quản lý gửi ngược về cho nhân viên thường
+    if (msg.includes("đã phản hồi") || msg.includes("phản hồi yêu cầu")) {
+      return "/my-okr";
+    }
+
     // 1. Phân hệ duyệt dành cho Quản lý / Trưởng khoa / Admin
     if (
       msg.includes("yêu cầu xét duyệt") || 
