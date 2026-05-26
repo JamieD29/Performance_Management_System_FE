@@ -73,7 +73,9 @@ export default function NotificationBell() {
       msg.includes("đã gửi đề xuất") ||
       msg.includes("gửi đề xuất okr") ||
       msg.includes("đã phản hồi đề xuất") ||
-      msg.includes("phản hồi đề xuất")
+      msg.includes("phản hồi đề xuất") ||
+      msg.includes("đồng ý chấp nhận") ||
+      msg.includes("chấp nhận okr")
     ) {
       localStorage.setItem("department_okr_tab", "2"); // Chuyển thẳng tới Tab "Duyệt đề xuất"
       return "/departments/okr";
