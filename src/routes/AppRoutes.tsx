@@ -26,6 +26,7 @@ const DepartmentOverview = React.lazy(
 const MyOkrPage = React.lazy(() => import('../pages/MyOkr/MyOkrPage'));
 const MyEvaluationPage = React.lazy(() => import('../pages/MyEvaluation/MyEvaluationPage'));
 const DeanDashboard = React.lazy(() => import('../pages/DeanDashboard/DeanDashboard'));
+const AdminDashboard = React.lazy(() => import('../pages/AdminDashboard/AdminDashboard'));
 
 // Non-lazy (always needed for layout)
 import MainLayout from '../layouts/MainLayout';
@@ -189,6 +190,16 @@ export default function AppRoutes() {
           element={
             <AdminRoute>
               <AdminSettings />
+            </AdminRoute>
+          }
+        />
+
+        {/* 4b. ADMIN DASHBOARD */}
+        <Route
+          path="/admin-dashboard"
+          element={
+            <AdminRoute>
+              <AdminDashboard />
             </AdminRoute>
           }
         />
