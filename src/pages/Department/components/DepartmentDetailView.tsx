@@ -34,6 +34,7 @@ import { Users, Building2 } from "lucide-react";
 import { api } from "../../../services/api";
 import AssignPositionModal from "./AssignPositionModal";
 import type { User, Department } from "../department.types";
+import { confirmAction, showSuccess, showError } from "../../../utils/swal";
 
 interface DepartmentDetailViewProps {
   department: Department;
@@ -80,6 +81,28 @@ export default function DepartmentDetailView({
 
   const reloadUsers = async () => {
     fetchUsers();
+  };
+
+  const handleRemoveFromDepartment = async (user: User) => {
+    const ok = await confirmAction({
+      title: "Gỡ khỏi bộ môn?",
+      text: `Bạn có chắc chắn muốn gỡ nhân sự "${user.name}" khỏi bộ môn này không?`,
+      icon: "warning",
+      confirmText: "Gỡ bộ môn",
+      confirmColor: "#d97706",
+    });
+    if (!ok) return;
+
+    try {
+      await api.put(`/users/${user.id}/department`, {
+        departmentId: null,
+      });
+      showSuccess("Thành công", `Đã gỡ nhân sự "${user.name}" khỏi bộ môn.`);
+      reloadUsers();
+    } catch (error: any) {
+      console.error(error);
+      showError("Lỗi", error?.response?.data?.message || "Có lỗi xảy ra khi gỡ bộ môn.");
+    }
   };
 
   const filteredUsers = useMemo(() => {
@@ -254,7 +277,7 @@ export default function DepartmentDetailView({
                           <IconButton size="small" color="primary" onClick={() => { setAssignModalUser(user); setAssignModalOpen(true); }} sx={{ "&:hover": { bgcolor: "#dbeafe" } }}><BadgeOutlined fontSize="small" /></IconButton>
                         </Tooltip>
                         <Tooltip title="Gỡ khỏi bộ môn">
-                          <IconButton size="small" color="warning" sx={{ "&:hover": { bgcolor: "#fef3c7" } }}><PersonRemove fontSize="small" /></IconButton>
+                          <IconButton size="small" color="warning" onClick={() => handleRemoveFromDepartment(user)} sx={{ "&:hover": { bgcolor: "#fef3c7" } }}><PersonRemove fontSize="small" /></IconButton>
                         </Tooltip>
                       </TableCell>
                     )}
