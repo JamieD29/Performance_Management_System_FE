@@ -33,6 +33,7 @@ import { api } from "../../../services/api";
 import { showWarning, showSuccess, showError } from "../../../utils/swal";
 import { performanceService } from "../../../services/performanceService";
 import VariantEditorDialog from "./VariantEditorDialog";
+import dayjs from "dayjs";
 
 interface AssignTemplateDialogProps {
   open: boolean;
@@ -80,6 +81,26 @@ export default function AssignTemplateDialog({
     }
   }, [open, template]);
 
+  // Tự động gán và giới hạn hạn chót chốt OKR
+  useEffect(() => {
+    if (selectedCycleId) {
+      const cycle = cycles.find((c: any) => c.id === selectedCycleId);
+      if (cycle?.startDate) {
+        const maxDate = dayjs(cycle.startDate).subtract(3, "day");
+        const today = dayjs().startOf("day");
+        if (maxDate.isBefore(today)) {
+          setDeadline("");
+        } else {
+          setDeadline(maxDate.format("YYYY-MM-DD"));
+        }
+      } else {
+        setDeadline("");
+      }
+    } else {
+      setDeadline("");
+    }
+  }, [selectedCycleId, cycles]);
+
   const loadData = async () => {
     try {
       setLoadingUsers(true);
@@ -123,6 +144,31 @@ export default function AssignTemplateDialog({
     if (assignedCount === 0 || !selectedCycleId) {
       showWarning("Thiếu thông tin", "Vui lòng chọn ít nhất 1 User và Kỳ đánh giá!");
       return;
+    }
+
+    if (!deadline) {
+      showWarning("Thiếu thông tin", "Vui lòng chọn Hạn chót thương lượng & chốt OKR!");
+      return;
+    }
+
+    const today = dayjs().startOf("day");
+    const dlDate = dayjs(deadline).startOf("day");
+    const cycle = cycles.find((c: any) => c.id === selectedCycleId);
+
+    if (dlDate.isBefore(today)) {
+      showWarning("Hạn chót không hợp lệ", "Hạn chót chốt OKR không thể nằm trong quá khứ!");
+      return;
+    }
+
+    if (cycle?.startDate) {
+      const maxDate = dayjs(cycle.startDate).subtract(3, "day").startOf("day");
+      if (dlDate.isAfter(maxDate)) {
+        showWarning(
+          "Hạn chót không hợp lệ",
+          `Hạn chót phải diễn ra trước ngày bắt đầu kỳ OKR ít nhất 3 ngày (tối đa là ngày ${maxDate.format("DD/MM/YYYY")})!`
+        );
+        return;
+      }
     }
     setLoading(true);
     try {
@@ -191,6 +237,13 @@ export default function AssignTemplateDialog({
   const departments = Array.from(new Set(users.map((u) => u.department?.id))).filter(Boolean).map((id) => users.find((u) => u.department?.id === id)?.department);
   const positions = Array.from(new Set(users.map((u) => u.managementPosition?.id))).filter(Boolean).map((id) => users.find((u) => u.managementPosition?.id === id)?.managementPosition);
   const jobTitles = Array.from(new Set(users.map((u) => u.jobTitle))).filter(Boolean);
+
+  const minDeadline = dayjs().format("YYYY-MM-DD");
+  const maxDeadline = selectedCycleId
+    ? cycles.find((c: any) => c.id === selectedCycleId)?.startDate
+      ? dayjs(cycles.find((c: any) => c.id === selectedCycleId).startDate).subtract(3, "day").format("YYYY-MM-DD")
+      : ""
+    : "";
 
   return (
     <Dialog
@@ -302,16 +355,15 @@ export default function AssignTemplateDialog({
               </FormControl>
               <TextField
                 fullWidth
-                label="Hạn chót thương lượng & chốt OKR"
+                label="Hạn chót thương lượng & chốt OKR *"
                 type="date"
                 value={deadline}
                 onChange={(e) => setDeadline(e.target.value)}
                 InputLabelProps={{ shrink: true }}
-                helperText="Thời gian để nhân sự điều chỉnh và chốt OKR trước khi kỳ bắt đầu."
+                helperText={`Thời gian chốt OKR (Giới hạn: ${dayjs().format("DD/MM/YYYY")} đến ${maxDeadline ? dayjs(maxDeadline).format("DD/MM/YYYY") : "ngày bắt đầu - 3 ngày"}).`}
                 inputProps={{
-                  max: cycles.find(c => c.id === selectedCycleId)?.startDate
-                    ? new Date(cycles.find(c => c.id === selectedCycleId).startDate).toISOString().split('T')[0]
-                    : undefined
+                  min: minDeadline,
+                  max: maxDeadline || undefined,
                 }}
               />
             </Box>
