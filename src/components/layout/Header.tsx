@@ -64,9 +64,9 @@ export default function Header({
     } catch (error) {
       console.log("Lỗi báo Backend (bỏ qua)");
     } finally {
-      // 1. Dọn sạch ổ cứng
+      // 1. Dọn sạch ổ cứng và bộ nhớ phiên
       localStorage.clear();
-      localStorage.clear();
+      sessionStorage.clear();
       if (typeof setAnchorEl === "function") setAnchorEl(null);
 
       // 2. DÙNG SETTIMEOUT ĐỂ ÉP CHUYỂN TRANG BẤT CHẤP LỖI REACT
