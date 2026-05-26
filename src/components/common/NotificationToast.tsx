@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Snackbar,
   Alert,
@@ -25,6 +26,7 @@ function SlideTransition(props: SlideProps) {
 const POLL_INTERVAL = 10000; // 10 giây
 
 export default function NotificationToast() {
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [currentNotification, setCurrentNotification] =
     useState<NotificationItem | null>(null);
@@ -98,6 +100,42 @@ export default function NotificationToast() {
     }
   };
 
+  const getNotificationLink = (message: string): string => {
+    const msg = message.toLowerCase();
+
+    // 1. Phân hệ duyệt dành cho Quản lý / Trưởng khoa / Admin
+    if (
+      msg.includes("yêu cầu xét duyệt") || 
+      msg.includes("đề xuất điều chỉnh") ||
+      msg.includes("đã gửi đề xuất") ||
+      msg.includes("gửi đề xuất okr")
+    ) {
+      localStorage.setItem("department_okr_tab", "2"); // Chuyển thẳng tới Tab "Duyệt đề xuất"
+      return "/departments/okr";
+    }
+    if (msg.includes("tự khai điểm okr") || msg.includes("tự khai điểm")) {
+      localStorage.setItem("department_okr_tab", "3"); // Chuyển thẳng tới Tab "Tự khai điểm"
+      return "/departments/okr";
+    }
+    if (msg.includes("tự đánh giá") || msg.includes("nộp phiếu tự đánh giá")) {
+      localStorage.setItem("department_okr_tab", "4"); // Chuyển thẳng tới Tab "Duyệt phiếu đánh giá"
+      return "/departments/okr";
+    }
+
+    // 2. Phân hệ cá nhân dành cho nhân sự thường
+    if (msg.includes("giao") && msg.includes("okr")) return "/my-okr";
+    if (msg.includes("phê duyệt") || msg.includes("đề xuất")) return "/my-okr";
+    if (msg.includes("chức vụ") || msg.includes("role")) return "/profile";
+    if (msg.includes("đánh giá") || msg.includes("kỳ")) return "/my-evaluation";
+    return "/dashboard";
+  };
+
+  const handleNotificationClick = async (notif: NotificationItem) => {
+    handleClose();
+    const targetUrl = getNotificationLink(notif.message);
+    navigate(targetUrl);
+  };
+
   // Hiển thị notification kế tiếp khi đóng cái hiện tại
   const handleExited = () => {
     const remaining = notifications.filter(
@@ -125,7 +163,7 @@ export default function NotificationToast() {
       anchorOrigin={{ vertical: "top", horizontal: "center" }}
       sx={{ maxWidth: 400, cursor: "pointer", mt: 2 }}
       onClick={() => {
-        handleClose();
+        handleNotificationClick(currentNotification);
       }}
     >
       <Alert

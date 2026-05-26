@@ -60,6 +60,27 @@ export default function NotificationBell() {
 
   const getNotificationLink = (message: string): string => {
     const msg = message.toLowerCase();
+
+    // 1. Phân hệ duyệt dành cho Quản lý / Trưởng khoa / Admin
+    if (
+      msg.includes("yêu cầu xét duyệt") || 
+      msg.includes("đề xuất điều chỉnh") ||
+      msg.includes("đã gửi đề xuất") ||
+      msg.includes("gửi đề xuất okr")
+    ) {
+      localStorage.setItem("department_okr_tab", "2"); // Chuyển thẳng tới Tab "Duyệt đề xuất"
+      return "/departments/okr";
+    }
+    if (msg.includes("tự khai điểm okr") || msg.includes("tự khai điểm")) {
+      localStorage.setItem("department_okr_tab", "3"); // Chuyển thẳng tới Tab "Tự khai điểm"
+      return "/departments/okr";
+    }
+    if (msg.includes("tự đánh giá") || msg.includes("nộp phiếu tự đánh giá")) {
+      localStorage.setItem("department_okr_tab", "4"); // Chuyển thẳng tới Tab "Duyệt phiếu đánh giá"
+      return "/departments/okr";
+    }
+
+    // 2. Phân hệ cá nhân dành cho nhân sự thường
     if (msg.includes("giao") && msg.includes("okr")) return "/my-okr";
     if (msg.includes("phê duyệt") || msg.includes("đề xuất")) return "/my-okr";
     if (msg.includes("chức vụ") || msg.includes("role")) return "/profile";
