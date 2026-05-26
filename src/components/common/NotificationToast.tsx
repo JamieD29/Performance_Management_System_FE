@@ -19,7 +19,7 @@ interface NotificationItem {
 }
 
 function SlideTransition(props: SlideProps) {
-  return <Slide {...props} direction="left" />;
+  return <Slide {...props} direction="down" />;
 }
 
 const POLL_INTERVAL = 10000; // 10 giây
@@ -122,7 +122,7 @@ export default function NotificationToast() {
       onClose={handleClose}
       TransitionComponent={SlideTransition}
       TransitionProps={{ onExited: handleExited }}
-      anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      anchorOrigin={{ vertical: "top", horizontal: "center" }}
       sx={{ maxWidth: 400, cursor: "pointer" }}
       onClick={() => {
         handleClose();
