@@ -62,7 +62,7 @@ export default function NotificationBell() {
     const msg = message.toLowerCase();
 
     // 0. Phản hồi đàm phán từ quản lý gửi ngược về cho nhân viên thường
-    if (msg.includes("đã phản hồi") || msg.includes("phản hồi yêu cầu")) {
+    if (msg.includes("người giao okr") && (msg.includes("đã phản hồi") || msg.includes("phản hồi yêu cầu"))) {
       return "/my-okr";
     }
 
@@ -71,7 +71,9 @@ export default function NotificationBell() {
       msg.includes("yêu cầu xét duyệt") || 
       msg.includes("đề xuất điều chỉnh") ||
       msg.includes("đã gửi đề xuất") ||
-      msg.includes("gửi đề xuất okr")
+      msg.includes("gửi đề xuất okr") ||
+      msg.includes("đã phản hồi đề xuất") ||
+      msg.includes("phản hồi đề xuất")
     ) {
       localStorage.setItem("department_okr_tab", "2"); // Chuyển thẳng tới Tab "Duyệt đề xuất"
       return "/departments/okr";
