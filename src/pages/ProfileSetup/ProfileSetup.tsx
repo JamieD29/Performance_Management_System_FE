@@ -36,8 +36,18 @@ const steps = ["Thông tin cá nhân", "Thông tin công tác"];
 export default function ProfileSetup() {
   const navigate = useNavigate();
 
-  // Hàm đăng xuất / đổi tài khoản: xóa session và về trang login
+  // Hàm đăng xuất / đổi tài khoản: xóa session và về trang login, đồng thời xóa bản nháp của tài khoản này
   const handleSwitchAccount = () => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        const user = JSON.parse(storedUser);
+        const draftKey = `profile_setup_draft_${user.email}`;
+        localStorage.removeItem(draftKey);
+      } catch (e) {
+        console.error("Failed to clear draft on switch account", e);
+      }
+    }
     localStorage.removeItem("authToken");
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("user");
@@ -59,6 +69,8 @@ export default function ProfileSetup() {
     jobTitle: "",
   });
 
+  const [isDraftLoaded, setIsDraftLoaded] = useState(false);
+
   // Data & UI state
   const [departments, setDepartments] = useState<DepartmentOption[]>([]);
   const [loadingDepts, setLoadingDepts] = useState(true);
@@ -74,22 +86,34 @@ export default function ProfileSetup() {
   const degrees = profileOptions.degrees.length > 0 ? profileOptions.degrees : FALLBACK_DEGREES;
   const jobTitles = profileOptions.jobTitles.length > 0 ? profileOptions.jobTitles : FALLBACK_JOB_TITLES;
 
-  // Fetch departments and set initial user data on mount
+  // Fetch departments and set initial user data / load draft on mount
   useEffect(() => {
     // Load initial user data from session
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       try {
         const user = JSON.parse(storedUser);
-        setFormData((prev) => ({
-          ...prev,
-          fullName: user.fullName || user.name || prev.fullName,
-          email: user.email || prev.email,
-        }));
+        const draftKey = `profile_setup_draft_${user.email}`;
+        const savedDraft = localStorage.getItem(draftKey);
+
+        if (savedDraft) {
+          const { draftFormData, draftActiveStep } = JSON.parse(savedDraft);
+          setFormData(draftFormData);
+          if (typeof draftActiveStep === "number") {
+            setActiveStep(draftActiveStep);
+          }
+        } else {
+          setFormData((prev) => ({
+            ...prev,
+            fullName: user.fullName || user.name || prev.fullName,
+            email: user.email || prev.email,
+          }));
+        }
       } catch (e) {
-        console.error("Failed to parse user from session", e);
+        console.error("Failed to parse user from session or load draft", e);
       }
     }
+    setIsDraftLoaded(true);
 
     (async () => {
       try {
@@ -104,6 +128,28 @@ export default function ProfileSetup() {
       }
     })();
   }, []);
+
+  // Tự động lưu bản nháp thông tin đã nhập vào localStorage khi có thay đổi
+  useEffect(() => {
+    if (!isDraftLoaded) return;
+
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        const user = JSON.parse(storedUser);
+        const draftKey = `profile_setup_draft_${user.email}`;
+        localStorage.setItem(
+          draftKey,
+          JSON.stringify({
+            draftFormData: formData,
+            draftActiveStep: activeStep,
+          })
+        );
+      } catch (e) {
+        console.error("Failed to save draft to localStorage", e);
+      }
+    }
+  }, [formData, activeStep, isDraftLoaded]);
 
   const handleFieldChange = (field: keyof ProfileFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -187,6 +233,10 @@ export default function ProfileSetup() {
         user.profileCompleted = true;
         user.department = { id: formData.departmentId, name: selectedDeptName };
         localStorage.setItem("user", JSON.stringify(user));
+
+        // Xóa bản nháp sau khi đã thiết lập hồ sơ thành công
+        const draftKey = `profile_setup_draft_${user.email}`;
+        localStorage.removeItem(draftKey);
       }
 
       setConfirmOpen(false);
