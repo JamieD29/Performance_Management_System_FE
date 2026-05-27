@@ -1,4 +1,5 @@
-import { Box, Typography, Chip, Avatar, Skeleton } from "@mui/material";
+import { useState, useCallback } from "react";
+import { Box, Typography, Chip, Avatar, Skeleton, IconButton, Tooltip } from "@mui/material";
 import {
   Add,
   Edit,
@@ -7,12 +8,14 @@ import {
   Logout,
   HelpOutline,
   History,
+  Refresh,
 } from "@mui/icons-material";
 import type { SystemLog } from "../useAdminDashboardData";
 
 interface Props {
   logs: SystemLog[];
   loading: boolean;
+  onRefresh?: () => Promise<void>;
 }
 
 function getActionMeta(action: string) {
@@ -43,6 +46,10 @@ function formatRelativeTime(dateStr: string) {
   return `${days} ngày trước`;
 }
 
+function formatClockTime(date: Date) {
+  return date.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+}
+
 function getInitials(name?: string) {
   if (!name) return "?";
   return name
@@ -66,7 +73,21 @@ function LogSkeleton() {
   );
 }
 
-export default function ActivityFeed({ logs, loading }: Props) {
+export default function ActivityFeed({ logs, loading, onRefresh }: Props) {
+  const [refreshing, setRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+
+  const handleRefresh = useCallback(async () => {
+    if (!onRefresh || refreshing) return;
+    setRefreshing(true);
+    try {
+      await onRefresh();
+      setLastUpdated(new Date());
+    } finally {
+      setRefreshing(false);
+    }
+  }, [onRefresh, refreshing]);
+
   return (
     <Box
       sx={{
@@ -92,19 +113,45 @@ export default function ActivityFeed({ logs, loading }: Props) {
         }}
       >
         <History sx={{ color: "#60a5fa", fontSize: 20 }} />
-        <Box>
+        <Box flex={1}>
           <Typography variant="subtitle2" fontWeight={700} color="#ffffff">
             Hoạt động gần đây
           </Typography>
           <Typography variant="caption" color="rgba(255,255,255,0.45)">
-            10 hành động mới nhất trong hệ thống
+            Cập nhật lúc {formatClockTime(lastUpdated)} · Tự động mỗi 15 giây
           </Typography>
         </Box>
+
+        {/* Nút Refresh thủ công */}
+        <Tooltip title="Làm mới ngay" placement="left">
+          <IconButton
+            size="small"
+            onClick={handleRefresh}
+            disabled={refreshing}
+            sx={{
+              color: "rgba(255,255,255,0.7)",
+              transition: "all 0.2s",
+              "&:hover": { color: "#ffffff", bgcolor: "rgba(255,255,255,0.1)" },
+              "& svg": {
+                transition: "transform 0.5s ease",
+                transform: refreshing ? "rotate(360deg)" : "rotate(0deg)",
+                animation: refreshing ? "spin 0.8s linear infinite" : "none",
+                "@keyframes spin": { "0%": { transform: "rotate(0deg)" }, "100%": { transform: "rotate(360deg)" } },
+              },
+            }}
+          >
+            <Refresh fontSize="small" />
+          </IconButton>
+        </Tooltip>
       </Box>
 
-      {/* Feed list */}
-      <Box sx={{ flex: 1, overflow: "auto", px: 3 }}>
-        {loading && logs.length === 0 ? (
+      {/* Feed list — tối đa 10 bản ghi, scroll để xem thêm */}
+      <Box sx={{ flex: 1, overflowY: "auto", maxHeight: 380, px: 3,
+        "&::-webkit-scrollbar": { width: 4 },
+        "&::-webkit-scrollbar-track": { bgcolor: "transparent" },
+        "&::-webkit-scrollbar-thumb": { bgcolor: "#cbd5e1", borderRadius: 2 },
+      }}>
+        {(loading || refreshing) && logs.length === 0 ? (
           Array.from({ length: 6 }).map((_, i) => <LogSkeleton key={i} />)
         ) : logs.length === 0 ? (
           <Box
@@ -123,7 +170,7 @@ export default function ActivityFeed({ logs, loading }: Props) {
             </Typography>
           </Box>
         ) : (
-          logs.map((log, idx) => {
+          logs.slice(0, 10).map((log, idx) => {
             const meta = getActionMeta(log.action);
             const isFailed = log.status === "FAILED";
             return (
@@ -236,3 +283,4 @@ export default function ActivityFeed({ logs, loading }: Props) {
     </Box>
   );
 }
+

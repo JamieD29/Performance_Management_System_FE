@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation, useSearchParams } from 'react-router-dom';
 import { Box, CircularProgress } from '@mui/material';
 
 // Lazy-loaded pages (code splitting — load on demand)
@@ -111,7 +111,14 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 // 4. Component Route công khai
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuth();
-  if (isAuthenticated) return <Navigate to="/dashboard" replace />;
+  const [searchParams] = useSearchParams();
+
+  // 🔑 Nếu URL chứa accessToken mới (từ OAuth callback), KHÔNG redirect.
+  // Cho phép Login.tsx xử lý và ghi đè token/user cũ trong localStorage.
+  // Điều này xảy ra khi user back lại trang chọn tài khoản và chọn tài khoản khác.
+  const hasNewToken = !!searchParams.get('accessToken');
+
+  if (isAuthenticated && !hasNewToken) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 }
 

@@ -88,8 +88,15 @@ export default function Login() {
 
     if (accessToken) {
       setIsLoading(true);
-      localStorage.setItem("authToken", accessToken);
-      if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
+
+      // 🧹 Xóa dữ liệu cũ trước khi lưu tài khoản mới.
+      // Quan trọng: ngăn lỗi khi user chọn đổi tài khoản Google khi đang ở profile-setup.
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
+
+      localStorage.setItem('authToken', accessToken);
+      if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
 
       let parsedUser: any = null;
       if (userParam) {

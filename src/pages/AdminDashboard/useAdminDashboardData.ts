@@ -81,6 +81,7 @@ export interface AdminDashboardData {
 }
 
 const HEALTH_POLL_INTERVAL = 30_000; // 30 giây
+const LOGS_POLL_INTERVAL  = 15_000; // 15 giây — logs cần realtime hơn
 
 export function useAdminDashboardData() {
   const [data, setData] = useState<AdminDashboardData>({
@@ -173,14 +174,42 @@ export function useAdminDashboardData() {
     }
   }, []);
 
+  // --- Lấy chỉ logs (dùng riêng để polling độc lập với data chính) ---
+  const fetchLogs = useCallback(async () => {
+    try {
+      const logsRes = await api.get("/system-logs");
+      const raw = Array.isArray(logsRes.data)
+        ? logsRes.data
+        : logsRes.data?.data || [];
+      const recentLogs: SystemLog[] = raw.slice(0, 20);
+      setData((prev) => ({ ...prev, recentLogs }));
+    } catch {
+      // Không crash UI nếu logs lỗi
+    }
+  }, []);
+
   useEffect(() => {
     fetchMainData();
     fetchSystemHealth();
 
     // Polling system health mỗi 30 giây
     const healthInterval = setInterval(fetchSystemHealth, HEALTH_POLL_INTERVAL);
-    return () => clearInterval(healthInterval);
-  }, [fetchMainData, fetchSystemHealth]);
+    // Polling logs mỗi 15 giây — để bắt được login/logout mới
+    const logsInterval  = setInterval(fetchLogs, LOGS_POLL_INTERVAL);
 
-  return { data, loading, healthLoading, error, refetch: fetchMainData, refetchHealth: fetchSystemHealth };
+    return () => {
+      clearInterval(healthInterval);
+      clearInterval(logsInterval);
+    };
+  }, [fetchMainData, fetchSystemHealth, fetchLogs]);
+
+  return {
+    data,
+    loading,
+    healthLoading,
+    error,
+    refetch: fetchMainData,
+    refetchHealth: fetchSystemHealth,
+    refetchLogs: fetchLogs,
+  };
 }

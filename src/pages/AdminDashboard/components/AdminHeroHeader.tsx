@@ -158,13 +158,13 @@ export default function AdminHeroHeader({ cycle, adminName }: Props) {
               backdropFilter: "blur(12px)",
               border: "1px solid rgba(255,255,255,0.15)",
               borderRadius: 2.5,
-              p: 2.5,
-              minWidth: { xs: "100%", md: 320 },
+              p: 2,
+              minWidth: { xs: "100%", md: 380 },
               flexShrink: 0,
             }}
           >
-            {/* Cycle header */}
-            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1.5 }}>
+            {/* Cycle header: label + status chip */}
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1 }}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <CalendarToday sx={{ color: "#93c5fd", fontSize: 16 }} />
                 <Typography variant="caption" color="#93c5fd" fontWeight={600} textTransform="uppercase" letterSpacing="0.08em">
@@ -185,58 +185,62 @@ export default function AdminHeroHeader({ cycle, adminName }: Props) {
               />
             </Box>
 
-            <Typography variant="subtitle1" color="#ffffff" fontWeight={700} mb={0.5} noWrap>
-              {cycle.name}
-            </Typography>
-
-            {/* Dates */}
-            <Typography variant="caption" color="rgba(255,255,255,0.5)" sx={{ display: "block", mb: 1.5 }}>
-              {formatDate(cycle.startDate)} → {formatDate(cycle.endDate)}
-            </Typography>
-
-            {/* Progress bar */}
-            <Box mb={1}>
-              <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>
-                <Typography variant="caption" color="rgba(255,255,255,0.6)">
-                  <TrendingUp sx={{ fontSize: 12, mr: 0.5, verticalAlign: "middle" }} />
-                  Tiến độ
+            {/* 2-column layout: left=name+date, right=progress+days */}
+            <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+              {/* Left */}
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography variant="subtitle2" color="#ffffff" fontWeight={700} noWrap>
+                  {cycle.name}
                 </Typography>
-                <Typography variant="caption" color="#93c5fd" fontWeight={700}>
-                  {progress}%
+                <Typography variant="caption" color="rgba(255,255,255,0.5)" sx={{ display: "block", mt: 0.25 }}>
+                  {formatDate(cycle.startDate)} → {formatDate(cycle.endDate)}
                 </Typography>
               </Box>
-              <LinearProgress
-                variant="determinate"
-                value={progress}
-                sx={{
-                  height: 6,
-                  borderRadius: 3,
-                  bgcolor: "rgba(255,255,255,0.1)",
-                  "& .MuiLinearProgress-bar": {
+
+              {/* Divider */}
+              <Box sx={{ width: "1px", height: 40, bgcolor: "rgba(255,255,255,0.15)", flexShrink: 0 }} />
+
+              {/* Right: progress + days */}
+              <Box sx={{ flexShrink: 0, minWidth: 120 }}>
+                <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>
+                  <Typography variant="caption" color="rgba(255,255,255,0.6)">
+                    <TrendingUp sx={{ fontSize: 12, mr: 0.5, verticalAlign: "middle" }} />
+                    Tiến độ
+                  </Typography>
+                  <Typography variant="caption" color="#93c5fd" fontWeight={700}>
+                    {progress}%
+                  </Typography>
+                </Box>
+                <LinearProgress
+                  variant="determinate"
+                  value={progress}
+                  sx={{
+                    height: 6,
                     borderRadius: 3,
-                    background: progress >= 80
-                      ? "linear-gradient(90deg, #f87171, #ef4444)"
-                      : "linear-gradient(90deg, #60a5fa, #34d399)",
-                  },
-                }}
-              />
-            </Box>
-
-            {/* Days remaining */}
-            {daysLeft !== null && (
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-                <AccessTime sx={{ fontSize: 13, color: daysLeft <= 7 ? "#f87171" : "#fbbf24" }} />
-                <Typography
-                  variant="caption"
-                  fontWeight={600}
-                  color={daysLeft <= 0 ? "#f87171" : daysLeft <= 7 ? "#fb923c" : "#fbbf24"}
-                >
-                  {daysLeft <= 0
-                    ? "Đã kết thúc"
-                    : `Còn ${daysLeft} ngày`}
-                </Typography>
+                    bgcolor: "rgba(255,255,255,0.1)",
+                    mb: 0.75,
+                    "& .MuiLinearProgress-bar": {
+                      borderRadius: 3,
+                      background: progress >= 80
+                        ? "linear-gradient(90deg, #f87171, #ef4444)"
+                        : "linear-gradient(90deg, #60a5fa, #34d399)",
+                    },
+                  }}
+                />
+                {daysLeft !== null && (
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+                    <AccessTime sx={{ fontSize: 13, color: daysLeft <= 7 ? "#f87171" : "#fbbf24" }} />
+                    <Typography
+                      variant="caption"
+                      fontWeight={600}
+                      color={daysLeft <= 0 ? "#f87171" : daysLeft <= 7 ? "#fb923c" : "#fbbf24"}
+                    >
+                      {daysLeft <= 0 ? "Đã kết thúc" : `Còn ${daysLeft} ngày`}
+                    </Typography>
+                  </Box>
+                )}
               </Box>
-            )}
+            </Box>
           </Box>
         ) : (
           <Box
