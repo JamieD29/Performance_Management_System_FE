@@ -68,38 +68,39 @@ function MetricCard({
         }}
       />
 
-      {/* Icon */}
-      <Box
-        sx={{
-          width: 48,
-          height: 48,
-          borderRadius: 2,
-          background: bgGradient,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          mb: 2,
-          boxShadow: `0 4px 12px ${color}30`,
-        }}
-      >
-        <Box sx={{ color: "#fff", display: "flex" }}>{icon}</Box>
-      </Box>
-
-      {/* Value */}
-      {loading ? (
-        <Skeleton variant="text" width={60} height={48} sx={{ mb: 0.5 }} />
-      ) : (
-        <Typography
-          variant="h4"
-          fontWeight={800}
-          color={color}
-          lineHeight={1}
-          mb={0.5}
-          letterSpacing="-1px"
+      {/* Icon + Value row */}
+      <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1.5 }}>
+        <Box
+          sx={{
+            width: 48,
+            height: 48,
+            borderRadius: 2,
+            background: bgGradient,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+            boxShadow: `0 4px 12px ${color}30`,
+          }}
         >
-          {value ?? "—"}
-        </Typography>
-      )}
+          <Box sx={{ color: "#fff", display: "flex" }}>{icon}</Box>
+        </Box>
+
+        {/* Value */}
+        {loading ? (
+          <Skeleton variant="text" width={60} height={48} />
+        ) : (
+          <Typography
+            variant="h4"
+            fontWeight={800}
+            color={color}
+            lineHeight={1}
+            letterSpacing="-1px"
+          >
+            {value ?? "—"}
+          </Typography>
+        )}
+      </Box>
 
       {/* Label */}
       <Typography variant="body2" fontWeight={600} color="#334155" mb={0.25}>

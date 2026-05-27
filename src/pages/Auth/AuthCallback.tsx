@@ -38,6 +38,12 @@ export default function AuthCallback() {
       try {
         const user = JSON.parse(decodeURIComponent(userParam));
 
+        // 🧹 Xóa dữ liệu phiên cũ trước khi lưu tài khoản mới.
+        // Ngăn lỗi lẫn lộn khi user đổi tài khoản Microsoft.
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
+
         // Store authentication data
         localStorage.setItem("authToken", token);
         localStorage.setItem("user", JSON.stringify(user));

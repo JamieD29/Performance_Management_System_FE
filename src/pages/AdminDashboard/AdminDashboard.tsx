@@ -9,7 +9,7 @@ import ActivityFeed from "./components/ActivityFeed";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const { data, loading, healthLoading, error, refetch, refetchHealth } =
+  const { data, loading, healthLoading, error, refetch, refetchHealth, refetchLogs } =
     useAdminDashboardData();
 
   // Lấy tên admin từ session
@@ -108,7 +108,11 @@ export default function AdminDashboard() {
         />
 
         {/* Activity Feed */}
-        <ActivityFeed logs={data.recentLogs} loading={loading} />
+        <ActivityFeed
+          logs={data.recentLogs}
+          loading={loading}
+          onRefresh={refetchLogs}
+        />
       </Box>
     </Container>
   );
