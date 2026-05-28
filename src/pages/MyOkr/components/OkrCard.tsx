@@ -369,6 +369,38 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
     return max > 0 ? Math.min(total, max) : total;
   };
 
+  const calcObjectiveReportScore = (obj: any) => {
+    let total = 0;
+    obj.items?.forEach((kr: any) => {
+      const krKey = `${obj.id}-${kr.id}`;
+      const krQty = reportData[krKey]?.quantity || 0;
+      const krUnitScore = Number(kr.unitScore) || 0;
+      const krCalcScore = krUnitScore > 0 ? krQty * krUnitScore : krQty;
+      const krCappedScore = Math.min(krCalcScore, Number(kr.maxScore) || Infinity);
+      total += krCappedScore;
+
+      kr.items?.forEach((sub: any) => {
+        const subKey = `${obj.id}-${kr.id}-${sub.id}`;
+        const subQty = reportData[subKey]?.quantity || 0;
+        const subUnitScore = Number(sub.unitScore) || 0;
+        const subCalcScore = subUnitScore > 0 ? subQty * subUnitScore : subQty;
+        const subCappedScore = Math.min(subCalcScore, Number(sub.maxScore) || Infinity);
+        total += subCappedScore;
+
+        sub.items?.forEach((subsub: any) => {
+          const subsubKey = `${obj.id}-${kr.id}-${sub.id}-${subsub.id}`;
+          const subsubQty = reportData[subsubKey]?.quantity || 0;
+          const subsubUnitScore = Number(subsub.unitScore) || 0;
+          const subsubCalcScore = subsubUnitScore > 0 ? subsubQty * subsubUnitScore : subsubQty;
+          const subsubCappedScore = Math.min(subsubCalcScore, Number(subsub.maxScore) || Infinity);
+          total += subsubCappedScore;
+        });
+      });
+    });
+    const max = Number(obj.maxScore) || 0;
+    return max > 0 ? Math.min(total, max) : total;
+  };
+
   const getManagerData = (key: string, kr: any) => {
     const mgrReport = okr.managerReportData || {};
     const qty = mgrReport[key]?.quantity || 0;
@@ -1407,9 +1439,17 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                         <TableCell></TableCell>
                         {canReport && (
                           <>
-                            <TableCell></TableCell>
-                            <TableCell></TableCell>
-                            <TableCell></TableCell>
+                            <TableCell align="center">—</TableCell>
+                            <TableCell
+                              align="center"
+                              sx={{
+                                fontWeight: "bold",
+                                color: "#1e3a8a",
+                              }}
+                            >
+                              {calcObjectiveReportScore(obj)} / {obj.maxScore || 0}
+                            </TableCell>
+                            <TableCell align="center">—</TableCell>
                           </>
                         )}
                         {(isSubmitted || isCompleted) && (
