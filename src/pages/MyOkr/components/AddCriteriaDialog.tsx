@@ -54,6 +54,11 @@ const AddCriteriaDialog: React.FC<AddCriteriaDialogProps> = ({
               fullWidth 
               value={unitScore} 
               onChange={(e) => setUnitScore(e.target.value)} 
+              onKeyDown={(e) => {
+                if (["-", ".", "e", "E", "+", ","].includes(e.key)) {
+                  e.preventDefault();
+                }
+              }}
             />
             <TextField 
               label="Đơn vị tính" 

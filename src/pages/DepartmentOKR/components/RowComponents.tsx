@@ -27,6 +27,11 @@ export const ObjectiveRow = ({ obj, idx, updateItem, handleAddKR, handleDeleteOb
         className={`${inputClass} font-bold text-blue-900`}
         value={obj.maxScore || ""}
         onChange={(e) => updateItem(idx, "maxScore", setNonNeg(e.target.value))}
+        onKeyDown={(e) => {
+          if (["-", ".", "e", "E", "+", ","].includes(e.key)) {
+            e.preventDefault();
+          }
+        }}
       />
     </TableCell>
     <TableCell colSpan={2}></TableCell>
@@ -75,6 +80,11 @@ export const KeyResultRow = ({ kr, oIdx, kIdx, updateItem, handleAddSubKR, handl
           placeholder="1"
           value={kr.unitScore || ""}
           onChange={(e) => updateItem(oIdx, "unitScore", setNonNeg(e.target.value), kIdx)}
+          onKeyDown={(e) => {
+            if (["-", ".", "e", "E", "+", ","].includes(e.key)) {
+              e.preventDefault();
+            }
+          }}
         />
       </div>
     </TableCell>
@@ -134,6 +144,11 @@ export const SubKRRow = ({ sub, oIdx, kIdx, sIdx, updateItem, handleAddSubSubKR,
           placeholder="1"
           value={sub.unitScore || ""}
           onChange={(e) => updateItem(oIdx, "unitScore", setNonNeg(e.target.value), kIdx, sIdx)}
+          onKeyDown={(e) => {
+            if (["-", ".", "e", "E", "+", ","].includes(e.key)) {
+              e.preventDefault();
+            }
+          }}
         />
       </div>
     </TableCell>
@@ -185,6 +200,11 @@ export const SubSubKRRow = ({ item, oIdx, kIdx, sIdx, ssIdx, updateItem, handleD
           placeholder="1"
           value={item.unitScore || ""}
           onChange={(e) => updateItem(oIdx, "unitScore", setNonNeg(e.target.value), kIdx, sIdx, ssIdx)}
+          onKeyDown={(e) => {
+            if (["-", ".", "e", "E", "+", ","].includes(e.key)) {
+              e.preventDefault();
+            }
+          }}
         />
       </div>
     </TableCell>

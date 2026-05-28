@@ -3,7 +3,7 @@ import { useState, useCallback } from "react";
 export const useTemplateStructure = (initialStructure: any[] = []) => {
   const [structure, setStructure] = useState<any[]>(initialStructure);
 
-  const setNonNeg = (v: any) => Math.max(0, Number(v) || 0);
+  const setNonNeg = (v: any) => Math.max(0, Math.floor(Number(v)) || 0);
 
   const updateItem = useCallback((
     objIdx: number,
@@ -18,7 +18,7 @@ export const useTemplateStructure = (initialStructure: any[] = []) => {
 
     let finalValue = value;
     if (field === "unitScore") {
-      const targetVal = Math.max(0, Number(value) || 0);
+      const targetVal = Math.max(0, Math.floor(Number(value)) || 0);
       const objMaxScore = Number(obj.maxScore) || 0;
       
       let otherSum = 0;
