@@ -215,7 +215,7 @@ export default function TemplateEditorDialog({
               label="Chức danh áp dụng"
               onChange={(e) => setJobTitle(e.target.value)}
             >
-              <MenuItem value="">-- Tất cả --</MenuItem>
+              <MenuItem value="Tất cả">-- Tất cả --</MenuItem>
               {jobTitles.map((t) => (
                 <MenuItem key={t.value} value={t.value}>{t.label}</MenuItem>
               ))}
