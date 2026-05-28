@@ -318,7 +318,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
         const krQty = reportData[krKey]?.quantity || 0;
         const krUnitScore = Number(kr.unitScore) || 0;
         const krCalcScore = krUnitScore > 0 ? krQty * krUnitScore : krQty;
-        const krCappedScore = Math.min(krCalcScore, Number(kr.maxScore) || Infinity);
+        const krCappedScore = Math.min(krCalcScore, Number(kr.maxScore) || Number(kr.unitScore) || Infinity);
         objRawScore += krCappedScore;
 
         kr.items?.forEach((sub: any) => {
@@ -326,7 +326,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
           const subQty = reportData[subKey]?.quantity || 0;
           const subUnitScore = Number(sub.unitScore) || 0;
           const subCalcScore = subUnitScore > 0 ? subQty * subUnitScore : subQty;
-          const subCappedScore = Math.min(subCalcScore, Number(sub.maxScore) || Infinity);
+          const subCappedScore = Math.min(subCalcScore, Number(sub.maxScore) || Number(sub.unitScore) || Infinity);
           objRawScore += subCappedScore;
 
           sub.items?.forEach((subsub: any) => {
@@ -334,7 +334,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
             const subsubQty = reportData[subsubKey]?.quantity || 0;
             const subsubUnitScore = Number(subsub.unitScore) || 0;
             const subsubCalcScore = subsubUnitScore > 0 ? subsubQty * subsubUnitScore : subsubQty;
-            const subsubCappedScore = Math.min(subsubCalcScore, Number(subsub.maxScore) || Infinity);
+            const subsubCappedScore = Math.min(subsubCalcScore, Number(subsub.maxScore) || Number(subsub.unitScore) || Infinity);
             objRawScore += subsubCappedScore;
           });
         });
@@ -380,7 +380,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
       const krQty = reportData[krKey]?.quantity || 0;
       const krUnitScore = Number(kr.unitScore) || 0;
       const krCalcScore = krUnitScore > 0 ? krQty * krUnitScore : krQty;
-      const krCappedScore = Math.min(krCalcScore, Number(kr.maxScore) || Infinity);
+      const krCappedScore = Math.min(krCalcScore, Number(kr.maxScore) || Number(kr.unitScore) || Infinity);
       total += krCappedScore;
 
       kr.items?.forEach((sub: any) => {
@@ -388,7 +388,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
         const subQty = reportData[subKey]?.quantity || 0;
         const subUnitScore = Number(sub.unitScore) || 0;
         const subCalcScore = subUnitScore > 0 ? subQty * subUnitScore : subQty;
-        const subCappedScore = Math.min(subCalcScore, Number(sub.maxScore) || Infinity);
+        const subCappedScore = Math.min(subCalcScore, Number(sub.maxScore) || Number(sub.unitScore) || Infinity);
         total += subCappedScore;
 
         sub.items?.forEach((subsub: any) => {
@@ -396,7 +396,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
           const subsubQty = reportData[subsubKey]?.quantity || 0;
           const subsubUnitScore = Number(subsub.unitScore) || 0;
           const subsubCalcScore = subsubUnitScore > 0 ? subsubQty * subsubUnitScore : subsubQty;
-          const subsubCappedScore = Math.min(subsubCalcScore, Number(subsub.maxScore) || Infinity);
+          const subsubCappedScore = Math.min(subsubCalcScore, Number(subsub.maxScore) || Number(subsub.unitScore) || Infinity);
           total += subsubCappedScore;
         });
       });
@@ -411,7 +411,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
     const unitScore = Number(kr.unitScore) || 0;
     const score = Math.min(
       unitScore > 0 ? qty * unitScore : qty,
-      Number(kr.maxScore) || Infinity
+      Number(kr.maxScore) || Number(kr.unitScore) || Infinity
     );
     return { quantity: qty, score };
   };
@@ -921,6 +921,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
     field: "quantity" | "evidence",
     value: any,
     maxScore?: number,
+    unitScore?: number,
   ) => {
     let cleanValue = value;
     if (field === "quantity") {
@@ -929,11 +930,12 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
       } else {
         const cleanStr = String(value).replace(/[^0-9]/g, "");
         const numVal = parseInt(cleanStr, 10) || 0;
-        if (maxScore !== undefined && maxScore !== null && !isNaN(maxScore)) {
-          cleanValue = Math.min(numVal, Number(maxScore));
-        } else {
-          cleanValue = numVal;
-        }
+        
+        const effectiveMax = Number(maxScore) || Number(unitScore) || Infinity;
+        const effectiveUnit = Number(unitScore) || 1;
+        const maxQty = effectiveUnit > 0 ? Math.floor(effectiveMax / effectiveUnit) : Infinity;
+
+        cleanValue = Math.min(numVal, maxQty);
       }
     }
 
@@ -1773,6 +1775,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                           "quantity",
                                           e.target.value,
                                           Number(kr.maxScore) || undefined,
+                                          Number(kr.unitScore) || undefined,
                                         )
                                       }
                                       onKeyDown={(e) => {
@@ -1793,7 +1796,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                       color: "#2563eb",
                                     }}
                                   >
-                                    {Math.min(krCalcScore, Number(kr.maxScore) || Infinity).toFixed(1)}
+                                    {Math.min(krCalcScore, Number(kr.maxScore) || Number(kr.unitScore) || Infinity).toFixed(1)}
                                   </TableCell>
                                   <TableCell>
                                     <TextField
@@ -2040,6 +2043,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                                 "quantity",
                                                 e.target.value,
                                                 Number(sub.maxScore) || undefined,
+                                                Number(sub.unitScore) || undefined,
                                               )
                                             }
                                             onKeyDown={(e) => {
@@ -2060,7 +2064,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                             color: "#2563eb",
                                           }}
                                         >
-                                          {Math.min(subCalcScore, Number(sub.maxScore) || Infinity).toFixed(1)}
+                                          {Math.min(subCalcScore, Number(sub.maxScore) || Number(sub.unitScore) || Infinity).toFixed(1)}
                                         </TableCell>
                                         <TableCell>
                                           <TextField
@@ -2328,6 +2332,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                                         "quantity",
                                                         e.target.value,
                                                         Number(subsub.maxScore) || undefined,
+                                                        Number(subsub.unitScore) || undefined,
                                                       )
                                                     }
                                                     onKeyDown={(e) => {
@@ -2350,7 +2355,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                                     color: "#2563eb",
                                                   }}
                                                 >
-                                                  {Math.min(subsubCalcScore, Number(subsub.maxScore) || Infinity).toFixed(1)}
+                                                  {Math.min(subsubCalcScore, Number(subsub.maxScore) || Number(subsub.unitScore) || Infinity).toFixed(1)}
                                                 </TableCell>
                                                 <TableCell>
                                                   <TextField
