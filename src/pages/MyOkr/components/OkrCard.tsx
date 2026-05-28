@@ -2332,32 +2332,36 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                             {canReport && (
                                               <>
                                                 <TableCell>
-                                                  <TextField
-                                                    size="small"
-                                                    type="number"
-                                                    value={subsubQty || ""}
-                                                    onChange={(e) =>
-                                                      updateReport(
-                                                        subsubKey,
-                                                        "quantity",
-                                                        e.target.value,
-                                                        Number(subsub.maxScore) || undefined,
-                                                        Number(subsub.unitScore) || undefined,
-                                                      )
-                                                    }
-                                                    onKeyDown={(e) => {
-                                                      if (["-", ".", "e", "E", "+", ","].includes(e.key)) {
-                                                        e.preventDefault();
+                                                  {Number(subsub.unitScore) > 0 ? (
+                                                    <TextField
+                                                      size="small"
+                                                      type="number"
+                                                      value={subsubQty || ""}
+                                                      onChange={(e) =>
+                                                        updateReport(
+                                                          subsubKey,
+                                                          "quantity",
+                                                          e.target.value,
+                                                          undefined,
+                                                          Number(subsub.unitScore) || undefined,
+                                                        )
                                                       }
-                                                    }}
-                                                    inputProps={{
-                                                      min: 0,
-                                                      style: {
-                                                        textAlign: "center",
-                                                      },
-                                                    }}
-                                                    sx={{ width: 80 }}
-                                                  />
+                                                      onKeyDown={(e) => {
+                                                        if (["-", ".", "e", "E", "+", ","].includes(e.key)) {
+                                                          e.preventDefault();
+                                                        }
+                                                      }}
+                                                      inputProps={{
+                                                        min: 0,
+                                                        style: {
+                                                          textAlign: "center",
+                                                        },
+                                                      }}
+                                                      sx={{ width: 80 }}
+                                                    />
+                                                  ) : (
+                                                    "—"
+                                                  )}
                                                 </TableCell>
                                                 <TableCell
                                                   sx={{
@@ -2365,25 +2369,29 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                                     color: "#2563eb",
                                                   }}
                                                 >
-                                                  {Math.min(subsubCalcScore, Number(subsub.maxScore) || Number(subsub.unitScore) || Infinity).toFixed(1)}
+                                                  {Number(subsub.unitScore) > 0 ? Math.min(subsubCalcScore, Number(subsub.unitScore) || Infinity).toFixed(1) : "—"}
                                                 </TableCell>
                                                 <TableCell>
-                                                  <TextField
-                                                    size="small"
-                                                    fullWidth
-                                                    placeholder="Link..."
-                                                    value={
-                                                      reportData[subsubKey]
-                                                        ?.evidence || ""
-                                                    }
-                                                    onChange={(e) =>
-                                                      updateReport(
-                                                        subsubKey,
-                                                        "evidence",
-                                                        e.target.value,
-                                                      )
-                                                    }
-                                                  />
+                                                  {Number(subsub.unitScore) > 0 ? (
+                                                    <TextField
+                                                      size="small"
+                                                      fullWidth
+                                                      placeholder="Link..."
+                                                      value={
+                                                        reportData[subsubKey]
+                                                          ?.evidence || ""
+                                                      }
+                                                      onChange={(e) =>
+                                                        updateReport(
+                                                          subsubKey,
+                                                          "evidence",
+                                                          e.target.value,
+                                                        )
+                                                      }
+                                                    />
+                                                  ) : (
+                                                    "—"
+                                                  )}
                                                 </TableCell>
                                               </>
                                             )}
