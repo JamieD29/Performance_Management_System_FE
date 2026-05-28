@@ -31,6 +31,7 @@ import {
 import { api } from "../../../services/api";
 import { showError, showSuccess } from "../../../utils/swal";
 import AddCriteriaDialog from "../../MyOkr/components/AddCriteriaDialog";
+import { validateStructureScores } from "./TemplateEditorDialog";
 
 export default function OkrManagerTree({
   okr,
@@ -797,6 +798,11 @@ export default function OkrManagerTree({
   };
 
   const handleSubmitChanges = async () => {
+    const validationError = validateStructureScores(localStructure);
+    if (validationError) {
+      showError("Lỗi cấu trúc điểm OKR", validationError);
+      return;
+    }
     try {
       await api.put(`/okrs/${okr.id}/manager-structure`, {
         keyResults: localStructure,
@@ -1615,6 +1621,7 @@ export default function OkrManagerTree({
               fullWidth
               value={editCriteriaMaxScore}
               onChange={(e) => setEditCriteriaMaxScore(e.target.value)}
+              disabled={editItemInfo?.type !== "OBJ"}
             />
             <Box sx={{ display: "flex", gap: 2 }}>
               <TextField

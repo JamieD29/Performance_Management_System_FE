@@ -40,6 +40,7 @@ import { confirmAction, showSuccess, showError } from "../../../utils/swal";
 import { statusConfig } from "../okr.constants";
 import NegotiationChat from "./NegotiationChat";
 import AddCriteriaDialog from "./AddCriteriaDialog";
+import { validateStructureScores } from "../../DepartmentOKR/components/TemplateEditorDialog";
 
 interface OkrCardProps {
   okr: any;
@@ -830,6 +831,11 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
   };
 
   const handleSubmitChanges = async () => {
+    const validationError = validateStructureScores(localStructure);
+    if (validationError) {
+      showError("Lỗi cấu trúc điểm OKR", validationError);
+      return;
+    }
     try {
       await api.put(`/okrs/${okr.id}/structure`, {
         keyResults: localStructure,
@@ -2748,6 +2754,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
               fullWidth
               value={editCriteriaMaxScore}
               onChange={(e) => setEditCriteriaMaxScore(e.target.value)}
+              disabled={editItemInfo?.type !== "OBJ"}
             />
             <Box sx={{ display: "flex", gap: 2 }}>
               <TextField

@@ -39,6 +39,73 @@ import { useTemplateStructure } from "../hooks/useTemplateStructure";
 import { ObjectiveRow, KeyResultRow, SubKRRow, SubSubKRRow } from "./RowComponents";
 import { parseExcelToStructure } from "../../../utils/excelParser";
 
+export const validateStructureScores = (items: any[]): string | null => {
+  if (!items || items.length === 0) {
+    return "Cấu trúc OKR phải có ít nhất 1 Mục tiêu (Objective).";
+  }
+
+  let totalMaxScore = 0;
+
+  for (const obj of items) {
+    const objMaxScore = Number(obj.maxScore) || 0;
+    if (objMaxScore < 0) {
+      return `Điểm số tối đa của Mục tiêu "${obj.title || obj.id}" không được là số âm.`;
+    }
+    totalMaxScore += objMaxScore;
+
+    if (!obj.items || obj.items.length === 0) {
+      return `Mục tiêu lớn "${obj.title || obj.id}" phải có ít nhất 1 Kết quả then chốt (KR).`;
+    }
+
+    // Traverse and check children recursively
+    const checkDescendants = (parent: any): string | null => {
+      if (!parent.items || parent.items.length === 0) return null;
+
+      let childrenTotal = 0;
+      for (const child of parent.items) {
+        const childMaxScore = Number(child.maxScore) || 0;
+        const childUnitScore = Number(child.unitScore) || 0;
+
+        if (childMaxScore < 0) {
+          return `Điểm tối đa của "${child.title || child.id}" không được là số âm.`;
+        }
+        if (childUnitScore < 0) {
+          return `Điểm/Đơn vị của "${child.title || child.id}" không được là số âm.`;
+        }
+
+        // Điểm đơn vị của các key result không được quá điểm tối đa của object
+        if (childUnitScore > objMaxScore) {
+          return `Điểm/Đơn vị của Tiêu chí "${child.title || child.id}" (${childUnitScore}) không được vượt quá Điểm tối đa của Mục tiêu lớn "${obj.title || obj.id}" (${objMaxScore}).`;
+        }
+
+        childrenTotal += childMaxScore;
+
+        const err = checkDescendants(child);
+        if (err) return err;
+      }
+
+      const parentMaxScore = Number(parent.maxScore) || 0;
+      if (childrenTotal > 0 && childrenTotal !== parentMaxScore) {
+        if (childrenTotal > parentMaxScore) {
+          return `Tổng điểm tối đa của các mục con thuộc "${parent.title || parent.id}" (${childrenTotal}) không được vượt quá điểm tối đa của mục "${parent.title || parent.id}" (${parentMaxScore}).`;
+        } else {
+          return `Tổng điểm tối đa của các mục con thuộc "${parent.title || parent.id}" (${childrenTotal}) không được nhỏ hơn điểm tối đa của mục "${parent.title || parent.id}" (${parentMaxScore}) (phải bằng chính xác ${parentMaxScore}).`;
+        }
+      }
+      return null;
+    };
+
+    const err = checkDescendants(obj);
+    if (err) return err;
+  }
+
+  if (totalMaxScore !== 100) {
+    return `Tổng điểm tối đa (maxScore) của tất cả các Mục tiêu lớn phải chính xác bằng 100. Hiện tại đang là ${totalMaxScore}.`;
+  }
+
+  return null;
+};
+
 interface TemplateEditorDialogProps {
   open: boolean;
   onClose: () => void;
@@ -132,6 +199,12 @@ export default function TemplateEditorDialog({
   };
 
   const handleSubmit = async () => {
+    const validationError = validateStructureScores(structure);
+    if (validationError) {
+      showError("Lỗi cấu trúc điểm OKR", validationError);
+      return;
+    }
+
     try {
       const payload = {
         title,

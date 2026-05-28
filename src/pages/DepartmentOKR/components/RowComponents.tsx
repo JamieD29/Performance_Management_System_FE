@@ -60,9 +60,9 @@ export const KeyResultRow = ({ kr, oIdx, kIdx, updateItem, handleAddSubKR, handl
       <input
         type="number"
         min="0"
-        className={inputClass}
+        className={`${inputClass} bg-gray-100 cursor-not-allowed`}
         value={kr.maxScore || ""}
-        onChange={(e) => updateItem(oIdx, "maxScore", setNonNeg(e.target.value), kIdx)}
+        disabled
       />
     </TableCell>
     <TableCell>
@@ -119,9 +119,9 @@ export const SubKRRow = ({ sub, oIdx, kIdx, sIdx, updateItem, handleAddSubSubKR,
       <input
         type="number"
         min="0"
-        className={inputClass}
+        className={`${inputClass} bg-gray-100 cursor-not-allowed`}
         value={sub.maxScore || ""}
-        onChange={(e) => updateItem(oIdx, "maxScore", setNonNeg(e.target.value), kIdx, sIdx)}
+        disabled
       />
     </TableCell>
     <TableCell>

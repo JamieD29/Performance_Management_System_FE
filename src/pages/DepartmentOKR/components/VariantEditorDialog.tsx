@@ -21,6 +21,8 @@ import { Save, Add } from "@mui/icons-material";
 import { useTemplateStructure } from "../hooks/useTemplateStructure";
 import { ObjectiveRow, KeyResultRow, SubKRRow, SubSubKRRow } from "./RowComponents";
 import { motion, AnimatePresence } from "framer-motion";
+import { showError } from "../../../utils/swal";
+import { validateStructureScores } from "./TemplateEditorDialog";
 
 interface VariantEditorDialogProps {
   open: boolean;
@@ -61,6 +63,12 @@ export default function VariantEditorDialog({
   }, [open, baseTemplate]);
 
   const handleSubmit = () => {
+    const validationError = validateStructureScores(structure);
+    if (validationError) {
+      showError("Lỗi cấu trúc điểm OKR", validationError);
+      return;
+    }
+
     onSaveVariant({
       id: "v_" + Date.now(),
       title,
