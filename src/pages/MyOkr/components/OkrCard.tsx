@@ -1649,7 +1649,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                       color: "#2563eb",
                                     }}
                                   >
-                                    {krCalcScore.toFixed(1)}
+                                    {Math.min(krCalcScore, Number(kr.maxScore) || Infinity).toFixed(1)}
                                   </TableCell>
                                   <TableCell>
                                     <TextField
@@ -1910,7 +1910,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                             color: "#2563eb",
                                           }}
                                         >
-                                          {subCalcScore.toFixed(1)}
+                                          {Math.min(subCalcScore, Number(sub.maxScore) || Infinity).toFixed(1)}
                                         </TableCell>
                                         <TableCell>
                                           <TextField
@@ -2194,7 +2194,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                                     color: "#2563eb",
                                                   }}
                                                 >
-                                                  {subsubCalcScore.toFixed(1)}
+                                                  {Math.min(subsubCalcScore, Number(subsub.maxScore) || Infinity).toFixed(1)}
                                                 </TableCell>
                                                 <TableCell>
                                                   <TextField
