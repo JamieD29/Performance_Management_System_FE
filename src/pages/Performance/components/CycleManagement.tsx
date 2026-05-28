@@ -23,6 +23,7 @@ import {
   FormControlLabel,
   Radio,
   Typography,
+  Checkbox,
 } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -82,6 +83,7 @@ export default function CycleManagement() {
   const [formType, setFormType] = useState("SEMESTER");
   const [formStartDate, setFormStartDate] = useState<Dayjs | null>(null);
   const [formEndDate, setFormEndDate] = useState<Dayjs | null>(null);
+  const [bypassValidation, setBypassValidation] = useState(false);
 
   useEffect(() => {
     fetchCycles();
@@ -101,6 +103,7 @@ export default function CycleManagement() {
     setFormType("SEMESTER");
     setFormStartDate(null);
     setFormEndDate(null);
+    setBypassValidation(false);
   };
 
   const handleCreate = async () => {
@@ -113,7 +116,7 @@ export default function CycleManagement() {
       showWarning("Thiếu thông tin", "Vui lòng chọn ngày bắt đầu và ngày kết thúc.");
       return;
     }
-    if (formStartDate.isBefore(dayjs().startOf("day"))) {
+    if (!bypassValidation && formStartDate.isBefore(dayjs().startOf("day"))) {
       showWarning("Ngày không hợp lệ", "Ngày bắt đầu không được ở quá khứ. Vui lòng chọn từ hôm nay trở đi.");
       return;
     }
@@ -128,6 +131,7 @@ export default function CycleManagement() {
         type: formType,
         startDate: formStartDate.format("YYYY-MM-DD"),
         endDate: formEndDate.format("YYYY-MM-DD"),
+        bypassValidation: bypassValidation,
       });
       setOpen(false);
       resetForm();
@@ -386,17 +390,36 @@ export default function CycleManagement() {
               </RadioGroup>
             </FormControl>
 
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={bypassValidation}
+                  onChange={(e) => {
+                    setBypassValidation(e.target.checked);
+                  }}
+                  size="small"
+                  color="warning"
+                />
+              }
+              label={
+                <Typography variant="body2" sx={{ fontWeight: 600, color: "#d97706" }}>
+                  ⚠️ Bypass kiểm tra ngày (Chế độ kiểm thử)
+                </Typography>
+              }
+              sx={{ mt: -1 }}
+            />
+
             <Box sx={{ display: "flex", gap: 2 }}>
               <DatePicker
                 label="Ngày bắt đầu"
                 value={formStartDate}
                 onChange={(val) => setFormStartDate(val)}
-                minDate={dayjs()}
+                minDate={bypassValidation ? undefined : dayjs()}
                 format="DD/MM/YYYY"
                 slotProps={{
                   textField: {
                     fullWidth: true,
-                    helperText: "Không được chọn ngày quá khứ",
+                    helperText: bypassValidation ? "Đang cho phép chọn ngày quá khứ" : "Không được chọn ngày quá khứ",
                   },
                 }}
               />
@@ -404,7 +427,7 @@ export default function CycleManagement() {
                 label="Ngày kết thúc"
                 value={formEndDate}
                 onChange={(val) => setFormEndDate(val)}
-                minDate={formStartDate ? formStartDate.add(1, "day") : dayjs().add(1, "day")}
+                minDate={formStartDate ? formStartDate.add(1, "day") : (bypassValidation ? undefined : dayjs().add(1, "day"))}
                 format="DD/MM/YYYY"
                 slotProps={{
                   textField: {
