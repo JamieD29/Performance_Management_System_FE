@@ -931,10 +931,20 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
         const cleanStr = String(value).replace(/[^0-9]/g, "");
         const numVal = parseInt(cleanStr, 10) || 0;
         
-        const effectiveMax = Number(maxScore) || Number(unitScore) || Infinity;
-        const effectiveUnit = Number(unitScore) || 1;
-        const maxQty = effectiveUnit > 0 ? Math.floor(effectiveMax / effectiveUnit) : Infinity;
+        let effectiveMax = Number(maxScore);
+        if (isNaN(effectiveMax) || effectiveMax <= 0) {
+          effectiveMax = Number(unitScore);
+          if (isNaN(effectiveMax) || effectiveMax <= 0) {
+            effectiveMax = Infinity;
+          }
+        }
+        
+        let effectiveUnit = Number(unitScore);
+        if (isNaN(effectiveUnit) || effectiveUnit <= 0) {
+          effectiveUnit = 1;
+        }
 
+        const maxQty = Math.floor(effectiveMax / effectiveUnit);
         cleanValue = Math.min(numVal, maxQty);
       }
     }
