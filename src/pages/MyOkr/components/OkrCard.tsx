@@ -288,10 +288,13 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
   const isCompleted = okr.status === "COMPLETED";
   const isPending = okr.status === "PENDING";
 
-  const isCycleStarted = okr.cycle?.startDate
-    ? new Date(new Date().setHours(0, 0, 0, 0)) >=
-    new Date(new Date(okr.cycle.startDate).setHours(0, 0, 0, 0))
-    : true;
+  const isCycleStarted =
+    okr.cycle?.bypassValidation ||
+    okr.cycle?.status === "OPEN" ||
+    (okr.cycle?.startDate
+      ? new Date(new Date().setHours(0, 0, 0, 0)) >=
+        new Date(new Date(okr.cycle.startDate).setHours(0, 0, 0, 0))
+      : true);
 
   const canReport = isAccepted && isCycleStarted;
 
