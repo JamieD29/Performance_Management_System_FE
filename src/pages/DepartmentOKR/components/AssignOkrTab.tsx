@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Box,
   Button,
@@ -20,6 +20,20 @@ export default function AssignOkrTab() {
   const [templates, setTemplates] = useState<any[]>([]);
   const [openAssign, setOpenAssign] = useState(false);
   const [assignTemplate, setAssignTemplate] = useState<any>(null);
+
+  // Kiểm tra vai trò Admin từ localStorage
+  const isAdmin = useMemo(() => {
+    const userString = localStorage.getItem("user");
+    if (!userString) return false;
+    try {
+      const u = JSON.parse(userString);
+      const rawRoles = u.roles || [];
+      const userRoles = rawRoles.map((r: any) => (typeof r === "string" ? r : r.slug));
+      return userRoles.includes("ADMIN");
+    } catch {
+      return false;
+    }
+  }, []);
 
   useEffect(() => {
     fetchTemplates();
@@ -53,7 +67,7 @@ export default function AssignOkrTab() {
             <TableRow>
               <TableCell sx={{ fontWeight: "bold" }}>Tên Template</TableCell>
               <TableCell sx={{ fontWeight: "bold" }}>Chức vụ / Chức danh</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Tác giả</TableCell>
+              {isAdmin && <TableCell sx={{ fontWeight: "bold" }}>Tác giả</TableCell>}
               <TableCell sx={{ fontWeight: "bold" }}>Ngày tạo</TableCell>
               <TableCell align="right" sx={{ fontWeight: "bold" }}>Thao tác</TableCell>
             </TableRow>
@@ -61,7 +75,7 @@ export default function AssignOkrTab() {
           <TableBody>
             {templates.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} align="center" sx={{ py: 3, color: "text.secondary" }}>
+                <TableCell colSpan={isAdmin ? 5 : 4} align="center" sx={{ py: 3, color: "text.secondary" }}>
                   Chưa có template nào.
                 </TableCell>
               </TableRow>
@@ -77,9 +91,11 @@ export default function AssignOkrTab() {
                       <Chip label={t.jobTitle} size="small" color="primary" variant="outlined" />
                     )}
                   </TableCell>
-                  <TableCell>
-                    <Typography variant="body2">{t.createdByName || "—"}</Typography>
-                  </TableCell>
+                  {isAdmin && (
+                    <TableCell>
+                      <Typography variant="body2">{t.createdByName || "—"}</Typography>
+                    </TableCell>
+                  )}
                   <TableCell>{new Date(t.createdAt).toLocaleDateString("vi-VN")}</TableCell>
                   <TableCell align="right">
                     <Button size="small" color="success" variant="contained" startIcon={<Send />} onClick={() => handleAssign(t)}>
