@@ -187,13 +187,22 @@ export default function TemplateListTab() {
                         sx={{ mr: 0.5 }}
                       />
                     )}
-                    {t.jobTitle && (
+                    {t.jobTitle ? (
                       <Chip
                         label={t.jobTitle}
                         size="small"
                         color="primary"
                         variant="outlined"
                       />
+                    ) : (
+                      !t.positionName && (
+                        <Chip
+                          label="Tất cả"
+                          size="small"
+                          color="default"
+                          variant="outlined"
+                        />
+                      )
                     )}
                   </TableCell>
                   {isAdmin && (

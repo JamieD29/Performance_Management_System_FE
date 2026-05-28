@@ -87,8 +87,12 @@ export default function AssignOkrTab() {
                     {t.positionName && (
                       <Chip label={t.positionName} size="small" color="secondary" sx={{ mr: 0.5 }} />
                     )}
-                    {t.jobTitle && (
+                    {t.jobTitle ? (
                       <Chip label={t.jobTitle} size="small" color="primary" variant="outlined" />
+                    ) : (
+                      !t.positionName && (
+                        <Chip label="Tất cả" size="small" color="default" variant="outlined" />
+                      )
                     )}
                   </TableCell>
                   {isAdmin && (
