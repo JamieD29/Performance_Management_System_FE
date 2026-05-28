@@ -1775,30 +1775,34 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                               {canReport && (
                                 <>
                                   <TableCell>
-                                    <TextField
-                                      size="small"
-                                      type="number"
-                                      value={krQty || ""}
-                                      onChange={(e) =>
-                                        updateReport(
-                                          krKey,
-                                          "quantity",
-                                          e.target.value,
-                                          Number(kr.maxScore) || undefined,
-                                          Number(kr.unitScore) || undefined,
-                                        )
-                                      }
-                                      onKeyDown={(e) => {
-                                        if (["-", ".", "e", "E", "+", ","].includes(e.key)) {
-                                          e.preventDefault();
+                                    {Number(kr.unitScore) > 0 ? (
+                                      <TextField
+                                        size="small"
+                                        type="number"
+                                        value={krQty || ""}
+                                        onChange={(e) =>
+                                          updateReport(
+                                            krKey,
+                                            "quantity",
+                                            e.target.value,
+                                            Number(kr.maxScore) || undefined,
+                                            Number(kr.unitScore) || undefined,
+                                          )
                                         }
-                                      }}
-                                      inputProps={{
-                                        min: 0,
-                                        style: { textAlign: "center" },
-                                      }}
-                                      sx={{ width: 80 }}
-                                    />
+                                        onKeyDown={(e) => {
+                                          if (["-", ".", "e", "E", "+", ","].includes(e.key)) {
+                                            e.preventDefault();
+                                          }
+                                        }}
+                                        inputProps={{
+                                          min: 0,
+                                          style: { textAlign: "center" },
+                                        }}
+                                        sx={{ width: 80 }}
+                                      />
+                                    ) : (
+                                      "—"
+                                    )}
                                   </TableCell>
                                   <TableCell
                                     sx={{
@@ -1806,22 +1810,26 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                       color: "#2563eb",
                                     }}
                                   >
-                                    {Math.min(krCalcScore, Number(kr.maxScore) || Number(kr.unitScore) || Infinity).toFixed(1)}
+                                    {Number(kr.unitScore) > 0 ? Math.min(krCalcScore, Number(kr.maxScore) || Number(kr.unitScore) || Infinity).toFixed(1) : "—"}
                                   </TableCell>
                                   <TableCell>
-                                    <TextField
-                                      size="small"
-                                      fullWidth
-                                      placeholder="Link minh chứng..."
-                                      value={reportData[krKey]?.evidence || ""}
-                                      onChange={(e) =>
-                                        updateReport(
-                                          krKey,
-                                          "evidence",
-                                          e.target.value,
-                                        )
-                                      }
-                                    />
+                                    {Number(kr.unitScore) > 0 ? (
+                                      <TextField
+                                        size="small"
+                                        fullWidth
+                                        placeholder="Link minh chứng..."
+                                        value={reportData[krKey]?.evidence || ""}
+                                        onChange={(e) =>
+                                          updateReport(
+                                            krKey,
+                                            "evidence",
+                                            e.target.value,
+                                          )
+                                        }
+                                      />
+                                    ) : (
+                                      "—"
+                                    )}
                                   </TableCell>
                                 </>
                               )}
@@ -2043,30 +2051,34 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                     {canReport && (
                                       <>
                                         <TableCell>
-                                          <TextField
-                                            size="small"
-                                            type="number"
-                                            value={subQty || ""}
-                                            onChange={(e) =>
-                                              updateReport(
-                                                subKey,
-                                                "quantity",
-                                                e.target.value,
-                                                Number(sub.maxScore) || undefined,
-                                                Number(sub.unitScore) || undefined,
-                                              )
-                                            }
-                                            onKeyDown={(e) => {
-                                              if (["-", ".", "e", "E", "+", ","].includes(e.key)) {
-                                                e.preventDefault();
+                                          {Number(sub.unitScore) > 0 ? (
+                                            <TextField
+                                              size="small"
+                                              type="number"
+                                              value={subQty || ""}
+                                              onChange={(e) =>
+                                                updateReport(
+                                                  subKey,
+                                                  "quantity",
+                                                  e.target.value,
+                                                  Number(sub.maxScore) || undefined,
+                                                  Number(sub.unitScore) || undefined,
+                                                )
                                               }
-                                            }}
-                                            inputProps={{
-                                              min: 0,
-                                              style: { textAlign: "center" },
-                                            }}
-                                            sx={{ width: 80 }}
-                                          />
+                                              onKeyDown={(e) => {
+                                                if (["-", ".", "e", "E", "+", ","].includes(e.key)) {
+                                                  e.preventDefault();
+                                                }
+                                              }}
+                                              inputProps={{
+                                                min: 0,
+                                                style: { textAlign: "center" },
+                                              }}
+                                              sx={{ width: 80 }}
+                                            />
+                                          ) : (
+                                            "—"
+                                          )}
                                         </TableCell>
                                         <TableCell
                                           sx={{
@@ -2074,24 +2086,28 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                             color: "#2563eb",
                                           }}
                                         >
-                                          {Math.min(subCalcScore, Number(sub.maxScore) || Number(sub.unitScore) || Infinity).toFixed(1)}
+                                          {Number(sub.unitScore) > 0 ? Math.min(subCalcScore, Number(sub.maxScore) || Number(sub.unitScore) || Infinity).toFixed(1) : "—"}
                                         </TableCell>
                                         <TableCell>
-                                          <TextField
-                                            size="small"
-                                            fullWidth
-                                            placeholder="Link..."
-                                            value={
-                                              reportData[subKey]?.evidence || ""
-                                            }
-                                            onChange={(e) =>
-                                              updateReport(
-                                                subKey,
-                                                "evidence",
-                                                e.target.value,
-                                              )
-                                            }
-                                          />
+                                          {Number(sub.unitScore) > 0 ? (
+                                            <TextField
+                                              size="small"
+                                              fullWidth
+                                              placeholder="Link..."
+                                              value={
+                                                reportData[subKey]?.evidence || ""
+                                              }
+                                              onChange={(e) =>
+                                                updateReport(
+                                                  subKey,
+                                                  "evidence",
+                                                  e.target.value,
+                                                )
+                                              }
+                                            />
+                                          ) : (
+                                            "—"
+                                          )}
                                         </TableCell>
                                       </>
                                     )}
