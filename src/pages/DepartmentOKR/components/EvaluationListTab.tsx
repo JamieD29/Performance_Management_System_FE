@@ -48,6 +48,11 @@ export default function EvaluationListTab() {
   const [selectedReport, setSelectedReport] = useState<any>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
+  const [expandedStates, setExpandedStates] = useState<Record<string, boolean>>(() => {
+    const saved = localStorage.getItem("okr_report_accordion_states");
+    return saved ? JSON.parse(saved) : {};
+  });
+
   // Filters
   const [tabValue, setTabValue] = useState(0); // 0: ACCEPTED, 1: SUBMITTED, 2: COMPLETED
   const [searchQuery, setSearchQuery] = useState("");
@@ -338,7 +343,12 @@ export default function EvaluationListTab() {
             return (
               <Accordion
                 key={cycleName}
-                defaultExpanded
+                expanded={expandedStates[cycleName] !== false}
+                onChange={(_, expanded) => {
+                  const nextStates = { ...expandedStates, [cycleName]: expanded };
+                  setExpandedStates(nextStates);
+                  localStorage.setItem("okr_report_accordion_states", JSON.stringify(nextStates));
+                }}
                 elevation={0}
                 sx={{
                   border: "1px solid #e2e8f0",
