@@ -24,7 +24,6 @@ import {
   Tooltip,
   Snackbar,
   Alert,
-  FormHelperText,
 } from "@mui/material";
 import {
   Save,
@@ -221,11 +220,6 @@ export default function TemplateEditorDialog({
                 <MenuItem key={t.value} value={t.value}>{t.label}</MenuItem>
               ))}
             </Select>
-            {!jobTitle && (
-              <FormHelperText sx={{ color: "text.secondary", mt: 0.5 }}>
-                * Áp dụng cho tất cả chức danh nghề nghiệp
-              </FormHelperText>
-            )}
           </FormControl>
         </Box>
 
