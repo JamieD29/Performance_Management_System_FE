@@ -16,14 +16,45 @@ export const useTemplateStructure = (initialStructure: any[] = []) => {
     const newStructure = [...structure];
     const obj = newStructure[objIdx];
 
+    let finalValue = value;
+    if (field === "unitScore") {
+      const targetVal = Math.max(0, Number(value) || 0);
+      const objMaxScore = Number(obj.maxScore) || 0;
+      
+      let otherSum = 0;
+      obj.items?.forEach((kr: any, kIdx: number) => {
+        const isTargetKR = krIdx === kIdx && subIdx === undefined && subSubIdx === undefined;
+        if (!isTargetKR) {
+          otherSum += Number(kr.unitScore) || 0;
+        }
+        
+        kr.items?.forEach((sub: any, sIdx: number) => {
+          const isTargetSub = krIdx === kIdx && subIdx === sIdx && subSubIdx === undefined;
+          if (!isTargetSub) {
+            otherSum += Number(sub.unitScore) || 0;
+          }
+          
+          sub.items?.forEach((subsub: any, ssIdx: number) => {
+            const isTargetSubSub = krIdx === kIdx && subIdx === sIdx && subSubIdx === ssIdx;
+            if (!isTargetSubSub) {
+              otherSum += Number(subsub.unitScore) || 0;
+            }
+          });
+        });
+      });
+      
+      const allowedMax = Math.max(0, objMaxScore - otherSum);
+      finalValue = Math.min(targetVal, allowedMax);
+    }
+
     if (subSubIdx !== undefined && subIdx !== undefined && krIdx !== undefined) {
-      obj.items[krIdx].items[subIdx].items[subSubIdx][field] = value;
+      obj.items[krIdx].items[subIdx].items[subSubIdx][field] = finalValue;
     } else if (subIdx !== undefined && krIdx !== undefined) {
-      obj.items[krIdx].items[subIdx][field] = value;
+      obj.items[krIdx].items[subIdx][field] = finalValue;
     } else if (krIdx !== undefined) {
-      obj.items[krIdx][field] = value;
+      obj.items[krIdx][field] = finalValue;
     } else {
-      obj[field] = value;
+      obj[field] = finalValue;
     }
 
     setStructure(newStructure);

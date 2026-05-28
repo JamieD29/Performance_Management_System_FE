@@ -818,9 +818,39 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
     }
 
     if (targetItem) {
+      let finalUnitScore = Number(editCriteriaUnitScore) || 0;
+      if (editItemInfo?.type !== "OBJ" && obj) {
+        const objMaxScore = Number(obj.maxScore) || 0;
+        let otherSum = 0;
+        
+        obj.items?.forEach((kr: any) => {
+          const isTargetKR = editItemInfo?.type === "KR" && kr.id === editItemInfo.krId;
+          if (!isTargetKR) {
+            otherSum += Number(kr.unitScore) || 0;
+          }
+          
+          kr.items?.forEach((sub: any) => {
+            const isTargetSub = editItemInfo?.type === "SUBKR" && sub.id === editItemInfo.subId && kr.id === editItemInfo.krId;
+            if (!isTargetSub) {
+              otherSum += Number(sub.unitScore) || 0;
+            }
+            
+            sub.items?.forEach((subsub: any) => {
+              const isTargetSubSub = editItemInfo?.type === "SUBSUBKR" && subsub.id === editItemInfo.subsubId && sub.id === editItemInfo.subId && kr.id === editItemInfo.krId;
+              if (!isTargetSubSub) {
+                otherSum += Number(subsub.unitScore) || 0;
+              }
+            });
+          });
+        });
+        
+        const allowedMax = Math.max(0, objMaxScore - otherSum);
+        finalUnitScore = Math.min(finalUnitScore, allowedMax);
+      }
+
       targetItem.title = editCriteriaTitle;
       targetItem.maxScore = Number(editCriteriaMaxScore) || 0;
-      targetItem.unitScore = Number(editCriteriaUnitScore) || 0;
+      targetItem.unitScore = finalUnitScore;
       targetItem.unit = editCriteriaUnit;
       targetItem.isEdited = true;
     }
