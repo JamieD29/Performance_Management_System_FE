@@ -65,6 +65,9 @@ export default function Login() {
 
   // State phục vụ việc bypass đăng nhập cho tester và tự động hóa
   const [showMock, setShowMock] = useState(() => {
+    // Luôn luôn ẩn nếu chạy ở môi trường Production
+    if (import.meta.env.PROD) return false;
+
     // Mặc định hiện trên localhost để dev/test nhanh chóng
     return (
       window.location.hostname === "localhost" ||
@@ -514,15 +517,17 @@ export default function Login() {
                 </Box>
               )}
 
-              <Box sx={{ mt: 2, textAlign: "center" }}>
-                <Typography
-                  variant="caption"
-                  sx={{ color: "text.secondary", cursor: "pointer", "&:hover": { textDecoration: "underline" } }}
-                  onClick={() => setShowMock(!showMock)}
-                >
-                  {showMock ? "Ẩn công cụ Tester" : "Hiện công cụ Tester (Bypass Login)"}
-                </Typography>
-              </Box>
+              {!import.meta.env.PROD && (
+                <Box sx={{ mt: 2, textAlign: "center" }}>
+                  <Typography
+                    variant="caption"
+                    sx={{ color: "text.secondary", cursor: "pointer", "&:hover": { textDecoration: "underline" } }}
+                    onClick={() => setShowMock(!showMock)}
+                  >
+                    {showMock ? "Ẩn công cụ Tester" : "Hiện công cụ Tester (Bypass Login)"}
+                  </Typography>
+                </Box>
+              )}
             </Paper>
 
             {/* FOOTER */}

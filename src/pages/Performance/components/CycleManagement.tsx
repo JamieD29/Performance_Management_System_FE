@@ -36,6 +36,7 @@ import {
   Pause,
   Calendar,
   ArrowRight,
+  Trash2,
 } from "lucide-react";
 import { api } from "../../../services/api";
 import { showSuccess, showError, showWarning, confirmAction } from "../../../utils/swal";
@@ -131,7 +132,7 @@ export default function CycleManagement() {
         type: formType,
         startDate: formStartDate.format("YYYY-MM-DD"),
         endDate: formEndDate.format("YYYY-MM-DD"),
-        bypassValidation: bypassValidation,
+        bypassValidation: import.meta.env.PROD ? false : bypassValidation,
       });
       setOpen(false);
       resetForm();
@@ -173,6 +174,28 @@ export default function CycleManagement() {
       }
     } catch (error) {
       showError("Lỗi", "Không thể cập nhật trạng thái.");
+    }
+  };
+
+  const handleDelete = async (id: string, name: string) => {
+    const confirmed = await confirmAction({
+      title: "Xác nhận xóa?",
+      text: `Bạn có chắc chắn muốn xóa kỳ đánh giá "${name}"? Thao tác này không thể hoàn tác.`,
+      icon: "warning",
+      confirmText: "Xóa kỳ",
+      cancelText: "Hủy bỏ",
+      confirmColor: "#dc2626",
+    });
+
+    if (!confirmed) return;
+
+    try {
+      await api.delete(`${RESOURCE_PATH}/admin/cycles/${id}`);
+      fetchCycles();
+      showSuccess("Thành công!", `Đã xóa kỳ đánh giá "${name}" thành công.`);
+    } catch (error: any) {
+      const msg = error?.response?.data?.message || "Không thể xóa kỳ đánh giá. Vui lòng thử lại.";
+      showError("Lỗi", msg);
     }
   };
 
@@ -319,16 +342,40 @@ export default function CycleManagement() {
                           />
                         </TableCell>
                         <TableCell align="center">
-                          <Button
-                            size="small"
-                            color={cycle.status === "OPEN" ? "error" : "success"}
-                            startIcon={
-                              cycle.status === "OPEN" ? <Pause size={14} /> : <Play size={14} />
-                            }
-                            onClick={() => toggleStatus(cycle.id, cycle.status, cycle)}
-                          >
-                            {cycle.status === "OPEN" ? "Đóng kỳ" : "Mở kỳ"}
-                          </Button>
+                          <Box className="flex justify-center gap-2">
+                            <Button
+                              size="small"
+                              color={cycle.status === "OPEN" ? "error" : "success"}
+                              startIcon={
+                                cycle.status === "OPEN" ? <Pause size={14} /> : <Play size={14} />
+                              }
+                              onClick={() => toggleStatus(cycle.id, cycle.status, cycle)}
+                            >
+                              {cycle.status === "OPEN" ? "Đóng kỳ" : "Mở kỳ"}
+                            </Button>
+                            <Button
+                              size="small"
+                              color="error"
+                              variant="outlined"
+                              disabled={cycle.status === "OPEN"}
+                              startIcon={<Trash2 size={14} />}
+                              onClick={() => handleDelete(cycle.id, cycle.name)}
+                              sx={{
+                                borderColor: "#fecaca",
+                                color: "#dc2626",
+                                "&:hover": {
+                                  borderColor: "#dc2626",
+                                  backgroundColor: "#fef2f2",
+                                },
+                                "&.Mui-disabled": {
+                                  borderColor: "#e5e7eb",
+                                  color: "#9ca3af",
+                                },
+                              }}
+                            >
+                              Xóa
+                            </Button>
+                          </Box>
                         </TableCell>
                       </TableRow>
                     );
@@ -390,24 +437,26 @@ export default function CycleManagement() {
               </RadioGroup>
             </FormControl>
 
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={bypassValidation}
-                  onChange={(e) => {
-                    setBypassValidation(e.target.checked);
-                  }}
-                  size="small"
-                  color="warning"
-                />
-              }
-              label={
-                <Typography variant="body2" sx={{ fontWeight: 600, color: "#d97706" }}>
-                  ⚠️ Bypass kiểm tra ngày (Chế độ kiểm thử)
-                </Typography>
-              }
-              sx={{ mt: -1 }}
-            />
+            {!import.meta.env.PROD && (
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={bypassValidation}
+                    onChange={(e) => {
+                      setBypassValidation(e.target.checked);
+                    }}
+                    size="small"
+                    color="warning"
+                  />
+                }
+                label={
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: "#d97706" }}>
+                    ⚠️ Bypass kiểm tra ngày (Chế độ kiểm thử)
+                  </Typography>
+                }
+                sx={{ mt: -1 }}
+              />
+            )}
 
             <Box sx={{ display: "flex", gap: 2 }}>
               <DatePicker

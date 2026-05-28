@@ -914,12 +914,28 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
     krId: string,
     field: "quantity" | "evidence",
     value: any,
+    maxScore?: number,
   ) => {
+    let cleanValue = value;
+    if (field === "quantity") {
+      if (value === "") {
+        cleanValue = 0;
+      } else {
+        const cleanStr = String(value).replace(/[^0-9]/g, "");
+        const numVal = parseInt(cleanStr, 10) || 0;
+        if (maxScore !== undefined && maxScore !== null && !isNaN(maxScore)) {
+          cleanValue = Math.min(numVal, Number(maxScore));
+        } else {
+          cleanValue = numVal;
+        }
+      }
+    }
+
     setReportData((prev) => ({
       ...prev,
       [krId]: {
         ...prev[krId],
-        [field]: field === "quantity" ? Math.max(0, Number(value) || 0) : value,
+        [field]: cleanValue,
       },
     }));
     setHasDraftChanges(true);
@@ -1750,8 +1766,14 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                           krKey,
                                           "quantity",
                                           e.target.value,
+                                          Number(kr.maxScore) || undefined,
                                         )
                                       }
+                                      onKeyDown={(e) => {
+                                        if (["-", ".", "e", "E", "+", ","].includes(e.key)) {
+                                          e.preventDefault();
+                                        }
+                                      }}
                                       inputProps={{
                                         min: 0,
                                         style: { textAlign: "center" },
@@ -2011,8 +2033,14 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                                 subKey,
                                                 "quantity",
                                                 e.target.value,
+                                                Number(sub.maxScore) || undefined,
                                               )
                                             }
+                                            onKeyDown={(e) => {
+                                              if (["-", ".", "e", "E", "+", ","].includes(e.key)) {
+                                                e.preventDefault();
+                                              }
+                                            }}
                                             inputProps={{
                                               min: 0,
                                               style: { textAlign: "center" },
@@ -2293,8 +2321,14 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                                                         subsubKey,
                                                         "quantity",
                                                         e.target.value,
+                                                        Number(subsub.maxScore) || undefined,
                                                       )
                                                     }
+                                                    onKeyDown={(e) => {
+                                                      if (["-", ".", "e", "E", "+", ","].includes(e.key)) {
+                                                        e.preventDefault();
+                                                      }
+                                                    }}
                                                     inputProps={{
                                                       min: 0,
                                                       style: {

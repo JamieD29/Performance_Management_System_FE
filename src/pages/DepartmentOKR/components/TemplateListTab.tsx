@@ -29,6 +29,20 @@ export default function TemplateListTab() {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
 
+  // Kiểm tra vai trò Admin từ localStorage
+  const isAdmin = useMemo(() => {
+    const userString = localStorage.getItem("user");
+    if (!userString) return false;
+    try {
+      const u = JSON.parse(userString);
+      const rawRoles = u.roles || [];
+      const userRoles = rawRoles.map((r: any) => (typeof r === "string" ? r : r.slug));
+      return userRoles.includes("ADMIN");
+    } catch {
+      return false;
+    }
+  }, []);
+
   useEffect(() => {
     fetchTemplates();
   }, []);
@@ -68,6 +82,8 @@ export default function TemplateListTab() {
       showError("Lỗi", "Không thể xóa template. Vui lòng thử lại sau.");
     }
   };
+
+  console.log(templates);
 
   const filteredTemplates = useMemo(() => {
     return templates.filter((t) => {
@@ -130,7 +146,7 @@ export default function TemplateListTab() {
               <TableCell sx={{ fontWeight: "bold" }}>
                 Chức vụ / Chức danh
               </TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Tác giả</TableCell>
+              {isAdmin && <TableCell sx={{ fontWeight: "bold" }}>Tác giả</TableCell>}
               <TableCell sx={{ fontWeight: "bold" }}>Ngày tạo</TableCell>
               <TableCell align="right" sx={{ fontWeight: "bold" }}>
                 Thao tác
@@ -141,7 +157,7 @@ export default function TemplateListTab() {
             {loading ? (
               <TableRow>
                 <TableCell
-                  colSpan={5}
+                  colSpan={isAdmin ? 5 : 4}
                   align="center"
                   sx={{ py: 5 }}
                 >
@@ -151,7 +167,7 @@ export default function TemplateListTab() {
             ) : filteredTemplates.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={5}
+                  colSpan={isAdmin ? 5 : 4}
                   align="center"
                   sx={{ py: 3, color: "text.secondary" }}
                 >
@@ -180,11 +196,13 @@ export default function TemplateListTab() {
                       />
                     )}
                   </TableCell>
-                  <TableCell>
-                    <Typography variant="body2">
-                      {t.createdByName || "—"}
-                    </Typography>
-                  </TableCell>
+                  {isAdmin && (
+                    <TableCell>
+                      <Typography variant="body2">
+                        {t.createdByName || "—"}
+                      </Typography>
+                    </TableCell>
+                  )}
                   <TableCell>
                     {new Date(t.createdAt).toLocaleDateString("vi-VN")}
                   </TableCell>
