@@ -1283,12 +1283,47 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                     />
                   )}
                 </Box>
-                <Chip
-                  label={`Tối đa: ${obj.maxScore} điểm`}
-                  size="small"
-                  color="primary"
-                  sx={{ height: 24, fontSize: "0.75rem", fontWeight: "bold", bgcolor: "#1e3a8a" }}
-                />
+                <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                  {isCompleted ? (
+                    <>
+                      <Chip
+                        label={`Tự khai: ${calcObjectiveScore(obj).toFixed(1)}đ`}
+                        size="small"
+                        color="info"
+                        variant="outlined"
+                        sx={{ height: 24, fontSize: "0.75rem", fontWeight: "bold" }}
+                      />
+                      <Chip
+                        label={`QL chốt: ${calcObjectiveManagerScore(obj).toFixed(1)}đ`}
+                        size="small"
+                        color="success"
+                        sx={{ height: 24, fontSize: "0.75rem", fontWeight: "bold", bgcolor: "#2e7d32", color: "white" }}
+                      />
+                    </>
+                  ) : isSubmitted ? (
+                    <Chip
+                      label={`Tự khai: ${calcObjectiveScore(obj).toFixed(1)}đ`}
+                      size="small"
+                      color="info"
+                      variant="outlined"
+                      sx={{ height: 24, fontSize: "0.75rem", fontWeight: "bold" }}
+                    />
+                  ) : canReport ? (
+                    <Chip
+                      label={`Tự khai: ${calcObjectiveReportScore(obj).toFixed(1)}đ`}
+                      size="small"
+                      color="primary"
+                      variant="outlined"
+                      sx={{ height: 24, fontSize: "0.75rem", fontWeight: "bold" }}
+                    />
+                  ) : null}
+                  <Chip
+                    label={`Tối đa: ${obj.maxScore} điểm`}
+                    size="small"
+                    color="primary"
+                    sx={{ height: 24, fontSize: "0.75rem", fontWeight: "bold", bgcolor: "#1e3a8a" }}
+                  />
+                </Box>
               </Box>
             </Box>
           );
