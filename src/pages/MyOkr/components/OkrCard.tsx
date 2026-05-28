@@ -438,6 +438,59 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
     return max > 0 ? Math.min(total, max) : total;
   };
 
+  const calcObjectiveReportQty = (obj: any) => {
+    let totalQty = 0;
+    obj.items?.forEach((kr: any) => {
+      const krKey = `${obj.id}-${kr.id}`;
+      totalQty += reportData[krKey]?.quantity || 0;
+      kr.items?.forEach((sub: any) => {
+        const subKey = `${obj.id}-${kr.id}-${sub.id}`;
+        totalQty += reportData[subKey]?.quantity || 0;
+        sub.items?.forEach((subsub: any) => {
+          const subsubKey = `${obj.id}-${kr.id}-${sub.id}-${subsub.id}`;
+          totalQty += reportData[subsubKey]?.quantity || 0;
+        });
+      });
+    });
+    return totalQty;
+  };
+
+  const calcObjectiveSubmittedQty = (obj: any) => {
+    let totalQty = 0;
+    const selfReport = okr.selfReportData || {};
+    obj.items?.forEach((kr: any) => {
+      const krKey = `${obj.id}-${kr.id}`;
+      totalQty += Number(selfReport[krKey]?.quantity) || 0;
+      kr.items?.forEach((sub: any) => {
+        const subKey = `${obj.id}-${kr.id}-${sub.id}`;
+        totalQty += Number(selfReport[subKey]?.quantity) || 0;
+        sub.items?.forEach((subsub: any) => {
+          const subsubKey = `${obj.id}-${kr.id}-${sub.id}-${subsub.id}`;
+          totalQty += Number(selfReport[subsubKey]?.quantity) || 0;
+        });
+      });
+    });
+    return totalQty;
+  };
+
+  const calcObjectiveManagerQty = (obj: any) => {
+    let totalQty = 0;
+    const mgrReport = okr.managerReportData || {};
+    obj.items?.forEach((kr: any) => {
+      const krKey = `${obj.id}-${kr.id}`;
+      totalQty += Number(mgrReport[krKey]?.quantity) || 0;
+      kr.items?.forEach((sub: any) => {
+        const subKey = `${obj.id}-${kr.id}-${sub.id}`;
+        totalQty += Number(mgrReport[subKey]?.quantity) || 0;
+        sub.items?.forEach((subsub: any) => {
+          const subsubKey = `${obj.id}-${kr.id}-${sub.id}-${subsub.id}`;
+          totalQty += Number(mgrReport[subsubKey]?.quantity) || 0;
+        });
+      });
+    });
+    return totalQty;
+  };
+
   const handleOpenAddDialog = (
     type: "KR" | "SUBKR",
     objId: string,
@@ -1442,7 +1495,15 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                         <TableCell></TableCell>
                         {canReport && (
                           <>
-                            <TableCell align="center">—</TableCell>
+                            <TableCell
+                              align="center"
+                              sx={{
+                                fontWeight: "bold",
+                                color: "#1e3a8a",
+                              }}
+                            >
+                              {calcObjectiveReportQty(obj)}
+                            </TableCell>
                             <TableCell
                               align="center"
                               sx={{
@@ -1457,7 +1518,15 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                         )}
                         {(isSubmitted || isCompleted) && (
                           <>
-                            <TableCell align="center">—</TableCell>
+                            <TableCell
+                              align="center"
+                              sx={{
+                                fontWeight: "bold",
+                                color: "#475569",
+                              }}
+                            >
+                              {calcObjectiveSubmittedQty(obj)}
+                            </TableCell>
                             <TableCell
                               align="center"
                               sx={{
@@ -1467,7 +1536,19 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                             >
                               {calcObjectiveScore(obj)} / {obj.maxScore || 0}
                             </TableCell>
-                            <TableCell align="center">—</TableCell>
+                            <TableCell
+                              align="center"
+                              sx={{
+                                fontWeight: "bold",
+                                color: "#15803d",
+                              }}
+                            >
+                              {okr.status === "COMPLETED" ? (
+                                calcObjectiveManagerQty(obj)
+                              ) : (
+                                "—"
+                              )}
+                            </TableCell>
                             <TableCell
                               align="center"
                               sx={{
