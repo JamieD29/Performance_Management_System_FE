@@ -13,6 +13,7 @@ import {
   Step,
   StepLabel,
   Tooltip,
+  IconButton,
 } from "@mui/material";
 import {
   School as SchoolIcon,
@@ -271,36 +272,6 @@ export default function ProfileSetup() {
         fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
       }}
     >
-      {/* Nút đổi tài khoản — góc trên bên phải */}
-      <Tooltip title="Đăng xuất và đổi tài khoản" placement="left">
-        <Button
-          onClick={handleSwitchAccount}
-          startIcon={<LogoutIcon />}
-          size="small"
-          sx={{
-            position: "fixed",
-            top: 20,
-            right: 24,
-            zIndex: 100,
-            textTransform: "none",
-            fontWeight: 600,
-            borderRadius: "10px",
-            px: 2,
-            py: 0.8,
-            bgcolor: "rgba(255,255,255,0.85)",
-            backdropFilter: "blur(8px)",
-            border: "1px solid rgba(25,118,210,0.25)",
-            color: "#1976d2",
-            boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
-            "&:hover": {
-              bgcolor: "rgba(25,118,210,0.08)",
-              borderColor: "#1976d2",
-            },
-          }}
-        >
-          Đổi tài khoản
-        </Button>
-      </Tooltip>
       {/* Decorative circles */}
       <Box
         sx={{
@@ -381,8 +352,33 @@ export default function ProfileSetup() {
                 backdropFilter: "blur(20px)",
                 border: "1px solid rgba(255,255,255,0.6)",
                 boxShadow: "0 8px 40px rgba(0, 0, 0, 0.06)",
+                position: "relative",
               }}
             >
+              {/* Nút đổi tài khoản nằm trong card - chỉ hiện icon */}
+              <Box sx={{ position: "absolute", top: 16, right: 16, zIndex: 10 }}>
+                <Tooltip title="Đăng xuất và đổi tài khoản" placement="left">
+                  <IconButton
+                    onClick={handleSwitchAccount}
+                    size="small"
+                    sx={{
+                      color: "#78909c",
+                      border: "1px solid rgba(120, 144, 156, 0.2)",
+                      borderRadius: "10px",
+                      bgcolor: "rgba(255, 255, 255, 0.6)",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        color: "#c62828",
+                        bgcolor: "rgba(198, 40, 40, 0.05)",
+                        borderColor: "rgba(198, 40, 40, 0.2)",
+                        transform: "scale(1.05)",
+                      },
+                    }}
+                  >
+                    <LogoutIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              </Box>
               {/* Stepper */}
               <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
                 {steps.map((label) => (
