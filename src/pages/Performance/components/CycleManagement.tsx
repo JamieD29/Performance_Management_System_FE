@@ -132,7 +132,7 @@ export default function CycleManagement() {
         type: formType,
         startDate: formStartDate.format("YYYY-MM-DD"),
         endDate: formEndDate.format("YYYY-MM-DD"),
-        bypassValidation: import.meta.env.PROD ? false : bypassValidation,
+        bypassValidation: bypassValidation,
       });
       setOpen(false);
       resetForm();
@@ -437,26 +437,24 @@ export default function CycleManagement() {
               </RadioGroup>
             </FormControl>
 
-            {!import.meta.env.PROD && (
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={bypassValidation}
-                    onChange={(e) => {
-                      setBypassValidation(e.target.checked);
-                    }}
-                    size="small"
-                    color="warning"
-                  />
-                }
-                label={
-                  <Typography variant="body2" sx={{ fontWeight: 600, color: "#d97706" }}>
-                    ⚠️ Bypass kiểm tra ngày (Chế độ kiểm thử)
-                  </Typography>
-                }
-                sx={{ mt: -1 }}
-              />
-            )}
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={bypassValidation}
+                  onChange={(e) => {
+                    setBypassValidation(e.target.checked);
+                  }}
+                  size="small"
+                  color="warning"
+                />
+              }
+              label={
+                <Typography variant="body2" sx={{ fontWeight: 600, color: "#d97706" }}>
+                  ⚠️ Bypass kiểm tra ngày (Chế độ kiểm thử)
+                </Typography>
+              }
+              sx={{ mt: -1 }}
+            />
 
             <Box sx={{ display: "flex", gap: 2 }}>
               <DatePicker
