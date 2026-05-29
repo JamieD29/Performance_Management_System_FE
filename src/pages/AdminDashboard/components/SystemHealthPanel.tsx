@@ -127,9 +127,25 @@ export default function SystemHealthPanel({ health, loading, onRefresh }: Props)
             <Typography variant="subtitle2" fontWeight={700} color="#ffffff">
               System Health
             </Typography>
-            <Typography variant="caption" color="rgba(255,255,255,0.45)">
-              Cập nhật mỗi 30 giây
-            </Typography>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mt: 0.25 }}>
+              <Box
+                sx={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: "50%",
+                  bgcolor: "#10b981",
+                  boxShadow: "0 0 8px #10b981",
+                  animation: "pulse-glow 1.8s infinite ease-in-out",
+                  "@keyframes pulse-glow": {
+                    "0%, 100%": { transform: "scale(0.8)", opacity: 0.5, boxShadow: "0 0 2px #10b981" },
+                    "50%": { transform: "scale(1.2)", opacity: 1, boxShadow: "0 0 12px #10b981" },
+                  },
+                }}
+              />
+              <Typography variant="caption" color="rgba(255,255,255,0.65)" fontWeight={600} sx={{ letterSpacing: "0.03em" }}>
+                Trực tiếp (Real-time)
+              </Typography>
+            </Box>
           </Box>
         </Box>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -189,26 +205,6 @@ export default function SystemHealthPanel({ health, loading, onRefresh }: Props)
               height: 22,
             }}
           />
-          <Tooltip title="Làm mới ngay">
-            <IconButton
-              size="small"
-              onClick={onRefresh}
-              disabled={loading}
-              sx={{
-                color: "rgba(255,255,255,0.6)",
-                "&:hover": { color: "#60a5fa", bgcolor: "rgba(96,165,250,0.1)" },
-                transition: "all 0.2s",
-              }}
-            >
-              <Refresh
-                fontSize="small"
-                sx={{
-                  animation: loading ? "spin 1s linear infinite" : "none",
-                  "@keyframes spin": { "100%": { transform: "rotate(360deg)" } },
-                }}
-              />
-            </IconButton>
-          </Tooltip>
         </Box>
       </Box>
 

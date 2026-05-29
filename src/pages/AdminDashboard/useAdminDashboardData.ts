@@ -190,18 +190,54 @@ export function useAdminDashboardData() {
 
   useEffect(() => {
     fetchMainData();
-    fetchSystemHealth();
+    fetchSystemHealth(); // Tải nhanh lần đầu tiên qua HTTP
 
-    // Polling system health mỗi 30 giây
-    const healthInterval = setInterval(fetchSystemHealth, HEALTH_POLL_INTERVAL);
-    // Polling logs mỗi 15 giây — để bắt được login/logout mới
-    const logsInterval  = setInterval(fetchLogs, LOGS_POLL_INTERVAL);
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+
+    // 1. Kết nối Real-time qua Server-Sent Events (SSE) cho System Health
+    const sseHealthUrl = `${baseUrl}/admin/system-health/stream`;
+    const healthEventSource = new EventSource(sseHealthUrl);
+
+    healthEventSource.onmessage = (event) => {
+      try {
+        const health = JSON.parse(event.data);
+        if (health) {
+          setData((prev) => ({ ...prev, systemHealth: health }));
+        }
+      } catch (err) {
+        console.error("Lỗi parse dữ liệu SSE System Health:", err);
+      }
+    };
+
+    healthEventSource.onerror = (err) => {
+      console.error("Lỗi kết nối SSE System Health:", err);
+    };
+
+    // 2. Kết nối Real-time qua Server-Sent Events (SSE) cho Logs
+    const sseLogsUrl = `${baseUrl}/admin/system-logs/stream`;
+    const logsEventSource = new EventSource(sseLogsUrl);
+
+    logsEventSource.onmessage = (event) => {
+      try {
+        const logs = JSON.parse(event.data);
+        if (Array.isArray(logs)) {
+          const recentLogs: SystemLog[] = logs.slice(0, 20);
+          setData((prev) => ({ ...prev, recentLogs }));
+        }
+      } catch (err) {
+        console.error("Lỗi parse dữ liệu SSE System Logs:", err);
+      }
+    };
+
+    logsEventSource.onerror = (err) => {
+      console.error("Lỗi kết nối SSE System Logs:", err);
+    };
 
     return () => {
-      clearInterval(healthInterval);
-      clearInterval(logsInterval);
+      healthEventSource.close();
+      logsEventSource.close();
     };
-  }, [fetchMainData, fetchSystemHealth, fetchLogs]);
+  }, [fetchMainData, fetchSystemHealth]);
 
   return {
     data,

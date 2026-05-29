@@ -117,36 +117,31 @@ export default function ActivityFeed({ logs, loading, onRefresh }: Props) {
           <Typography variant="subtitle2" fontWeight={700} color="#ffffff">
             Hoạt động gần đây
           </Typography>
-          <Typography variant="caption" color="rgba(255,255,255,0.45)">
-            Cập nhật lúc {formatClockTime(lastUpdated)} · Tự động mỗi 15 giây
-          </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mt: 0.25 }}>
+            <Box
+              sx={{
+                width: 7,
+                height: 7,
+                borderRadius: "50%",
+                bgcolor: "#3b82f6",
+                boxShadow: "0 0 8px #3b82f6",
+                animation: "pulse-glow-blue 1.8s infinite ease-in-out",
+                "@keyframes pulse-glow-blue": {
+                  "0%, 100%": { transform: "scale(0.8)", opacity: 0.5, boxShadow: "0 0 2px #3b82f6" },
+                  "50%": { transform: "scale(1.2)", opacity: 1, boxShadow: "0 0 12px #3b82f6" },
+                },
+              }}
+            />
+            <Typography variant="caption" color="rgba(255,255,255,0.65)" fontWeight={600} sx={{ letterSpacing: "0.03em" }}>
+              Trực tiếp (Real-time)
+            </Typography>
+          </Box>
         </Box>
-
-        {/* Nút Refresh thủ công */}
-        <Tooltip title="Làm mới ngay" placement="left">
-          <IconButton
-            size="small"
-            onClick={handleRefresh}
-            disabled={refreshing}
-            sx={{
-              color: "rgba(255,255,255,0.7)",
-              transition: "all 0.2s",
-              "&:hover": { color: "#ffffff", bgcolor: "rgba(255,255,255,0.1)" },
-              "& svg": {
-                transition: "transform 0.5s ease",
-                transform: refreshing ? "rotate(360deg)" : "rotate(0deg)",
-                animation: refreshing ? "spin 0.8s linear infinite" : "none",
-                "@keyframes spin": { "0%": { transform: "rotate(0deg)" }, "100%": { transform: "rotate(360deg)" } },
-              },
-            }}
-          >
-            <Refresh fontSize="small" />
-          </IconButton>
-        </Tooltip>
       </Box>
 
       {/* Feed list — tối đa 10 bản ghi, scroll để xem thêm */}
-      <Box sx={{ flex: 1, overflowY: "auto", maxHeight: 380, px: 3,
+      <Box sx={{
+        flex: 1, overflowY: "auto", maxHeight: 380, px: 3,
         "&::-webkit-scrollbar": { width: 4 },
         "&::-webkit-scrollbar-track": { bgcolor: "transparent" },
         "&::-webkit-scrollbar-thumb": { bgcolor: "#cbd5e1", borderRadius: 2 },
