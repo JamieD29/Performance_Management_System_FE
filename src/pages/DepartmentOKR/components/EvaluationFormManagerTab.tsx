@@ -23,8 +23,10 @@ import { CheckCircle, ExpandMore } from "@mui/icons-material";
 import { api } from "../../../services/api";
 import { showError } from "../../../utils/swal";
 import EvaluationFormManagerDialog from "./EvaluationFormManagerDialog";
+import { useNavigate } from "react-router-dom";
 
 export default function EvaluationFormManagerTab() {
+  const navigate = useNavigate();
   const [reports, setReports] = useState<any[]>([]);
   const [allCycles, setAllCycles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -223,12 +225,17 @@ export default function EvaluationFormManagerTab() {
                       {cycleReports.map((report) => (
                         <TableRow hover key={report.id}>
                           <TableCell>
-                            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                              <Avatar sx={{ width: 32, height: 32, bgcolor: "#1C4D8D", fontSize: "0.9rem" }}>
+                            <Box 
+                              sx={{ display: "flex", alignItems: "center", gap: 1.5, cursor: "pointer", "&:hover .user-name": { textDecoration: "underline" } }}
+                              onClick={() => {
+                                if (report.user?.id) navigate(`/departments/users/${report.user.id}`, { state: { parentName: "OKR Bộ Môn", parentUrl: "/departments/okr" } });
+                              }}
+                            >
+                              <Avatar src={report.user?.avatarUrl} sx={{ width: 32, height: 32, bgcolor: "#1C4D8D", fontSize: "0.9rem" }}>
                                 {report.user?.name?.[0] || "?"}
                               </Avatar>
                               <Box>
-                                <Typography variant="body2" fontWeight="bold">
+                                <Typography variant="body2" fontWeight="bold" color="primary.main" className="user-name">
                                   {report.user?.name}
                                 </Typography>
                                 <Typography variant="caption" color="text.secondary">

@@ -38,8 +38,10 @@ import {
 import EvaluationDetailsDialog from "./EvaluationDetailsDialog";
 import { api } from "../../../services/api";
 import { showInfo, showError } from "../../../utils/swal";
+import { useNavigate } from "react-router-dom";
 
 export default function EvaluationListTab() {
+  const navigate = useNavigate();
   const [acceptedReports, setAcceptedReports] = useState<any[]>([]);
   const [submittedReports, setSubmittedReports] = useState<any[]>([]);
   const [completedReports, setCompletedReports] = useState<any[]>([]);
@@ -484,9 +486,15 @@ export default function EvaluationListTab() {
                                     display: "flex",
                                     alignItems: "center",
                                     gap: 1.5,
+                                    cursor: "pointer",
+                                    "&:hover .user-name": { textDecoration: "underline" }
+                                  }}
+                                  onClick={() => {
+                                    if (report.user?.id) navigate(`/departments/users/${report.user.id}`, { state: { parentName: "OKR Bộ Môn", parentUrl: "/departments/okr" } });
                                   }}
                                 >
                                   <Avatar
+                                    src={report.user?.avatarUrl}
                                     sx={{ bgcolor: "#1C4D8D", width: 36, height: 36 }}
                                   >
                                     {report.user?.name?.[0] || "?"}
@@ -495,7 +503,8 @@ export default function EvaluationListTab() {
                                     <Typography
                                       variant="body2"
                                       fontWeight={600}
-                                      color="#0f172a"
+                                      color="primary.main"
+                                      className="user-name"
                                     >
                                       {report.user?.name || "No name"}
                                     </Typography>

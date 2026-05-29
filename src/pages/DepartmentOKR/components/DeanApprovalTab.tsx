@@ -33,8 +33,10 @@ import { Check, Close, Visibility, ExpandMore, Search } from "@mui/icons-materia
 import { api } from "../../../services/api";
 import { confirmAction, showSuccess, showError, showInfo } from "../../../utils/swal";
 import OkrManagerTree from "./OkrManagerTree";
+import { useNavigate } from "react-router-dom";
 
 export default function DeanApprovalTab() {
+  const navigate = useNavigate();
   const [pendingOkrs, setPendingOkrs] = useState<any[]>([]);
   const [viewDialog, setViewDialog] = useState(false);
   const [selectedOkr, setSelectedOkr] = useState<any>(null);
@@ -288,7 +290,12 @@ export default function DeanApprovalTab() {
                       {okrs.map((okr) => (
                         <TableRow key={okr.id} hover>
                           <TableCell>
-                            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                            <Box 
+                              sx={{ display: "flex", alignItems: "center", gap: 1, cursor: "pointer", "&:hover .user-name": { textDecoration: "underline" } }}
+                              onClick={() => {
+                                if (okr.user?.id) navigate(`/departments/users/${okr.user.id}`, { state: { parentName: "OKR Bộ Môn", parentUrl: "/departments/okr" } });
+                              }}
+                            >
                               <Avatar
                                 src={okr.user?.avatarUrl}
                                 sx={{ width: 28, height: 28 }}
@@ -296,7 +303,7 @@ export default function DeanApprovalTab() {
                                 {(okr.user?.name || okr.user?.email)?.[0]?.toUpperCase()}
                               </Avatar>
                               <Box>
-                                <Typography variant="body2" fontWeight={500}>
+                                <Typography variant="body2" fontWeight={500} className="user-name" color="primary.main">
                                   {okr.user?.name || "(Chưa đặt tên)"}
                                 </Typography>
                                 <Typography variant="caption" color="text.secondary">

@@ -106,7 +106,7 @@ export default function UserProfileCard({ user }: UserProfileCardProps) {
           >
             {user.name}
           </Typography>
-          <VerifiedUser sx={{ color: mainColor }} />
+          {/* <VerifiedUser sx={{ color: mainColor }} /> */}
         </Box>
 
         <Box

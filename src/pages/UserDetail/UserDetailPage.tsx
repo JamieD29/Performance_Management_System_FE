@@ -2,7 +2,7 @@ import { Box, Container, CircularProgress, Typography, Tabs, Tab, Breadcrumbs, P
 import { Person, Assessment, TrendingUp, NavigateNext, School, ArrowBack } from "@mui/icons-material";
 import { Building2 } from "lucide-react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useUserDetailData } from "./useUserDetailData";
 import UserProfileCard from "./components/UserProfileCard";
 import CycleSelector from "./components/CycleSelector";
@@ -13,6 +13,8 @@ import { THEME_COLORS } from "../ProfileSetting/profile.constants";
 
 export default function UserDetailPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const state = location.state as { parentName?: string; parentUrl?: string } | null;
   const { data, loading, error, selectedCycleId, setSelectedCycleId } = useUserDetailData();
   const [activeTab, setActiveTab] = useState(0);
 
@@ -50,19 +52,38 @@ export default function UserDetailPage() {
           </IconButton>
 
           <Breadcrumbs separator={<NavigateNext fontSize="small" />}>
-            <Typography
+            {/* <Typography
               sx={{ display: "flex", alignItems: "center", cursor: "pointer", color: "text.secondary", "&:hover": { color: "#1e293b", textDecoration: "underline" } }}
               onClick={() => navigate("/departments")}
             >
               <School sx={{ mr: 0.5, fontSize: 18 }} />
               Đơn vị
-            </Typography>
-            {data.user.department && (
-              <Typography sx={{ display: "flex", alignItems: "center", color: "text.secondary" }}>
+            </Typography> */}
+
+            {state?.parentName && state.parentName !== "Đơn vị" && (
+              <Typography
+                sx={{ display: "flex", alignItems: "center", cursor: "pointer", color: "text.secondary", "&:hover": { color: "#1e293b", textDecoration: "underline" } }}
+                onClick={() => navigate(state.parentUrl || "/")}
+              >
+                {state.parentName === "OKR Bộ Môn" ? <Assessment sx={{ mr: 0.5, fontSize: 18 }} /> : <Building2 size={16} style={{ marginRight: 4 }} />}
+                {state.parentName}
+              </Typography>
+            )}
+
+            {(!state?.parentName) && data.user.department && (
+              <Typography
+                sx={{ display: "flex", alignItems: "center", color: "text.secondary", cursor: "pointer", "&:hover": { color: "#1e293b", textDecoration: "underline" } }}
+                onClick={() => {
+                  if (data.user.department?.id) {
+                    navigate(`/departments?deptId=${data.user.department.id}`);
+                  }
+                }}
+              >
                 <Building2 size={16} style={{ marginRight: 4 }} />
                 {data.user.department.name}
               </Typography>
             )}
+
             <Typography sx={{ fontWeight: "bold", color: "#1e293b" }}>
               {data.user.name}
             </Typography>

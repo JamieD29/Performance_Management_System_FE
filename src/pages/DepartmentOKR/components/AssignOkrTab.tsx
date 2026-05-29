@@ -11,12 +11,16 @@ import {
   Paper,
   Typography,
   Chip,
+  Avatar,
+  Tooltip,
 } from "@mui/material";
 import { Send } from "@mui/icons-material";
 import { api } from "../../../services/api";
 import AssignTemplateDialog from "./AssignTemplateDialog";
+import { useNavigate } from "react-router-dom";
 
 export default function AssignOkrTab() {
+  const navigate = useNavigate();
   const [templates, setTemplates] = useState<any[]>([]);
   const [openAssign, setOpenAssign] = useState(false);
   const [assignTemplate, setAssignTemplate] = useState<any>(null);
@@ -65,11 +69,11 @@ export default function AssignOkrTab() {
         <Table>
           <TableHead sx={{ bgcolor: "#f1f5f9" }}>
             <TableRow>
-              <TableCell sx={{ fontWeight: "bold" }}>Tên Template</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Chức vụ / Chức danh</TableCell>
-              {isAdmin && <TableCell sx={{ fontWeight: "bold" }}>Tác giả</TableCell>}
-              <TableCell sx={{ fontWeight: "bold" }}>Ngày tạo</TableCell>
-              <TableCell align="right" sx={{ fontWeight: "bold" }}>Thao tác</TableCell>
+              <TableCell sx={{ fontWeight: "bold", width: { xs: "30%", md: "40%" } }}>Tên Template</TableCell>
+              <TableCell sx={{ fontWeight: "bold", width: "20%", whiteSpace: "nowrap" }}>Chức vụ / Chức danh</TableCell>
+              {isAdmin && <TableCell sx={{ fontWeight: "bold", width: "15%", whiteSpace: "nowrap" }}>Tác giả</TableCell>}
+              <TableCell sx={{ fontWeight: "bold", width: "15%", whiteSpace: "nowrap" }}>Ngày tạo</TableCell>
+              <TableCell align="right" sx={{ fontWeight: "bold", width: "10%", whiteSpace: "nowrap" }}>Thao tác</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -82,7 +86,24 @@ export default function AssignOkrTab() {
             ) : (
               templates.map((t) => (
                 <TableRow key={t.id} hover>
-                  <TableCell sx={{ fontWeight: 500 }}>{t.title}</TableCell>
+                  <TableCell sx={{ maxWidth: { xs: 150, sm: 200, md: 300 } }}>
+                    <Tooltip title={t.title}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: 500,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                          wordBreak: "break-word",
+                        }}
+                      >
+                        {t.title}
+                      </Typography>
+                    </Tooltip>
+                  </TableCell>
                   <TableCell>
                     {t.positionName && (
                       <Chip label={t.positionName} size="small" color="secondary" sx={{ mr: 0.5 }} />
@@ -97,7 +118,25 @@ export default function AssignOkrTab() {
                   </TableCell>
                   {isAdmin && (
                     <TableCell>
-                      <Typography variant="body2">{t.createdByName || "—"}</Typography>
+                      {t.createdByUserId ? (
+                        <Box
+                          sx={{ display: "flex", alignItems: "center", gap: 1, cursor: "pointer", "&:hover .author-name": { textDecoration: "underline" } }}
+                          onClick={() => navigate(`/departments/users/${t.createdByUserId}`, { state: { parentName: "OKR Bộ Môn", parentUrl: "/departments/okr" } })}
+                        >
+                          <Avatar sx={{ width: 24, height: 24, fontSize: 12, bgcolor: "#dbeafe", color: "#1e40af", fontWeight: "bold" }}>
+                            {t.createdByName ? t.createdByName.charAt(0).toUpperCase() : "U"}
+                          </Avatar>
+                          <Typography
+                            variant="body2"
+                            className="author-name"
+                            sx={{ color: "primary.main" }}
+                          >
+                            {t.createdByName || "—"}
+                          </Typography>
+                        </Box>
+                      ) : (
+                        <Typography variant="body2">—</Typography>
+                      )}
                     </TableCell>
                   )}
                   <TableCell>{new Date(t.createdAt).toLocaleDateString("vi-VN")}</TableCell>

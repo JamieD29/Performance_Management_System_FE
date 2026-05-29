@@ -255,7 +255,7 @@ export default function DepartmentDetailView({
                   <TableRow
                     key={user.id}
                     hover
-                    onClick={() => navigate(`/departments/users/${user.id}`)}
+                    onClick={() => navigate(`/departments/users/${user.id}`, { state: { parentName: department.name, parentUrl: window.location.pathname + window.location.search } })}
                     sx={{
                       cursor: "pointer",
                       transition: "all 0.15s ease",
