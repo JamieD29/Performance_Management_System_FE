@@ -27,6 +27,7 @@ const MyOkrPage = React.lazy(() => import('../pages/MyOkr/MyOkrPage'));
 const MyEvaluationPage = React.lazy(() => import('../pages/MyEvaluation/MyEvaluationPage'));
 const DeanDashboard = React.lazy(() => import('../pages/DeanDashboard/DeanDashboard'));
 const AdminDashboard = React.lazy(() => import('../pages/AdminDashboard/AdminDashboard'));
+const UserDetailPage = React.lazy(() => import('../pages/UserDetail/UserDetailPage'));
 
 // Non-lazy (always needed for layout)
 import MainLayout from '../layouts/MainLayout';
@@ -190,6 +191,7 @@ export default function AppRoutes() {
 
         {/* 🔥 "NHÂN SỰ" - KẾT NỐI VÀO COMPONENT DEPARTMENT CŨ TẠI ĐÂY */}
         <Route path="/departments/users" element={<ManagerRoute><Department /></ManagerRoute>} />
+        <Route path="/departments/users/:userId" element={<ManagerRoute><UserDetailPage /></ManagerRoute>} />
 
         {/* 4. TRANG ADMIN (Bảo vệ 2 lớp) */}
         <Route

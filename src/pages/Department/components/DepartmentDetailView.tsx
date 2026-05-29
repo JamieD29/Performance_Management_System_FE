@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -29,6 +30,7 @@ import {
   BadgeOutlined,
   ArrowBack,
   FilterList,
+  Visibility,
 } from "@mui/icons-material";
 import { Users, Building2 } from "lucide-react";
 import { api } from "../../../services/api";
@@ -49,6 +51,7 @@ export default function DepartmentDetailView({
   isDonVi,
   onBack,
 }: DepartmentDetailViewProps) {
+  const navigate = useNavigate();
   const [users, setUsers] = useState<User[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [userSearch, setUserSearch] = useState("");
@@ -231,12 +234,12 @@ export default function DepartmentDetailView({
           <Table>
             <TableHead sx={{ bgcolor: "#f8fafc" }}>
               <TableRow>
-                <TableCell sx={{ fontWeight: "bold", color: "#475569", width: 50 }}>#</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#475569", width: 50 }}>ID</TableCell>
                 <TableCell sx={{ fontWeight: "bold", color: "#475569" }}>NHÂN VIÊN</TableCell>
                 <TableCell sx={{ fontWeight: "bold", color: "#475569" }}>EMAIL</TableCell>
                 <TableCell sx={{ fontWeight: "bold", color: "#475569" }}>CHỨC DANH</TableCell>
                 <TableCell sx={{ fontWeight: "bold", color: "#475569" }}>CHỨC VỤ QUẢN LÝ</TableCell>
-                {isAdmin && <TableCell align="right" sx={{ fontWeight: "bold", color: "#475569" }}>THAO TÁC</TableCell>}
+                <TableCell align="right" sx={{ fontWeight: "bold", color: "#475569" }}>THAO TÁC</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -249,7 +252,16 @@ export default function DepartmentDetailView({
                 </TableRow>
               ) : filteredUsers.length > 0 ? (
                 filteredUsers.map((user, idx) => (
-                  <TableRow key={user.id} hover sx={{ transition: "all 0.15s ease", "&:hover": { bgcolor: "#f0f7ff" } }}>
+                  <TableRow
+                    key={user.id}
+                    hover
+                    onClick={() => navigate(`/departments/users/${user.id}`)}
+                    sx={{
+                      cursor: "pointer",
+                      transition: "all 0.15s ease",
+                      "&:hover": { bgcolor: "#f0f7ff" }
+                    }}
+                  >
                     <TableCell><Typography variant="body2" color="text.secondary" fontWeight={500}>{idx + 1}</Typography></TableCell>
                     <TableCell>
                       <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
@@ -271,16 +283,18 @@ export default function DepartmentDetailView({
                         <Typography variant="caption" color="text.disabled">—</Typography>
                       )}
                     </TableCell>
-                    {isAdmin && (
-                      <TableCell align="right">
-                        <Tooltip title="Gán chức vụ quản lý">
-                          <IconButton size="small" color="primary" onClick={() => { setAssignModalUser(user); setAssignModalOpen(true); }} sx={{ "&:hover": { bgcolor: "#dbeafe" } }}><BadgeOutlined fontSize="small" /></IconButton>
-                        </Tooltip>
-                        <Tooltip title="Gỡ khỏi bộ môn">
-                          <IconButton size="small" color="warning" onClick={() => handleRemoveFromDepartment(user)} sx={{ "&:hover": { bgcolor: "#fef3c7" } }}><PersonRemove fontSize="small" /></IconButton>
-                        </Tooltip>
-                      </TableCell>
-                    )}
+                    <TableCell align="right">
+                      {isAdmin && (
+                        <>
+                          <Tooltip title="Gán chức vụ quản lý">
+                            <IconButton size="small" color="primary" onClick={(e) => { e.stopPropagation(); setAssignModalUser(user); setAssignModalOpen(true); }} sx={{ "&:hover": { bgcolor: "#dbeafe" }, ml: 1 }}><BadgeOutlined fontSize="small" /></IconButton>
+                          </Tooltip>
+                          <Tooltip title="Gỡ khỏi bộ môn">
+                            <IconButton size="small" color="error" onClick={(e) => { e.stopPropagation(); handleRemoveFromDepartment(user); }} sx={{ "&:hover": { bgcolor: "#fee2e2" }, ml: 1 }}><PersonRemove fontSize="small" /></IconButton>
+                          </Tooltip>
+                        </>
+                      )}
+                    </TableCell>
                   </TableRow>
                 ))
               ) : (
