@@ -63,16 +63,13 @@ export default function Login() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
+  const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+
   // State phục vụ việc bypass đăng nhập cho tester và tự động hóa
   const [showMock, setShowMock] = useState(() => {
-    // Luôn luôn ẩn nếu chạy ở môi trường Production
-    if (import.meta.env.PROD) return false;
-
-    // Mặc định hiện trên localhost để dev/test nhanh chóng
-    return (
-      window.location.hostname === "localhost" ||
-      window.location.hostname === "127.0.0.1"
-    );
+    // Luôn luôn ẩn nếu chạy ở môi trường Production hoặc không phải local
+    if (import.meta.env.PROD || !isLocal) return false;
+    return true;
   });
   const [mockEmail, setMockEmail] = useState("");
   const [mockRole, setMockRole] = useState("USER");
@@ -517,7 +514,7 @@ export default function Login() {
                 </Box>
               )}
 
-              {!import.meta.env.PROD && (
+              {!import.meta.env.PROD && isLocal && (
                 <Box sx={{ mt: 2, textAlign: "center" }}>
                   <Typography
                     variant="caption"
