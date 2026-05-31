@@ -44,8 +44,18 @@ export default function MyEvaluationPage() {
 
   const fetchCycles = async () => {
     try {
-      const res = await api.get("/performance/cycles");
-      const list = res.data || [];
+      const res = await api.get("/okrs/my");
+      const okrs = res.data || [];
+      
+      // Lọc các kỳ đánh giá duy nhất từ danh sách OKR của user
+      const cycleMap: Record<string, any> = {};
+      okrs.forEach((okr: any) => {
+        if (okr.cycle) {
+          cycleMap[okr.cycle.id] = okr.cycle;
+        }
+      });
+      const list = Object.values(cycleMap);
+      
       setCycles(list);
       const active = list.find((c: any) => c.status === "OPEN") || list[0];
       if (active) {
