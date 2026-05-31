@@ -67,13 +67,24 @@ export interface ActionItem {
   severity: "error" | "warning" | "info" | "success";
 }
 
+export interface RatingPersonItem {
+  userId: string;
+  userName: string;
+  userAvatar: string | null;
+  deptName: string;
+  selfScore: number | null;
+  managerScore: number | null;
+}
+
 export interface DeanDashboardData {
   cycle: CycleInfo | null;
+  allCycles: CycleInfo[];
   summary: DashboardSummary;
   okrsByStatus: Record<string, number>;
   departmentStats: DepartmentStat[];
   staffRanking: StaffRankItem[];
   ratingDistribution: Record<string, number>;
+  ratingDetails: Record<string, RatingPersonItem[]>;
   timelineData: TimelinePoint[];
   actionItems: ActionItem[];
 }
@@ -82,7 +93,7 @@ export interface DeanDashboardData {
 // HOOK
 // ============================================================
 
-export function useDeanDashboardData() {
+export function useDeanDashboardData(cycleId?: string) {
   const [data, setData] = useState<DeanDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -92,7 +103,8 @@ export function useDeanDashboardData() {
     setError(null);
 
     try {
-      const res = await api.get("/okrs/dean-dashboard");
+      const url = cycleId ? `/okrs/dean-dashboard?cycleId=${cycleId}` : "/okrs/dean-dashboard";
+      const res = await api.get(url);
       setData(res.data);
     } catch (err: any) {
       console.error("Dean Dashboard fetch error:", err);
@@ -100,7 +112,7 @@ export function useDeanDashboardData() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [cycleId]);
 
   useEffect(() => {
     fetchData();

@@ -1,4 +1,4 @@
-import { Box, Typography, LinearProgress, Chip } from "@mui/material";
+import { Box, Typography, LinearProgress, Chip, FormControl, Select, MenuItem } from "@mui/material";
 import { GraduationCap, Calendar, Clock } from "lucide-react";
 import { motion } from "framer-motion";
 import type { CycleInfo } from "../useDeanDashboardData";
@@ -6,9 +6,12 @@ import type { CycleInfo } from "../useDeanDashboardData";
 interface Props {
   userName: string;
   cycle: CycleInfo | null;
+  allCycles: CycleInfo[];
+  selectedCycleId: string;
+  onCycleChange: (id: string) => void;
 }
 
-export default function DeanWelcomeHeader({ userName, cycle }: Props) {
+export default function DeanWelcomeHeader({ userName, cycle, allCycles, selectedCycleId, onCycleChange }: Props) {
   const statusColor: Record<string, string> = {
     OPEN: "#16a34a",
     CLOSED: "#dc2626",
@@ -26,7 +29,6 @@ export default function DeanWelcomeHeader({ userName, cycle }: Props) {
           background: "linear-gradient(135deg, #0F2854 0%, #1C4D8D 60%, #2563eb 100%)",
           borderRadius: 4,
           p: 3.5,
-          mb: 3,
           color: "white",
           position: "relative",
           overflow: "hidden",
@@ -81,72 +83,95 @@ export default function DeanWelcomeHeader({ userName, cycle }: Props) {
           </Box>
         </Box>
 
-        {cycle && (
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 3,
-              flexWrap: "wrap",
-              mt: 2,
-              position: "relative",
-              zIndex: 1,
-            }}
-          >
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 3,
+            flexWrap: "wrap",
+            mt: 2,
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
+          {allCycles && allCycles.length > 0 && (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <Calendar size={16} />
-              <Typography variant="body2" fontWeight={600}>
-                {cycle.name}
-              </Typography>
-              <Chip
-                label={cycle.status}
-                size="small"
-                sx={{
-                  bgcolor: statusColor[cycle.status] || "#6b7280",
-                  color: "white",
-                  fontWeight: 700,
-                  fontSize: "0.7rem",
-                  height: 22,
-                }}
-              />
+              <FormControl size="small" variant="standard">
+                <Select
+                  disableUnderline
+                  value={selectedCycleId}
+                  onChange={(e) => onCycleChange(e.target.value as string)}
+                  sx={{
+                    color: "white",
+                    fontWeight: 600,
+                    fontSize: "0.875rem",
+                    "& .MuiSelect-icon": { color: "white" },
+                  }}
+                >
+                  {allCycles.map((c) => (
+                    <MenuItem key={c.id} value={c.id}>
+                      {c.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              {cycle && (
+                <Chip
+                  label={cycle.status}
+                  size="small"
+                  sx={{
+                    bgcolor: statusColor[cycle.status] || "#6b7280",
+                    color: "white",
+                    fontWeight: 700,
+                    fontSize: "0.7rem",
+                    height: 22,
+                    ml: 1,
+                  }}
+                />
+              )}
             </Box>
+          )}
 
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Clock size={16} />
-              <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                {cycle.daysRemaining !== null && cycle.daysRemaining > 0
-                  ? `Còn ${cycle.daysRemaining} ngày`
-                  : cycle.daysRemaining !== null && cycle.daysRemaining <= 0
-                    ? "Đã hết hạn"
-                    : "—"}
-              </Typography>
-            </Box>
-
-            <Box sx={{ flex: 1, minWidth: 200 }}>
-              <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>
-                <Typography variant="caption" sx={{ opacity: 0.7 }}>
-                  Tiến độ kỳ
-                </Typography>
-                <Typography variant="caption" fontWeight={700}>
-                  {cycle.progressPercent}%
+          {cycle && (
+            <>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Clock size={16} />
+                <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                  {cycle.daysRemaining !== null && cycle.daysRemaining > 0
+                    ? `Còn ${cycle.daysRemaining} ngày`
+                    : cycle.daysRemaining !== null && cycle.daysRemaining <= 0
+                      ? "Đã hết hạn"
+                      : "—"}
                 </Typography>
               </Box>
-              <LinearProgress
-                variant="determinate"
-                value={cycle.progressPercent}
-                sx={{
-                  height: 6,
-                  borderRadius: 3,
-                  bgcolor: "rgba(255,255,255,0.15)",
-                  "& .MuiLinearProgress-bar": {
+
+              <Box sx={{ flex: 1, minWidth: 200 }}>
+                <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>
+                  <Typography variant="caption" sx={{ opacity: 0.7 }}>
+                    Tiến độ kỳ
+                  </Typography>
+                  <Typography variant="caption" fontWeight={700}>
+                    {cycle.progressPercent}%
+                  </Typography>
+                </Box>
+                <LinearProgress
+                  variant="determinate"
+                  value={cycle.progressPercent}
+                  sx={{
+                    height: 6,
                     borderRadius: 3,
-                    bgcolor: "#FFD60A",
-                  },
-                }}
-              />
-            </Box>
-          </Box>
-        )}
+                    bgcolor: "rgba(255,255,255,0.15)",
+                    "& .MuiLinearProgress-bar": {
+                      borderRadius: 3,
+                      bgcolor: "#FFD60A",
+                    },
+                  }}
+                />
+              </Box>
+            </>
+          )}
+        </Box>
       </Box>
     </motion.div>
   );

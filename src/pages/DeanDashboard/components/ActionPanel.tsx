@@ -49,7 +49,6 @@ export default function ActionPanel({ items, daysRemaining }: Props) {
           borderRadius: 3,
           border: "1px solid #fecaca",
           bgcolor: "#fffbf0",
-          mb: 3,
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
