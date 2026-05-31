@@ -28,6 +28,7 @@ export default function NotificationBell() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [filter, setFilter] = useState<"ALL" | "UNREAD">("ALL");
+  const [visibleCount, setVisibleCount] = useState(20);
   const open = Boolean(anchorEl);
   const navigate = useNavigate();
 
@@ -56,6 +57,7 @@ export default function NotificationBell() {
 
   const handleClose = () => {
     setAnchorEl(null);
+    setVisibleCount(20);
   };
 
   const getNotificationLink = (message: string): string => {
@@ -188,7 +190,7 @@ export default function NotificationBell() {
             <Chip 
               label="Tất cả" 
               clickable 
-              onClick={() => setFilter("ALL")}
+              onClick={() => { setFilter("ALL"); setVisibleCount(20); }}
               sx={{ 
                 height: 28,
                 fontWeight: 600, 
@@ -202,7 +204,7 @@ export default function NotificationBell() {
             <Chip 
               label="Chưa đọc" 
               clickable 
-              onClick={() => setFilter("UNREAD")}
+              onClick={() => { setFilter("UNREAD"); setVisibleCount(20); }}
               sx={{ 
                 height: 28,
                 fontWeight: 600, 
@@ -214,13 +216,6 @@ export default function NotificationBell() {
               }} 
             />
           </Box>
-          <Button 
-            size="small" 
-            onClick={() => { handleClose(); navigate("/dashboard"); }} // Chuyển tạm về Dashboard nếu chưa có trang All Notifications
-            sx={{ textTransform: "none", fontWeight: 600, fontSize: "0.8rem", color: "#64748b", "&:hover": { bgcolor: "transparent", color: "#0f172a" } }}
-          >
-            Xem tất cả
-          </Button>
         </Box>
         
         <List sx={{ p: 0, overflowY: "auto", flex: 1 }}>
@@ -232,43 +227,63 @@ export default function NotificationBell() {
               </Typography>
             </Box>
           ) : (
-            displayedNotifications.map((notif) => (
-              <Box key={notif.id}>
-                <ListItem 
-                  onClick={() => handleNotificationClick(notif)}
-                  sx={{ 
-                    cursor: "pointer",
-                    bgcolor: notif.isRead ? "transparent" : "#eff6ff",
-                    transition: "background 0.3s ease",
-                    alignItems: "flex-start",
-                    pt: 1.5,
-                    pb: 1.5,
-                    "&:hover": { bgcolor: notif.isRead ? "#f8fafc" : "#e0f2fe" }
-                  }}
-                >
-                  <ListItemText 
-                    primary={notif.message} 
-                    secondary={dayjs(notif.createdAt).format("DD/MM/YYYY HH:mm")}
-                    primaryTypographyProps={{ 
-                      variant: "body2", 
-                      fontWeight: notif.isRead ? 500 : 700,
-                      color: notif.isRead ? "#475569" : "#0f172a",
-                      lineHeight: 1.4
+            <>
+              {displayedNotifications.slice(0, visibleCount).map((notif) => (
+                <Box key={notif.id}>
+                  <ListItem 
+                    onClick={() => handleNotificationClick(notif)}
+                    sx={{ 
+                      cursor: "pointer",
+                      bgcolor: notif.isRead ? "transparent" : "#eff6ff",
+                      transition: "background 0.3s ease",
+                      alignItems: "flex-start",
+                      pt: 1.5,
+                      pb: 1.5,
+                      "&:hover": { bgcolor: notif.isRead ? "#f8fafc" : "#e0f2fe" }
                     }}
-                    secondaryTypographyProps={{
-                      variant: "caption",
-                      color: "#94a3b8",
-                      mt: 0.5,
-                      display: "block"
+                  >
+                    <ListItemText 
+                      primary={notif.message} 
+                      secondary={dayjs(notif.createdAt).format("DD/MM/YYYY HH:mm")}
+                      primaryTypographyProps={{ 
+                        variant: "body2", 
+                        fontWeight: notif.isRead ? 500 : 700,
+                        color: notif.isRead ? "#475569" : "#0f172a",
+                        lineHeight: 1.4
+                      }}
+                      secondaryTypographyProps={{
+                        variant: "caption",
+                        color: "#94a3b8",
+                        mt: 0.5,
+                        display: "block"
+                      }}
+                    />
+                    {!notif.isRead && (
+                      <Circle sx={{ fontSize: 10, color: "#3b82f6", mt: 0.5, ml: 1, flexShrink: 0 }} />
+                    )}
+                  </ListItem>
+                  <Divider />
+                </Box>
+              ))}
+              {visibleCount < displayedNotifications.length && (
+                <Box sx={{ p: 1.5, textAlign: "center" }}>
+                  <Button
+                    size="small"
+                    fullWidth
+                    onClick={() => setVisibleCount((prev) => prev + 20)}
+                    sx={{
+                      textTransform: "none",
+                      fontWeight: 600,
+                      fontSize: "0.85rem",
+                      color: "#2563eb",
+                      "&:hover": { bgcolor: "#eff6ff" }
                     }}
-                  />
-                  {!notif.isRead && (
-                    <Circle sx={{ fontSize: 10, color: "#3b82f6", mt: 0.5, ml: 1, flexShrink: 0 }} />
-                  )}
-                </ListItem>
-                <Divider />
-              </Box>
-            ))
+                  >
+                    Xem thêm thông báo trước đó
+                  </Button>
+                </Box>
+              )}
+            </>
           )}
         </List>
       </Popover>
