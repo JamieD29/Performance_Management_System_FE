@@ -1,10 +1,12 @@
-import { Box, Paper, Typography } from "@mui/material";
+import { Box, Paper, Typography, Button } from "@mui/material";
 import { Users, ClipboardCheck, CheckCircle2, FileSearch } from "lucide-react";
 import { motion } from "framer-motion";
-import type { DashboardSummary } from "../useDeanDashboardData";
+import { useNavigate } from "react-router-dom";
+import type { DashboardSummary, ActionItem } from "../useDeanDashboardData";
 
 interface Props {
   summary: DashboardSummary;
+  actionItems: ActionItem[];
 }
 
 const cards = [
@@ -16,6 +18,7 @@ const cards = [
     borderColor: "#fecaca",
     iconColor: "#dc2626",
     textColor: "#991b1b",
+    actionType: "PENDING_APPROVAL", // to match actionItems
   },
   {
     key: "awaitingReview",
@@ -25,6 +28,7 @@ const cards = [
     borderColor: "#fde68a",
     iconColor: "#d97706",
     textColor: "#92400e",
+    actionType: "AWAITING_REVIEW",
   },
   {
     key: "completed",
@@ -46,19 +50,25 @@ const cards = [
   },
 ] as const;
 
-export default function SummaryCards({ summary }: Props) {
+export default function SummaryCards({ summary, actionItems }: Props) {
+  const navigate = useNavigate();
+
   return (
     <Box
       sx={{
         display: "grid",
         gridTemplateColumns: { xs: "1fr 1fr", md: "repeat(4, 1fr)" },
         gap: 2.5,
-        mb: 3,
       }}
     >
       {cards.map((card, i) => {
         const Icon = card.icon;
         const value = summary[card.key as keyof DashboardSummary];
+        
+        // Tìm xem có action tương ứng với card này không
+        const actionItem = (card as any).actionType 
+          ? actionItems.find(a => a.type === (card as any).actionType)
+          : null;
 
         return (
           <motion.div
@@ -66,6 +76,7 @@ export default function SummaryCards({ summary }: Props) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: i * 0.08 }}
+            style={{ display: "flex" }}
           >
             <Paper
               elevation={0}
@@ -76,6 +87,9 @@ export default function SummaryCards({ summary }: Props) {
                 border: `1px solid ${card.borderColor}`,
                 transition: "all 0.25s ease",
                 cursor: "default",
+                display: "flex",
+                flexDirection: "column",
+                width: "100%",
                 "&:hover": {
                   transform: "translateY(-3px)",
                   boxShadow: `0 8px 24px ${card.borderColor}80`,
@@ -101,9 +115,36 @@ export default function SummaryCards({ summary }: Props) {
                   {card.label}
                 </Typography>
               </Box>
-              <Typography variant="h3" fontWeight={800} sx={{ color: card.textColor, lineHeight: 1 }}>
-                {value}
-              </Typography>
+              
+              <Box sx={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", mt: "auto", pt: 1 }}>
+                <Typography variant="h3" fontWeight={800} sx={{ color: card.textColor, lineHeight: 1 }}>
+                  {value}
+                </Typography>
+                
+                {actionItem && (
+                  <Button
+                    variant="contained"
+                    size="small"
+                    onClick={() => navigate(actionItem.route)}
+                    sx={{
+                      bgcolor: card.textColor,
+                      color: "white",
+                      px: 2,
+                      py: 0.5,
+                      borderRadius: 2,
+                      textTransform: "none",
+                      fontWeight: 600,
+                      boxShadow: "none",
+                      "&:hover": {
+                        bgcolor: card.iconColor,
+                        boxShadow: "none",
+                      },
+                    }}
+                  >
+                    Xử lý
+                  </Button>
+                )}
+              </Box>
             </Paper>
           </motion.div>
         );

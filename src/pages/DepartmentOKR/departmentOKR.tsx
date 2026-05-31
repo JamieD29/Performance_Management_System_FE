@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   Box,
@@ -26,12 +27,35 @@ import EvaluationListTab from "./components/EvaluationListTab";
 import EvaluationFormManagerTab from "./components/EvaluationFormManagerTab";
 
 export default function DepartmentOKR() {
-  const [tabValue, setTabValue] = useState(() => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { t } = useTranslation();
+
+  // Ưu tiên đọc tab từ URL query param (?tab=N), fallback về localStorage
+  const getInitialTab = () => {
+    const urlTab = searchParams.get("tab");
+    if (urlTab !== null) {
+      const idx = parseInt(urlTab, 10);
+      if (idx >= 0 && idx < 5) return idx;
+    }
     const savedTab = localStorage.getItem("department_okr_tab");
     const index = savedTab ? parseInt(savedTab, 10) : 0;
     return index >= 0 && index < 5 ? index : 0;
-  });
-  const { t } = useTranslation();
+  };
+
+  const [tabValue, setTabValue] = useState(getInitialTab);
+
+  // Đồng bộ tab khi URL thay đổi (ví dụ: navigate từ dashboard)
+  useEffect(() => {
+    const urlTab = searchParams.get("tab");
+    if (urlTab !== null) {
+      const idx = parseInt(urlTab, 10);
+      if (idx >= 0 && idx < 5 && idx !== tabValue) {
+        setTabValue(idx);
+        localStorage.setItem("department_okr_tab", idx.toString());
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   // Tab definitions
   const TABS = [
@@ -84,6 +108,8 @@ export default function DepartmentOKR() {
           onChange={(_, v) => {
             setTabValue(v);
             localStorage.setItem("department_okr_tab", v.toString());
+            // Cập nhật URL param để giữ đồng bộ
+            setSearchParams({ tab: v.toString() }, { replace: true });
           }}
           variant="fullWidth"
           TabIndicatorProps={{

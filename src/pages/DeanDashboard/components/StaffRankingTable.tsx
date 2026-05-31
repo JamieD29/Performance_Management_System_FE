@@ -48,6 +48,7 @@ export default function StaffRankingTable({ ranking }: Props) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.4 }}
+      style={{ height: "100%" }}
     >
       <Paper
         elevation={0}
@@ -55,7 +56,6 @@ export default function StaffRankingTable({ ranking }: Props) {
           borderRadius: 3,
           border: "1px solid #e2e8f0",
           overflow: "hidden",
-          mb: 3,
         }}
       >
         <Box sx={{ p: 3, pb: 2, display: "flex", alignItems: "center", gap: 1.5 }}>

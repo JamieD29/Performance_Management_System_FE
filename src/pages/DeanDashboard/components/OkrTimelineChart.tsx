@@ -64,7 +64,6 @@ export default function OkrTimelineChart({ data }: Props) {
           p: 3,
           borderRadius: 3,
           border: "1px solid #e2e8f0",
-          mb: 3,
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2.5 }}>

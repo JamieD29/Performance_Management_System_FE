@@ -1,10 +1,14 @@
+import { useState } from "react";
 import { Paper, Typography, Box } from "@mui/material";
 import { Award } from "lucide-react";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
+import { PieChart, Pie, Cell, Tooltip } from "recharts";
 import { motion } from "framer-motion";
+import type { RatingPersonItem } from "../useDeanDashboardData";
+import RatingDetailDialog from "./RatingDetailDialog";
 
 interface Props {
   distribution: Record<string, number>;
+  ratingDetails: Record<string, RatingPersonItem[]>;
 }
 
 const ratingLabels: Record<string, string> = {
@@ -23,30 +27,54 @@ const ratingColors: Record<string, string> = {
   POOR: "#dc2626",
 };
 
-export default function RatingDistribution({ distribution }: Props) {
+export default function RatingDistribution({ distribution, ratingDetails }: Props) {
+  const [selectedRating, setSelectedRating] = useState<string | null>(null);
+
   const entries = Object.entries(distribution);
   if (entries.length === 0) {
     return (
-      <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: "1px solid #e2e8f0", textAlign: "center" }}>
-        <Typography color="text.secondary">Chưa có dữ liệu xếp loại</Typography>
+      <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: "1px solid #e2e8f0", textAlign: "center", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <Typography color="text.secondary">Chưa có dữ liệu xếp loại trong kỳ này</Typography>
       </Paper>
     );
   }
 
   const total = entries.reduce((s, [, v]) => s + v, 0);
   const chartData = entries.map(([key, value]) => ({
+    key,
     name: ratingLabels[key] || key,
     value,
     color: ratingColors[key] || "#6b7280",
   }));
+
+  const handleClose = () => setSelectedRating(null);
+
+  const selectedData = selectedRating ? {
+    key: selectedRating,
+    label: ratingLabels[selectedRating] || selectedRating,
+    color: ratingColors[selectedRating] || "#6b7280",
+    people: ratingDetails[selectedRating] || []
+  } : null;
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.6 }}
+      style={{ height: "100%" }}
     >
-      <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: "1px solid #e2e8f0", mb: 3 }}>
+      <Paper
+        elevation={0}
+        sx={{
+          p: 3,
+          borderRadius: 3,
+          border: "1px solid #e2e8f0",
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        {/* Header */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
           <Box
             sx={{
@@ -71,75 +99,104 @@ export default function RatingDistribution({ distribution }: Props) {
           </Box>
         </Box>
 
-        <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, alignItems: "center", gap: 3 }}>
-          {/* Pie chart */}
-          <Box sx={{ width: 220, height: 220, flexShrink: 0 }}>
-            <PieChart width={220} height={220}>
-              <Pie
-                data={chartData}
-                cx="50%"
-                cy="50%"
-                innerRadius={50}
-                outerRadius={90}
-                paddingAngle={3}
-                dataKey="value"
-                stroke="none"
-              >
-                {chartData.map((entry, i) => (
-                  <Cell key={i} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip
-                contentStyle={{
-                  borderRadius: 10,
-                  border: "1px solid #e2e8f0",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
-                  fontSize: 13,
-                }}
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                formatter={(value: any, name: any) => [`${value} người (${Math.round((value / total) * 100)}%)`, name]}
-              />
-            </PieChart>
-          </Box>
+        {/* Pie chart — căn giữa */}
+        <Box sx={{ 
+          display: "flex", 
+          justifyContent: "center", 
+          mb: 1, 
+          outline: "none",
+          "& .recharts-wrapper": { outline: "none !important" },
+          "& .recharts-surface": { outline: "none !important" },
+          "& *:focus": { outline: "none !important" }
+        }}>
+          <PieChart width={200} height={200} style={{ outline: "none" }}>
+            <Pie
+              data={chartData}
+              cx="50%"
+              cy="50%"
+              innerRadius={50}
+              outerRadius={85}
+              paddingAngle={3}
+              dataKey="value"
+              stroke="none"
+              style={{ outline: "none", cursor: "pointer" }}
+              onClick={(data) => {
+                if (data && data.payload && data.payload.key) {
+                  setSelectedRating(data.payload.key);
+                }
+              }}
+            >
+              {chartData.map((entry, i) => (
+                <Cell key={i} fill={entry.color} style={{ outline: "none" }} />
+              ))}
+            </Pie>
+            <Tooltip
+              contentStyle={{
+                borderRadius: 10,
+                border: "1px solid #e2e8f0",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
+                fontSize: 13,
+                cursor: "pointer"
+              }}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              formatter={(value: any, name: any) => [`${value} người (${Math.round((value / total) * 100)}%) - Click để xem`, name]}
+            />
+          </PieChart>
+        </Box>
 
-          {/* Legend bars */}
-          <Box sx={{ flex: 1, width: "100%" }}>
-            {chartData.map((item) => (
-              <Box key={item.name} sx={{ mb: 1.5 }}>
-                <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.3 }}>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Box sx={{ width: 10, height: 10, borderRadius: "3px", bgcolor: item.color }} />
-                    <Typography variant="body2" fontWeight={600}>
-                      {item.name}
-                    </Typography>
-                  </Box>
-                  <Typography variant="body2" fontWeight={700} sx={{ color: item.color }}>
-                    {item.value} ({Math.round((item.value / total) * 100)}%)
+        {/* Legend bars — bên dưới pie, chiếm phần còn lại */}
+        <Box sx={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 0.5 }}>
+          {chartData.map((item) => (
+            <Box 
+              key={item.name} 
+              sx={{ mb: 1, cursor: "pointer", transition: "opacity 0.2s", "&:hover": { opacity: 0.8 } }}
+              onClick={() => setSelectedRating(item.key)}
+            >
+              <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.4 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Box sx={{ width: 10, height: 10, borderRadius: "3px", bgcolor: item.color, flexShrink: 0 }} />
+                  <Typography variant="body2" fontWeight={600}>
+                    {item.name}
                   </Typography>
                 </Box>
+                <Typography variant="body2" fontWeight={700} sx={{ color: item.color }}>
+                  {item.value} ({Math.round((item.value / total) * 100)}%)
+                </Typography>
+              </Box>
+              <Box
+                sx={{
+                  height: 7,
+                  borderRadius: 3,
+                  bgcolor: "#f1f5f9",
+                  overflow: "hidden",
+                }}
+              >
                 <Box
                   sx={{
-                    height: 6,
+                    height: "100%",
+                    width: `${(item.value / total) * 100}%`,
+                    bgcolor: item.color,
                     borderRadius: 3,
-                    bgcolor: "#f1f5f9",
-                    overflow: "hidden",
+                    transition: "width 0.6s ease",
                   }}
-                >
-                  <Box
-                    sx={{
-                      height: "100%",
-                      width: `${(item.value / total) * 100}%`,
-                      bgcolor: item.color,
-                      borderRadius: 3,
-                      transition: "width 0.6s ease",
-                    }}
-                  />
-                </Box>
+                />
               </Box>
-            ))}
-          </Box>
+            </Box>
+          ))}
         </Box>
       </Paper>
+
+      {/* Dialog Danh Sách Người */}
+      {selectedData && (
+        <RatingDetailDialog
+          open={Boolean(selectedRating)}
+          onClose={handleClose}
+          ratingKey={selectedData.key}
+          ratingLabel={selectedData.label}
+          ratingColor={selectedData.color}
+          people={selectedData.people}
+        />
+      )}
     </motion.div>
   );
 }

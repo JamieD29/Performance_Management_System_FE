@@ -49,7 +49,7 @@ export default function DepartmentComparison({ stats }: Props) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.5 }}
     >
-      <Paper elevation={0} sx={{ borderRadius: 3, border: "1px solid #e2e8f0", overflow: "hidden", mb: 3 }}>
+      <Paper elevation={0} sx={{ borderRadius: 3, border: "1px solid #e2e8f0", overflow: "hidden" }}>
         <Box sx={{ p: 3, pb: 2, display: "flex", alignItems: "center", gap: 1.5 }}>
           <Box
             sx={{
@@ -168,16 +168,23 @@ export default function DepartmentComparison({ stats }: Props) {
 
         {/* Bar Chart — ĐTB Điểm */}
         {chartData.length > 0 && (
-          <Box sx={{ p: 3, pt: 2 }}>
+          <Box sx={{ 
+            p: 3, 
+            pt: 2,
+            "& .recharts-wrapper": { outline: "none !important" },
+            "& .recharts-surface": { outline: "none !important" },
+            "& *:focus": { outline: "none !important" }
+          }}>
             <Typography variant="subtitle2" fontWeight={600} color="text.secondary" sx={{ mb: 1 }}>
               Điểm Trung Bình Theo Đơn Vị
             </Typography>
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={chartData} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
+            <ResponsiveContainer width="100%" height={200} style={{ outline: "none" }}>
+              <BarChart data={chartData} margin={{ top: 5, right: 10, left: -10, bottom: 5 }} style={{ outline: "none" }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
                 <XAxis dataKey="name" tick={{ fontSize: 12, fill: "#64748b" }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 12, fill: "#64748b" }} axisLine={false} tickLine={false} />
                 <Tooltip
+                  cursor={{ fill: "transparent" }}
                   contentStyle={{
                     borderRadius: 10,
                     border: "1px solid #e2e8f0",

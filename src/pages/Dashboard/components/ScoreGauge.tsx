@@ -6,12 +6,14 @@ interface ScoreGaugeProps {
   selfScore: number;
   managerScore: number | null;
   maxScore: number;
+  transparent?: boolean;
 }
 
 export default function ScoreGauge({
   selfScore,
   managerScore,
   maxScore,
+  transparent = false,
 }: ScoreGaugeProps) {
   const primaryScore = managerScore ?? selfScore;
   const percentage = Math.min(100, (primaryScore / maxScore) * 100);
@@ -46,14 +48,15 @@ export default function ScoreGauge({
     <Paper
       elevation={0}
       sx={{
-        p: 3,
-        borderRadius: 3,
-        border: `1px solid ${colors.border}`,
-        bgcolor: colors.bg,
+        p: transparent ? 0 : 3,
+        borderRadius: transparent ? 0 : 3,
+        border: transparent ? "none" : `1px solid ${colors.border}`,
+        bgcolor: transparent ? "transparent" : colors.bg,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
+        width: "100%",
       }}
     >
       <Typography

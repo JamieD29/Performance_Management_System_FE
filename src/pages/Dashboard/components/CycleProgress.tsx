@@ -5,15 +5,31 @@ import { CalendarDays } from "lucide-react";
 interface CycleProgressProps {
   cycleName: string;
   progressPercent: number;
+  startDate: string;
   endDate: string;
 }
 
-export default function CycleProgress({ cycleName, progressPercent, endDate }: CycleProgressProps) {
-  const formattedEnd = new Date(endDate).toLocaleDateString("vi-VN", {
+export default function CycleProgress({ cycleName, progressPercent, startDate, endDate }: CycleProgressProps) {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const today = new Date();
+  
+  const formattedStart = start.toLocaleDateString("vi-VN", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
   });
+  
+  const formattedEnd = end.toLocaleDateString("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+
+  // Calculate days
+  const totalDays = Math.max(1, Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
+  const elapsedDays = Math.max(0, Math.ceil((Math.min(today.getTime(), end.getTime()) - start.getTime()) / (1000 * 60 * 60 * 24)));
+  const remainingDays = Math.max(0, totalDays - elapsedDays);
 
   return (
     <Paper
@@ -23,12 +39,20 @@ export default function CycleProgress({ cycleName, progressPercent, endDate }: C
         borderRadius: 3,
         border: "1px solid #e2e8f0",
         bgcolor: "white",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5 }}>
-        <CalendarDays size={16} color="#64748b" />
-        <Typography variant="caption" fontWeight="600" color="text.secondary">
-          Tiến độ kỳ đánh giá
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1.5 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <CalendarDays size={16} color="#64748b" />
+          <Typography variant="caption" fontWeight="600" color="text.secondary">
+            Tiến độ kỳ đánh giá
+          </Typography>
+        </Box>
+        <Typography variant="caption" color="text.secondary">
+          {progressPercent.toFixed(0)}% đã qua
         </Typography>
       </Box>
 
@@ -39,7 +63,7 @@ export default function CycleProgress({ cycleName, progressPercent, endDate }: C
           height: 8,
           borderRadius: 4,
           bgcolor: "#e2e8f0",
-          mb: 1,
+          mb: 1.5,
           "& .MuiLinearProgress-bar": {
             borderRadius: 4,
             background: progressPercent > 80
@@ -49,13 +73,48 @@ export default function CycleProgress({ cycleName, progressPercent, endDate }: C
         }}
       />
 
-      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography variant="caption" color="text.secondary">
-          {progressPercent.toFixed(0)}% đã qua
+      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+        <Typography variant="caption" fontWeight="600" color="text.secondary">
+          Bắt đầu: {formattedStart}
         </Typography>
         <Typography variant="caption" fontWeight="600" color="text.secondary">
           Kết thúc: {formattedEnd}
         </Typography>
+      </Box>
+
+      {/* Mini stats */}
+      <Box sx={{ 
+        display: "grid", 
+        gridTemplateColumns: "repeat(3, 1fr)", 
+        gap: 1, 
+        mt: "auto", 
+        pt: 2,
+        borderTop: "1px dashed #e2e8f0" 
+      }}>
+        <Box sx={{ textAlign: "center" }}>
+          <Typography variant="h6" fontWeight="700" color="#334155" lineHeight={1.2}>
+            {totalDays}
+          </Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.65rem" }}>
+            Tổng ngày
+          </Typography>
+        </Box>
+        <Box sx={{ textAlign: "center", borderLeft: "1px solid #e2e8f0", borderRight: "1px solid #e2e8f0" }}>
+          <Typography variant="h6" fontWeight="700" color="#3b82f6" lineHeight={1.2}>
+            {elapsedDays}
+          </Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.65rem" }}>
+            Đã qua
+          </Typography>
+        </Box>
+        <Box sx={{ textAlign: "center" }}>
+          <Typography variant="h6" fontWeight="700" color={remainingDays < 5 ? "#ea580c" : "#10b981"} lineHeight={1.2}>
+            {remainingDays}
+          </Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.65rem" }}>
+            Còn lại
+          </Typography>
+        </Box>
       </Box>
     </Paper>
   );

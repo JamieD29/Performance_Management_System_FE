@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -9,14 +10,22 @@ import {
 import { useDeanDashboardData } from "./useDeanDashboardData";
 import DeanWelcomeHeader from "./components/DeanWelcomeHeader";
 import SummaryCards from "./components/SummaryCards";
-import ActionPanel from "./components/ActionPanel";
 import OkrTimelineChart from "./components/OkrTimelineChart";
 import StaffRankingTable from "./components/StaffRankingTable";
 import DepartmentComparison from "./components/DepartmentComparison";
 import RatingDistribution from "./components/RatingDistribution";
 
 export default function DeanDashboard() {
-  const { data, loading, error } = useDeanDashboardData();
+  const [selectedCycleId, setSelectedCycleId] = useState<string>("");
+  // Truyền selectedCycleId vào hook (nếu empty thì backend sẽ tự lấy kỳ mặc định)
+  const { data, loading, error } = useDeanDashboardData(selectedCycleId || undefined);
+
+  // Sync selectedCycleId khi data lần đầu được load (để hiện đúng ở Select)
+  useEffect(() => {
+    if (data?.cycle?.id && !selectedCycleId) {
+      setSelectedCycleId(data.cycle.id);
+    }
+  }, [data?.cycle?.id, selectedCycleId]);
 
   // Lấy user từ session
   let userName = "Trưởng khoa";
@@ -28,7 +37,7 @@ export default function DeanDashboard() {
     // ignore
   }
 
-  if (loading) {
+  if (loading && !data) {
     return (
       <Box
         sx={{
@@ -48,7 +57,7 @@ export default function DeanDashboard() {
     );
   }
 
-  if (error) {
+  if (error && !data) {
     return (
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <Alert severity="error">
@@ -63,54 +72,64 @@ export default function DeanDashboard() {
 
   const {
     cycle,
+    allCycles,
     summary,
     departmentStats,
     staffRanking,
     ratingDistribution,
+    ratingDetails,
     timelineData,
     actionItems,
   } = data;
 
-  const hasRatingData = Object.keys(ratingDistribution).length > 0;
-
   return (
     <Container maxWidth="xl" sx={{ py: 2 }}>
-      {/* === SECTION 1: Welcome Header + Cycle Info === */}
-      <DeanWelcomeHeader userName={userName} cycle={cycle} />
+      {/* Tất cả section dùng chung gap: 3 để khoảng cách đồng đều */}
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
 
-      {/* === SECTION 2: Summary Cards === */}
-      <SummaryCards summary={summary} />
+        {/* === SECTION 1: Welcome Header + Cycle Info === */}
+        <DeanWelcomeHeader 
+          userName={userName} 
+          cycle={cycle} 
+          allCycles={allCycles}
+          selectedCycleId={selectedCycleId}
+          onCycleChange={setSelectedCycleId}
+        />
 
-      {/* === SECTION 3: Action Panel (Nếu có) === */}
-      <ActionPanel
-        items={actionItems}
-        daysRemaining={cycle?.daysRemaining ?? null}
-      />
+        {/* === SECTION 2: Summary Cards === */}
+        <SummaryCards summary={summary} actionItems={actionItems} />
 
-      {/* === SECTION 4: Timeline Chart === */}
-      <OkrTimelineChart data={timelineData} />
+        {/* === SECTION 3: Timeline Chart === */}
+        <OkrTimelineChart data={timelineData} />
 
-      {/* === SECTION 5: 2-column layout: Ranking + Rating === */}
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: {
-            xs: "1fr",
-            lg: hasRatingData ? "1fr 380px" : "1fr",
-          },
-          gap: 3,
-          mb: 0,
-        }}
-      >
-        {/* Bảng xếp hạng cá nhân */}
-        <StaffRankingTable ranking={staffRanking} />
+        {/* === SECTION 4: 2-column layout: Ranking + Rating === */}
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              lg: "1fr 380px",
+            },
+            alignItems: "stretch",
+            gap: 3,
+          }}
+        >
+          {/* Bảng xếp hạng cá nhân */}
+          <StaffRankingTable ranking={staffRanking} />
 
-        {/* Phân bổ xếp loại (nếu có) */}
-        {hasRatingData && <RatingDistribution distribution={ratingDistribution} />}
+          {/* Phân bổ xếp loại (luôn hiển thị, truyền thêm ratingDetails) */}
+          <Box sx={{ height: "100%" }}>
+            <RatingDistribution 
+              distribution={ratingDistribution} 
+              ratingDetails={ratingDetails} 
+            />
+          </Box>
+        </Box>
+
+        {/* === SECTION 5: So sánh bộ môn === */}
+        <DepartmentComparison stats={departmentStats} />
+
       </Box>
-
-      {/* === SECTION 6: So sánh bộ môn === */}
-      <DepartmentComparison stats={departmentStats} />
     </Container>
   );
 }

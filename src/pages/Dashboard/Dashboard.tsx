@@ -83,6 +83,15 @@ export default function Dashboard() {
           route={computed.actionRoute}
           label={computed.actionLabel}
           status={primaryOkr?.status || null}
+          scoreProps={
+            isSubmittedOrCompleted
+              ? {
+                  selfScore: primaryOkr?.totalScore || 0,
+                  managerScore: primaryOkr?.managerScore ?? null,
+                  maxScore: 100,
+                }
+              : null
+          }
         />
 
         <Box
@@ -96,12 +105,14 @@ export default function Dashboard() {
             <DeadlineCountdown
               daysLeft={computed.daysUntilDeadline}
               label={computed.deadlineLabel}
+              state={computed.deadlineState as any}
             />
           )}
           {currentCycle && (
             <CycleProgress
               cycleName={currentCycle.name}
               progressPercent={computed.cycleProgressPercent}
+              startDate={currentCycle.startDate}
               endDate={currentCycle.endDate}
             />
           )}
@@ -125,27 +136,10 @@ export default function Dashboard() {
         </Box>
       )}
 
-      {/* === SECTION 4: Score + Chart (chỉ khi có dữ liệu) === */}
-      {isSubmittedOrCompleted && (
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "320px 1fr" },
-            gap: 3,
-            mb: 4,
-          }}
-        >
-          <ScoreGauge
-            selfScore={primaryOkr?.totalScore || 0}
-            managerScore={primaryOkr?.managerScore ?? null}
-            maxScore={100}
-          />
-
-          {evaluation &&
-            evaluation.evaluationData &&
-            evaluation.evaluationData.length > 0 && (
-              <ObjectiveRadarChart evaluationData={evaluation.evaluationData} />
-            )}
+      {/* === SECTION 4: Chart (chỉ khi có dữ liệu) === */}
+      {isSubmittedOrCompleted && evaluation && evaluation.evaluationData && evaluation.evaluationData.length > 0 && (
+        <Box sx={{ mb: 4 }}>
+          <ObjectiveRadarChart evaluationData={evaluation.evaluationData} />
         </Box>
       )}
 

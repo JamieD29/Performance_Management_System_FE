@@ -33,6 +33,7 @@ export interface UserOkrData {
   keyResults: any[];
   deadline: string | null;
   createdAt: string;
+  updatedAt: string;
   cycle?: {
     id: string;
     name: string;
@@ -88,6 +89,8 @@ export interface DashboardData {
     currentStepIndex: number;
     /** Số ngày còn lại đến deadline */
     daysUntilDeadline: number | null;
+    /** Trạng thái của deadline countdown */
+    deadlineState: "DEFAULT" | "SUBMITTED_EARLY" | "SUBMITTED_LATE";
     /** % thời gian đã qua trong kỳ */
     cycleProgressPercent: number;
     /** Có action cần thực hiện không */
@@ -127,7 +130,12 @@ export const OKR_STEPS: OkrStep[] = [
   {
     key: "ACCEPTED",
     label: "Đã duyệt",
-    description: "OKR đã được thống nhất, sẵn sàng tự khai",
+    description: "OKR đã được thống nhất",
+  },
+  {
+    key: "INPUTTING" as any,
+    label: "Bắt đầu nhập điểm",
+    description: "Sẵn sàng hoặc đang tiến hành tự khai",
   },
   {
     key: "SUBMITTED",
@@ -145,9 +153,9 @@ export const OKR_STEPS: OkrStep[] = [
 const STATUS_TO_STEP: Record<string, number> = {
   PENDING: 1,
   NEGOTIATING: 2,
-  ACCEPTED: 3,
-  SUBMITTED: 4,
-  COMPLETED: 5,
+  ACCEPTED: 4, // Khi ACCEPTED, user đang ở giai đoạn Bắt đầu nhập điểm
+  SUBMITTED: 5,
+  COMPLETED: 6,
   REJECTED: 1, // Rejected quay về bước phản hồi
 };
 
@@ -410,9 +418,33 @@ export function useDashboardData() {
         ? STATUS_TO_STEP[primaryOkr.status] ?? 0
         : 0;
 
-      const daysUntilDeadline = primaryOkr
-        ? calcDaysUntilDeadline(primaryOkr.deadline)
-        : null;
+      let daysUntilDeadline: number | null = null;
+      let deadlineState: "DEFAULT" | "SUBMITTED_EARLY" | "SUBMITTED_LATE" = "DEFAULT";
+      
+      if (primaryOkr) {
+        if (["PENDING", "NEGOTIATING", "REJECTED"].includes(primaryOkr.status)) {
+          daysUntilDeadline = calcDaysUntilDeadline(primaryOkr.deadline);
+        } else {
+          const cycleEnd = primaryOkr.cycle?.endDate || currentCycle?.endDate || null;
+          if (["SUBMITTED", "COMPLETED"].includes(primaryOkr.status)) {
+            const subDate = primaryOkr.updatedAt ? new Date(primaryOkr.updatedAt).getTime() : null;
+            const endDate = cycleEnd ? new Date(cycleEnd).getTime() : null;
+            if (subDate && endDate) {
+              if (subDate <= endDate) {
+                deadlineState = "SUBMITTED_EARLY";
+                daysUntilDeadline = Math.floor((endDate - subDate) / (1000 * 60 * 60 * 24));
+              } else {
+                deadlineState = "SUBMITTED_LATE";
+                daysUntilDeadline = null;
+              }
+            } else {
+              daysUntilDeadline = calcDaysUntilDeadline(cycleEnd);
+            }
+          } else {
+            daysUntilDeadline = calcDaysUntilDeadline(cycleEnd);
+          }
+        }
+      }
 
       const cycleProgressPercent =
         currentCycle?.startDate && currentCycle?.endDate
@@ -444,6 +476,7 @@ export function useDashboardData() {
         computed: {
           currentStepIndex,
           daysUntilDeadline,
+          deadlineState,
           cycleProgressPercent,
           hasActionRequired: action.hasAction,
           actionMessage: action.message,
