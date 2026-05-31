@@ -92,5 +92,278 @@
     "noDataInSystem": "Chưa có dữ liệu bộ môn trong hệ thống",
     "edit": "Chỉnh sửa",
     "delete": "Xóa"
+  },
+  "deanApprovalTab": {
+    "title": "Duyệt Đề Xuất Điều Chỉnh OKR",
+    "subtitle": "Xem và phản hồi các đề xuất điều chỉnh mục tiêu, chỉ tiêu từ nhân sự trong khoa.",
+    "searchPlaceholder": "Tìm theo Tên hoặc Email...",
+    "departmentFilter": "Bộ môn / Phòng ban",
+    "cycleFilter": "Kỳ đánh giá",
+    "allDepartments": "Tất cả Bộ môn",
+    "allCycles": "Tất cả các kỳ",
+    "noProposals": "Không có đề xuất nào đang chờ duyệt.",
+    "noProposalsFiltered": "Không tìm thấy đề xuất nào khớp với điều kiện lọc.",
+    "countProposals": "{{count}} đề xuất",
+    "tableHeaders": {
+      "staff": "Nhân sự",
+      "department": "Bộ môn",
+      "objective": "Mục tiêu",
+      "assignedDate": "Ngày giao",
+      "negotiationDeadline": "Hạn đàm phán",
+      "status": "Trạng thái",
+      "proposalContent": "Nội dung đề xuất",
+      "actions": "Thao tác"
+    },
+    "status": {
+      "pendingApproval": "Chờ bạn duyệt",
+      "pendingResponse": "Chờ nhân sự phản hồi"
+    },
+    "actions": {
+      "detailsAndEdit": "Chi tiết & Sửa",
+      "approve": "Duyệt",
+      "reject": "Từ chối"
+    },
+    "dialog": {
+      "detailsTitle": "Chi tiết đề xuất điều chỉnh",
+      "staff": "Nhân sự:",
+      "assignedDate": "Ngày giao OKR:",
+      "negotiationDeadline": "Hạn đàm phán:",
+      "objective": "Mục tiêu OKR:",
+      "structureDetails": "Chi tiết cấu trúc và đàm phán:",
+      "rejectTitle": "Từ chối đề xuất",
+      "rejectReason": "Lý do từ chối",
+      "rejectReasonPlaceholder": "VD: Tiêu chuẩn đánh giá không thể thay đổi...",
+      "cancel": "Hủy",
+      "confirmReject": "Xác nhận từ chối"
+    }
+  },
+  "assignTemplateDialog": {
+    "dialogTitle": "Giao OKR cho Nhân sự",
+    "selectedTemplate": "Template được chọn:",
+    "createCustomVersion": "Tạo phiên bản tùy biến",
+    "requiredInfo": "📋 Thông tin bắt buộc",
+    "cycleLabel": "Kỳ đánh giá *",
+    "cycleStatusOpen": "Đang mở",
+    "cycleStatusClosed": "Đã đóng",
+    "cycleInProgress": " - Đang diễn ra (Không thể giao mới)",
+    "deadlineLabel": "Hạn đàm phán & chốt OKR *",
+    "deadlineHelperText": "Hạn đàm phán OKR (Giới hạn: {{min}} đến {{max}}).",
+    "filterStaff": "🔍 Lọc nhân sự",
+    "optionalLabel": "Tùy chọn",
+    "searchPlaceholder": "Tìm kiếm theo tên, email...",
+    "departmentLabel": "Bộ môn",
+    "departmentAll": "-- Tất cả --",
+    "jobTitleLabel": "Chức danh nghề nghiệp",
+    "jobTitleAll": "-- Tất cả --",
+    "tableSelectStaff": "Chọn Nhân sự để giao",
+    "deselectAll": "Bỏ chọn tất cả",
+    "selectAll": "Chọn tất cả",
+    "tableHeaders": {
+      "fullName": "Họ tên",
+      "email": "Email",
+      "department": "Bộ môn",
+      "position": "Chức vụ quản lý",
+      "jobTitle": "Chức danh nghề nghiệp",
+      "version": "Phiên bản gán"
+    },
+    "loading": "Đang tải danh sách nhân sự...",
+    "noStaffFound": "Không tìm thấy nhân sự nào phù hợp với tiêu chí của template.",
+    "alreadyAssigned": "Đã giao OKR",
+    "cancel": "Hủy",
+    "assignButton": "Giao OKR cho {{count}} Nhân sự"
+  },
+  "okrCard": {
+    "detailsTitle": "Chi tiết OKR",
+    "completionProgress": "Tiến độ hoàn thành:",
+    "assignedOkrFramework": "📋 Khung OKR giao trong kỳ:",
+    "unsavedDraft": "⚠️ Nháp chưa lưu lên máy chủ",
+    "saving": "Đang lưu...",
+    "savedAt": "✓ Đã lưu lúc {{time}}",
+    "totalSelfScore": "Tổng điểm tự khai:",
+    "save": "Lưu",
+    "submit": "Nộp bài tự khai",
+    "negotiateAndEdit": "Đàm phán & Chỉnh sửa",
+    "reportScore": "Khai báo điểm & Minh chứng",
+    "viewDetails": "Xem chi tiết",
+    "awaitingCycleStart": "Chờ kỳ bắt đầu",
+    "awaitingGrading": "Chờ chấm điểm",
+    "expectedScore": "Điểm dự kiến",
+    "selfScore": "Tự chấm",
+    "managerScore": "QL chấm",
+    "finalScore": "Điểm cuối cùng",
+    "approvedByManager": "Đã được Trưởng khoa duyệt.",
+    "tableHeaders": {
+      "no": "STT",
+      "content": "Nội dung",
+      "maxScore": "Điểm tối đa",
+      "scorePerUnit": "Điểm/đơn vị",
+      "selfReportQty": "Số lượng tự khai",
+      "conversion": "Quy đổi",
+      "evidence": "Minh chứng",
+      "negotiation": "Đàm phán",
+      "selfReportQtySubmitted": "S.Lượng Tự Khai",
+      "selfScoreSubmitted": "Điểm Tự Khai",
+      "managerQtyApproved": "S.Lượng QL Chốt",
+      "managerScoreApproved": "Điểm QL Chốt"
+    }
+  },
+  "evaluationDetailsDialog": {
+    "dialogTitle": "Phiếu Kết Quả Đánh Giá OKR",
+    "objectiveLabel": "Mục tiêu",
+    "departmentLabel": "Bộ môn",
+    "approveAllTooltip": "Đồng ý toàn bộ số lượng do nhân sự tự khai",
+    "approveAllSelf": "Đồng ý Cá nhân",
+    "tickAllTooltip": "Cho điểm số lượng đạt trần max score",
+    "tickAll": "Tick All",
+    "sectionTitle": "Chi tiết đánh giá mức độ hoàn thành nhiệm vụ",
+    "headers": {
+      "no": "STT",
+      "criteria": "Tiêu chí / Nhiệm vụ",
+      "maxScore": "Điểm Tối đa",
+      "scorePerUnit": "Hệ số Điểm",
+      "selfReportQty": "S.Lượng Tự Khai",
+      "selfReportScore": "Điểm Tự Khai",
+      "evidence": "Minh chứng",
+      "managerQty": "S.Lượng Q.Lý Duyệt",
+      "managerScore": "Điểm Q.Lý"
+    },
+    "totalScoreLabel": "TỔNG ĐIỂM BÀI ĐÁNH GIÁ (GIỚI HẠN: 100)",
+    "managerScoreLabel": "ĐIỂM QUẢN LÝ CHỐT:",
+    "selfScoreLabel": "TỔNG ĐIỂM TỰ ĐÁNH GIÁ:",
+    "cancelBtn": "Hủy / Đóng",
+    "saveBtn": "Chốt Điểm Đánh Giá",
+    "unitFallback": "đv",
+    "evidenceLink": "Link"
+  },
+  "evaluationFormManagerDialog": {
+    "dialogTitle": "Xét Duyệt Phiếu Đánh Giá",
+    "formTitle": "Phiếu Đánh Giá, Xếp Loại Chất Lượng Viên Chức",
+    "yearLabel": "Năm: {{year}}",
+    "personalInfoTitle": "I. THÔNG TIN CÁ NHÂN",
+    "fullNameLabel": "Họ và tên:",
+    "staffCodeLabel": "MSCB:",
+    "emailLabel": "Email:",
+    "departmentLabel": "Đơn vị công tác:",
+    "positionLabel": "Chức vụ:",
+    "defaultPosition": "Giảng viên",
+    "okrResultsTitle": "II. KẾT QUẢ TỰ ĐÁNH GIÁ (Đồng bộ OKR)",
+    "table": {
+      "no": "STT",
+      "criteria": "Tiêu chí",
+      "score": "Điểm Đánh Giá",
+      "totalScoreLabel": "TỔNG ĐIỂM CHẤM TỪ OKR"
+    },
+    "selfEvaluationTitle": "III. TỰ NHẬN XÉT, XẾP LOẠI CHẤT LƯỢNG (Của Nhân sự)",
+    "selfCommentLabel": "1. Tự nhận xét ưu/khuyết điểm:",
+    "noSelfComment": "Không có nhận xét.",
+    "selfRatingLabel": "2. Tự xếp loại chất lượng:",
+    "ratings": {
+      "excellent": "Hoàn thành tốt nhiệm vụ (86 - 100 điểm)",
+      "good": "Hoàn thành nhiệm vụ (60 - 86 điểm)",
+      "poor": "Không hoàn thành nhiệm vụ (dưới 60 điểm)",
+      "excellentSimple": "Hoàn thành tốt nhiệm vụ",
+      "goodSimple": "Hoàn thành nhiệm vụ",
+      "poorSimple": "Không hoàn thành nhiệm vụ"
+    },
+    "managerEvaluationTitle": "IV. KẾT QUẢ ĐÁNH GIÁ, XẾP LOẠI VIÊN CHỨC (Bởi Cấp Quản Lý)",
+    "managerCommentLabel": "1. Nhận xét của Quản lý / Trưởng khoa:",
+    "managerCommentPlaceholder": "Ghi nhận xét đánh giá dành cho viên chức...",
+    "managerRatingLabel": "2. Phê duyệt kết quả Xếp loại chất lượng viên chức:",
+    "cancelBtn": "Hủy / Đóng",
+    "saveBtn": "Lưu Kết Luận Xếp Loại"
+  },
+  "evaluationFormManagerTab": {
+    "ratings": {
+      "excellent": "Hoàn thành Tốt",
+      "good": "Hoàn thành",
+      "poor": "Không hoàn thành",
+      "unrated": "Chưa xếp loại"
+    },
+    "filters": {
+      "searchPlaceholder": "Tìm kiếm nhân sự...",
+      "allDepartments": "Tất cả Phòng Ban",
+      "allCycles": "Tất cả Kỳ đánh giá"
+    },
+    "states": {
+      "loading": "Đang tải dữ liệu...",
+      "noReports": "Không có phiếu đánh giá nào đang chờ duyệt."
+    },
+    "accordion": {
+      "sheetCount": "{{count}} phiếu"
+    },
+    "table": {
+      "headers": {
+        "employee": "Nhân sự",
+        "department": "Bộ môn",
+        "cycle": "Kỳ đánh giá",
+        "okrTotalScore": "Tổng Điểm Tính (OKR)",
+        "selfRating": "NV Xếp Loại",
+        "managerRating": "QL Kết Luận",
+        "status": "Trạng thái",
+        "actions": "Thao tác"
+      }
+    },
+    "cycleFallback": "Kỳ mặc định",
+    "unratedLabel": "Chưa đánh giá",
+    "status": {
+      "completed": "Đã hoàn tất",
+      "pending": "Chờ duyệt"
+    },
+    "tooltip": {
+      "viewAndEvaluate": "Xem & Đánh giá"
+    }
+  },
+  "evaluationListTab": {
+    "headerTitle": "Đánh Giá Hiệu Suất / Báo Cáo NV",
+    "tabs": {
+      "inProgress": "Đang thực hiện ({{count}})",
+      "pendingReview": "Cần đánh giá ({{count}})",
+      "completedHistory": "Lịch sử Đã duyệt ({{count}})"
+    },
+    "filters": {
+      "searchPlaceholder": "Tìm theo Tên hoặc Email...",
+      "departmentLabel": "Bộ môn / Phòng ban",
+      "allDepartments": "Tất cả Bộ môn",
+      "cycleLabel": "Kỳ đánh giá",
+      "allCycles": "Tất cả các kỳ"
+    },
+    "buttons": {
+      "tickAll": "Duyệt nhanh ({{count}})"
+    },
+    "alerts": {
+      "noReportsInProgress": "Không có báo cáo nào đang thực hiện.",
+      "noReportsPendingReview": "Không có báo cáo nào cần đánh giá.",
+      "noEvaluationHistory": "Không có lịch sử đánh giá.",
+      "noFilteredReportsFound": "Không tìm thấy báo cáo nào khớp với điều kiện lọc."
+    },
+    "accordion": {
+      "inProgressCount": "{{count}} đang thực hiện",
+      "pendingReviewCount": "{{count}} cần đánh giá",
+      "completedCount": "{{count}} đã duyệt"
+    },
+    "table": {
+      "headers": {
+        "employee": "Nhân sự",
+        "department": "Bộ môn",
+        "assignedDate": "Ngày giao",
+        "okrProgress": "% OKR Hoàn thành",
+        "selfScore": "Điểm Tự Khai (Tổng)",
+        "managerScore": "Điểm Q.Lý Duyệt (Tổng)",
+        "status": "Trạng thái",
+        "actions": "Thao tác"
+      },
+      "notGradedYet": "Chưa chấm",
+      "status": {
+        "completed": "Đã đánh giá",
+        "inProgress": "Đang thực hiện",
+        "pending": "Chờ đánh giá"
+      }
+    },
+    "noNameFallback": "Không có tên",
+    "cycleFallback": "Kỳ mặc định",
+    "tooltips": {
+      "viewDetails": "Đánh giá chi tiết",
+      "quickApprove": "Chấp nhận điểm tự khai"
+    }
   }
 }

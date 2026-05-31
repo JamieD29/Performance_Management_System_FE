@@ -22,6 +22,7 @@ import {
   Chip,
 } from "@mui/material";
 import { CheckCircle, Close, Save } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
 
 interface EvaluationDetailsDialogProps {
   open: boolean;
@@ -31,6 +32,7 @@ interface EvaluationDetailsDialogProps {
 }
 
 export default function EvaluationDetailsDialog({ open, reportData, onClose, onSave }: EvaluationDetailsDialogProps) {
+  const { t } = useTranslation();
   const [managerData, setManagerData] = useState<Record<string, { quantity: number; evidence?: string; score?: number }>>({});
 
   const structure = reportData?.keyResults || [];
@@ -163,10 +165,10 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", pb: 1 }}>
         <Box>
           <Typography variant="h6" fontWeight="bold" color="#1e293b">
-            Phiếu Kết Quả Đánh Giá OKR
+            {t("evaluationDetailsDialog.dialogTitle")}
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            Mục tiêu: {reportData.objective}
+            {t("evaluationDetailsDialog.objectiveLabel")}: {reportData.objective}
           </Typography>
         </Box>
         <IconButton onClick={onClose} size="small"><Close /></IconButton>
@@ -185,20 +187,20 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
               {reportData.user?.name}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Bộ môn: {reportData.user?.department?.name || "N/A"} • Email: {reportData.user?.email}
+              {t("evaluationDetailsDialog.departmentLabel")}: {reportData.user?.department?.name || "N/A"} • Email: {reportData.user?.email}
             </Typography>
           </Box>
 
           {isEditable && (
             <Box sx={{ ml: "auto", display: "flex", gap: 1 }}>
-              <Tooltip title="Đồng ý toàn bộ số lượng do nhân sự tự khai">
+              <Tooltip title={t("evaluationDetailsDialog.approveAllTooltip")}>
                 <Button variant="outlined" size="small" onClick={handleCopySelfScore}>
-                  Đồng ý Cá nhân
+                  {t("evaluationDetailsDialog.approveAllSelf")}
                 </Button>
               </Tooltip>
-              <Tooltip title="Cho điểm số lượng đạt trần max score">
+              <Tooltip title={t("evaluationDetailsDialog.tickAllTooltip")}>
                 <Button variant="contained" color="success" size="small" startIcon={<CheckCircle />} onClick={handleTickAll}>
-                  Tick All
+                  {t("evaluationDetailsDialog.tickAll")}
                 </Button>
               </Tooltip>
             </Box>
@@ -207,22 +209,22 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
 
         {/* Evaluation Table */}
         <Typography variant="subtitle1" fontWeight={600} color="#1e293b" sx={{ mb: 1.5 }}>
-          Chi tiết đánh giá mức độ hoàn thành nhiệm vụ
+          {t("evaluationDetailsDialog.sectionTitle")}
         </Typography>
 
         <TableContainer component={Paper} elevation={0} sx={{ border: "1px solid #e2e8f0", borderRadius: 2 }}>
           <Table size="small">
             <TableHead sx={{ bgcolor: "#f1f5f9" }}>
               <TableRow>
-                <TableCell sx={{ fontWeight: "bold", width: "5%" }}>STT</TableCell>
-                <TableCell sx={{ fontWeight: "bold", width: "25%" }}>Tiêu chí / Nhiệm vụ</TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold", width: "8%" }}>Điểm<br />Tối đa</TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold", width: "8%" }}>Hệ số<br />Điểm</TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold", width: "8%", color: "#64748b" }}>S.Lượng<br />Tự Khai</TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold", width: "8%", color: "#64748b" }}>Điểm<br />Tự Khai</TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold", width: "12%" }}>Minh chứng</TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold", width: "10%", color: "#1C4D8D" }}>S.Lượng<br />Q.Lý Duyệt</TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold", width: "8%", color: "#1C4D8D" }}>Điểm<br />Q.Lý</TableCell>
+                <TableCell sx={{ fontWeight: "bold", width: "5%" }}>{t("evaluationDetailsDialog.headers.no")}</TableCell>
+                <TableCell sx={{ fontWeight: "bold", width: "25%" }}>{t("evaluationDetailsDialog.headers.criteria")}</TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold", width: "8%" }}>{t("evaluationDetailsDialog.headers.maxScore")}</TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold", width: "8%" }}>{t("evaluationDetailsDialog.headers.scorePerUnit")}</TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold", width: "8%", color: "#64748b" }}>{t("evaluationDetailsDialog.headers.selfReportQty")}</TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold", width: "8%", color: "#64748b" }}>{t("evaluationDetailsDialog.headers.selfReportScore")}</TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold", width: "12%" }}>{t("evaluationDetailsDialog.headers.evidence")}</TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold", width: "10%", color: "#1C4D8D" }}>{t("evaluationDetailsDialog.headers.managerQty")}</TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold", width: "8%", color: "#1C4D8D" }}>{t("evaluationDetailsDialog.headers.managerScore")}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -267,7 +269,7 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
                             <TableCell>{kr.title}</TableCell>
                             <TableCell align="center">{kr.maxScore}</TableCell>
                             <TableCell align="center">
-                              {kr.unitScore ? <Chip label={`+${kr.unitScore}/${kr.unit || "đv"}`} size="small" color="primary" variant="outlined" /> : "—"}
+                              {kr.unitScore ? <Chip label={`+${kr.unitScore}/${kr.unit || t("evaluationDetailsDialog.unitFallback")}`} size="small" color="primary" variant="outlined" /> : "—"}
                             </TableCell>
                             <TableCell align="center" sx={{ color: "#64748b" }}>{selfKrObj.quantity || 0}</TableCell>
                             <TableCell align="center" sx={{ color: "#64748b", fontWeight: 500 }}>{selfKrObj.score?.toFixed(1) || 0}</TableCell>
@@ -275,7 +277,7 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
                               {selfKrObj.evidence ? (
                                 <Tooltip title={selfKrObj.evidence}>
                                   <Button size="small" variant="text" href={selfKrObj.evidence} target="_blank" sx={{ minWidth: 0, textTransform: 'none' }}>
-                                    Link
+                                    {t("evaluationDetailsDialog.evidenceLink")}
                                   </Button>
                                 </Tooltip>
                               ) : "—"}
@@ -321,7 +323,7 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
                                   <TableCell sx={{ fontSize: "0.9rem" }}>{sub.title}</TableCell>
                                   <TableCell align="center">{sub.maxScore}</TableCell>
                                   <TableCell align="center">
-                                    {sub.unitScore ? <Chip label={`+${sub.unitScore}/${sub.unit || "đv"}`} size="small" variant="outlined" /> : "—"}
+                                    {sub.unitScore ? <Chip label={`+${sub.unitScore}/${sub.unit || t("evaluationDetailsDialog.unitFallback")}`} size="small" variant="outlined" /> : "—"}
                                   </TableCell>
                                   <TableCell align="center" sx={{ color: "#64748b" }}>{selfSubObj.quantity || 0}</TableCell>
                                   <TableCell align="center" sx={{ color: "#64748b" }}>{selfSubObj.score?.toFixed(1) || 0}</TableCell>
@@ -329,7 +331,7 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
                                     {selfSubObj.evidence ? (
                                       <Tooltip title={selfSubObj.evidence}>
                                         <Button size="small" variant="text" href={selfSubObj.evidence} target="_blank" sx={{ minWidth: 0, textTransform: 'none' }}>
-                                          Link
+                                          {t("evaluationDetailsDialog.evidenceLink")}
                                         </Button>
                                       </Tooltip>
                                     ) : "—"}
@@ -374,7 +376,7 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
                                       <TableCell sx={{ fontSize: "0.85rem" }}>{subsub.title}</TableCell>
                                       <TableCell align="center">—</TableCell>
                                       <TableCell align="center">
-                                        {subsub.unitScore ? <Chip label={`+${subsub.unitScore}/${subsub.unit || "đv"}`} size="small" variant="outlined" sx={{ fontSize: "0.75rem" }} /> : "—"}
+                                        {subsub.unitScore ? <Chip label={`+${subsub.unitScore}/${subsub.unit || t("evaluationDetailsDialog.unitFallback")}`} size="small" variant="outlined" sx={{ fontSize: "0.75rem" }} /> : "—"}
                                       </TableCell>
                                       <TableCell align="center" sx={{ color: "#64748b" }}>{selfSubSubObj.quantity || 0}</TableCell>
                                       <TableCell align="center" sx={{ color: "#64748b" }}>{selfSubSubObj.score?.toFixed(1) || 0}</TableCell>
@@ -382,7 +384,7 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
                                         {selfSubSubObj.evidence ? (
                                           <Tooltip title={selfSubSubObj.evidence}>
                                             <Button size="small" variant="text" href={selfSubSubObj.evidence} target="_blank" sx={{ minWidth: 0, textTransform: 'none' }}>
-                                              Link
+                                              {t("evaluationDetailsDialog.evidenceLink")}
                                             </Button>
                                           </Tooltip>
                                         ) : "—"}
@@ -424,7 +426,7 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
               {/* Row Tổng Điểm */}
               <TableRow sx={{ bgcolor: "#fffbeb" }}>
                 <TableCell colSpan={5} align="center" sx={{ fontWeight: "bold", color: "#b45309", fontSize: "1.05rem" }}>
-                  TỔNG ĐIỂM BÀI ĐÁNH GIÁ (GIỚI HẠN: 100)
+                  {t("evaluationDetailsDialog.totalScoreLabel")}
                 </TableCell>
                 <TableCell align="center">
                   <Typography fontWeight="bold" color="#b45309" fontSize="1.1rem">
@@ -432,7 +434,7 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
                   </Typography>
                 </TableCell>
                 <TableCell align="center" colSpan={2} sx={{ fontWeight: "bold", color: "#1C4D8D", fontSize: "1.05rem", textAlign: "right" }}>
-                  ĐIỂM QUẢN LÝ CHỐT:
+                  {t("evaluationDetailsDialog.managerScoreLabel")}
                 </TableCell>
                 <TableCell align="center">
                   <Typography fontWeight="bold" color="#1C4D8D" fontSize="1.2rem">
@@ -461,7 +463,7 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
             borderRadius: "8px" 
           }}>
             <Typography variant="body2" fontWeight={600} color="#b45309">
-              TỔNG ĐIỂM TỰ ĐÁNH GIÁ:
+              {t("evaluationDetailsDialog.selfScoreLabel")}
             </Typography>
             <Typography variant="subtitle1" fontWeight={700} color="#c2410c">
               {reportData.totalScore?.toFixed(1) || 0}
@@ -480,7 +482,7 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
             borderRadius: "8px" 
           }}>
             <Typography variant="body2" fontWeight={600} color="#15803d">
-              ĐIỂM QUẢN LÝ CHỐT:
+              {t("evaluationDetailsDialog.managerScoreLabel")}
             </Typography>
             <Typography variant="h6" fontWeight={800} color="#166534">
               {reportData.status === "ACCEPTED" ? "—" : (isCompleted ? (reportData.managerScore?.toFixed(1) || 0) : calculateTotalManagerScore().toFixed(1))}
@@ -490,7 +492,7 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
 
         <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
           <Button onClick={onClose} variant="outlined" color="inherit">
-            Hủy / Đóng
+            {t("evaluationDetailsDialog.cancelBtn")}
           </Button>
           {isEditable && (
             <Button
@@ -500,7 +502,7 @@ export default function EvaluationDetailsDialog({ open, reportData, onClose, onS
               onClick={handleSave}
               sx={{ px: 3, fontWeight: "bold" }}
             >
-              Chốt Điểm Đánh Giá
+              {t("evaluationDetailsDialog.saveBtn")}
             </Button>
           )}
         </Box>

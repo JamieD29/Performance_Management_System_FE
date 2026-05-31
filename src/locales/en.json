@@ -92,5 +92,278 @@
     "noDataInSystem": "No department data in the system",
     "edit": "Edit",
     "delete": "Delete"
+  },
+  "deanApprovalTab": {
+    "title": "Approve OKR Adjustment Proposal",
+    "subtitle": "Review and respond to target and indicator adjustment proposals from department staff.",
+    "searchPlaceholder": "Search by Name or Email...",
+    "departmentFilter": "Department",
+    "cycleFilter": "Evaluation Cycle",
+    "allDepartments": "All Departments",
+    "allCycles": "All Cycles",
+    "noProposals": "No proposals pending approval.",
+    "noProposalsFiltered": "No proposals found matching the filter criteria.",
+    "countProposals": "{{count}} proposal(s)",
+    "tableHeaders": {
+      "staff": "Staff",
+      "department": "Department",
+      "objective": "Objective",
+      "assignedDate": "Assigned Date",
+      "negotiationDeadline": "Negotiation Deadline",
+      "status": "Status",
+      "proposalContent": "Proposal Content",
+      "actions": "Actions"
+    },
+    "status": {
+      "pendingApproval": "Pending Your Approval",
+      "pendingResponse": "Pending Staff Response"
+    },
+    "actions": {
+      "detailsAndEdit": "Details & Edit",
+      "approve": "Approve",
+      "reject": "Reject"
+    },
+    "dialog": {
+      "detailsTitle": "Adjustment Proposal Details",
+      "staff": "Staff:",
+      "assignedDate": "OKR Assigned Date:",
+      "negotiationDeadline": "Negotiation Deadline:",
+      "objective": "OKR Objective:",
+      "structureDetails": "Structure & Negotiation Details:",
+      "rejectTitle": "Reject Proposal",
+      "rejectReason": "Reason for Rejection",
+      "rejectReasonPlaceholder": "e.g. Criteria cannot be modified...",
+      "cancel": "Cancel",
+      "confirmReject": "Confirm Rejection"
+    }
+  },
+  "assignTemplateDialog": {
+    "dialogTitle": "Assign OKR to Staff",
+    "selectedTemplate": "Selected Template:",
+    "createCustomVersion": "Create Custom Version",
+    "requiredInfo": "📋 Required Information",
+    "cycleLabel": "Evaluation Cycle *",
+    "cycleStatusOpen": "Open",
+    "cycleStatusClosed": "Closed",
+    "cycleInProgress": " - In Progress (Cannot assign)",
+    "deadlineLabel": "Negotiation & Finalization Deadline *",
+    "deadlineHelperText": "OKR Negotiation Deadline (Limit: {{min}} to {{max}}).",
+    "filterStaff": "🔍 Filter Staff",
+    "optionalLabel": "Optional",
+    "searchPlaceholder": "Search by name, email...",
+    "departmentLabel": "Department",
+    "departmentAll": "-- All --",
+    "jobTitleLabel": "Job Title",
+    "jobTitleAll": "-- All --",
+    "tableSelectStaff": "Select Staff to Assign",
+    "deselectAll": "Deselect All",
+    "selectAll": "Select All",
+    "tableHeaders": {
+      "fullName": "Full Name",
+      "email": "Email",
+      "department": "Department",
+      "position": "Management Position",
+      "jobTitle": "Job Title",
+      "version": "Assignment Version"
+    },
+    "loading": "Loading staff list...",
+    "noStaffFound": "No personnel found matching the template criteria.",
+    "alreadyAssigned": "Already Assigned",
+    "cancel": "Cancel",
+    "assignButton": "Assign OKR to {{count}} Staff"
+  },
+  "okrCard": {
+    "detailsTitle": "OKR Details",
+    "completionProgress": "Completion Progress:",
+    "assignedOkrFramework": "📋 Assigned OKR Framework:",
+    "unsavedDraft": "⚠️ Unsaved Draft on Server",
+    "saving": "Saving...",
+    "savedAt": "✓ Saved at {{time}}",
+    "totalSelfScore": "Total Self Score:",
+    "save": "Save",
+    "submit": "Submit Self-report",
+    "negotiateAndEdit": "Negotiate & Edit",
+    "reportScore": "Report Scores & Evidence",
+    "viewDetails": "View Details",
+    "awaitingCycleStart": "Awaiting cycle start",
+    "awaitingGrading": "Awaiting grading",
+    "expectedScore": "Expected score",
+    "selfScore": "Self score",
+    "managerScore": "Manager score",
+    "finalScore": "Final score",
+    "approvedByManager": "Approved by Dean.",
+    "tableHeaders": {
+      "no": "No.",
+      "content": "Content",
+      "maxScore": "Max Score",
+      "scorePerUnit": "Score/Unit",
+      "selfReportQty": "Self-reported Qty",
+      "conversion": "Conversion",
+      "evidence": "Evidence",
+      "negotiation": "Negotiation",
+      "selfReportQtySubmitted": "Self Qty",
+      "selfScoreSubmitted": "Self Score",
+      "managerQtyApproved": "Manager Qty",
+      "managerScoreApproved": "Manager Score"
+    }
+  },
+  "evaluationDetailsDialog": {
+    "dialogTitle": "OKR Evaluation Result Sheet",
+    "objectiveLabel": "Objective",
+    "departmentLabel": "Department",
+    "approveAllTooltip": "Agree to all quantities reported by staff",
+    "approveAllSelf": "Agree to Personal Report",
+    "tickAllTooltip": "Award max score for all items",
+    "tickAll": "Tick All",
+    "sectionTitle": "Detailed assessment of task completion level",
+    "headers": {
+      "no": "No.",
+      "criteria": "Criteria / Task",
+      "maxScore": "Max Score",
+      "scorePerUnit": "Score Factor",
+      "selfReportQty": "Self-reported Qty",
+      "selfReportScore": "Self-reported Score",
+      "evidence": "Evidence",
+      "managerQty": "Manager Qty",
+      "managerScore": "Manager Score"
+    },
+    "totalScoreLabel": "TOTAL EVALUATION SCORE (LIMIT: 100)",
+    "managerScoreLabel": "FINAL MANAGER SCORE:",
+    "selfScoreLabel": "TOTAL SELF-EVALUATION SCORE:",
+    "cancelBtn": "Cancel / Close",
+    "saveBtn": "Finalize Evaluation Score",
+    "unitFallback": "unit",
+    "evidenceLink": "Link"
+  },
+  "evaluationFormManagerDialog": {
+    "dialogTitle": "Review Evaluation Sheet",
+    "formTitle": "Staff Performance Evaluation & Classification Sheet",
+    "yearLabel": "Year: {{year}}",
+    "personalInfoTitle": "I. PERSONAL INFORMATION",
+    "fullNameLabel": "Full name:",
+    "staffCodeLabel": "Staff Code:",
+    "emailLabel": "Email:",
+    "departmentLabel": "Working department:",
+    "positionLabel": "Position:",
+    "defaultPosition": "Lecturer",
+    "okrResultsTitle": "II. SELF-EVALUATION RESULTS (OKR Sync)",
+    "table": {
+      "no": "No.",
+      "criteria": "Criteria",
+      "score": "Evaluation Score",
+      "totalScoreLabel": "TOTAL SCORE FROM OKR"
+    },
+    "selfEvaluationTitle": "III. SELF-COMMENT & PERFORMANCE CLASSIFICATION (By Employee)",
+    "selfCommentLabel": "1. Self-comment on strengths/weaknesses:",
+    "noSelfComment": "No comment.",
+    "selfRatingLabel": "2. Self-reported performance classification:",
+    "ratings": {
+      "excellent": "Excellent performance (86 - 100 points)",
+      "good": "Good performance (60 - 86 points)",
+      "poor": "Unsatisfactory performance (under 60 points)",
+      "excellentSimple": "Excellent performance",
+      "goodSimple": "Good performance",
+      "poorSimple": "Unsatisfactory performance"
+    },
+    "managerEvaluationTitle": "IV. PERFORMANCE EVALUATION & CLASSIFICATION RESULTS (By Management)",
+    "managerCommentLabel": "1. Comment by Manager / Dean:",
+    "managerCommentPlaceholder": "Write an evaluation comment for the employee...",
+    "managerRatingLabel": "2. Approve employee performance classification results:",
+    "cancelBtn": "Cancel / Close",
+    "saveBtn": "Save Classification Conclusion"
+  },
+  "evaluationFormManagerTab": {
+    "ratings": {
+      "excellent": "Excellent performance",
+      "good": "Good performance",
+      "poor": "Unsatisfactory performance",
+      "unrated": "Unrated"
+    },
+    "filters": {
+      "searchPlaceholder": "Search staff...",
+      "allDepartments": "All Departments",
+      "allCycles": "All Cycles"
+    },
+    "states": {
+      "loading": "Loading data...",
+      "noReports": "No evaluation sheets are pending review."
+    },
+    "accordion": {
+      "sheetCount": "{{count}} sheets"
+    },
+    "table": {
+      "headers": {
+        "employee": "Staff",
+        "department": "Department",
+        "cycle": "Cycle",
+        "okrTotalScore": "Total Calculated Score (OKR)",
+        "selfRating": "Self Rating",
+        "managerRating": "Manager Conclusion",
+        "status": "Status",
+        "actions": "Actions"
+      }
+    },
+    "cycleFallback": "Default Cycle",
+    "unratedLabel": "Unrated",
+    "status": {
+      "completed": "Completed",
+      "pending": "Pending review"
+    },
+    "tooltip": {
+      "viewAndEvaluate": "View & Evaluate"
+    }
+  },
+  "evaluationListTab": {
+    "headerTitle": "Performance Evaluation / Employee Reports",
+    "tabs": {
+      "inProgress": "In Progress ({{count}})",
+      "pendingReview": "Pending Evaluation ({{count}})",
+      "completedHistory": "Approved History ({{count}})"
+    },
+    "filters": {
+      "searchPlaceholder": "Search by Name or Email...",
+      "departmentLabel": "Department / Room",
+      "allDepartments": "All Departments",
+      "cycleLabel": "Evaluation Cycle",
+      "allCycles": "All Cycles"
+    },
+    "buttons": {
+      "tickAll": "Quick Approve ({{count}})"
+    },
+    "alerts": {
+      "noReportsInProgress": "No reports are currently in progress.",
+      "noReportsPendingReview": "No reports pending evaluation.",
+      "noEvaluationHistory": "No evaluation history.",
+      "noFilteredReportsFound": "No reports found matching filter conditions."
+    },
+    "accordion": {
+      "inProgressCount": "{{count}} in progress",
+      "pendingReviewCount": "{{count}} pending evaluation",
+      "completedCount": "{{count}} approved"
+    },
+    "table": {
+      "headers": {
+        "employee": "Staff",
+        "department": "Department",
+        "assignedDate": "Assigned Date",
+        "okrProgress": "% OKR Progress",
+        "selfScore": "Self Score (Total)",
+        "managerScore": "Manager Score (Total)",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "notGradedYet": "Not graded",
+      "status": {
+        "completed": "Evaluated",
+        "inProgress": "In progress",
+        "pending": "Pending evaluation"
+      }
+    },
+    "noNameFallback": "No name",
+    "cycleFallback": "Default Cycle",
+    "tooltips": {
+      "viewDetails": "Detailed evaluation",
+      "quickApprove": "Accept self-reported scores"
+    }
   }
 }

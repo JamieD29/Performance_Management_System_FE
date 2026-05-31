@@ -34,6 +34,7 @@ import { showWarning, showSuccess, showError } from "../../../utils/swal";
 import { performanceService } from "../../../services/performanceService";
 import VariantEditorDialog from "./VariantEditorDialog";
 import dayjs from "dayjs";
+import { useTranslation } from "react-i18next";
 
 interface AssignTemplateDialogProps {
   open: boolean;
@@ -46,11 +47,17 @@ export default function AssignTemplateDialog({
   onClose,
   template,
 }: AssignTemplateDialogProps) {
+  const { t } = useTranslation();
+  const loggedInUserStr = localStorage.getItem("user");
+  const loggedInUser = loggedInUserStr ? JSON.parse(loggedInUserStr) : null;
+  const isDonVi = loggedInUser?.managementPosition?.permissionLevel === "DON_VI";
+
   const [users, setUsers] = useState<any[]>([]);
   const [cycles, setCycles] = useState<any[]>([]);
   const [userAssignments, setUserAssignments] = useState<Record<string, string>>({});
   const [variants, setVariants] = useState<any[]>([]);
   const [openVariantEditor, setOpenVariantEditor] = useState(false);
+  const [assignedUserIds, setAssignedUserIds] = useState<string[]>([]);
 
   const [selectedCycleId, setSelectedCycleId] = useState("");
   const [deadline, setDeadline] = useState("");
@@ -73,7 +80,8 @@ export default function AssignTemplateDialog({
     if (open && template) {
       setFilterPositionId(template?.positionId || "");
       setFilterJobTitle(template?.jobTitle || "");
-      setFilterDepartmentId("");
+      setFilterDepartmentId(isDonVi ? loggedInUser?.department?.id || "" : "");
+
       setSearchName("");
       loadData();
       setVariants([{ id: "base", title: "Phiên bản Gốc (Mặc định)", structure: template.structure }]);
@@ -100,6 +108,37 @@ export default function AssignTemplateDialog({
       setDeadline("");
     }
   }, [selectedCycleId, cycles]);
+
+  // Fetch users already assigned an OKR in the selected cycle
+  useEffect(() => {
+    const fetchAssignedUsers = async () => {
+      if (!selectedCycleId) {
+        setAssignedUserIds([]);
+        return;
+      }
+      try {
+        const res = await api.get(`/okrs/assigned-users?cycleId=${selectedCycleId}`);
+        const list = res.data || [];
+        setAssignedUserIds(list);
+        
+        // Clear these users from userAssignments if they were selected
+        setUserAssignments((prev) => {
+          const next = { ...prev };
+          let changed = false;
+          list.forEach((uid: string) => {
+            if (next[uid]) {
+              delete next[uid];
+              changed = true;
+            }
+          });
+          return changed ? next : prev;
+        });
+      } catch (error) {
+        console.error("Error fetching assigned users:", error);
+      }
+    };
+    fetchAssignedUsers();
+  }, [selectedCycleId]);
 
   const loadData = async () => {
     try {
@@ -129,25 +168,44 @@ export default function AssignTemplateDialog({
   };
 
   const handleSelectAll = () => {
-    const assignedCount = Object.keys(userAssignments).length;
-    if (assignedCount === filteredUsers.length && filteredUsers.length > 0) {
-      setUserAssignments({});
+    const selectableUsers = filteredUsers.filter((u) => !assignedUserIds.includes(u.id));
+    const assignedSelectableCount = selectableUsers.filter((u) => !!userAssignments[u.id]).length;
+    
+    if (assignedSelectableCount === selectableUsers.length && selectableUsers.length > 0) {
+      // Bỏ chọn tất cả các user khả dụng
+      setUserAssignments((prev) => {
+        const next = { ...prev };
+        selectableUsers.forEach((u) => delete next[u.id]);
+        return next;
+      });
     } else {
-      const next: Record<string, string> = {};
-      filteredUsers.forEach((u) => (next[u.id] = "base"));
-      setUserAssignments(next);
+      // Chọn tất cả các user khả dụng
+      setUserAssignments((prev) => {
+        const next = { ...prev };
+        selectableUsers.forEach((u) => {
+          next[u.id] = "base";
+        });
+        return next;
+      });
     }
   };
 
   const handleAssign = async () => {
+    const isEn = localStorage.getItem("i18nextLng") === "en";
     const assignedCount = Object.keys(userAssignments).length;
     if (assignedCount === 0 || !selectedCycleId) {
-      showWarning("Thiếu thông tin", "Vui lòng chọn ít nhất 1 User và Kỳ đánh giá!");
+      showWarning(
+        isEn ? "Missing Information" : "Thiếu thông tin",
+        isEn ? "Please select at least 1 User and an Evaluation Cycle!" : "Vui lòng chọn ít nhất 1 User và Kỳ đánh giá!"
+      );
       return;
     }
 
     if (!deadline) {
-      showWarning("Thiếu thông tin", "Vui lòng chọn Hạn chót thương lượng & chốt OKR!");
+      showWarning(
+        isEn ? "Missing Information" : "Thiếu thông tin",
+        isEn ? "Please select the Negotiation & OKR Finalization Deadline!" : "Vui lòng chọn Hạn chót thương lượng & chốt OKR!"
+      );
       return;
     }
 
@@ -156,7 +214,10 @@ export default function AssignTemplateDialog({
     const cycle = cycles.find((c: any) => c.id === selectedCycleId);
 
     if (dlDate.isBefore(today)) {
-      showWarning("Hạn chót không hợp lệ", "Hạn chót chốt OKR không thể nằm trong quá khứ!");
+      showWarning(
+        isEn ? "Invalid Deadline" : "Hạn chót không hợp lệ",
+        isEn ? "The OKR finalization deadline cannot be in the past!" : "Hạn chót chốt OKR không thể nằm trong quá khứ!"
+      );
       return;
     }
 
@@ -164,8 +225,10 @@ export default function AssignTemplateDialog({
       const maxDate = dayjs(cycle.startDate).subtract(3, "day").startOf("day");
       if (dlDate.isAfter(maxDate)) {
         showWarning(
-          "Hạn chót không hợp lệ",
-          `Hạn chót phải diễn ra trước ngày bắt đầu kỳ OKR ít nhất 3 ngày (tối đa là ngày ${maxDate.format("DD/MM/YYYY")})!`
+          isEn ? "Invalid Deadline" : "Hạn chót không hợp lệ",
+          isEn
+            ? `The deadline must be at least 3 days before the OKR cycle start date (maximum is ${maxDate.format("DD/MM/YYYY")})!`
+            : `Hạn chót phải diễn ra trước ngày bắt đầu kỳ OKR ít nhất 3 ngày (tối đa là ngày ${maxDate.format("DD/MM/YYYY")})!`
         );
         return;
       }
@@ -205,13 +268,18 @@ export default function AssignTemplateDialog({
       }
 
       showSuccess(
-        "Thành công!",
-        `Đã giao OKR Template cho ${assignedCount} nhân sự.`,
+        isEn ? "Success!" : "Thành công!",
+        isEn
+          ? `OKR Template assigned to ${assignedCount} personnel.`
+          : `Đã giao OKR Template cho ${assignedCount} nhân sự.`
       );
       onClose();
     } catch (error) {
       console.error("Error assigning template", error);
-      showError("Lỗi", "Có lỗi xảy ra khi giao template.");
+      showError(
+        isEn ? "Error" : "Lỗi",
+        isEn ? "An error occurred while assigning the template." : "Có lỗi xảy ra khi giao template."
+      );
     } finally {
       setLoading(false);
     }
@@ -230,6 +298,9 @@ export default function AssignTemplateDialog({
     }
     return true;
   });
+
+  const selectableUsers = filteredUsers.filter((u) => !assignedUserIds.includes(u.id));
+  const assignedSelectableCount = selectableUsers.filter((u) => !!userAssignments[u.id]).length;
 
   const paginatedUsers = filteredUsers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
@@ -267,7 +338,7 @@ export default function AssignTemplateDialog({
         }}
       >
         <Send />
-        Giao OKR cho Nhân sự
+        {t("assignTemplateDialog.dialogTitle")}
       </DialogTitle>
       <Divider />
 
@@ -284,7 +355,7 @@ export default function AssignTemplateDialog({
           }}
         >
           <Typography variant="subtitle2" color="text.secondary">
-            Template được chọn:
+            {t("assignTemplateDialog.selectedTemplate")}
           </Typography>
           <Typography variant="h6" fontWeight="bold" color="#1e3a8a">
             {template?.title}
@@ -292,14 +363,14 @@ export default function AssignTemplateDialog({
           <Box sx={{ mt: 0.5, display: "flex", gap: 0.5, flexWrap: "wrap" }}>
             {template?.positionName && (
               <Chip
-                label={`Chức vụ: ${template.positionName}`}
+                label={`${t("assignTemplateDialog.tableHeaders.position")}: ${template.positionName}`}
                 size="small"
                 color="secondary"
               />
             )}
             {template?.jobTitle && (
               <Chip
-                label={`Chức danh: ${template.jobTitle}`}
+                label={`${t("assignTemplateDialog.tableHeaders.jobTitle")}: ${template.jobTitle}`}
                 size="small"
                 color="primary"
               />
@@ -310,7 +381,7 @@ export default function AssignTemplateDialog({
         <Box sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
             <Button variant="outlined" color="secondary" startIcon={<AddCircleOutline />} onClick={() => setOpenVariantEditor(true)}>
-              Tạo phiên bản tùy biến
+              {t("assignTemplateDialog.createCustomVersion")}
             </Button>
           </Box>
           {/* ═══ PHẦN 1: THÔNG TIN BẮT BUỘC ═══ */}
@@ -326,14 +397,14 @@ export default function AssignTemplateDialog({
             }}
           >
             <Typography variant="subtitle1" fontWeight="bold" color="#1e3a8a" sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
-              📋 Thông tin bắt buộc
+              {t("assignTemplateDialog.requiredInfo")}
             </Typography>
             <Box sx={{ display: "flex", gap: 2 }}>
               <FormControl fullWidth required>
-                <InputLabel>Kỳ đánh giá *</InputLabel>
+                <InputLabel>{t("assignTemplateDialog.cycleLabel")}</InputLabel>
                 <Select
                   value={selectedCycleId}
-                  label="Kỳ đánh giá *"
+                  label={t("assignTemplateDialog.cycleLabel")}
                   onChange={(e) => setSelectedCycleId(e.target.value)}
                 >
                   {cycles.map((c: any) => {
@@ -346,8 +417,8 @@ export default function AssignTemplateDialog({
                       : "N/A";
                     return (
                       <MenuItem key={c.id} value={c.id} disabled={isStarted}>
-                        {c.name} ({start} → {end}) [{c.status === "OPEN" ? "Đang mở" : "Đã đóng"}]
-                        {isStarted ? " - Đang diễn ra (Không thể giao mới)" : ""}
+                        {c.name} ({start} → {end}) [{c.status === "OPEN" ? t("assignTemplateDialog.cycleStatusOpen") : t("assignTemplateDialog.cycleStatusClosed")}]
+                        {isStarted ? t("assignTemplateDialog.cycleInProgress") : ""}
                       </MenuItem>
                     );
                   })}
@@ -355,12 +426,12 @@ export default function AssignTemplateDialog({
               </FormControl>
               <TextField
                 fullWidth
-                label="Hạn chót thương lượng & chốt OKR *"
+                label={t("assignTemplateDialog.deadlineLabel")}
                 type="date"
                 value={deadline}
                 onChange={(e) => setDeadline(e.target.value)}
                 InputLabelProps={{ shrink: true }}
-                helperText={`Thời gian chốt OKR (Giới hạn: ${dayjs().format("DD/MM/YYYY")} đến ${maxDeadline ? dayjs(maxDeadline).format("DD/MM/YYYY") : "ngày bắt đầu - 3 ngày"}).`}
+                helperText={t("assignTemplateDialog.deadlineHelperText", { min: dayjs().format("DD/MM/YYYY"), max: maxDeadline ? dayjs(maxDeadline).format("DD/MM/YYYY") : (localStorage.getItem("i18nextLng") === "en" ? "start date - 3 days" : "ngày bắt đầu - 3 ngày") })}
                 inputProps={{
                   min: minDeadline,
                   max: maxDeadline || undefined,
@@ -374,13 +445,13 @@ export default function AssignTemplateDialog({
           {/* ═══ PHẦN 2: BỘ LỌC NHÂN SỰ (Tùy chọn) ═══ */}
           <Box sx={{ mb: 3 }}>
             <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: "bold", color: "text.secondary", display: "flex", alignItems: "center", gap: 1 }}>
-              🔍 Lọc nhân sự
-              <Chip label="Tùy chọn" size="small" variant="outlined" color="default" sx={{ fontSize: "0.7rem" }} />
+              {t("assignTemplateDialog.filterStaff")}
+              <Chip label={t("assignTemplateDialog.optionalLabel")} size="small" variant="outlined" color="default" sx={{ fontSize: "0.7rem" }} />
             </Typography>
             <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
               <TextField
                 size="small"
-                label="Tìm kiếm theo tên, email..."
+                label={t("assignTemplateDialog.searchPlaceholder")}
                 variant="outlined"
                 value={searchName}
                 onChange={(e) => setSearchName(e.target.value)}
@@ -404,17 +475,18 @@ export default function AssignTemplateDialog({
                 }}
               />
               <FormControl size="small" sx={{ minWidth: 200, flex: 1 }}>
-                <InputLabel>Bộ môn</InputLabel>
+                <InputLabel>{t("assignTemplateDialog.departmentLabel")}</InputLabel>
                 <Select
                   value={filterDepartmentId}
-                  label="Bộ môn"
+                  label={t("assignTemplateDialog.departmentLabel")}
                   onChange={(e) => {
                     setFilterDepartmentId(e.target.value);
                     setFilterPositionId("");
                     setFilterJobTitle("");
                   }}
+                  disabled={isDonVi}
                 >
-                  <MenuItem value="">-- Tất cả --</MenuItem>
+                  <MenuItem value="">{t("assignTemplateDialog.departmentAll")}</MenuItem>
                   {departments.map((dept: any) => (
                     <MenuItem key={dept.id} value={dept.id}>
                       {dept.name}
@@ -423,30 +495,14 @@ export default function AssignTemplateDialog({
                 </Select>
               </FormControl>
 
-              {/* <FormControl size="small" sx={{ minWidth: 200, flex: 1 }}>
-                <InputLabel>Chức vụ quản lý</InputLabel>
-                <Select
-                  value={filterPositionId}
-                  label="Chức vụ quản lý"
-                  onChange={(e) => setFilterPositionId(e.target.value)}
-                >
-                  <MenuItem value="">-- Tất cả --</MenuItem>
-                  {positions.map((pos: any) => (
-                    <MenuItem key={pos.id} value={pos.id}>
-                      {pos.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl> */}
-
               <FormControl size="small" sx={{ minWidth: 200, flex: 1 }}>
-                <InputLabel>Chức danh nghề nghiệp</InputLabel>
+                <InputLabel>{t("assignTemplateDialog.jobTitleLabel")}</InputLabel>
                 <Select
                   value={filterJobTitle}
-                  label="Chức danh nghề nghiệp"
+                  label={t("assignTemplateDialog.jobTitleLabel")}
                   onChange={(e) => setFilterJobTitle(e.target.value)}
                 >
-                  <MenuItem value="">-- Tất cả --</MenuItem>
+                  <MenuItem value="">{t("assignTemplateDialog.jobTitleAll")}</MenuItem>
                   {jobTitles.map((title: any) => (
                     <MenuItem key={title} value={title}>
                       {title}
@@ -461,25 +517,25 @@ export default function AssignTemplateDialog({
           <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
             <PersonSearch color="primary" />
             <Typography variant="h6" fontWeight="bold">
-              Chọn Nhân sự để giao
+              {t("assignTemplateDialog.tableSelectStaff")}
             </Typography>
             <Box sx={{ ml: "auto", display: "flex", gap: 1 }}>
               <Button
                 size="small"
                 variant="outlined"
                 startIcon={
-                  Object.keys(userAssignments).length === filteredUsers.length && filteredUsers.length > 0 ? (
+                  assignedSelectableCount === selectableUsers.length && selectableUsers.length > 0 ? (
                     <Deselect />
                   ) : (
                     <SelectAll />
                   )
                 }
                 onClick={handleSelectAll}
-                disabled={filteredUsers.length === 0}
+                disabled={selectableUsers.length === 0}
               >
-                {Object.keys(userAssignments).length === filteredUsers.length && filteredUsers.length > 0
-                  ? "Bỏ chọn tất cả"
-                  : "Chọn tất cả"}
+                {assignedSelectableCount === selectableUsers.length && selectableUsers.length > 0
+                  ? t("assignTemplateDialog.deselectAll")
+                  : t("assignTemplateDialog.selectAll")}
               </Button>
             </Box>
           </Box>
@@ -497,23 +553,24 @@ export default function AssignTemplateDialog({
                   <TableCell width={50}>
                     <Checkbox
                       checked={
-                        Object.keys(userAssignments).length === filteredUsers.length &&
-                        filteredUsers.length > 0
+                        assignedSelectableCount === selectableUsers.length &&
+                        selectableUsers.length > 0
                       }
                       indeterminate={
-                        Object.keys(userAssignments).length > 0 &&
-                        Object.keys(userAssignments).length < filteredUsers.length
+                        assignedSelectableCount > 0 &&
+                        assignedSelectableCount < selectableUsers.length
                       }
                       onChange={handleSelectAll}
+                      disabled={selectableUsers.length === 0}
                       size="small"
                     />
                   </TableCell>
-                  <TableCell>Họ tên</TableCell>
-                  <TableCell>Email</TableCell>
-                  <TableCell>Bộ môn</TableCell>
-                  <TableCell>Chức vụ quản lý</TableCell>
-                  <TableCell>Chức danh nghề nghiệp</TableCell>
-                  <TableCell>Phiên bản gán</TableCell>
+                  <TableCell>{t("assignTemplateDialog.tableHeaders.fullName")}</TableCell>
+                  <TableCell>{t("assignTemplateDialog.tableHeaders.email")}</TableCell>
+                  <TableCell>{t("assignTemplateDialog.tableHeaders.department")}</TableCell>
+                  <TableCell>{t("assignTemplateDialog.tableHeaders.position")}</TableCell>
+                  <TableCell>{t("assignTemplateDialog.tableHeaders.jobTitle")}</TableCell>
+                  <TableCell>{t("assignTemplateDialog.tableHeaders.version")}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -524,7 +581,7 @@ export default function AssignTemplateDialog({
                       align="center"
                       sx={{ py: 3, color: "text.secondary" }}
                     >
-                      Đang tải danh sách nhân sự...
+                      {t("assignTemplateDialog.loading")}
                     </TableCell>
                   </TableRow>
                 ) : filteredUsers.length === 0 ? (
@@ -534,109 +591,128 @@ export default function AssignTemplateDialog({
                       align="center"
                       sx={{ py: 3, color: "text.secondary" }}
                     >
-                      Không tìm thấy nhân sự nào phù hợp với tiêu chí của
-                      template.
+                      {t("assignTemplateDialog.noStaffFound")}
                     </TableCell>
                   </TableRow>
                 ) : (
-                  paginatedUsers.map((user: any) => (
-                    <TableRow
-                      key={user.id}
-                      hover
-                      selected={!!userAssignments[user.id]}
-                      onClick={() => {
-                        if (userAssignments[user.id]) handleAssignVariant(user.id, "");
-                        else handleAssignVariant(user.id, "base");
-                      }}
-                      sx={{ cursor: "pointer" }}
-                    >
-                      <TableCell>
-                        <Checkbox
-                          checked={!!userAssignments[user.id]}
-                          onChange={(e) => {
-                            if (e.target.checked) handleAssignVariant(user.id, "base");
-                            else handleAssignVariant(user.id, "");
-                          }}
-                          onClick={(e) => e.stopPropagation()}
-                          size="small"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Box
-                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                        >
-                          <Avatar
-                            src={user.avatarUrl}
-                            sx={{ width: 28, height: 28 }}
-                          >
-                            {(user.name || user.email)?.[0]?.toUpperCase()}
-                          </Avatar>
-                          {user.name || "(Chưa đặt tên)"}
-                        </Box>
-                      </TableCell>
-                      <TableCell sx={{ fontSize: "0.85rem" }}>
-                        {user.email}
-                      </TableCell>
-                      <TableCell>
-                        {user.department?.name ? (
-                          <Chip
-                            label={user.department.name}
-                            size="small"
-                            variant="outlined"
-                          />
-                        ) : (
-                          <Typography variant="caption" color="text.secondary">
-                            —
-                          </Typography>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {user.managementPosition?.name ? (
-                          <Chip
-                            label={user.managementPosition.name}
-                            size="small"
-                            color="secondary"
-                          />
-                        ) : (
-                          <Typography variant="caption" color="text.secondary">
-                            —
-                          </Typography>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {user.jobTitle ? (
-                          <Chip
-                            label={user.jobTitle}
-                            size="small"
-                            color="info"
-                          />
-                        ) : (
-                          <Typography variant="caption" color="text.secondary">
-                            —
-                          </Typography>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <FormControl size="small" fullWidth>
-                          <Select
-                            displayEmpty
-                            value={userAssignments[user.id] || ""}
-                            onChange={(e) => handleAssignVariant(user.id, e.target.value)}
+                  paginatedUsers.map((user: any) => {
+                    const isAssigned = assignedUserIds.includes(user.id);
+                    return (
+                      <TableRow
+                        key={user.id}
+                        hover={!isAssigned}
+                        selected={!isAssigned && !!userAssignments[user.id]}
+                        onClick={() => {
+                          if (isAssigned) return;
+                          if (userAssignments[user.id]) handleAssignVariant(user.id, "");
+                          else handleAssignVariant(user.id, "base");
+                        }}
+                        sx={{
+                          cursor: isAssigned ? "not-allowed" : "pointer",
+                          opacity: isAssigned ? 0.75 : 1,
+                          bgcolor: isAssigned ? "#fef2f2" : "inherit",
+                        }}
+                      >
+                        <TableCell>
+                          <Checkbox
+                            checked={!isAssigned && !!userAssignments[user.id]}
+                            disabled={isAssigned}
+                            onChange={(e) => {
+                              if (isAssigned) return;
+                              if (e.target.checked) handleAssignVariant(user.id, "base");
+                              else handleAssignVariant(user.id, "");
+                            }}
                             onClick={(e) => e.stopPropagation()}
+                            size="small"
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Box
+                            sx={{ display: "flex", alignItems: "center", gap: 1 }}
                           >
-                            <MenuItem value="">
-                              <em style={{ color: "gray" }}>-- Không giao --</em>
-                            </MenuItem>
-                            {variants.map((v) => (
-                              <MenuItem key={v.id} value={v.id} sx={{ fontWeight: v.id === "base" ? "bold" : "normal" }}>
-                                {v.title}
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
-                      </TableCell>
-                    </TableRow>
-                  ))
+                            <Avatar
+                              src={user.avatarUrl}
+                              sx={{ width: 28, height: 28 }}
+                            >
+                              {(user.name || user.email)?.[0]?.toUpperCase()}
+                            </Avatar>
+                            {user.name || "(Chưa đặt tên)"}
+                          </Box>
+                        </TableCell>
+                        <TableCell sx={{ fontSize: "0.85rem" }}>
+                          {user.email}
+                        </TableCell>
+                        <TableCell>
+                          {user.department?.name ? (
+                            <Chip
+                              label={user.department.name}
+                              size="small"
+                              variant="outlined"
+                            />
+                          ) : (
+                            <Typography variant="caption" color="text.secondary">
+                              —
+                            </Typography>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {user.managementPosition?.name ? (
+                            <Chip
+                              label={user.managementPosition.name}
+                              size="small"
+                              color="secondary"
+                            />
+                          ) : (
+                            <Typography variant="caption" color="text.secondary">
+                              —
+                            </Typography>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {user.jobTitle ? (
+                            <Chip
+                              label={user.jobTitle}
+                              size="small"
+                              color="info"
+                            />
+                          ) : (
+                            <Typography variant="caption" color="text.secondary">
+                              —
+                            </Typography>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {isAssigned ? (
+                            <Chip
+                              label={t("assignTemplateDialog.alreadyAssigned")}
+                              size="small"
+                              color="error"
+                              variant="filled"
+                              sx={{ fontWeight: "bold" }}
+                            />
+                          ) : (
+                            <FormControl size="small" fullWidth>
+                              <Select
+                                displayEmpty
+                                value={userAssignments[user.id] || ""}
+                                onChange={(e) => handleAssignVariant(user.id, e.target.value)}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <MenuItem value="">
+                                  <em style={{ color: "gray" }}>-- {localStorage.getItem("i18nextLng") === "en" ? "Do not assign" : "Không giao"} --</em>
+                                </MenuItem>
+                                {variants.map((v) => (
+                                  <MenuItem key={v.id} value={v.id} sx={{ fontWeight: v.id === "base" ? "bold" : "normal" }}>
+                                    {v.title}
+                                  </MenuItem>
+                                ))}
+                              </Select>
+                            </FormControl>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
                 )}
               </TableBody>
             </Table>
@@ -653,9 +729,11 @@ export default function AssignTemplateDialog({
               setRowsPerPage(parseInt(e.target.value, 10));
               setPage(0);
             }}
-            labelRowsPerPage="Số dòng mỗi trang:"
+            labelRowsPerPage={localStorage.getItem("i18nextLng") === "en" ? "Rows per page:" : "Số dòng mỗi trang:"}
             labelDisplayedRows={({ from, to, count }) =>
-              `${from}–${to} trong ${count !== -1 ? count : `hơn ${to}`}`
+              localStorage.getItem("i18nextLng") === "en"
+                ? `${from}–${to} of ${count !== -1 ? count : `more than ${to}`}`
+                : `${from}–${to} trong ${count !== -1 ? count : `hơn ${to}`}`
             }
           />
 
@@ -674,7 +752,11 @@ export default function AssignTemplateDialog({
             }}
           >
             <Typography variant="body2" color="success.main" sx={{ mb: 1 }}>
-              ✅ Đã chọn <strong>{Object.keys(userAssignments).length}</strong> nhân sự:
+              {localStorage.getItem("i18nextLng") === "en" ? (
+                <>Selected <strong>{Object.keys(userAssignments).length}</strong> staff:</>
+              ) : (
+                <>✅ Đã chọn <strong>{Object.keys(userAssignments).length}</strong> nhân sự:</>
+              )}
             </Typography>
             <Box
               sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}
@@ -695,7 +777,7 @@ export default function AssignTemplateDialog({
               })}
               {Object.keys(userAssignments).length > 10 && (
                 <Chip
-                  label={`+${Object.keys(userAssignments).length - 10} người khác`}
+                  label={localStorage.getItem("i18nextLng") === "en" ? `+${Object.keys(userAssignments).length - 10} others` : `+${Object.keys(userAssignments).length - 10} người khác`}
                   size="small"
                   color="default"
                 />
@@ -706,7 +788,7 @@ export default function AssignTemplateDialog({
 
         <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
           <Button onClick={onClose} color="inherit">
-            Hủy
+            {t("assignTemplateDialog.cancel")}
           </Button>
           <Button
             variant="contained"
@@ -715,8 +797,8 @@ export default function AssignTemplateDialog({
             startIcon={<Send />}
           >
             {loading
-              ? "Đang giao..."
-              : `Giao OKR cho ${Object.keys(userAssignments).length || ""} Nhân sự`}
+              ? (localStorage.getItem("i18nextLng") === "en" ? "Assigning..." : "Đang giao...")
+              : t("assignTemplateDialog.assignButton", { count: Object.keys(userAssignments).length })}
           </Button>
         </Box>
       </DialogActions>

@@ -34,8 +34,10 @@ import { api } from "../../../services/api";
 import { confirmAction, showSuccess, showError, showInfo } from "../../../utils/swal";
 import OkrManagerTree from "./OkrManagerTree";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export default function DeanApprovalTab() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [pendingOkrs, setPendingOkrs] = useState<any[]>([]);
   const [viewDialog, setViewDialog] = useState(false);
@@ -104,25 +106,35 @@ export default function DeanApprovalTab() {
   };
 
   const handleApprove = async (okrId: string) => {
+    const isEn = localStorage.getItem("i18nextLng") === "en";
     const ok = await confirmAction({
-      title: "Duyệt đề xuất?",
-      text: "Bạn xác nhận duyệt đề xuất điều chỉnh này?",
+      title: isEn ? "Approve proposal?" : "Duyệt đề xuất?",
+      text: isEn ? "Are you sure you want to approve this adjustment proposal?" : "Bạn xác nhận duyệt đề xuất điều chỉnh này?",
       icon: "question",
-      confirmText: "Duyệt",
+      confirmText: isEn ? "Approve" : "Duyệt",
       confirmColor: "#16a34a",
     });
     if (!ok) return;
     try {
       await api.put(`/okrs/${okrId}/dean-approve`);
-      await showSuccess("Thành công!", "Đã duyệt đề xuất.");
+      await showSuccess(
+        isEn ? "Success!" : "Thành công!",
+        isEn ? "Proposal approved." : "Đã duyệt đề xuất."
+      );
       await showInfo(
-        "Theo dõi tiến độ",
-        "OKR đã được chốt. Bạn có thể theo dõi tiến độ thực hiện của nhân sự tại tab \"Đánh giá / Báo cáo OKR\"."
+        isEn ? "Track Progress" : "Theo dõi tiến độ",
+        isEn
+          ? "OKR finalized. You can track staff progress under the 'Evaluation / OKR Reports' tab."
+          : "OKR đã được chốt. Bạn có thể theo dõi tiến độ thực hiện của nhân sự tại tab \"Đánh giá / Báo cáo OKR\"."
       );
       fetchPending();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error approving", error);
-      showError("Lỗi", "Có lỗi xảy ra khi duyệt.");
+      const apiMsg = error.response?.data?.message;
+      showError(
+        isEn ? "Error" : "Lỗi",
+        apiMsg || (isEn ? "An error occurred while approving." : "Có lỗi xảy ra khi duyệt.")
+      );
     }
   };
 
@@ -134,16 +146,24 @@ export default function DeanApprovalTab() {
 
   const handleReject = async () => {
     if (!selectedOkr) return;
+    const isEn = localStorage.getItem("i18nextLng") === "en";
     try {
       await api.put(`/okrs/${selectedOkr.id}/dean-reject`, {
         reason: rejectReason,
       });
-      showSuccess("Đã từ chối", "Đề xuất đã bị từ chối.");
+      showSuccess(
+        isEn ? "Rejected" : "Đã từ chối",
+        isEn ? "Proposal has been rejected." : "Đề xuất đã bị từ chối."
+      );
       setRejectDialog(false);
       fetchPending();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error rejecting", error);
-      showError("Lỗi", "Có lỗi xảy ra khi từ chối.");
+      const apiMsg = error.response?.data?.message;
+      showError(
+        isEn ? "Error" : "Lỗi",
+        apiMsg || (isEn ? "An error occurred while rejecting." : "Có lỗi xảy ra khi từ chối.")
+      );
     }
   };
 
@@ -158,10 +178,10 @@ export default function DeanApprovalTab() {
     <Box>
       <Box sx={{ mb: 4, display: "flex", flexDirection: "column", gap: 1 }}>
         <Typography variant="h5" fontWeight="bold" color="#1e3a8a">
-          Duyệt Đề Xuất Điều Chỉnh OKR
+          {t("deanApprovalTab.title")}
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Xem và phản hồi các đề xuất điều chỉnh mục tiêu, chỉ tiêu từ nhân sự trong khoa.
+          {t("deanApprovalTab.subtitle")}
         </Typography>
       </Box>
 
@@ -180,7 +200,7 @@ export default function DeanApprovalTab() {
         >
           <TextField
             size="small"
-            placeholder="Tìm theo Tên hoặc Email..."
+            placeholder={t("deanApprovalTab.searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             InputProps={{
@@ -194,30 +214,30 @@ export default function DeanApprovalTab() {
           />
 
           <FormControl size="small" sx={{ minWidth: 200 }}>
-            <InputLabel>Bộ môn / Phòng ban</InputLabel>
+            <InputLabel>{t("deanApprovalTab.departmentFilter")}</InputLabel>
             <Select
               value={selectedDepartment}
-              label="Bộ môn / Phòng ban"
+              label={t("deanApprovalTab.departmentFilter")}
               onChange={(e) => setSelectedDepartment(e.target.value)}
             >
               {departmentOptions.map((dept) => (
                 <MenuItem key={dept} value={dept}>
-                  {dept === "ALL" ? "Tất cả Bộ môn" : dept}
+                  {dept === "ALL" ? t("deanApprovalTab.allDepartments") : dept}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
 
           <FormControl size="small" sx={{ minWidth: 200 }}>
-            <InputLabel>Kỳ đánh giá</InputLabel>
+            <InputLabel>{t("deanApprovalTab.cycleFilter")}</InputLabel>
             <Select
               value={selectedCycle}
-              label="Kỳ đánh giá"
+              label={t("deanApprovalTab.cycleFilter")}
               onChange={(e) => setSelectedCycle(e.target.value)}
             >
               {cycleOptions.map((cycle) => (
                 <MenuItem key={cycle} value={cycle}>
-                  {cycle === "ALL" ? "Tất cả các kỳ" : cycle}
+                  {cycle === "ALL" ? t("deanApprovalTab.allCycles") : cycle}
                 </MenuItem>
               ))}
             </Select>
@@ -227,11 +247,11 @@ export default function DeanApprovalTab() {
 
       {pendingOkrs.length === 0 ? (
         <Alert severity="success" sx={{ borderRadius: 2 }}>
-          Không có đề xuất nào đang chờ duyệt.
+          {t("deanApprovalTab.noProposals")}
         </Alert>
       ) : Object.keys(groupedByCycle).length === 0 ? (
         <Alert severity="info" sx={{ borderRadius: 2 }}>
-          Không tìm thấy đề xuất nào khớp với điều kiện lọc.
+          {t("deanApprovalTab.noProposalsFiltered")}
         </Alert>
       ) : (
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -265,7 +285,7 @@ export default function DeanApprovalTab() {
                     {cycleName}
                   </Typography>
                   <Chip
-                    label={`${okrs.length} đề xuất`}
+                    label={t("deanApprovalTab.countProposals", { count: okrs.length })}
                     size="small"
                     color="warning"
                     sx={{ fontWeight: "bold" }}
@@ -277,23 +297,24 @@ export default function DeanApprovalTab() {
                   <Table>
                     <TableHead sx={{ bgcolor: "#f1f5f9" }}>
                       <TableRow>
-                        <TableCell sx={{ fontWeight: "bold" }}>Nhân sự</TableCell>
-                        <TableCell sx={{ fontWeight: "bold" }}>Bộ môn</TableCell>
-                        <TableCell sx={{ fontWeight: "bold" }}>Mục tiêu</TableCell>
-                        <TableCell sx={{ fontWeight: "bold" }}>Ngày giao</TableCell>
-                        <TableCell sx={{ fontWeight: "bold" }}>Trạng thái</TableCell>
-                        <TableCell sx={{ fontWeight: "bold" }}>Nội dung đề xuất</TableCell>
-                        <TableCell align="right" sx={{ fontWeight: "bold" }}>Thao tác</TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>{t("deanApprovalTab.tableHeaders.staff")}</TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>{t("deanApprovalTab.tableHeaders.department")}</TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>{t("deanApprovalTab.tableHeaders.objective")}</TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>{t("deanApprovalTab.tableHeaders.assignedDate")}</TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>{t("deanApprovalTab.tableHeaders.negotiationDeadline")}</TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>{t("deanApprovalTab.tableHeaders.status")}</TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>{t("deanApprovalTab.tableHeaders.proposalContent")}</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: "bold" }}>{t("deanApprovalTab.tableHeaders.actions")}</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
                       {okrs.map((okr) => (
                         <TableRow key={okr.id} hover>
                           <TableCell>
-                            <Box 
+                            <Box
                               sx={{ display: "flex", alignItems: "center", gap: 1, cursor: "pointer", "&:hover .user-name": { textDecoration: "underline" } }}
                               onClick={() => {
-                                if (okr.user?.id) navigate(`/departments/users/${okr.user.id}`, { state: { parentName: "OKR Bộ Môn", parentUrl: "/departments/okr" } });
+                                  if (okr.user?.id) navigate(`/departments/users/${okr.user.id}`, { state: { parentName: "OKR Bộ Môn", parentUrl: "/departments/okr" } });
                               }}
                             >
                               <Avatar
@@ -324,8 +345,19 @@ export default function DeanApprovalTab() {
                             </Typography>
                           </TableCell>
                           <TableCell>
+                            <Typography
+                              variant="body2"
+                              fontWeight={600}
+                              color={okr.deadline && new Date(okr.deadline) < new Date() ? "error.main" : "text.secondary"}
+                            >
+                              {okr.deadline
+                                ? new Date(okr.deadline).toLocaleDateString("vi-VN")
+                                : "—"}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
                             <Chip
-                              label={okr.status === "NEGOTIATING" ? "Chờ bạn duyệt" : "Chờ nhân sự phản hồi"}
+                              label={okr.status === "NEGOTIATING" ? t("deanApprovalTab.status.pendingApproval") : t("deanApprovalTab.status.pendingResponse")}
                               size="small"
                               color={okr.status === "NEGOTIATING" ? "warning" : "info"}
                               variant={okr.status === "NEGOTIATING" ? "filled" : "outlined"}
@@ -384,7 +416,7 @@ export default function DeanApprovalTab() {
                               onClick={() => viewDetails(okr)}
                               sx={{ mr: 1 }}
                             >
-                              Chi tiết & Sửa
+                              {t("deanApprovalTab.actions.detailsAndEdit")}
                             </Button>
                             <Button
                               size="small"
@@ -394,7 +426,7 @@ export default function DeanApprovalTab() {
                               onClick={() => handleApprove(okr.id)}
                               sx={{ mr: 1 }}
                             >
-                              Duyệt
+                              {t("deanApprovalTab.actions.approve")}
                             </Button>
                             <Button
                               size="small"
@@ -403,7 +435,7 @@ export default function DeanApprovalTab() {
                               startIcon={<Close />}
                               onClick={() => openReject(okr)}
                             >
-                              Từ chối
+                              {t("deanApprovalTab.actions.reject")}
                             </Button>
                           </TableCell>
                         </TableRow>
@@ -425,7 +457,7 @@ export default function DeanApprovalTab() {
         fullWidth
       >
         <DialogTitle sx={{ m: 0, p: 2, fontWeight: "bold" }}>
-          Chi tiết đề xuất điều chỉnh
+          {t("deanApprovalTab.dialog.detailsTitle")}
           <IconButton
             aria-label="close"
             onClick={() => setViewDialog(false)}
@@ -441,10 +473,10 @@ export default function DeanApprovalTab() {
         </DialogTitle>
         <Divider />
         <DialogContent sx={{ mt: 2 }}>
-          <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between' }}>
+          <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
             <Box>
               <Typography variant="subtitle2" color="text.secondary">
-                Nhân sự:
+                {t("deanApprovalTab.dialog.staff")}
               </Typography>
               <Typography variant="body1" fontWeight={500}>
                 {selectedOkr?.user?.name || selectedOkr?.user?.email || "—"}
@@ -452,7 +484,7 @@ export default function DeanApprovalTab() {
             </Box>
             <Box>
               <Typography variant="subtitle2" color="text.secondary">
-                Ngày giao OKR:
+                {t("deanApprovalTab.dialog.assignedDate")}
               </Typography>
               <Typography variant="body1" fontWeight={500}>
                 {selectedOkr?.createdAt
@@ -462,7 +494,21 @@ export default function DeanApprovalTab() {
             </Box>
             <Box>
               <Typography variant="subtitle2" color="text.secondary">
-                Mục tiêu OKR:
+                {t("deanApprovalTab.dialog.negotiationDeadline")}
+              </Typography>
+              <Typography
+                variant="body1"
+                fontWeight={600}
+                color={selectedOkr?.deadline && new Date(selectedOkr.deadline) < new Date() ? "error.main" : "text.primary"}
+              >
+                {selectedOkr?.deadline
+                  ? new Date(selectedOkr.deadline).toLocaleDateString("vi-VN")
+                  : "—"}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="subtitle2" color="text.secondary">
+                {t("deanApprovalTab.dialog.objective")}
               </Typography>
               <Typography variant="body1" fontWeight={500}>
                 {selectedOkr?.objective}
@@ -470,7 +516,7 @@ export default function DeanApprovalTab() {
             </Box>
           </Box>
           <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
-            Chi tiết cấu trúc và đàm phán:
+            {t("deanApprovalTab.dialog.structureDetails")}
           </Typography>
           {selectedOkr && (
             <OkrManagerTree okr={selectedOkr} onRefresh={() => {
@@ -491,7 +537,7 @@ export default function DeanApprovalTab() {
               openReject(selectedOkr);
             }}
           >
-            Từ chối
+            {t("deanApprovalTab.actions.reject")}
           </Button>
           <Button
             variant="contained"
@@ -502,7 +548,7 @@ export default function DeanApprovalTab() {
               handleApprove(selectedOkr?.id);
             }}
           >
-            Duyệt
+            {t("deanApprovalTab.actions.approve")}
           </Button>
         </DialogActions>
       </Dialog>
@@ -515,7 +561,7 @@ export default function DeanApprovalTab() {
         fullWidth
       >
         <DialogTitle sx={{ fontWeight: "bold", color: "error.main" }}>
-          Từ chối đề xuất
+          {t("deanApprovalTab.dialog.rejectTitle")}
         </DialogTitle>
         <Divider />
         <DialogContent sx={{ mt: 2 }}>
@@ -523,18 +569,18 @@ export default function DeanApprovalTab() {
             fullWidth
             multiline
             rows={3}
-            label="Lý do từ chối"
-            placeholder="VD: Tiêu chuẩn đánh giá không thể thay đổi..."
+            label={t("deanApprovalTab.dialog.rejectReason")}
+            placeholder={t("deanApprovalTab.dialog.rejectReasonPlaceholder")}
             value={rejectReason}
             onChange={(e) => setRejectReason(e.target.value)}
           />
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
           <Button onClick={() => setRejectDialog(false)} color="inherit">
-            Hủy
+            {t("deanApprovalTab.dialog.cancel")}
           </Button>
           <Button variant="contained" color="error" onClick={handleReject}>
-            Xác nhận từ chối
+            {t("deanApprovalTab.dialog.confirmReject")}
           </Button>
         </DialogActions>
       </Dialog>

@@ -39,8 +39,10 @@ import EvaluationDetailsDialog from "./EvaluationDetailsDialog";
 import { api } from "../../../services/api";
 import { showInfo, showError } from "../../../utils/swal";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export default function EvaluationListTab() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [acceptedReports, setAcceptedReports] = useState<any[]>([]);
   const [submittedReports, setSubmittedReports] = useState<any[]>([]);

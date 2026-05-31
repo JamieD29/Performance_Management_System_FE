@@ -25,6 +25,7 @@ import {
 } from "@mui/material";
 import { Close, Save } from "@mui/icons-material";
 import { showWarning } from "../../../utils/swal";
+import { useTranslation } from "react-i18next";
 
 interface EvaluationFormManagerDialogProps {
   open: boolean;
@@ -34,6 +35,7 @@ interface EvaluationFormManagerDialogProps {
 }
 
 export default function EvaluationFormManagerDialog({ open, reportData, onClose, onSave }: EvaluationFormManagerDialogProps) {
+  const { t } = useTranslation();
   const [managerComment, setManagerComment] = useState("");
   const [managerRating, setManagerRating] = useState("");
 
@@ -46,7 +48,11 @@ export default function EvaluationFormManagerDialog({ open, reportData, onClose,
 
   const handleSave = () => {
     if (!managerRating) {
-      showWarning("Thiếu thông tin", "Vui lòng xếp loại viên chức trước khi lưu!");
+      const isEn = localStorage.getItem("i18nextLng") === "en";
+      showWarning(
+        isEn ? "Missing Information" : "Thiếu thông tin",
+        isEn ? "Please rate the employee before saving!" : "Vui lòng xếp loại viên chức trước khi lưu!"
+      );
       return;
     }
     const updatedReport = {
@@ -67,7 +73,7 @@ export default function EvaluationFormManagerDialog({ open, reportData, onClose,
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", pb: 1 }}>
         <Box>
           <Typography variant="h6" fontWeight="bold" color="#1e293b">
-            Xét Duyệt Phiếu Đánh Giá
+            {t("evaluationFormManagerDialog.dialogTitle")}
           </Typography>
         </Box>
         <IconButton onClick={onClose} size="small"><Close /></IconButton>
@@ -78,31 +84,31 @@ export default function EvaluationFormManagerDialog({ open, reportData, onClose,
       <DialogContent sx={{ bgcolor: "#f8fafc", p: 3 }}>
         <Paper sx={{ p: 4, borderRadius: 2, border: "1px solid #e2e8f0" }}>
           <Typography variant="h5" align="center" fontWeight="bold" sx={{ mb: 1, textTransform: "uppercase" }}>
-            Phiếu Đánh Giá, Xếp Loại Chất Lượng Viên Chức
+            {t("evaluationFormManagerDialog.formTitle")}
           </Typography>
           <Typography variant="subtitle1" align="center" fontWeight="bold" sx={{ mb: 4 }}>
-            Năm: {new Date().getFullYear()}
+            {t("evaluationFormManagerDialog.yearLabel", { year: new Date().getFullYear() })}
           </Typography>
 
           {/* PHẦN I */}
           <Typography variant="h6" fontWeight="bold" color="#1e3a8a" sx={{ mb: 2 }}>
-            I. THÔNG TIN CÁ NHÂN
+            {t("evaluationFormManagerDialog.personalInfoTitle")}
           </Typography>
           <Grid container spacing={2} sx={{ mb: 4, px: 2 }}>
             <Grid size={{ xs: 12, md: 6 }}>
-              <Typography><strong>Họ và tên:</strong> {user.name}</Typography>
+              <Typography><strong>{t("evaluationFormManagerDialog.fullNameLabel")}</strong> {user.name}</Typography>
             </Grid>
             <Grid size={{ xs: 12, md: 6 }}>
-              <Typography><strong>MSCB:</strong> {user.staffCode || "N/A"}</Typography>
+              <Typography><strong>{t("evaluationFormManagerDialog.staffCodeLabel")}</strong> {user.staffCode || "N/A"}</Typography>
             </Grid>
             <Grid size={{ xs: 12, md: 6 }}>
-              <Typography><strong>Email:</strong> {user.email}</Typography>
+              <Typography><strong>{t("evaluationFormManagerDialog.emailLabel")}</strong> {user.email}</Typography>
             </Grid>
             <Grid size={{ xs: 12, md: 6 }}>
-              <Typography><strong>Đơn vị công tác:</strong> {user.department?.name || "N/A"}</Typography>
+              <Typography><strong>{t("evaluationFormManagerDialog.departmentLabel")}</strong> {user.department?.name || "N/A"}</Typography>
             </Grid>
             <Grid size={{ xs: 12, md: 6 }}>
-              <Typography><strong>Chức vụ:</strong> {user.managementPosition?.name || "Giảng viên"}</Typography>
+              <Typography><strong>{t("evaluationFormManagerDialog.positionLabel")}</strong> {user.managementPosition?.name || t("evaluationFormManagerDialog.defaultPosition")}</Typography>
             </Grid>
           </Grid>
 
@@ -110,16 +116,16 @@ export default function EvaluationFormManagerDialog({ open, reportData, onClose,
 
           {/* PHẦN II */}
           <Typography variant="h6" fontWeight="bold" color="#1e3a8a" sx={{ mb: 1 }}>
-            II. KẾT QUẢ TỰ ĐÁNH GIÁ (Đồng bộ OKR)
+            {t("evaluationFormManagerDialog.okrResultsTitle")}
           </Typography>
           
           <TableContainer component={Paper} elevation={0} sx={{ mb: 4, border: "1px solid #cbd5e1" }}>
             <Table size="small">
               <TableHead sx={{ bgcolor: "#f1f5f9" }}>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: "bold", width: "10%", textAlign: "center" }}>STT</TableCell>
-                  <TableCell sx={{ fontWeight: "bold", width: "50%" }}>Tiêu chí</TableCell>
-                  <TableCell sx={{ fontWeight: "bold", textAlign: "center" }}>Điểm Đánh Giá</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", width: "10%", textAlign: "center" }}>{t("evaluationFormManagerDialog.table.no")}</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", width: "50%" }}>{t("evaluationFormManagerDialog.table.criteria")}</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", textAlign: "center" }}>{t("evaluationFormManagerDialog.table.score")}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -133,7 +139,7 @@ export default function EvaluationFormManagerDialog({ open, reportData, onClose,
                   </TableRow>
                 ))}
                 <TableRow sx={{ bgcolor: "#f0fdf4" }}>
-                  <TableCell colSpan={2} align="center" sx={{ fontWeight: "bold", color: "#166534" }}>TỔNG ĐIỂM CHẤM TỪ OKR</TableCell>
+                  <TableCell colSpan={2} align="center" sx={{ fontWeight: "bold", color: "#166534" }}>{t("evaluationFormManagerDialog.table.totalScoreLabel")}</TableCell>
                   <TableCell align="center" sx={{ fontWeight: "bold", color: "#166534", fontSize: "1.1rem" }}>
                     {reportData.selfScoreTotal?.toFixed(1) || 0}
                   </TableCell>
@@ -146,29 +152,29 @@ export default function EvaluationFormManagerDialog({ open, reportData, onClose,
 
           {/* PHẦN III */}
           <Typography variant="h6" fontWeight="bold" color="#1e3a8a" sx={{ mb: 2 }}>
-            III. TỰ NHẬN XÉT, XẾP LOẠI CHẤT LƯỢNG (Của Nhân sự)
+            {t("evaluationFormManagerDialog.selfEvaluationTitle")}
           </Typography>
           <Box sx={{ px: 2, mb: 4, bgcolor: "#f8fafc", p: 2, borderRadius: 2, border: "1px dashed #cbd5e1" }}>
-            <Typography fontWeight="bold" sx={{ mb: 1 }}>1. Tự nhận xét ưu/khuyết điểm:</Typography>
+            <Typography fontWeight="bold" sx={{ mb: 1 }}>{t("evaluationFormManagerDialog.selfCommentLabel")}</Typography>
             <Typography sx={{ mb: 3, whiteSpace: "pre-wrap" }}>
-              {reportData.selfComment || "Không có nhận xét."}
+              {reportData.selfComment || t("evaluationFormManagerDialog.noSelfComment")}
             </Typography>
 
-            <Typography fontWeight="bold" sx={{ mb: 1 }}>2. Tự xếp loại chất lượng:</Typography>
+            <Typography fontWeight="bold" sx={{ mb: 1 }}>{t("evaluationFormManagerDialog.selfRatingLabel")}</Typography>
             <Box sx={{ ml: 2 }}>
               <FormControlLabel
                 control={<Radio checked={reportData.selfRating === "EXCELLENT"} color="primary" readOnly />}
-                label="Hoàn thành tốt nhiệm vụ (86 - 100 điểm)"
+                label={t("evaluationFormManagerDialog.ratings.excellent")}
               />
               <br/>
               <FormControlLabel
                 control={<Radio checked={reportData.selfRating === "GOOD"} color="primary" readOnly />}
-                label="Hoàn thành nhiệm vụ (60 - 86 điểm)"
+                label={t("evaluationFormManagerDialog.ratings.good")}
               />
               <br/>
               <FormControlLabel
                 control={<Radio checked={reportData.selfRating === "POOR"} color="primary" readOnly />}
-                label="Không hoàn thành nhiệm vụ (dưới 60 điểm)"
+                label={t("evaluationFormManagerDialog.ratings.poor")}
               />
             </Box>
           </Box>
@@ -177,27 +183,27 @@ export default function EvaluationFormManagerDialog({ open, reportData, onClose,
 
           {/* PHẦN IV */}
           <Typography variant="h6" fontWeight="bold" color="#b45309" sx={{ mb: 2 }}>
-            IV. KẾT QUẢ ĐÁNH GIÁ, XẾP LOẠI VIÊN CHỨC (Bởi Cấp Quản Lý)
+            {t("evaluationFormManagerDialog.managerEvaluationTitle")}
           </Typography>
           <Box sx={{ px: 2, mb: 4, bgcolor: "#fffbeb", p: 3, borderRadius: 2, border: "1px solid #fcd34d" }}>
-            <Typography fontWeight="bold" sx={{ mb: 1 }}>1. Nhận xét của Quản lý / Trưởng khoa:</Typography>
+            <Typography fontWeight="bold" sx={{ mb: 1 }}>{t("evaluationFormManagerDialog.managerCommentLabel")}</Typography>
             <TextField
               fullWidth
               multiline
               rows={3}
-              placeholder="Ghi nhận xét đánh giá dành cho viên chức..."
+              placeholder={t("evaluationFormManagerDialog.managerCommentPlaceholder")}
               value={managerComment}
               onChange={(e) => setManagerComment(e.target.value)}
               disabled={isCompleted}
               sx={{ mb: 3, bgcolor: "#fff" }}
             />
 
-            <Typography fontWeight="bold" sx={{ mb: 1 }}>2. Phê duyệt kết quả Xếp loại chất lượng viên chức:</Typography>
+            <Typography fontWeight="bold" sx={{ mb: 1 }}>{t("evaluationFormManagerDialog.managerRatingLabel")}</Typography>
             <FormControl disabled={isCompleted} sx={{ ml: 2 }}>
               <RadioGroup row value={managerRating} onChange={(e) => setManagerRating(e.target.value)}>
-                <FormControlLabel value="EXCELLENT" control={<Radio color="success" />} label="Hoàn thành tốt nhiệm vụ" />
-                <FormControlLabel value="GOOD" control={<Radio color="success" />} label="Hoàn thành nhiệm vụ" />
-                <FormControlLabel value="POOR" control={<Radio color="success" />} label="Không hoàn thành nhiệm vụ" />
+                <FormControlLabel value="EXCELLENT" control={<Radio color="success" />} label={t("evaluationFormManagerDialog.ratings.excellentSimple")} />
+                <FormControlLabel value="GOOD" control={<Radio color="success" />} label={t("evaluationFormManagerDialog.ratings.goodSimple")} />
+                <FormControlLabel value="POOR" control={<Radio color="success" />} label={t("evaluationFormManagerDialog.ratings.poorSimple")} />
               </RadioGroup>
             </FormControl>
           </Box>
@@ -207,7 +213,7 @@ export default function EvaluationFormManagerDialog({ open, reportData, onClose,
 
       <Divider />
       <DialogActions sx={{ p: 2 }}>
-        <Button onClick={onClose} color="inherit">Hủy / Đóng</Button>
+        <Button onClick={onClose} color="inherit">{t("evaluationFormManagerDialog.cancelBtn")}</Button>
         {!isCompleted && (
           <Button 
             variant="contained" 
@@ -216,7 +222,7 @@ export default function EvaluationFormManagerDialog({ open, reportData, onClose,
             onClick={handleSave}
             sx={{ px: 3 }}
           >
-            Lưu Kết Luận Xếp Loại
+            {t("evaluationFormManagerDialog.saveBtn")}
           </Button>
         )}
       </DialogActions>

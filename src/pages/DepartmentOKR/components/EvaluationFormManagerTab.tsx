@@ -24,8 +24,10 @@ import { api } from "../../../services/api";
 import { showError } from "../../../utils/swal";
 import EvaluationFormManagerDialog from "./EvaluationFormManagerDialog";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export default function EvaluationFormManagerTab() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [reports, setReports] = useState<any[]>([]);
   const [allCycles, setAllCycles] = useState<any[]>([]);
@@ -85,12 +87,12 @@ export default function EvaluationFormManagerTab() {
   const groupedByCycle = useMemo(() => {
     const groups: Record<string, any[]> = {};
     filteredReports.forEach((report) => {
-      const cycleName = report.cycle?.name || "Kỳ mặc định";
+      const cycleName = report.cycle?.name || t("evaluationFormManagerTab.cycleFallback");
       if (!groups[cycleName]) groups[cycleName] = [];
       groups[cycleName].push(report);
     });
     return groups;
-  }, [filteredReports]);
+  }, [filteredReports, t]);
 
   const handleOpenDialog = (report: any) => {
     setSelectedReport(report);
@@ -107,16 +109,20 @@ export default function EvaluationFormManagerTab() {
       fetchEvaluations();
     } catch (e) {
       console.error(e);
-      showError("Lỗi", "Không thể cập nhật Phiếu Đánh Giá.");
+      const isEn = localStorage.getItem("i18nextLng") === "en";
+      showError(
+        isEn ? "Error" : "Lỗi",
+        isEn ? "Failed to update Evaluation Sheet." : "Không thể cập nhật Phiếu Đánh Giá."
+      );
     }
   };
 
   const getRatingLabel = (code: string) => {
     switch (code) {
-      case "EXCELLENT": return "Hoàn thành Tốt";
-      case "GOOD": return "Hoàn thành";
-      case "POOR": return "Không hoàn thành";
-      default: return "Chưa xếp loại";
+      case "EXCELLENT": return t("evaluationFormManagerTab.ratings.excellent");
+      case "GOOD": return t("evaluationFormManagerTab.ratings.good");
+      case "POOR": return t("evaluationFormManagerTab.ratings.poor");
+      default: return t("evaluationFormManagerTab.ratings.unrated");
     }
   };
 
@@ -125,7 +131,7 @@ export default function EvaluationFormManagerTab() {
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mb: 3 }}>
         <TextField
           size="small"
-          placeholder="Tìm kiếm nhân sự..."
+          placeholder={t("evaluationFormManagerTab.filters.searchPlaceholder")}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           sx={{ minWidth: 250, bgcolor: "#fff" }}
@@ -139,7 +145,7 @@ export default function EvaluationFormManagerTab() {
         >
           {departmentOptions.map((option) => (
             <MenuItem key={option} value={option}>
-              {option === "ALL" ? "Tất cả Phòng Ban" : option}
+              {option === "ALL" ? t("evaluationFormManagerTab.filters.allDepartments") : option}
             </MenuItem>
           ))}
         </TextField>
@@ -150,7 +156,7 @@ export default function EvaluationFormManagerTab() {
           onChange={(e) => setSelectedCycle(e.target.value)}
           sx={{ minWidth: 200, bgcolor: "#fff" }}
         >
-          <MenuItem value="ALL">Tất cả Kỳ đánh giá</MenuItem>
+          <MenuItem value="ALL">{t("evaluationFormManagerTab.filters.allCycles")}</MenuItem>
           {allCycles.map((c) => (
             <MenuItem key={c.id} value={c.name}>
               {c.name}
@@ -160,11 +166,11 @@ export default function EvaluationFormManagerTab() {
       </Box>
 
       {loading ? (
-        <Typography>Đang tải dữ liệu...</Typography>
+        <Typography>{t("evaluationFormManagerTab.states.loading")}</Typography>
       ) : filteredReports.length === 0 ? (
         <Paper sx={{ p: 4, borderRadius: 2, border: "1px solid #e2e8f0", textAlign: "center" }}>
           <Typography color="text.secondary">
-            Không có phiếu đánh giá nào đang chờ duyệt.
+            {t("evaluationFormManagerTab.states.noReports")}
           </Typography>
         </Paper>
       ) : (
@@ -199,7 +205,7 @@ export default function EvaluationFormManagerTab() {
                     {cycleName}
                   </Typography>
                   <Chip
-                    label={`${cycleReports.length} phiếu`}
+                    label={t("evaluationFormManagerTab.accordion.sheetCount", { count: cycleReports.length })}
                     size="small"
                     color="primary"
                     sx={{ fontWeight: "bold" }}
@@ -211,14 +217,14 @@ export default function EvaluationFormManagerTab() {
                   <Table size="small">
                     <TableHead sx={{ bgcolor: "#f8fafc" }}>
                       <TableRow>
-                        <TableCell sx={{ fontWeight: "bold" }}>Nhân sự</TableCell>
-                        <TableCell sx={{ fontWeight: "bold" }}>Bộ môn</TableCell>
-                        <TableCell sx={{ fontWeight: "bold" }}>Kỳ đánh giá</TableCell>
-                        <TableCell sx={{ fontWeight: "bold" }}>Tổng Điểm Tính (OKR)</TableCell>
-                        <TableCell sx={{ fontWeight: "bold" }}>NV Xếp Loại</TableCell>
-                        <TableCell sx={{ fontWeight: "bold" }}>QL Kết Luận</TableCell>
-                        <TableCell sx={{ fontWeight: "bold" }}>Trạng thái</TableCell>
-                        <TableCell align="right" sx={{ fontWeight: "bold" }}>Thao tác</TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>{t("evaluationFormManagerTab.table.headers.employee")}</TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>{t("evaluationFormManagerTab.table.headers.department")}</TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>{t("evaluationFormManagerTab.table.headers.cycle")}</TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>{t("evaluationFormManagerTab.table.headers.okrTotalScore")}</TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>{t("evaluationFormManagerTab.table.headers.selfRating")}</TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>{t("evaluationFormManagerTab.table.headers.managerRating")}</TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>{t("evaluationFormManagerTab.table.headers.status")}</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: "bold" }}>{t("evaluationFormManagerTab.table.headers.actions")}</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -246,7 +252,7 @@ export default function EvaluationFormManagerTab() {
                           </TableCell>
                           <TableCell>{report.user?.department?.name || "N/A"}</TableCell>
                           <TableCell>
-                            <Chip label={report.cycle?.name || "Kỳ mặc định"} size="small" variant="outlined" />
+                            <Chip label={report.cycle?.name || t("evaluationFormManagerTab.cycleFallback")} size="small" variant="outlined" />
                           </TableCell>
                           <TableCell>
                             <Typography fontWeight="bold" color="#2563eb">{report.selfScoreTotal?.toFixed(1) || 0}</Typography>
@@ -258,18 +264,18 @@ export default function EvaluationFormManagerTab() {
                             {report.status === "EVALUATED" ? (
                               <Chip label={getRatingLabel(report.managerRating)} color={report.managerRating === 'EXCELLENT' ? 'success' : report.managerRating === 'POOR' ? 'error' : 'primary'} size="small"/>
                             ) : (
-                              <Typography variant="body2" fontStyle="italic" color="text.secondary">Chưa đánh giá</Typography>
+                              <Typography variant="body2" fontStyle="italic" color="text.secondary">{t("evaluationFormManagerTab.unratedLabel")}</Typography>
                             )}
                           </TableCell>
                           <TableCell>
                             {report.status === "EVALUATED" ? (
-                              <Chip label="Đã hoàn tất" color="success" size="small" />
+                              <Chip label={t("evaluationFormManagerTab.status.completed")} color="success" size="small" />
                             ) : (
-                              <Chip label="Chờ duyệt" color="warning" size="small" />
+                              <Chip label={t("evaluationFormManagerTab.status.pending")} color="warning" size="small" />
                             )}
                           </TableCell>
                           <TableCell align="right">
-                            <Tooltip title="Xem & Đánh giá">
+                            <Tooltip title={t("evaluationFormManagerTab.tooltip.viewAndEvaluate")}>
                               <IconButton color="primary" onClick={() => handleOpenDialog(report)}>
                                 <CheckCircle />
                               </IconButton>

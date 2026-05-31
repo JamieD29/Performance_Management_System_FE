@@ -47,25 +47,32 @@ export default function AssignPositionModal({
   onSuccess,
 }: AssignPositionModalProps) {
   const [positions, setPositions] = useState<ManagementPosition[]>([]);
+  const [assignedUsers, setAssignedUsers] = useState<any[]>([]);
   const [selectedPositionId, setSelectedPositionId] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  // Load danh sách chức vụ
+  // Load danh sách chức vụ và phân công
   useEffect(() => {
     if (open) {
       setError("");
       setLoading(true);
-      api
-        .get("/management-positions")
-        .then((res) => {
-          const data = Array.isArray(res.data) ? res.data : [];
-          setPositions(data);
+      Promise.all([
+        api.get("/management-positions"),
+        api.get("/users"),
+      ])
+        .then(([posRes, usersRes]) => {
+          const posData = Array.isArray(posRes.data) ? posRes.data : [];
+          setPositions(posData);
+
+          const usersData = Array.isArray(usersRes.data) ? usersRes.data : [];
+          setAssignedUsers(usersData);
+
           // Set giá trị hiện tại
           setSelectedPositionId(user?.managementPosition?.id || "");
         })
-        .catch(() => setError("Không thể tải danh sách chức vụ"))
+        .catch(() => setError("Không thể tải danh sách chức vụ và phân công"))
         .finally(() => setLoading(false));
     }
   }, [open, user]);
@@ -175,20 +182,73 @@ export default function AssignPositionModal({
               <MenuItem value="">
                 <em>— Không có chức vụ —</em>
               </MenuItem>
-              {positions.map((pos) => (
-                <MenuItem key={pos.id} value={pos.id}>
-                  <Box>
-                    <Typography variant="body2" fontWeight={500}>
-                      {pos.name}
-                    </Typography>
-                    {pos.description && (
-                      <Typography variant="caption" color="text.secondary">
-                        {pos.description}
-                      </Typography>
-                    )}
-                  </Box>
-                </MenuItem>
-              ))}
+              {positions.map((pos) => {
+                let isTaken = false;
+                let takenBy = "";
+
+                if (pos.slug === "TRUONG_KHOA") {
+                  const existingDean = assignedUsers.find(
+                    (u) => u.managementPosition?.slug === "TRUONG_KHOA" && u.id !== user.id
+                  );
+                  if (existingDean) {
+                    isTaken = true;
+                    takenBy = existingDean.name || existingDean.email;
+                  }
+                } else if (pos.slug === "TRUONG_BO_MON") {
+                  const currentUserInDb = assignedUsers.find((u) => u.id === user.id);
+                  const userDeptId = currentUserInDb?.department?.id;
+
+                  if (userDeptId) {
+                    const existingHead = assignedUsers.find(
+                      (u) =>
+                        u.managementPosition?.slug === "TRUONG_BO_MON" &&
+                        u.department?.id === userDeptId &&
+                        u.id !== user.id
+                    );
+                    if (existingHead) {
+                      isTaken = true;
+                      takenBy = existingHead.name || existingHead.email;
+                    }
+                  }
+                }
+
+                return (
+                  <MenuItem key={pos.id} value={pos.id} disabled={isTaken}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        width: "100%",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Box>
+                        <Typography
+                          variant="body2"
+                          fontWeight={500}
+                          color={isTaken ? "text.disabled" : "text.primary"}
+                        >
+                          {pos.name}
+                        </Typography>
+                        {pos.description && (
+                          <Typography variant="caption" color="text.secondary">
+                            {pos.description}
+                          </Typography>
+                        )}
+                      </Box>
+                      {isTaken && (
+                        <Chip
+                          label={`Đã gán: ${takenBy}`}
+                          size="small"
+                          color="error"
+                          variant="outlined"
+                          sx={{ fontSize: 11, fontWeight: 600, ml: 2 }}
+                        />
+                      )}
+                    </Box>
+                  </MenuItem>
+                );
+              })}
             </Select>
           </FormControl>
         )}

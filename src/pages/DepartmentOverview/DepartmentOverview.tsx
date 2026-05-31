@@ -68,9 +68,14 @@ export default function DepartmentOverview() {
   const fetchDepartments = async () => {
     setLoading(true);
     try {
-      // Gọi API lấy danh sách
       const res = await api.get("/departments");
-      setDepartments(res.data);
+      const data = Array.isArray(res.data) ? res.data : [];
+      setDepartments(data);
+
+      // Nếu chỉ có 1 bộ môn (ví dụ: Trưởng bộ môn), tự động chọn bộ môn đó luôn
+      if (data.length === 1 && !deptId) {
+        setSearchParams({ deptId: data[0].id });
+      }
     } catch (error) {
       console.error("Lỗi tải danh sách bộ môn:", error);
     } finally {
@@ -94,18 +99,20 @@ export default function DepartmentOverview() {
         <Home size={16} style={{ marginRight: 4 }} />
         {t("departmentOverview.home")}
       </Link>
-      <Link
-        underline="hover"
-        color={!selectedDept ? "text.primary" : "inherit"}
-        href="#"
-        onClick={(e) => {
-          e.preventDefault();
-          handleSelectDept(null);
-        }}
-        aria-current={!selectedDept ? "page" : undefined}
-      >
-        {t("departmentOverview.departments")}
-      </Link>
+      {departments.length > 1 && (
+        <Link
+          underline="hover"
+          color={!selectedDept ? "text.primary" : "inherit"}
+          href="#"
+          onClick={(e) => {
+            e.preventDefault();
+            handleSelectDept(null);
+          }}
+          aria-current={!selectedDept ? "page" : undefined}
+        >
+          {t("departmentOverview.departments")}
+        </Link>
+      )}
       {selectedDept && (
         <Typography color="text.primary">{selectedDept.name}</Typography>
       )}
@@ -244,14 +251,16 @@ export default function DepartmentOverview() {
       {renderBreadcrumbs()}
 
       {/* Nút Back Mobile Friendly */}
-      <Button
-        variant="text"
-        startIcon={<ArrowLeft size={18} />}
-        onClick={() => handleSelectDept(null)}
-        sx={{ mb: 2, color: "#64748b", display: { xs: "flex", md: "none" } }}
-      >
-        {t("departmentOverview.back")}
-      </Button>
+      {departments.length > 1 && (
+        <Button
+          variant="text"
+          startIcon={<ArrowLeft size={18} />}
+          onClick={() => handleSelectDept(null)}
+          sx={{ mb: 2, color: "#64748b", display: { xs: "flex", md: "none" } }}
+        >
+          {t("departmentOverview.back")}
+        </Button>
+      )}
 
       <Box
         sx={{
