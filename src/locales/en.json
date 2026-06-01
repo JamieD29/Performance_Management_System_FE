@@ -116,7 +116,7 @@
     },
     "status": {
       "pendingApproval": "Pending Your Approval",
-      "pendingResponse": "Pending Staff Response"
+      "pendingResponse": "Pending"
     },
     "actions": {
       "detailsAndEdit": "Details & Edit",
@@ -258,12 +258,12 @@
     "noSelfComment": "No comment.",
     "selfRatingLabel": "2. Self-reported performance classification:",
     "ratings": {
-      "excellent": "Excellent performance (86 - 100 points)",
-      "good": "Good performance (60 - 86 points)",
-      "poor": "Unsatisfactory performance (under 60 points)",
-      "excellentSimple": "Excellent performance",
-      "goodSimple": "Good performance",
-      "poorSimple": "Unsatisfactory performance"
+      "excellent": "Excellent (86-100 pts)",
+      "good": "Good (60-86 pts)",
+      "poor": "Poor (<60 pts)",
+      "excellentSimple": "Excellent",
+      "goodSimple": "Good",
+      "poorSimple": "Poor"
     },
     "managerEvaluationTitle": "IV. PERFORMANCE EVALUATION & CLASSIFICATION RESULTS (By Management)",
     "managerCommentLabel": "1. Comment by Manager / Dean:",
@@ -274,9 +274,9 @@
   },
   "evaluationFormManagerTab": {
     "ratings": {
-      "excellent": "Excellent performance",
-      "good": "Good performance",
-      "poor": "Unsatisfactory performance",
+      "excellent": "Excellent",
+      "good": "Good",
+      "poor": "Poor",
       "unrated": "Unrated"
     },
     "filters": {
@@ -296,9 +296,9 @@
         "employee": "Staff",
         "department": "Department",
         "cycle": "Cycle",
-        "okrTotalScore": "Total Calculated Score (OKR)",
+        "okrTotalScore": "OKR Score",
         "selfRating": "Self Rating",
-        "managerRating": "Manager Conclusion",
+        "managerRating": "Conclusion",
         "status": "Status",
         "actions": "Actions"
       }
@@ -346,9 +346,9 @@
         "employee": "Staff",
         "department": "Department",
         "assignedDate": "Assigned Date",
-        "okrProgress": "% OKR Progress",
-        "selfScore": "Self Score (Total)",
-        "managerScore": "Manager Score (Total)",
+        "okrProgress": "% OKR",
+        "selfScore": "Self Score",
+        "managerScore": "Manager Score",
         "status": "Status",
         "actions": "Actions"
       },
