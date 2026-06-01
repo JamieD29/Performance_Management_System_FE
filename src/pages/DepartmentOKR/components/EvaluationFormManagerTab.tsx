@@ -217,69 +217,116 @@ export default function EvaluationFormManagerTab() {
                   <Table size="small">
                     <TableHead sx={{ bgcolor: "#f8fafc" }}>
                       <TableRow>
-                        <TableCell sx={{ fontWeight: "bold" }}>{t("evaluationFormManagerTab.table.headers.employee")}</TableCell>
-                        <TableCell sx={{ fontWeight: "bold" }}>{t("evaluationFormManagerTab.table.headers.department")}</TableCell>
-                        <TableCell sx={{ fontWeight: "bold" }}>{t("evaluationFormManagerTab.table.headers.cycle")}</TableCell>
-                        <TableCell sx={{ fontWeight: "bold" }}>{t("evaluationFormManagerTab.table.headers.okrTotalScore")}</TableCell>
-                        <TableCell sx={{ fontWeight: "bold" }}>{t("evaluationFormManagerTab.table.headers.selfRating")}</TableCell>
-                        <TableCell sx={{ fontWeight: "bold" }}>{t("evaluationFormManagerTab.table.headers.managerRating")}</TableCell>
-                        <TableCell sx={{ fontWeight: "bold" }}>{t("evaluationFormManagerTab.table.headers.status")}</TableCell>
-                        <TableCell align="right" sx={{ fontWeight: "bold" }}>{t("evaluationFormManagerTab.table.headers.actions")}</TableCell>
+                        <TableCell sx={{ fontWeight: "600", color: "#475569", fontSize: "0.85rem", whiteSpace: "nowrap", letterSpacing: "0.01em" }}>
+                          {t("evaluationFormManagerTab.table.headers.employee")}
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: "600", color: "#475569", fontSize: "0.85rem", whiteSpace: "nowrap", letterSpacing: "0.01em" }}>
+                          {t("evaluationFormManagerTab.table.headers.department")}
+                        </TableCell>
+                        <TableCell
+                          align="center"
+                          sx={{ fontWeight: "600", color: "#475569", fontSize: "0.85rem", whiteSpace: "nowrap", letterSpacing: "0.01em" }}
+                        >
+                          {t("evaluationFormManagerTab.table.headers.cycle")}
+                        </TableCell>
+                        <TableCell
+                          align="center"
+                          sx={{ fontWeight: "600", color: "#475569", fontSize: "0.85rem", whiteSpace: "nowrap", letterSpacing: "0.01em" }}
+                        >
+                          {t("evaluationFormManagerTab.table.headers.okrTotalScore")}
+                        </TableCell>
+                        <TableCell
+                          align="center"
+                          sx={{ fontWeight: "600", color: "#475569", fontSize: "0.85rem", whiteSpace: "nowrap", letterSpacing: "0.01em" }}
+                        >
+                          {t("evaluationFormManagerTab.table.headers.selfRating")}
+                        </TableCell>
+                        <TableCell
+                          align="center"
+                          sx={{ fontWeight: "600", color: "#475569", fontSize: "0.85rem", whiteSpace: "nowrap", letterSpacing: "0.01em" }}
+                        >
+                          {t("evaluationFormManagerTab.table.headers.managerRating")}
+                        </TableCell>
+                        <TableCell
+                          align="center"
+                          sx={{ fontWeight: "600", color: "#475569", fontSize: "0.85rem", whiteSpace: "nowrap", letterSpacing: "0.01em" }}
+                        >
+                          {t("evaluationFormManagerTab.table.headers.status")}
+                        </TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
                       {cycleReports.map((report) => (
-                        <TableRow hover key={report.id}>
-                          <TableCell>
-                            <Box 
+                        <TableRow
+                          hover
+                          key={report.id}
+                          onClick={() => handleOpenDialog(report)}
+                          sx={{ cursor: "pointer", transition: "all 0.2s ease" }}
+                        >
+                          <TableCell sx={{ maxWidth: 220 }}>
+                            <Box
                               sx={{ display: "flex", alignItems: "center", gap: 1.5, cursor: "pointer", "&:hover .user-name": { textDecoration: "underline" } }}
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 if (report.user?.id) navigate(`/departments/users/${report.user.id}`, { state: { parentName: "OKR Bộ Môn", parentUrl: "/departments/okr" } });
                               }}
                             >
-                              <Avatar src={report.user?.avatarUrl} sx={{ width: 32, height: 32, bgcolor: "#1C4D8D", fontSize: "0.9rem" }}>
+                              <Avatar src={report.user?.avatarUrl} sx={{ width: 32, height: 32, bgcolor: "#1C4D8D", fontSize: "0.9rem", flexShrink: 0 }}>
                                 {report.user?.name?.[0] || "?"}
                               </Avatar>
-                              <Box>
-                                <Typography variant="body2" fontWeight="bold" color="primary.main" className="user-name">
-                                  {report.user?.name}
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary">
-                                  {report.user?.email}
-                                </Typography>
+                              <Box sx={{ minWidth: 0, flexGrow: 1 }}>
+                                <Tooltip title={report.user?.name || ""} enterDelay={500} arrow>
+                                  <Typography variant="body2" fontWeight="bold" color="primary.main" className="user-name" noWrap sx={{ maxWidth: 160 }}>
+                                    {report.user?.name}
+                                  </Typography>
+                                </Tooltip>
+                                <Tooltip title={report.user?.email || ""} enterDelay={500} arrow>
+                                  <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block", maxWidth: 160 }}>
+                                    {report.user?.email}
+                                  </Typography>
+                                </Tooltip>
                               </Box>
                             </Box>
                           </TableCell>
-                          <TableCell>{report.user?.department?.name || "N/A"}</TableCell>
-                          <TableCell>
+                          <TableCell sx={{ maxWidth: 140 }}>
+                            <Tooltip title={report.user?.department?.name || "N/A"} enterDelay={500} arrow>
+                              <Chip
+                                label={report.user?.department?.name || "N/A"}
+                                size="small"
+                                variant="outlined"
+                                sx={{
+                                  maxWidth: "100%",
+                                  "& .MuiChip-label": {
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    whiteSpace: "nowrap"
+                                  }
+                                }}
+                              />
+                            </Tooltip>
+                          </TableCell>
+                          <TableCell align="center" sx={{ whiteSpace: "nowrap" }}>
                             <Chip label={report.cycle?.name || t("evaluationFormManagerTab.cycleFallback")} size="small" variant="outlined" />
                           </TableCell>
-                          <TableCell>
+                          <TableCell align="center" sx={{ whiteSpace: "nowrap" }}>
                             <Typography fontWeight="bold" color="#2563eb">{report.selfScoreTotal?.toFixed(1) || 0}</Typography>
                           </TableCell>
-                          <TableCell>
+                          <TableCell align="center" sx={{ whiteSpace: "nowrap" }}>
                             <Chip label={getRatingLabel(report.selfRating)} variant="outlined" color={report.selfRating === 'EXCELLENT' ? 'success' : report.selfRating === 'POOR' ? 'error' : 'primary'} size="small"/>
                           </TableCell>
-                          <TableCell>
+                          <TableCell align="center" sx={{ whiteSpace: "nowrap" }}>
                             {report.status === "EVALUATED" ? (
                               <Chip label={getRatingLabel(report.managerRating)} color={report.managerRating === 'EXCELLENT' ? 'success' : report.managerRating === 'POOR' ? 'error' : 'primary'} size="small"/>
                             ) : (
                               <Typography variant="body2" fontStyle="italic" color="text.secondary">{t("evaluationFormManagerTab.unratedLabel")}</Typography>
                             )}
                           </TableCell>
-                          <TableCell>
+                          <TableCell align="center" sx={{ whiteSpace: "nowrap" }}>
                             {report.status === "EVALUATED" ? (
                               <Chip label={t("evaluationFormManagerTab.status.completed")} color="success" size="small" />
                             ) : (
                               <Chip label={t("evaluationFormManagerTab.status.pending")} color="warning" size="small" />
                             )}
-                          </TableCell>
-                          <TableCell align="right">
-                            <Tooltip title={t("evaluationFormManagerTab.tooltip.viewAndEvaluate")}>
-                              <IconButton color="primary" onClick={() => handleOpenDialog(report)}>
-                                <CheckCircle />
-                              </IconButton>
-                            </Tooltip>
                           </TableCell>
                         </TableRow>
                       ))}

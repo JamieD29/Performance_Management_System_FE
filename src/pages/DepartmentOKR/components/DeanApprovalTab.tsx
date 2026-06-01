@@ -28,6 +28,7 @@ import {
   Select,
   MenuItem,
   InputAdornment,
+  Tooltip,
 } from "@mui/material";
 import { Check, Close, Visibility, ExpandMore, Search } from "@mui/icons-material";
 import { api } from "../../../services/api";
@@ -295,56 +296,117 @@ export default function DeanApprovalTab() {
               <AccordionDetails sx={{ p: 0 }}>
                 <TableContainer component={Paper} elevation={0} sx={{ borderRadius: 0 }}>
                   <Table>
-                    <TableHead sx={{ bgcolor: "#f1f5f9" }}>
+                    <TableHead sx={{ bgcolor: "#f8fafc" }}>
                       <TableRow>
-                        <TableCell sx={{ fontWeight: "bold" }}>{t("deanApprovalTab.tableHeaders.staff")}</TableCell>
-                        <TableCell sx={{ fontWeight: "bold" }}>{t("deanApprovalTab.tableHeaders.department")}</TableCell>
-                        <TableCell sx={{ fontWeight: "bold" }}>{t("deanApprovalTab.tableHeaders.objective")}</TableCell>
-                        <TableCell sx={{ fontWeight: "bold" }}>{t("deanApprovalTab.tableHeaders.assignedDate")}</TableCell>
-                        <TableCell sx={{ fontWeight: "bold" }}>{t("deanApprovalTab.tableHeaders.negotiationDeadline")}</TableCell>
-                        <TableCell sx={{ fontWeight: "bold" }}>{t("deanApprovalTab.tableHeaders.status")}</TableCell>
-                        <TableCell sx={{ fontWeight: "bold" }}>{t("deanApprovalTab.tableHeaders.proposalContent")}</TableCell>
-                        <TableCell align="right" sx={{ fontWeight: "bold" }}>{t("deanApprovalTab.tableHeaders.actions")}</TableCell>
+                        <TableCell sx={{ fontWeight: "600", color: "#475569", fontSize: "0.85rem", whiteSpace: "nowrap", letterSpacing: "0.01em" }}>
+                          {t("deanApprovalTab.tableHeaders.staff")}
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: "600", color: "#475569", fontSize: "0.85rem", whiteSpace: "nowrap", letterSpacing: "0.01em" }}>
+                          {t("deanApprovalTab.tableHeaders.department")}
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: "600", color: "#475569", fontSize: "0.85rem", whiteSpace: "nowrap", letterSpacing: "0.01em" }}>
+                          {t("deanApprovalTab.tableHeaders.objective")}
+                        </TableCell>
+                        <TableCell
+                          align="center"
+                          sx={{ fontWeight: "600", color: "#475569", fontSize: "0.85rem", whiteSpace: "nowrap", letterSpacing: "0.01em" }}
+                        >
+                          {t("deanApprovalTab.tableHeaders.assignedDate")}
+                        </TableCell>
+                        <TableCell
+                          align="center"
+                          sx={{ fontWeight: "600", color: "#475569", fontSize: "0.85rem", whiteSpace: "nowrap", letterSpacing: "0.01em" }}
+                        >
+                          {t("deanApprovalTab.tableHeaders.negotiationDeadline")}
+                        </TableCell>
+                        <TableCell
+                          align="center"
+                          sx={{ fontWeight: "600", color: "#475569", fontSize: "0.85rem", whiteSpace: "nowrap", letterSpacing: "0.01em" }}
+                        >
+                          {t("deanApprovalTab.tableHeaders.status")}
+                        </TableCell>
+                        <TableCell
+                          align="center"
+                          sx={{ fontWeight: "600", color: "#475569", fontSize: "0.85rem", whiteSpace: "nowrap", letterSpacing: "0.01em" }}
+                        >
+                          {t("deanApprovalTab.tableHeaders.proposalContent")}
+                        </TableCell>
+                        <TableCell
+                          align="right"
+                          sx={{ fontWeight: "600", color: "#475569", fontSize: "0.85rem", whiteSpace: "nowrap", letterSpacing: "0.01em" }}
+                        >
+                          {t("deanApprovalTab.tableHeaders.actions")}
+                        </TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
                       {okrs.map((okr) => (
-                        <TableRow key={okr.id} hover>
-                          <TableCell>
+                        <TableRow
+                          key={okr.id}
+                          hover
+                          onClick={() => viewDetails(okr)}
+                          sx={{ cursor: "pointer", transition: "all 0.2s ease" }}
+                        >
+                          <TableCell sx={{ maxWidth: 220 }}>
                             <Box
                               sx={{ display: "flex", alignItems: "center", gap: 1, cursor: "pointer", "&:hover .user-name": { textDecoration: "underline" } }}
-                              onClick={() => {
-                                  if (okr.user?.id) navigate(`/departments/users/${okr.user.id}`, { state: { parentName: "OKR Bộ Môn", parentUrl: "/departments/okr" } });
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (okr.user?.id) navigate(`/departments/users/${okr.user.id}`, { state: { parentName: "OKR Bộ Môn", parentUrl: "/departments/okr" } });
                               }}
                             >
                               <Avatar
                                 src={okr.user?.avatarUrl}
-                                sx={{ width: 28, height: 28 }}
+                                sx={{ width: 28, height: 28, flexShrink: 0 }}
                               >
                                 {(okr.user?.name || okr.user?.email)?.[0]?.toUpperCase()}
                               </Avatar>
-                              <Box>
-                                <Typography variant="body2" fontWeight={500} className="user-name" color="primary.main">
-                                  {okr.user?.name || "(Chưa đặt tên)"}
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary">
-                                  {okr.user?.email}
-                                </Typography>
+                              <Box sx={{ minWidth: 0, flexGrow: 1 }}>
+                                <Tooltip title={okr.user?.name || "(Chưa đặt tên)"} enterDelay={500} arrow>
+                                  <Typography variant="body2" fontWeight={500} className="user-name" color="primary.main" noWrap sx={{ maxWidth: 160 }}>
+                                    {okr.user?.name || "(Chưa đặt tên)"}
+                                  </Typography>
+                                </Tooltip>
+                                <Tooltip title={okr.user?.email || ""} enterDelay={500} arrow>
+                                  <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block", maxWidth: 160 }}>
+                                    {okr.user?.email}
+                                  </Typography>
+                                </Tooltip>
                               </Box>
                             </Box>
                           </TableCell>
-                          <TableCell>{okr.user?.department?.name || "—"}</TableCell>
-                          <TableCell sx={{ fontWeight: 500 }}>
-                            {okr.objective}
+                          <TableCell sx={{ maxWidth: 140 }}>
+                            <Tooltip title={okr.user?.department?.name || "—"} enterDelay={500} arrow>
+                              <Chip
+                                label={okr.user?.department?.name || "—"}
+                                size="small"
+                                variant="outlined"
+                                sx={{
+                                  maxWidth: "100%",
+                                  "& .MuiChip-label": {
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    whiteSpace: "nowrap"
+                                  }
+                                }}
+                              />
+                            </Tooltip>
                           </TableCell>
-                          <TableCell>
+                          <TableCell sx={{ maxWidth: 220 }}>
+                            <Tooltip title={okr.objective || ""} enterDelay={500} arrow>
+                              <Typography variant="body2" fontWeight={500} noWrap sx={{ maxWidth: 200 }}>
+                                {okr.objective}
+                              </Typography>
+                            </Tooltip>
+                          </TableCell>
+                          <TableCell align="center" sx={{ whiteSpace: "nowrap" }}>
                             <Typography variant="body2" color="text.secondary">
                               {okr.createdAt
                                 ? new Date(okr.createdAt).toLocaleDateString("vi-VN")
                                 : "—"}
                             </Typography>
                           </TableCell>
-                          <TableCell>
+                          <TableCell align="center" sx={{ whiteSpace: "nowrap" }}>
                             <Typography
                               variant="body2"
                               fontWeight={600}
@@ -355,7 +417,7 @@ export default function DeanApprovalTab() {
                                 : "—"}
                             </Typography>
                           </TableCell>
-                          <TableCell>
+                          <TableCell align="center" sx={{ whiteSpace: "nowrap" }}>
                             <Chip
                               label={okr.status === "NEGOTIATING" ? t("deanApprovalTab.status.pendingApproval") : t("deanApprovalTab.status.pendingResponse")}
                               size="small"
@@ -364,17 +426,9 @@ export default function DeanApprovalTab() {
                               sx={{ fontWeight: 600 }}
                             />
                           </TableCell>
-                          <TableCell>
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                maxWidth: 250,
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap",
-                              }}
-                            >
-                              {(() => {
+                          <TableCell align="center" sx={{ maxWidth: 200 }}>
+                            {(() => {
+                              const proposalText = (() => {
                                 if (!okr.proposedChanges || Object.keys(okr.proposedChanges).length === 0) {
                                   return "Xem chi tiết...";
                                 }
@@ -386,57 +440,59 @@ export default function DeanApprovalTab() {
                                   const senders = new Set(msgs.map((m: any) => m.sender));
                                   const lastSender = msgs[msgs.length - 1]?.sender;
                                   if (senders.has("USER") && senders.has("MANAGER")) {
-                                    // Trao đổi 2 chiều: chỉ tính "đang trao đổi" nếu tin cuối là USER (chờ Manager xử lý)
-                                    if (lastSender === "USER") {
-                                      exchangeCount++;
-                                    }
-                                    // Nếu tin cuối là MANAGER → đã phản hồi, không tính
+                                    if (lastSender === "USER") exchangeCount++;
                                   } else {
-                                    // Chỉ 1 phía nhắn → nhận xét
-                                    if (lastSender === "USER") {
-                                      commentCount++;
-                                    }
-                                    // Nếu chỉ MANAGER nhắn → không cần hiện
+                                    if (lastSender === "USER") commentCount++;
                                   }
                                 }
-                                if (exchangeCount > 0) {
-                                  return `${exchangeCount} mục chờ xử lý`;
-                                }
-                                if (commentCount > 0) {
-                                  return `Có nhận xét trên ${commentCount} mục`;
-                                }
+                                if (exchangeCount > 0) return `${exchangeCount} mục chờ xử lý`;
+                                if (commentCount > 0) return `Có nhận xét trên ${commentCount} mục`;
                                 return "Đã phản hồi tất cả";
-                              })()}
-                            </Typography>
+                              })();
+
+                              return (
+                                <Tooltip title={proposalText} enterDelay={500} arrow>
+                                  <Typography
+                                    variant="body2"
+                                    noWrap
+                                    sx={{
+                                      maxWidth: 180,
+                                      mx: "auto"
+                                    }}
+                                  >
+                                    {proposalText}
+                                  </Typography>
+                                </Tooltip>
+                              );
+                            })()}
                           </TableCell>
-                          <TableCell align="right">
-                            <Button
-                              size="small"
-                              startIcon={<Visibility />}
-                              onClick={() => viewDetails(okr)}
-                              sx={{ mr: 1 }}
-                            >
-                              {t("deanApprovalTab.actions.detailsAndEdit")}
-                            </Button>
-                            <Button
-                              size="small"
-                              variant="contained"
-                              color="success"
-                              startIcon={<Check />}
-                              onClick={() => handleApprove(okr.id)}
-                              sx={{ mr: 1 }}
-                            >
-                              {t("deanApprovalTab.actions.approve")}
-                            </Button>
-                            <Button
-                              size="small"
-                              variant="outlined"
-                              color="error"
-                              startIcon={<Close />}
-                              onClick={() => openReject(okr)}
-                            >
-                              {t("deanApprovalTab.actions.reject")}
-                            </Button>
+                          <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
+                            <Tooltip title={t("deanApprovalTab.actions.approve")} arrow>
+                              <IconButton
+                                size="small"
+                                color="success"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleApprove(okr.id);
+                                }}
+                                sx={{ mr: 0.5, bgcolor: "rgba(46, 125, 50, 0.08)", "&:hover": { bgcolor: "rgba(46, 125, 50, 0.15)" } }}
+                              >
+                                <Check fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title={t("deanApprovalTab.actions.reject")} arrow>
+                              <IconButton
+                                size="small"
+                                color="error"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openReject(okr);
+                                }}
+                                sx={{ bgcolor: "rgba(211, 47, 47, 0.04)", "&:hover": { bgcolor: "rgba(211, 47, 47, 0.1)" } }}
+                              >
+                                <Close fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
                           </TableCell>
                         </TableRow>
                       ))}

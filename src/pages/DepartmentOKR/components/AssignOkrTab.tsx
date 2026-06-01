@@ -139,8 +139,8 @@ export default function AssignOkrTab() {
                       )}
                     </TableCell>
                   )}
-                  <TableCell>{new Date(t.createdAt).toLocaleDateString("vi-VN")}</TableCell>
-                  <TableCell align="right">
+                  <TableCell sx={{ whiteSpace: "nowrap" }}>{new Date(t.createdAt).toLocaleDateString("vi-VN")}</TableCell>
+                  <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
                     <Button size="small" color="success" variant="contained" startIcon={<Send />} onClick={() => handleAssign(t)}>
                       Gán OKR
                     </Button>

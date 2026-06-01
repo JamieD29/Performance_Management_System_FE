@@ -232,16 +232,10 @@ export default function EvaluationListTab() {
       {/* Control Panel: Search & Filters */}
       <Paper
         elevation={0}
-        sx={{ p: 2, mb: 3, border: "1px solid #e2e8f0", borderRadius: 2 }}
+        sx={{ border: "1px solid #e2e8f0", borderRadius: 2, mb: 3, overflow: "hidden" }}
       >
-        <Box
-          sx={{
-            display: "flex",
-            gap: 2,
-            alignItems: "center",
-            flexWrap: "wrap",
-          }}
-        >
+        {/* Row 1: Tabs Header */}
+        <Box sx={{ borderBottom: 1, borderColor: "divider", px: 2, bgcolor: "#f8fafc" }}>
           <Tabs
             value={tabValue}
             onChange={(_, v) => {
@@ -249,19 +243,23 @@ export default function EvaluationListTab() {
               setSelectedRowIds([]);
               setSelectedCycle("ALL");
             }}
-            sx={{ borderRight: 1, borderColor: "divider", pr: 2 }}
           >
-            <Tab
-              label={`Đang thực hiện (${acceptedReports.length})`}
-            />
-            <Tab
-              label={`Cần đánh giá (${submittedReports.length})`}
-            />
-            <Tab
-              label={`Lịch sử Đã duyệt (${completedReports.length})`}
-            />
+            <Tab label={`Đang thực hiện (${acceptedReports.length})`} />
+            <Tab label={`Cần đánh giá (${submittedReports.length})`} />
+            <Tab label={`Lịch sử Đã duyệt (${completedReports.length})`} />
           </Tabs>
+        </Box>
 
+        {/* Row 2: Filters Toolbar */}
+        <Box
+          sx={{
+            p: 2,
+            display: "flex",
+            gap: 2,
+            alignItems: "center",
+            flexWrap: "wrap",
+          }}
+        >
           <TextField
             size="small"
             placeholder="Tìm theo Tên hoặc Email..."
@@ -333,8 +331,8 @@ export default function EvaluationListTab() {
           {tabValue === 0
             ? "Không có báo cáo nào đang thực hiện."
             : tabValue === 1
-            ? "Không có báo cáo nào cần đánh giá."
-            : "Không có lịch sử đánh giá."}
+              ? "Không có báo cáo nào cần đánh giá."
+              : "Không có lịch sử đánh giá."}
         </Alert>
       ) : Object.keys(groupedByCycle).length === 0 ? (
         <Alert severity="info" sx={{ borderRadius: 2 }}>
@@ -378,8 +376,8 @@ export default function EvaluationListTab() {
                         tabValue === 0
                           ? `${cycleReports.length} đang thực hiện`
                           : tabValue === 1
-                          ? `${cycleReports.length} cần đánh giá`
-                          : `${cycleReports.length} đã duyệt`
+                            ? `${cycleReports.length} cần đánh giá`
+                            : `${cycleReports.length} đã duyệt`
                       }
                       size="small"
                       color={tabValue === 1 ? "warning" : tabValue === 2 ? "success" : "info"}
@@ -404,62 +402,71 @@ export default function EvaluationListTab() {
                               />
                             </TableCell>
                           )}
-                          <TableCell sx={{ fontWeight: "bold", color: "#1e293b" }}>
+                          <TableCell sx={{ fontWeight: "600", color: "#475569", fontSize: "0.85rem", whiteSpace: "nowrap", letterSpacing: "0.01em" }}>
                             Nhân sự
                           </TableCell>
-                          <TableCell sx={{ fontWeight: "bold", color: "#1e293b" }}>
+                          <TableCell sx={{ fontWeight: "600", color: "#475569", fontSize: "0.85rem", whiteSpace: "nowrap", letterSpacing: "0.01em" }}>
                             Bộ môn
                           </TableCell>
                           <TableCell
+                            align="center"
                             sx={{
-                              fontWeight: "bold",
-                              color: "#1e293b",
-                              textAlign: "center",
+                              fontWeight: "600",
+                              color: "#475569",
+                              fontSize: "0.85rem",
+                              whiteSpace: "nowrap",
+                              letterSpacing: "0.01em",
                             }}
                           >
                             Ngày giao
                           </TableCell>
                           <TableCell
+                            align="center"
                             sx={{
-                              fontWeight: "bold",
-                              color: "#1e293b",
-                              textAlign: "center",
+                              fontWeight: "600",
+                              color: "#475569",
+                              fontSize: "0.85rem",
+                              whiteSpace: "nowrap",
+                              letterSpacing: "0.01em",
                             }}
                           >
-                            % OKR Hoàn thành
+                            % Hoàn thành OKR
                           </TableCell>
                           <TableCell
+                            align="center"
                             sx={{
-                              fontWeight: "bold",
-                              color: "#1e293b",
-                              textAlign: "center",
+                              fontWeight: "600",
+                              color: "#475569",
+                              fontSize: "0.85rem",
+                              whiteSpace: "nowrap",
+                              letterSpacing: "0.01em",
                             }}
                           >
-                            Điểm Tự Khai (Tổng)
+                            Điểm Tự Khai
                           </TableCell>
                           <TableCell
+                            align="center"
                             sx={{
-                              fontWeight: "bold",
-                              color: "#1e293b",
-                              textAlign: "center",
+                              fontWeight: "600",
+                              color: "#475569",
+                              fontSize: "0.85rem",
+                              whiteSpace: "nowrap",
+                              letterSpacing: "0.01em",
                             }}
                           >
-                            Điểm Q.Lý Duyệt (Tổng)
+                            Điểm Quản Lý
                           </TableCell>
                           <TableCell
+                            align="center"
                             sx={{
-                              fontWeight: "bold",
-                              color: "#1e293b",
-                              textAlign: "center",
+                              fontWeight: "600",
+                              color: "#475569",
+                              fontSize: "0.85rem",
+                              whiteSpace: "nowrap",
+                              letterSpacing: "0.01em",
                             }}
                           >
                             Trạng thái
-                          </TableCell>
-                          <TableCell
-                            align="right"
-                            sx={{ fontWeight: "bold", color: "#1e293b" }}
-                          >
-                            Thao tác
                           </TableCell>
                         </TableRow>
                       </TableHead>
@@ -471,10 +478,17 @@ export default function EvaluationListTab() {
                               key={report.id}
                               hover
                               selected={isItemSelected}
-                              sx={{ transition: "all 0.2s ease" }}
+                              onClick={() => {
+                                setSelectedReport(report);
+                                setDialogOpen(true);
+                              }}
+                              sx={{ cursor: "pointer", transition: "all 0.2s ease" }}
                             >
                               {tabValue === 1 && (
-                                <TableCell padding="checkbox">
+                                <TableCell
+                                  padding="checkbox"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
                                   <Checkbox
                                     color="primary"
                                     checked={isItemSelected}
@@ -482,7 +496,7 @@ export default function EvaluationListTab() {
                                   />
                                 </TableCell>
                               )}
-                              <TableCell>
+                              <TableCell sx={{ maxWidth: 220 }}>
                                 <Box
                                   sx={{
                                     display: "flex",
@@ -491,40 +505,59 @@ export default function EvaluationListTab() {
                                     cursor: "pointer",
                                     "&:hover .user-name": { textDecoration: "underline" }
                                   }}
-                                  onClick={() => {
+                                  onClick={(e) => {
+                                    e.stopPropagation();
                                     if (report.user?.id) navigate(`/departments/users/${report.user.id}`, { state: { parentName: "OKR Bộ Môn", parentUrl: "/departments/okr" } });
                                   }}
                                 >
                                   <Avatar
                                     src={report.user?.avatarUrl}
-                                    sx={{ bgcolor: "#1C4D8D", width: 36, height: 36 }}
+                                    sx={{ bgcolor: "#1C4D8D", width: 36, height: 36, flexShrink: 0 }}
                                   >
                                     {report.user?.name?.[0] || "?"}
                                   </Avatar>
-                                  <Box>
-                                    <Typography
-                                      variant="body2"
-                                      fontWeight={600}
-                                      color="primary.main"
-                                      className="user-name"
-                                    >
-                                      {report.user?.name || "No name"}
-                                    </Typography>
-                                    <Typography
-                                      variant="caption"
-                                      color="text.secondary"
-                                    >
-                                      {report.user?.email}
-                                    </Typography>
+                                  <Box sx={{ minWidth: 0, flexGrow: 1 }}>
+                                    <Tooltip title={report.user?.name || "No name"} enterDelay={500} arrow>
+                                      <Typography
+                                        variant="body2"
+                                        fontWeight={600}
+                                        color="primary.main"
+                                        className="user-name"
+                                        noWrap
+                                        sx={{ maxWidth: 160 }}
+                                      >
+                                        {report.user?.name || "No name"}
+                                      </Typography>
+                                    </Tooltip>
+                                    <Tooltip title={report.user?.email || ""} enterDelay={500} arrow>
+                                      <Typography
+                                        variant="caption"
+                                        color="text.secondary"
+                                        noWrap
+                                        sx={{ display: "block", maxWidth: 160 }}
+                                      >
+                                        {report.user?.email}
+                                      </Typography>
+                                    </Tooltip>
                                   </Box>
                                 </Box>
                               </TableCell>
-                              <TableCell>
-                                <Chip
-                                  label={report.user?.department?.name || "N/A"}
-                                  size="small"
-                                  variant="outlined"
-                                />
+                              <TableCell sx={{ maxWidth: 140 }}>
+                                <Tooltip title={report.user?.department?.name || "N/A"} enterDelay={500} arrow>
+                                  <Chip
+                                    label={report.user?.department?.name || "N/A"}
+                                    size="small"
+                                    variant="outlined"
+                                    sx={{
+                                      maxWidth: "100%",
+                                      "& .MuiChip-label": {
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                        whiteSpace: "nowrap"
+                                      }
+                                    }}
+                                  />
+                                </Tooltip>
                               </TableCell>
                               <TableCell align="center">
                                 <Typography variant="body2" color="text.secondary">
@@ -605,29 +638,6 @@ export default function EvaluationListTab() {
                                     size="small"
                                     sx={{ fontWeight: 500 }}
                                   />
-                                )}
-                              </TableCell>
-                              <TableCell align="right">
-                                <Tooltip title="Đánh giá chi tiết">
-                                  <IconButton
-                                    color="primary"
-                                    onClick={() => {
-                                      setSelectedReport(report);
-                                      setDialogOpen(true);
-                                    }}
-                                  >
-                                    <Description />
-                                  </IconButton>
-                                </Tooltip>
-                                {report.status === "SUBMITTED" && (
-                                  <Tooltip title="Chấp nhận điểm tự khai">
-                                    <IconButton
-                                      color="success"
-                                      onClick={() => handleQuickApproveSingle(report)}
-                                    >
-                                      <CheckCircle />
-                                    </IconButton>
-                                  </Tooltip>
                                 )}
                               </TableCell>
                             </TableRow>
