@@ -246,10 +246,12 @@ export const useProfileLogic = () => {
         type: "success",
         message: "Cập nhật thông tin hồ sơ thành công!",
       });
-    } catch (error) {
+    } catch (error: any) {
       setNotification({
         type: "error",
-        message: "Có lỗi xảy ra khi lưu thông tin. Vui lòng thử lại.",
+        message:
+          error?.response?.data?.message ||
+          "Có lỗi xảy ra khi lưu thông tin. Vui lòng thử lại.",
       });
     } finally {
       setSaving(false);
