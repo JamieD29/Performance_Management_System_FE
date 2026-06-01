@@ -10,7 +10,6 @@ import {
 import { useDeanDashboardData } from "./useDeanDashboardData";
 import DeanWelcomeHeader from "./components/DeanWelcomeHeader";
 import SummaryCards from "./components/SummaryCards";
-import OkrTimelineChart from "./components/OkrTimelineChart";
 import StaffRankingTable from "./components/StaffRankingTable";
 import DepartmentComparison from "./components/DepartmentComparison";
 import RatingDistribution from "./components/RatingDistribution";
@@ -78,7 +77,6 @@ export default function DeanDashboard() {
     staffRanking,
     ratingDistribution,
     ratingDetails,
-    timelineData,
     actionItems,
   } = data;
 
@@ -99,10 +97,7 @@ export default function DeanDashboard() {
         {/* === SECTION 2: Summary Cards === */}
         <SummaryCards summary={summary} actionItems={actionItems} />
 
-        {/* === SECTION 3: Timeline Chart === */}
-        <OkrTimelineChart data={timelineData} />
-
-        {/* === SECTION 4: 2-column layout: Ranking + Rating === */}
+        {/* === SECTION 3: 2-column layout: Ranking + Rating === */}
         <Box
           sx={{
             display: "grid",
@@ -126,7 +121,7 @@ export default function DeanDashboard() {
           </Box>
         </Box>
 
-        {/* === SECTION 5: So sánh bộ môn === */}
+        {/* === SECTION 4: So sánh bộ môn === */}
         <DepartmentComparison stats={departmentStats} />
 
       </Box>
