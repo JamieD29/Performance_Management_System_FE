@@ -31,14 +31,6 @@ export default function RatingDistribution({ distribution, ratingDetails }: Prop
   const [selectedRating, setSelectedRating] = useState<string | null>(null);
 
   const entries = Object.entries(distribution);
-  if (entries.length === 0) {
-    return (
-      <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: "1px solid #e2e8f0", textAlign: "center", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <Typography color="text.secondary">Chưa có dữ liệu xếp loại trong kỳ này</Typography>
-      </Paper>
-    );
-  }
-
   const total = entries.reduce((s, [, v]) => s + v, 0);
   const chartData = entries.map(([key, value]) => ({
     key,
@@ -111,25 +103,26 @@ export default function RatingDistribution({ distribution, ratingDetails }: Prop
         }}>
           <PieChart width={200} height={200} style={{ outline: "none" }}>
             <Pie
-              data={chartData}
+              data={chartData.length > 0 ? chartData : [{ name: "Trống", value: 1, color: "#e2e8f0" }]}
               cx="50%"
               cy="50%"
               innerRadius={50}
               outerRadius={85}
-              paddingAngle={3}
+              paddingAngle={chartData.length > 0 ? 3 : 0}
               dataKey="value"
               stroke="none"
-              style={{ outline: "none", cursor: "pointer" }}
+              style={{ outline: "none", cursor: chartData.length > 0 ? "pointer" : "default" }}
               onClick={(data) => {
-                if (data && data.payload && data.payload.key) {
+                if (chartData.length > 0 && data && data.payload && data.payload.key) {
                   setSelectedRating(data.payload.key);
                 }
               }}
             >
-              {chartData.map((entry, i) => (
+              {(chartData.length > 0 ? chartData : [{ name: "Trống", value: 1, color: "#e2e8f0" }]).map((entry, i) => (
                 <Cell key={i} fill={entry.color} style={{ outline: "none" }} />
               ))}
             </Pie>
+            {chartData.length > 0 && (
             <Tooltip
               contentStyle={{
                 borderRadius: 10,
@@ -139,14 +132,15 @@ export default function RatingDistribution({ distribution, ratingDetails }: Prop
                 cursor: "pointer"
               }}
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              formatter={(value: any, name: any) => [`${value} người (${Math.round((value / total) * 100)}%) - Click để xem`, name]}
+              formatter={(value: any, name: any) => [`${value} người (${total > 0 ? Math.round((value / total) * 100) : 0}%) - Click để xem`, name]}
             />
+            )}
           </PieChart>
         </Box>
 
         {/* Legend bars — bên dưới pie, chiếm phần còn lại */}
         <Box sx={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 0.5 }}>
-          {chartData.map((item) => (
+          {chartData.length > 0 ? chartData.map((item) => (
             <Box 
               key={item.name} 
               sx={{ mb: 1, cursor: "pointer", transition: "opacity 0.2s", "&:hover": { opacity: 0.8 } }}
@@ -182,7 +176,11 @@ export default function RatingDistribution({ distribution, ratingDetails }: Prop
                 />
               </Box>
             </Box>
-          ))}
+          )) : (
+            <Typography variant="body2" color="text.secondary" sx={{ textAlign: "center", py: 2 }}>
+              Chưa có phiếu đánh giá được xếp loại
+            </Typography>
+          )}
         </Box>
       </Paper>
 

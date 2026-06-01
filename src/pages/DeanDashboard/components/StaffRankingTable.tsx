@@ -27,22 +27,6 @@ const statusMap: Record<string, { label: string; color: string; bg: string }> = 
 const rankColors = ["#FFD700", "#C0C0C0", "#CD7F32"]; // gold, silver, bronze
 
 export default function StaffRankingTable({ ranking }: Props) {
-  if (ranking.length === 0) {
-    return (
-      <Paper
-        elevation={0}
-        sx={{
-          p: 3,
-          borderRadius: 3,
-          border: "1px solid #e2e8f0",
-          textAlign: "center",
-        }}
-      >
-        <Typography color="text.secondary">Chưa có dữ liệu xếp hạng</Typography>
-      </Paper>
-    );
-  }
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -95,7 +79,16 @@ export default function StaffRankingTable({ ranking }: Props) {
               </TableRow>
             </TableHead>
             <TableBody>
-              {ranking.map((item, index) => {
+              {ranking.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} sx={{ textAlign: "center", py: 6, color: "#94a3b8" }}>
+                    <Typography variant="body2" color="text.secondary">
+                      Chưa có dữ liệu xếp hạng trong kỳ này
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              ) : (
+              ranking.map((item, index) => {
                 const st = statusMap[item.status] || { label: item.status, color: "#475569", bg: "#f1f5f9" };
                 return (
                   <TableRow
@@ -198,7 +191,8 @@ export default function StaffRankingTable({ ranking }: Props) {
                     </TableCell>
                   </TableRow>
                 );
-              })}
+              })
+              )}
             </TableBody>
           </Table>
         </TableContainer>

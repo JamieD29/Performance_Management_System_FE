@@ -31,26 +31,10 @@ export default function OkrTimelineChart({ data }: Props) {
     };
   });
 
-  if (cumulativeData.length === 0) {
-    return (
-      <Paper
-        elevation={0}
-        sx={{
-          p: 3,
-          borderRadius: 3,
-          border: "1px solid #e2e8f0",
-          height: 380,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Typography color="text.secondary">
-          Chưa có dữ liệu timeline trong kỳ hiện tại
-        </Typography>
-      </Paper>
-    );
-  }
+  // Khi không có data, hiển thị chart rỗng với 1 điểm placeholder
+  const chartData = cumulativeData.length > 0
+    ? cumulativeData
+    : [{ weekLabel: "—", cumulCompleted: 0, cumulSubmitted: 0 }];
 
   return (
     <motion.div
@@ -91,7 +75,7 @@ export default function OkrTimelineChart({ data }: Props) {
         </Box>
 
         <ResponsiveContainer width="100%" height={300}>
-          <AreaChart data={cumulativeData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+          <AreaChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
             <defs>
               <linearGradient id="gradCompleted" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#16a34a" stopOpacity={0.3} />

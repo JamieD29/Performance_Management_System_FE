@@ -31,14 +31,6 @@ interface Props {
 const COLORS = ["#2563eb", "#16a34a", "#d97706", "#dc2626", "#7c3aed", "#0891b2", "#e11d48", "#4f46e5"];
 
 export default function DepartmentComparison({ stats }: Props) {
-  if (stats.length === 0) {
-    return (
-      <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: "1px solid #e2e8f0", textAlign: "center" }}>
-        <Typography color="text.secondary">Chưa có dữ liệu bộ môn</Typography>
-      </Paper>
-    );
-  }
-
   const chartData = stats
     .filter((d) => d.avgScore !== null)
     .map((d) => ({ name: d.deptCode || d.deptName, score: d.avgScore }));
@@ -166,43 +158,41 @@ export default function DepartmentComparison({ stats }: Props) {
           </Table>
         </TableContainer>
 
-        {/* Bar Chart — ĐTB Điểm */}
-        {chartData.length > 0 && (
-          <Box sx={{ 
-            p: 3, 
-            pt: 2,
-            "& .recharts-wrapper": { outline: "none !important" },
-            "& .recharts-surface": { outline: "none !important" },
-            "& *:focus": { outline: "none !important" }
-          }}>
-            <Typography variant="subtitle2" fontWeight={600} color="text.secondary" sx={{ mb: 1 }}>
-              Điểm Trung Bình Theo Đơn Vị
-            </Typography>
-            <ResponsiveContainer width="100%" height={200} style={{ outline: "none" }}>
-              <BarChart data={chartData} margin={{ top: 5, right: 10, left: -10, bottom: 5 }} style={{ outline: "none" }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-                <XAxis dataKey="name" tick={{ fontSize: 12, fill: "#64748b" }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 12, fill: "#64748b" }} axisLine={false} tickLine={false} />
-                <Tooltip
-                  cursor={{ fill: "transparent" }}
-                  contentStyle={{
-                    borderRadius: 10,
-                    border: "1px solid #e2e8f0",
-                    boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
-                    fontSize: 13,
-                  }}
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  formatter={(value: any) => [`${value} điểm`, "ĐTB"]}
-                />
-                <Bar dataKey="score" radius={[6, 6, 0, 0]} maxBarSize={48}>
-                  {chartData.map((_, i) => (
-                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </Box>
-        )}
+        {/* Bar Chart — ĐTB Điểm (luôn hiển thị) */}
+        <Box sx={{ 
+          p: 3, 
+          pt: 2,
+          "& .recharts-wrapper": { outline: "none !important" },
+          "& .recharts-surface": { outline: "none !important" },
+          "& *:focus": { outline: "none !important" }
+        }}>
+          <Typography variant="subtitle2" fontWeight={600} color="text.secondary" sx={{ mb: 1 }}>
+            Điểm Trung Bình Theo Đơn Vị
+          </Typography>
+          <ResponsiveContainer width="100%" height={200} style={{ outline: "none" }}>
+            <BarChart data={chartData.length > 0 ? chartData : [{ name: "—", score: 0 }]} margin={{ top: 5, right: 10, left: -10, bottom: 5 }} style={{ outline: "none" }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+              <XAxis dataKey="name" tick={{ fontSize: 12, fill: "#64748b" }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 12, fill: "#64748b" }} axisLine={false} tickLine={false} />
+              <Tooltip
+                cursor={{ fill: "transparent" }}
+                contentStyle={{
+                  borderRadius: 10,
+                  border: "1px solid #e2e8f0",
+                  boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
+                  fontSize: 13,
+                }}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                formatter={(value: any) => [`${value} điểm`, "ĐTB"]}
+              />
+              <Bar dataKey="score" radius={[6, 6, 0, 0]} maxBarSize={48}>
+                {(chartData.length > 0 ? chartData : [{ name: "—", score: 0 }]).map((_, i) => (
+                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </Box>
       </Paper>
     </motion.div>
   );
