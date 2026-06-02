@@ -23,9 +23,13 @@ import {
   MenuItem,
   InputLabel,
 } from "@mui/material";
-import { Send, FactCheck } from "@mui/icons-material";
+import { Send, FactCheck, PictureAsPdf } from "@mui/icons-material";
 import { api } from "../../services/api";
 import { confirmAction, showSuccess, showError, showWarning } from "../../utils/swal";
+
+// @ts-ignore
+import html2pdf from "html2pdf.js";
+import EvaluationPdfTemplate from "./components/EvaluationPdfTemplate";
 
 export default function MyEvaluationPage() {
   const [form, setForm] = useState<any>(null);
@@ -46,7 +50,7 @@ export default function MyEvaluationPage() {
     try {
       const res = await api.get("/okrs/my");
       const okrs = res.data || [];
-      
+
       // Lọc các kỳ đánh giá duy nhất từ danh sách OKR của user
       const cycleMap: Record<string, any> = {};
       okrs.forEach((okr: any) => {
@@ -55,7 +59,7 @@ export default function MyEvaluationPage() {
         }
       });
       const list = Object.values(cycleMap);
-      
+
       setCycles(list);
       const active = list.find((c: any) => c.status === "OPEN") || list[0];
       if (active) {
@@ -127,6 +131,59 @@ export default function MyEvaluationPage() {
     }
   };
 
+  const handleExportPDF = () => {
+    const element = document.getElementById("evaluation-form-pdf");
+    if (!element) return;
+
+    // Chuẩn hóa chuỗi tiếng Việt thành không dấu
+    const removeVietnameseTones = (str: string) => {
+      str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
+      str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
+      str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
+      str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
+      str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
+      str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
+      str = str.replace(/đ/g, "d");
+      str = str.replace(/À|Á|Ạ|Ả|Ã|Â|Ầ|Ấ|Ậ|Ẩ|Ẫ|Ă|Ằ|Ắ|Ặ|Ẳ|Ẵ/g, "A");
+      str = str.replace(/È|É|Ẹ|Ẻ|Ẽ|Ê|Ề|Ế|Ệ|Ể|Ễ/g, "E");
+      str = str.replace(/Ì|Í|Ị|Ỉ|Ĩ/g, "I");
+      str = str.replace(/Ò|Ó|Ọ|Ỏ|Õ|Ô|Ồ|Ố|Ộ|Ổ|ỗ|Ơ|Ờ|Ớ|Ợ|Ở|Ỡ/g, "O");
+      str = str.replace(/Ù|Ú|Ụ|Ủ|Ũ|Ư|Ừ|Ứ|Ự|Ử|Ữ/g, "U");
+      str = str.replace(/Ỳ|Ý|Ỵ|Ỷ|Ỹ/g, "Y");
+      str = str.replace(/Đ/g, "D");
+      // Loại bỏ một số ký tự đặc biệt
+      str = str.replace(/[^a-zA-Z0-9\s]/g, "");
+      return str;
+    };
+
+    const employeeName = user.name || "Vien_Chuc";
+    const cycleName = form?.cycle?.name || "Ky_Danh_Gia";
+    const safeEmployeeName = removeVietnameseTones(employeeName).trim().replace(/\s+/g, "_");
+    const safeCycleName = removeVietnameseTones(cycleName).trim().replace(/\s+/g, "_");
+    const filename = `Phieu_Danh_Gia_${safeEmployeeName}_${safeCycleName}.pdf`;
+
+    const opt = {
+      margin: [0, 0, 0, 10],
+      filename: filename,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        logging: false
+      },
+      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      pagebreak: { mode: ["css", "legacy"], avoid: "tr" }
+    };
+
+    try {
+      const exporter = (html2pdf as any).default || html2pdf;
+      exporter().from(element).set(opt).save();
+    } catch (err) {
+      console.error(err);
+      showError("Lỗi", "Không thể xuất PDF. Vui lòng thử lại sau.");
+    }
+  };
+
   const isSubmitted = form?.status === "SUBMITTED" || form?.status === "EVALUATED";
   const isEvaluated = form?.status === "EVALUATED";
 
@@ -158,22 +215,36 @@ export default function MyEvaluationPage() {
           </Typography>
         </Box>
 
-        {cycles.length > 0 && (
-          <FormControl size="small" sx={{ minWidth: 240, bgcolor: "#fff" }}>
-            <InputLabel>Chọn kỳ đánh giá</InputLabel>
-            <Select
-              value={selectedCycleId}
-              label="Chọn kỳ đánh giá"
-              onChange={(e) => setSelectedCycleId(e.target.value)}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          {isEvaluated && (
+            <Button
+              variant="outlined"
+              color="error"
+              startIcon={<PictureAsPdf />}
+              onClick={handleExportPDF}
+              sx={{ fontWeight: "bold" }}
             >
-              {cycles.map((c) => (
-                <MenuItem key={c.id} value={c.id}>
-                  {c.name} {c.status === "OPEN" ? "(Đang mở)" : "(Đã đóng)"}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        )}
+              Xuất PDF
+            </Button>
+          )}
+
+          {cycles.length > 0 && (
+            <FormControl size="small" sx={{ minWidth: 240, bgcolor: "#fff" }}>
+              <InputLabel>Chọn kỳ đánh giá</InputLabel>
+              <Select
+                value={selectedCycleId}
+                label="Chọn kỳ đánh giá"
+                onChange={(e) => setSelectedCycleId(e.target.value)}
+              >
+                {cycles.map((c) => (
+                  <MenuItem key={c.id} value={c.id}>
+                    {c.name} {c.status === "OPEN" ? "(Đang mở)" : "(Đã đóng)"}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+        </Box>
       </Box>
 
       {loading ? (
@@ -210,169 +281,192 @@ export default function MyEvaluationPage() {
               Kỳ đánh giá: {form.cycle?.name || "Kỳ mặc định"}
             </Typography>
 
-        {/* PHẦN I */}
-        <Typography variant="h6" fontWeight="bold" color="#1e3a8a" sx={{ mb: 2 }}>
-          I. THÔNG TIN CÁ NHÂN
-        </Typography>
-        <Grid container spacing={2} sx={{ mb: 4, px: 2 }}>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Typography><strong>Họ và tên:</strong> {user.name}</Typography>
-          </Grid>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Typography><strong>MSCB:</strong> {user.staffCode || "N/A"}</Typography>
-          </Grid>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Typography><strong>Email:</strong> {user.email}</Typography>
-          </Grid>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Typography><strong>Đơn vị công tác:</strong> {user.department?.name || "N/A"}</Typography>
-          </Grid>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Typography><strong>Chức vụ:</strong> {user.managementPosition?.name || "Giảng viên"}</Typography>
-          </Grid>
-        </Grid>
-
-        <Divider sx={{ my: 3 }} />
-
-        {/* PHẦN II */}
-        <Typography variant="h6" fontWeight="bold" color="#1e3a8a" sx={{ mb: 1 }}>
-          II. KẾT QUẢ TỰ ĐÁNH GIÁ LUỒNG OKR
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-          Kết quả thực hiện chức trách, nhiệm vụ được giao (Đồng bộ tự động từ Bài Tự Khai OKR).
-        </Typography>
-        {form.okrObjectiveName && (
-          <Typography variant="body2" fontWeight={600} color="#2563eb" sx={{ mb: 2 }}>
-            📋 OKR Template: {form.okrObjectiveName}
-            {form.okrStatus === "COMPLETED" && (
-              <Box component="span" sx={{ ml: 1, color: "#16a34a", fontWeight: 700 }}>✓ Đã chốt điểm</Box>
-            )}
-          </Typography>
-        )}
-
-        <TableContainer component={Paper} elevation={0} sx={{ mb: 4, border: "1px solid #cbd5e1" }}>
-          <Table size="small">
-            <TableHead sx={{ bgcolor: "#f1f5f9" }}>
-              <TableRow>
-                <TableCell sx={{ fontWeight: "bold", width: "8%", textAlign: "center" }}>STT</TableCell>
-                <TableCell sx={{ fontWeight: "bold", width: "40%" }}>Tiêu chí / Nhiệm vụ</TableCell>
-                <TableCell sx={{ fontWeight: "bold", textAlign: "center" }}>Điểm Tối Đa</TableCell>
-                <TableCell sx={{ fontWeight: "bold", textAlign: "center", color: "#64748b" }}>Điểm Tự Khai</TableCell>
-                <TableCell sx={{ fontWeight: "bold", textAlign: "center", color: "#1C4D8D" }}>Điểm QL Duyệt</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {form.evaluationData?.map((row: any, i: number) => (
-                <TableRow key={row.id || i}>
-                  <TableCell align="center" sx={{ fontWeight: "bold" }}>{row.id}</TableCell>
-                  <TableCell>{row.name}</TableCell>
-                  <TableCell align="center">
-                    <Typography fontWeight={500} color="text.secondary">{row.maxScore || 0}</Typography>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Typography fontWeight={600} color="#64748b">{row.selfScore?.toFixed(1) || 0}</Typography>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Typography fontWeight={700} color="#1C4D8D">
-                      {row.principalScore != null ? row.principalScore.toFixed(1) : "—"}
-                    </Typography>
-                  </TableCell>
-                </TableRow>
-              ))}
-              <TableRow sx={{ bgcolor: "#f0fdf4" }}>
-                <TableCell colSpan={2} align="center" sx={{ fontWeight: "bold", color: "#166534" }}>TỔNG ĐIỂM</TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold", color: "#166534" }}>100</TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold", color: "#64748b", fontSize: "1.1rem" }}>
-                  {form.selfScoreTotal?.toFixed(1) || 0}
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold", color: "#1C4D8D", fontSize: "1.1rem" }}>
-                  {form.principalScoreTotal != null ? form.principalScoreTotal.toFixed(1) : "—"}
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </TableContainer>
-
-        <Divider sx={{ my: 3 }} />
-
-        {/* PHẦN III */}
-        <Typography variant="h6" fontWeight="bold" color="#1e3a8a" sx={{ mb: 2 }}>
-          III. TỰ NHẬN XÉT, XẾP LOẠI CHẤT LƯỢNG
-        </Typography>
-        <Box sx={{ px: 2, mb: 4 }}>
-          <Typography fontWeight="bold" sx={{ mb: 1 }}>1. Tự nhận xét ưu/khuyết điểm:</Typography>
-          <TextField
-            fullWidth
-            multiline
-            rows={3}
-            placeholder="Viết nhận xét của bạn..."
-            value={selfComment}
-            onChange={(e) => setSelfComment(e.target.value)}
-            disabled={isSubmitted}
-            sx={{ mb: 3 }}
-          />
-
-          <Typography fontWeight="bold" sx={{ mb: 1 }}>2. Tự xếp loại chất lượng:</Typography>
-          <FormControl disabled={isSubmitted} sx={{ ml: 2 }}>
-            <RadioGroup row value={selfRating} onChange={(e) => setSelfRating(e.target.value)}>
-              <FormControlLabel value="EXCELLENT" control={<Radio color="primary" />} label="Hoàn thành tốt nhiệm vụ (86 - 100 điểm)" />
-              <FormControlLabel value="GOOD" control={<Radio color="primary" />} label="Hoàn thành nhiệm vụ (60 - 86 điểm)" />
-              <FormControlLabel value="POOR" control={<Radio color="primary" />} label="Không hoàn thành nhiệm vụ (dưới 60 điểm)" />
-            </RadioGroup>
-          </FormControl>
-        </Box>
-
-        {/* PHẦN IV */}
-        {isEvaluated && (
-          <>
-            <Divider sx={{ my: 3 }} />
-            <Typography variant="h6" fontWeight="bold" color="#b45309" sx={{ mb: 2 }}>
-              IV. KẾT QUẢ ĐÁNH GIÁ, XẾP LOẠI (DÀNH CHO CẤP QUẢN LÝ)
+            {/* PHẦN I */}
+            <Typography variant="h6" fontWeight="bold" color="#1e3a8a" sx={{ mb: 2 }}>
+              I. THÔNG TIN CÁ NHÂN
             </Typography>
-            <Box sx={{ px: 2, p: 3, bgcolor: "#fffbeb", borderRadius: 2, border: "1px solid #fde68a" }}>
-              <Typography fontWeight="bold" sx={{ mb: 1 }}>1. Nhận xét của cấp trên:</Typography>
-              <Typography sx={{ mb: 3, whiteSpace: "pre-wrap", color: "#1e293b" }}>
-                {form.managerComment || "Không có nhận xét."}
+            <Grid container spacing={2} sx={{ mb: 4, px: 2 }}>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <Typography><strong>Họ và tên:</strong> {user.name}</Typography>
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <Typography><strong>MSCB:</strong> {user.staffCode || "N/A"}</Typography>
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <Typography><strong>Email:</strong> {user.email}</Typography>
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <Typography><strong>Đơn vị công tác:</strong> {user.department?.name || "N/A"}</Typography>
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <Typography><strong>Chức vụ:</strong> {user.managementPosition?.name || "Giảng viên"}</Typography>
+              </Grid>
+            </Grid>
+
+            <Divider sx={{ my: 3 }} />
+
+            {/* PHẦN II */}
+            <Typography variant="h6" fontWeight="bold" color="#1e3a8a" sx={{ mb: 1 }}>
+              II. KẾT QUẢ TỰ ĐÁNH GIÁ LUỒNG OKR
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+              Kết quả thực hiện chức trách, nhiệm vụ được giao (Đồng bộ tự động từ Bài Tự Khai OKR).
+            </Typography>
+            {form.okrObjectiveName && (
+              <Typography variant="body2" fontWeight={600} color="#2563eb" sx={{ mb: 2 }}>
+                📋 OKR Template: {form.okrObjectiveName}
+                {form.okrStatus === "COMPLETED" && (
+                  <Box component="span" sx={{ ml: 1, color: "#16a34a", fontWeight: 700 }}>✓ Đã chốt điểm</Box>
+                )}
               </Typography>
+            )}
 
-              <Typography fontWeight="bold" sx={{ mb: 1 }}>2. Kết quả xếp loại:</Typography>
-              <Box sx={{ ml: 2 }}>
-                <FormControlLabel
-                  control={<Radio checked={form.managerRating === "EXCELLENT"} color="success" readOnly />}
-                  label="Hoàn thành tốt nhiệm vụ"
-                />
-                <br/>
-                <FormControlLabel
-                  control={<Radio checked={form.managerRating === "GOOD"} color="success" readOnly />}
-                  label="Hoàn thành nhiệm vụ"
-                />
-                <br/>
-                <FormControlLabel
-                  control={<Radio checked={form.managerRating === "POOR"} color="success" readOnly />}
-                  label="Không hoàn thành nhiệm vụ"
-                />
-              </Box>
+            <TableContainer component={Paper} elevation={0} sx={{ mb: 4, border: "1px solid #cbd5e1" }}>
+              <Table size="small">
+                <TableHead sx={{ bgcolor: "#f1f5f9" }}>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: "bold", width: "8%", textAlign: "center" }}>STT</TableCell>
+                    <TableCell sx={{ fontWeight: "bold", width: "40%" }}>Tiêu chí / Nhiệm vụ</TableCell>
+                    <TableCell sx={{ fontWeight: "bold", textAlign: "center" }}>Điểm Tối Đa</TableCell>
+                    <TableCell sx={{ fontWeight: "bold", textAlign: "center", color: "#64748b" }}>Điểm Tự Khai</TableCell>
+                    <TableCell sx={{ fontWeight: "bold", textAlign: "center", color: "#1C4D8D" }}>Điểm QL Duyệt</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {form.evaluationData?.map((row: any, i: number) => (
+                    <TableRow key={row.id || i}>
+                      <TableCell align="center" sx={{ fontWeight: "bold" }}>{row.id}</TableCell>
+                      <TableCell>{row.name}</TableCell>
+                      <TableCell align="center">
+                        <Typography fontWeight={500} color="text.secondary">{row.maxScore || 0}</Typography>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Typography fontWeight={600} color="#64748b">{row.selfScore?.toFixed(1) || 0}</Typography>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Typography fontWeight={700} color="#1C4D8D">
+                          {row.principalScore != null ? row.principalScore.toFixed(1) : "—"}
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  <TableRow sx={{ bgcolor: "#f0fdf4" }}>
+                    <TableCell colSpan={2} align="center" sx={{ fontWeight: "bold", color: "#166534" }}>TỔNG ĐIỂM</TableCell>
+                    <TableCell align="center" sx={{ fontWeight: "bold", color: "#166534" }}>100</TableCell>
+                    <TableCell align="center" sx={{ fontWeight: "bold", color: "#64748b", fontSize: "1.1rem" }}>
+                      {form.selfScoreTotal?.toFixed(1) || 0}
+                    </TableCell>
+                    <TableCell align="center" sx={{ fontWeight: "bold", color: "#1C4D8D", fontSize: "1.1rem" }}>
+                      {form.principalScoreTotal != null ? form.principalScoreTotal.toFixed(1) : "—"}
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </TableContainer>
+
+            <Divider sx={{ my: 3 }} />
+
+            {/* PHẦN III */}
+            <Typography variant="h6" fontWeight="bold" color="#1e3a8a" sx={{ mb: 2 }}>
+              III. TỰ NHẬN XÉT, XẾP LOẠI CHẤT LƯỢNG
+            </Typography>
+            <Box sx={{ px: 2, mb: 4 }}>
+              <Typography fontWeight="bold" sx={{ mb: 1 }}>1. Tự nhận xét ưu/khuyết điểm:</Typography>
+              <TextField
+                fullWidth
+                multiline
+                rows={3}
+                placeholder="Viết nhận xét của bạn..."
+                value={selfComment}
+                onChange={(e) => setSelfComment(e.target.value)}
+                disabled={isSubmitted}
+                sx={{ mb: 3 }}
+              />
+
+              <Typography fontWeight="bold" sx={{ mb: 1 }}>2. Tự xếp loại chất lượng:</Typography>
+              <FormControl disabled={isSubmitted} sx={{ ml: 2 }}>
+                <RadioGroup row value={selfRating} onChange={(e) => setSelfRating(e.target.value)}>
+                  <FormControlLabel value="EXCELLENT" control={<Radio color="primary" />} label="Hoàn thành tốt nhiệm vụ (86 - 100 điểm)" />
+                  <FormControlLabel value="GOOD" control={<Radio color="primary" />} label="Hoàn thành nhiệm vụ (60 - 86 điểm)" />
+                  <FormControlLabel value="POOR" control={<Radio color="primary" />} label="Không hoàn thành nhiệm vụ (dưới 60 điểm)" />
+                </RadioGroup>
+              </FormControl>
             </Box>
-          </>
-        )}
 
-        {/* Actions */}
-        {!isSubmitted && (
-          <Box sx={{ mt: 4, display: "flex", justifyContent: "flex-end" }}>
-            <Button
-              variant="contained"
-              size="large"
-              startIcon={<Send />}
-              onClick={handleSubmit}
-              disabled={saving}
-            >
-              Nộp Phiếu Đánh Giá
-            </Button>
-          </Box>
-        )}
-      </Paper>
-    </>
-  )}
-</Container>
+            {/* PHẦN IV */}
+            {isEvaluated && (
+              <>
+                <Divider sx={{ my: 3 }} />
+                <Typography variant="h6" fontWeight="bold" color="#b45309" sx={{ mb: 2 }}>
+                  IV. KẾT QUẢ ĐÁNH GIÁ, XẾP LOẠI (DÀNH CHO CẤP QUẢN LÝ)
+                </Typography>
+                <Box sx={{ px: 2, p: 3, bgcolor: "#fffbeb", borderRadius: 2, border: "1px solid #fde68a" }}>
+                  <Typography fontWeight="bold" sx={{ mb: 1 }}>1. Nhận xét của cấp trên:</Typography>
+                  <Typography sx={{ mb: 3, whiteSpace: "pre-wrap", color: "#1e293b" }}>
+                    {form.managerComment || "Không có nhận xét."}
+                  </Typography>
+
+                  <Typography fontWeight="bold" sx={{ mb: 1 }}>2. Kết quả xếp loại:</Typography>
+                  <Box sx={{ ml: 2 }}>
+                    <FormControlLabel
+                      control={<Radio checked={form.managerRating === "EXCELLENT"} color="success" readOnly />}
+                      label="Hoàn thành tốt nhiệm vụ"
+                    />
+                    <br />
+                    <FormControlLabel
+                      control={<Radio checked={form.managerRating === "GOOD"} color="success" readOnly />}
+                      label="Hoàn thành nhiệm vụ"
+                    />
+                    <br />
+                    <FormControlLabel
+                      control={<Radio checked={form.managerRating === "POOR"} color="success" readOnly />}
+                      label="Không hoàn thành nhiệm vụ"
+                    />
+                  </Box>
+                </Box>
+              </>
+            )}
+
+            {/* Actions */}
+            {!isSubmitted && (
+              <Box sx={{ mt: 4, display: "flex", justifyContent: "flex-end" }} data-html2canvas-ignore="true">
+                <Button
+                  variant="contained"
+                  size="large"
+                  startIcon={<Send />}
+                  onClick={handleSubmit}
+                  disabled={saving}
+                >
+                  Nộp Phiếu Đánh Giá
+                </Button>
+              </Box>
+            )}
+
+            {isEvaluated && (
+              <Box sx={{ mt: 4, display: "flex", justifyContent: "flex-end" }} data-html2canvas-ignore="true">
+                <Button
+                  variant="contained"
+                  color="error"
+                  size="large"
+                  startIcon={<PictureAsPdf />}
+                  onClick={handleExportPDF}
+                  sx={{ fontWeight: "bold" }}
+                >
+                  Xuất file PDF
+                </Button>
+              </Box>
+            )}
+          </Paper>
+
+          {/* PDF Hidden Export Template (Administrative document format) */}
+          <EvaluationPdfTemplate
+            user={user}
+            form={form}
+            selfComment={selfComment}
+            selfRating={selfRating}
+          />
+        </>
+      )}
+    </Container>
   );
 }
