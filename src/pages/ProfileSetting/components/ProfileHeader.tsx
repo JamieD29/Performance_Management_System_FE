@@ -26,8 +26,8 @@ import {
 } from "@mui/icons-material";
 
 import type { UserProfileForm } from "../profile.types";
-// Import màu sắc chủ đạo để phối màu
 import { THEME_COLORS } from "../profile.constants";
+import { useTranslation } from "react-i18next";
 
 // --- ĐỊNH NGHĨA PROPS ---
 interface ProfileHeaderProps {
@@ -51,6 +51,7 @@ export default function ProfileHeader({
   onAvatarChange,
   getDepartmentName,
 }: ProfileHeaderProps) {
+  const { t } = useTranslation();
   const theme = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -74,13 +75,19 @@ export default function ProfileHeader({
     if (isAdmin) return "Admin";
 
     // 2. Ưu tiên tiếp theo: Chức vụ quản lý (nếu có)
-    if (managementPosition?.name) return managementPosition.name;
+    if (managementPosition?.name) {
+      return t(`profile.enums.managementPosition.${managementPosition.name}`, {
+        defaultValue: managementPosition.name,
+      });
+    }
 
     // 3. Tiếp theo: Chức danh công việc (jobTitle)
-    if (jobTitle) return jobTitle;
+    if (jobTitle) {
+      return t(`profile.enums.jobTitle.${jobTitle}`, { defaultValue: jobTitle });
+    }
 
     // 4. Mặc định
-    return "Giảng viên";
+    return t("profile.enums.jobTitle.Giảng viên");
   };
 
   const userRoleStr = getDisplayRole(formData);
@@ -112,19 +119,18 @@ export default function ProfileHeader({
 
   return (
     <Paper
-      elevation={4} // Tăng độ nổi
+      elevation={4}
       sx={{
-        borderRadius: "24px", // Bo góc tròn hơn
+        borderRadius: "24px",
         p: { xs: 3, md: 4 },
         mb: 4,
         display: "flex",
         flexDirection: { xs: "column", md: "row" },
         alignItems: "center",
         position: "relative",
-        // Nền gradient nhẹ sang trọng hơn màu trắng phẳng
         background: "linear-gradient(145deg, #ffffff, #f8fafc)",
-        boxShadow: "0 10px 30px -5px rgba(0,0,0,0.1)", // Đổ bóng mềm
-        overflow: "visible", // Để avatar lồi ra ngoài
+        boxShadow: "0 10px 30px -5px rgba(0,0,0,0.1)",
+        overflow: "visible",
       }}
     >
       {/* --- KHU VỰC AVATAR --- */}
@@ -141,8 +147,7 @@ export default function ProfileHeader({
           sx={{
             position: "relative",
             borderRadius: "50%",
-            p: "6px", // Viền ngoài
-            // Hiệu ứng viền phát sáng màu xanh
+            p: "6px",
             background: `linear-gradient(135deg, ${alpha(mainColor, 0.8)}, ${alpha(THEME_COLORS.WORK, 0.5)})`,
             boxShadow: `0 8px 20px -5px ${alpha(mainColor, 0.5)}`,
           }}
@@ -151,7 +156,7 @@ export default function ProfileHeader({
             sx={{
               width: { xs: 120, md: 150 },
               height: { xs: 120, md: 150 },
-              border: "4px solid white", // Viền trắng bên trong
+              border: "4px solid white",
               bgcolor: mainColor,
               fontSize: { xs: 50, md: 60 },
               fontWeight: "bold",
@@ -166,7 +171,7 @@ export default function ProfileHeader({
 
         {/* Nút upload ảnh (Nổi bật hơn) */}
         {isEditing && (
-          <Tooltip title="Đổi ảnh đại diện">
+          <Tooltip title={t("profile.changeAvatar")}>
             <IconButton
               sx={{
                 position: "absolute",
@@ -221,9 +226,8 @@ export default function ProfileHeader({
             fontWeight="800"
             sx={{ color: "#1e293b", letterSpacing: "-0.5px" }}
           >
-            {formData.name || "Đang tải..."}
+            {formData.name || t("profile.loading")}
           </Typography>
-          {/* Icon xác thực nhỏ bên cạnh tên cho đẹp */}
           {!isEditing && <VerifiedUser sx={{ color: mainColor }} />}
         </Box>
 
@@ -268,7 +272,7 @@ export default function ProfileHeader({
         </Box>
       </Box>
 
-      {/* --- KHU VỰC NÚT HÀNH ĐỘNG (Hiện đại hơn) --- */}
+      {/* --- KHU VỰC NÚT HÀNH ĐỘNG --- */}
       <Box sx={{ mt: { xs: 4, md: 0 }, ml: { md: 3 }, flexShrink: 0 }}>
         {!isEditing ? (
           <Button
@@ -289,7 +293,7 @@ export default function ProfileHeader({
               },
             }}
           >
-            Chỉnh sửa
+            {t("profile.editBtn")}
           </Button>
         ) : (
           <Box sx={{ display: "flex", gap: 2 }}>
@@ -306,7 +310,7 @@ export default function ProfileHeader({
                 px: 3,
               }}
             >
-              Hủy
+              {t("profile.cancelBtn")}
             </Button>
             <Button
               variant="contained"
@@ -331,7 +335,7 @@ export default function ProfileHeader({
                 "&:hover": { bgcolor: "#059669" },
               }}
             >
-              {saving ? "Đang lưu..." : "Lưu lại"}
+              {saving ? t("profile.saving") : t("profile.saveBtn")}
             </Button>
           </Box>
         )}

@@ -20,6 +20,7 @@ import {
   FALLBACK_ACADEMIC_RANKS,
   FALLBACK_DEGREES,
 } from "../profile.constants";
+import { useTranslation } from "react-i18next";
 
 // --- HÀM STYLE & COMPONENT PHỤ DÙNG CHUNG ---
 const getColorfulInputStyle = (color: string) => ({
@@ -39,66 +40,69 @@ const getColorfulInputStyle = (color: string) => ({
 });
 
 // Component hiển thị thông tin dạng thẻ (View Mode)
-const ProfileField = ({ icon, label, value, color }: any) => (
-  <Box sx={{ mb: 3 }}>
-    <Typography
-      variant="caption"
-      sx={{
-        color: "#64748b",
-        fontWeight: 700,
-        textTransform: "uppercase",
-        ml: 1,
-        mb: 0.5,
-        display: "block",
-        fontSize: "0.75rem",
-        letterSpacing: "0.5px",
-      }}
-    >
-      {label}
-    </Typography>
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        p: 2,
-        borderRadius: 3,
-        bgcolor: "#fff",
-        border: "1px solid",
-        borderColor: `${color}40`,
-        boxShadow: `0 2px 4px ${color}10`,
-        transition: "all 0.2s",
-        "&:hover": { borderColor: color, boxShadow: `0 4px 8px ${color}20` },
-      }}
-    >
-      <Box
+const ProfileField = ({ icon, label, value, color }: any) => {
+  const { t } = useTranslation();
+  return (
+    <Box sx={{ mb: 3 }}>
+      <Typography
+        variant="caption"
         sx={{
-          color: color,
-          mr: 2,
-          display: "flex",
-          p: 1,
-          borderRadius: "50%",
-          bgcolor: `${color}10`,
+          color: "#64748b",
+          fontWeight: 700,
+          textTransform: "uppercase",
+          ml: 1,
+          mb: 0.5,
+          display: "block",
+          fontSize: "0.75rem",
+          letterSpacing: "0.5px",
         }}
       >
-        {React.cloneElement(icon as React.ReactElement<any>, {
-          fontSize: "small",
-        })}
-      </Box>
-      <Typography
-        variant="body1"
-        sx={{ color: "#1e293b", fontWeight: 600, flexGrow: 1 }}
-      >
-        {value || (
-          <span
-            style={{ color: "#94a3b8", fontWeight: 400, fontStyle: "italic" }}
-          >
-            Chưa cập nhật
-          </span>
-        )}
+        {label}
       </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          p: 2,
+          borderRadius: 3,
+          bgcolor: "#fff",
+          border: "1px solid",
+          borderColor: `${color}40`,
+          boxShadow: `0 2px 4px ${color}10`,
+          transition: "all 0.2s",
+          "&:hover": { borderColor: color, boxShadow: `0 4px 8px ${color}20` },
+        }}
+      >
+        <Box
+          sx={{
+            color: color,
+            mr: 2,
+            display: "flex",
+            p: 1,
+            borderRadius: "50%",
+            bgcolor: `${color}10`,
+          }}
+        >
+          {React.cloneElement(icon as React.ReactElement<any>, {
+            fontSize: "small",
+          })}
+        </Box>
+        <Typography
+          variant="body1"
+          sx={{ color: "#1e293b", fontWeight: 600, flexGrow: 1 }}
+        >
+          {value || (
+            <span
+              style={{ color: "#94a3b8", fontWeight: 400, fontStyle: "italic" }}
+            >
+              {t("profile.notUpdated")}
+            </span>
+          )}
+        </Typography>
+      </Box>
     </Box>
-  </Box>
-);
+  );
+};
 
 // --- ĐỊNH NGHĨA PROPS CHO COMPONENT ---
 interface WorkEducationTabProps {
@@ -132,10 +136,12 @@ export default function WorkEducationTab({
   academicRanks,
   degrees,
 }: WorkEducationTabProps) {
+  const { t } = useTranslation();
   // Dùng dữ liệu từ BE nếu có, nếu không fallback
   const _jobTitles = jobTitles && jobTitles.length > 0 ? jobTitles : FALLBACK_JOB_TITLES;
   const _academicRanks = academicRanks && academicRanks.length > 0 ? academicRanks : FALLBACK_ACADEMIC_RANKS;
   const _degrees = degrees && degrees.length > 0 ? degrees : FALLBACK_DEGREES;
+  
   // Các props mặc định cho Form Control / TextField
   const commonProps = {
     fullWidth: true,
@@ -152,37 +158,37 @@ export default function WorkEducationTab({
         <Grid size={{ xs: 12, md: 6 }}>
           <ProfileField
             icon={<Business />}
-            label="Đơn vị công tác"
+            label={t("profile.fields.department")}
             value={getDepartmentName(formData.departmentID)}
             color={THEME_COLORS.WORK}
           />
           <ProfileField
             icon={<School />}
-            label="Học vị"
-            value={formData.degree}
+            label={t("profile.fields.degree")}
+            value={formData.degree ? t(`profile.enums.degree.${formData.degree}`, { defaultValue: formData.degree }) : undefined}
             color={THEME_COLORS.WORK}
           />
           <ProfileField
             icon={<Star />}
-            label="Học hàm"
-            value={formData.academicRank}
+            label={t("profile.fields.academicRank")}
+            value={formData.academicRank ? t(`profile.enums.academicRank.${formData.academicRank}`, { defaultValue: formData.academicRank }) : undefined}
             color={THEME_COLORS.WORK}
           />
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
           <ProfileField
             icon={<Work />}
-            label="Chức danh nghề nghiệp"
-            value={formData.jobTitle}
+            label={t("profile.fields.jobTitle")}
+            value={formData.jobTitle ? t(`profile.enums.jobTitle.${formData.jobTitle}`, { defaultValue: formData.jobTitle }) : undefined}
             color={THEME_COLORS.WORK}
           />
           <ProfileField
             icon={<AccessTime />}
-            label="Giờ giảng/năm"
+            label={t("profile.fields.teachingHours")}
             value={
               formData.teachingHours !== undefined &&
               formData.teachingHours !== ""
-                ? `${formData.teachingHours} Tiết`
+                ? `${formData.teachingHours} ${t("profile.fields.hoursSuffix")}`
                 : ""
             }
             color={THEME_COLORS.WORK}
@@ -204,10 +210,10 @@ export default function WorkEducationTab({
           sx={{ ...getColorfulInputStyle("#94a3b8"), bgcolor: "#f1f5f9" }}
           disabled
         >
-          <InputLabel>Đơn vị công tác</InputLabel>
+          <InputLabel>{t("profile.fields.department")}</InputLabel>
           <Select
             value={formData.departmentID || ""}
-            label="Đơn vị công tác"
+            label={t("profile.fields.department")}
             startAdornment={
               <InputAdornment position="start" sx={{ mr: 2, ml: 1 }}>
                 <Business fontSize="small" />
@@ -222,7 +228,7 @@ export default function WorkEducationTab({
               ))
             ) : (
               <MenuItem value="" disabled>
-                Đang tải dữ liệu...
+                {t("profile.loadingData")}
               </MenuItem>
             )}
           </Select>
@@ -232,10 +238,10 @@ export default function WorkEducationTab({
       {/* HỌC VỊ */}
       <Grid size={{ xs: 12, md: 6 }}>
         <FormControl fullWidth sx={getColorfulInputStyle(THEME_COLORS.WORK)}>
-          <InputLabel>Học vị</InputLabel>
+          <InputLabel>{t("profile.fields.degree")}</InputLabel>
           <Select
             value={formData.degree || ""}
-            label="Học vị"
+            label={t("profile.fields.degree")}
             onChange={(e) => {
               handleChange("degree", e.target.value);
               if (e.target.value !== "Tiến sĩ") {
@@ -250,7 +256,7 @@ export default function WorkEducationTab({
           >
             {_degrees.map((d) => (
               <MenuItem key={d} value={d}>
-                {d}
+                {t(`profile.enums.degree.${d}`, { defaultValue: d })}
               </MenuItem>
             ))}
           </Select>
@@ -260,10 +266,10 @@ export default function WorkEducationTab({
       {/* HỌC HÀM */}
       <Grid size={{ xs: 12, md: 4 }}>
         <FormControl fullWidth sx={getColorfulInputStyle(THEME_COLORS.WORK)}>
-          <InputLabel>Học hàm</InputLabel>
+          <InputLabel>{t("profile.fields.academicRank")}</InputLabel>
           <Select
             value={formData.academicRank || ""}
-            label="Học hàm"
+            label={t("profile.fields.academicRank")}
             onChange={(e) => handleChange("academicRank", e.target.value)}
             disabled={formData.degree !== "Tiến sĩ"}
             startAdornment={
@@ -274,7 +280,7 @@ export default function WorkEducationTab({
           >
             {_academicRanks.map((ar) => (
               <MenuItem key={ar} value={ar}>
-                {ar}
+                {t(`profile.enums.academicRank.${ar}`, { defaultValue: ar })}
               </MenuItem>
             ))}
           </Select>
@@ -284,10 +290,10 @@ export default function WorkEducationTab({
       {/* CHỨC DANH NGHỀ NGHIỆP */}
       <Grid size={{ xs: 12, md: 4 }}>
         <FormControl fullWidth sx={getColorfulInputStyle(THEME_COLORS.WORK)}>
-          <InputLabel>Chức danh nghề nghiệp</InputLabel>
+          <InputLabel>{t("profile.fields.jobTitle")}</InputLabel>
           <Select
             value={formData.jobTitle || ""}
-            label="Chức danh nghề nghiệp"
+            label={t("profile.fields.jobTitle")}
             onChange={(e) => handleChange("jobTitle", e.target.value)}
             startAdornment={
               <InputAdornment position="start" sx={{ mr: 2, ml: 1 }}>
@@ -297,7 +303,7 @@ export default function WorkEducationTab({
           >
             {_jobTitles.map((jt) => (
               <MenuItem key={jt} value={jt}>
-                {jt}
+                {t(`profile.enums.jobTitle.${jt}`, { defaultValue: jt })}
               </MenuItem>
             ))}
           </Select>
@@ -309,7 +315,7 @@ export default function WorkEducationTab({
         <TextField
           {...commonProps}
           type="number"
-          label="Giờ giảng/năm"
+          label={t("profile.fields.teachingHours")}
           value={formData.teachingHours || ""}
           onChange={handleTeachingHoursChange}
           onKeyDown={handlePreventInvalidChars}
@@ -324,7 +330,7 @@ export default function WorkEducationTab({
             ),
             endAdornment: (
               <Typography variant="caption" sx={{ ml: 1 }}>
-                Tiết
+                {t("profile.fields.hoursSuffix")}
               </Typography>
             ),
           }}

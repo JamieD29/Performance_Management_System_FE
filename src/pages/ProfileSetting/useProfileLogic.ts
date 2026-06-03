@@ -9,8 +9,10 @@ import type {
   NotificationState,
 } from "./profile.types";
 import { useProfileValidation } from "../../hooks/useProfileValidation";
+import { useTranslation } from "react-i18next";
 
 export const useProfileLogic = () => {
+  const { t } = useTranslation();
   // --------------------------------------------------------
   // 1. KHAI BÁO STATE
   // --------------------------------------------------------
@@ -65,7 +67,7 @@ export const useProfileLogic = () => {
       } catch (error) {
         setNotification({
           type: "error",
-          message: "Lỗi khi tải thông tin. Vui lòng thử lại.",
+          message: t("profile.messages.loadError"),
         });
       } finally {
         setLoading(false);
@@ -73,11 +75,11 @@ export const useProfileLogic = () => {
     };
 
     fetchProfile();
-  }, []);
+  }, [t]);
 
   // --- Hàm lấy tên phòng ban từ ID ---
   const getDepartmentName = (id: string) => {
-    return departments.find((d) => d.id === id)?.name || id || "Chưa cập nhật";
+    return departments.find((d) => d.id === id)?.name || id || t("profile.notUpdated");
   };
 
   // --- Hàm đồng bộ dữ liệu vào localStorage (Để Header/Sidebar cập nhật theo) ---
@@ -119,7 +121,6 @@ export const useProfileLogic = () => {
     }
   };
 
-  // --- LOGIC NGÀY VÀO TRƯỜNG ---
   // --- LOGIC NGÀY VÀO TRƯỜNG & NGÀY SINH ---
   const validateDates = (
     dob: string,
@@ -183,7 +184,7 @@ export const useProfileLogic = () => {
       e.preventDefault(); // Chặn dán nếu chứa chữ/ký tự lạ
       setNotification({
         type: "warning",
-        message: "Chỉ được dán ký tự số vào ô Giờ giảng.",
+        message: t("profile.warnings.onlyNumbers"),
       });
     }
   };
@@ -215,7 +216,7 @@ export const useProfileLogic = () => {
     if (!formData.name || !formData.staffCode || !formData.departmentID) {
       setNotification({
         type: "error",
-        message: "Vui lòng điền đầy đủ các trường bắt buộc (*)",
+        message: t("profile.warnings.requiredFields"),
       });
       setActiveTab(0); // Nhảy về tab đầu tiên (hoặc tab chứa lỗi)
       return;
@@ -244,14 +245,14 @@ export const useProfileLogic = () => {
       syncToSession(formData); // Đồng bộ sau khi lưu thành công
       setNotification({
         type: "success",
-        message: "Cập nhật thông tin hồ sơ thành công!",
+        message: t("profile.messages.saveSuccess"),
       });
     } catch (error: any) {
       setNotification({
         type: "error",
         message:
           error?.response?.data?.message ||
-          "Có lỗi xảy ra khi lưu thông tin. Vui lòng thử lại.",
+          t("profile.messages.saveError"),
       });
     } finally {
       setSaving(false);
@@ -294,4 +295,3 @@ export const useProfileLogic = () => {
     handleSave,
   };
 };
-

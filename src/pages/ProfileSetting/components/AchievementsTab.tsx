@@ -2,11 +2,12 @@
 
 import React from "react";
 import { Box, Typography, TextField, InputAdornment } from "@mui/material";
-import Grid from "@mui/material/Grid"; // Dùng Grid v7
+import Grid from "@mui/material/Grid";
 import { EmojiEvents, Lightbulb } from "@mui/icons-material";
 
 import type { UserProfileForm } from "../profile.types";
 import { THEME_COLORS } from "../profile.constants";
+import { useTranslation } from "react-i18next";
 
 // --- HÀM STYLE DÙNG CHUNG CHO TAB NÀY ---
 const getColorfulInputStyle = (color: string) => ({
@@ -37,6 +38,7 @@ export default function AchievementsTab({
   isEditing,
   handleChange,
 }: AchievementsTabProps) {
+  const { t } = useTranslation();
   // Các props mặc định cho TextField khi ở chế độ Edit
   const commonProps = {
     fullWidth: true,
@@ -71,14 +73,14 @@ export default function AchievementsTab({
             >
               <EmojiEvents sx={{ color: "#eab308", mr: 1 }} />
               <Typography fontWeight="bold" variant="subtitle2">
-                KHEN THƯỞNG & DANH HIỆU
+                {t("profile.fields.awardsTitle")}
               </Typography>
             </Box>
             <Typography
               variant="body1"
               sx={{ whiteSpace: "pre-line", color: "#334155" }}
             >
-              {formData.awards || "Chưa có dữ liệu"}
+              {formData.awards || t("profile.noData")}
             </Typography>
           </Box>
 
@@ -101,14 +103,14 @@ export default function AchievementsTab({
             >
               <Lightbulb sx={{ color: "#eab308", mr: 1 }} />
               <Typography fontWeight="bold" variant="subtitle2">
-                SỞ HỮU TRÍ TUỆ / CÔNG TRÌNH
+                {t("profile.fields.intellectualPropertyTitle")}
               </Typography>
             </Box>
             <Typography
               variant="body1"
               sx={{ whiteSpace: "pre-line", color: "#334155" }}
             >
-              {formData.intellectualProperty || "Chưa có dữ liệu"}
+              {formData.intellectualProperty || t("profile.noData")}
             </Typography>
           </Box>
         </Grid>
@@ -126,8 +128,8 @@ export default function AchievementsTab({
           {...commonProps}
           multiline
           rows={3}
-          label="Khen thưởng & Danh hiệu"
-          value={formData.awards}
+          label={t("profile.fields.awards")}
+          value={formData.awards || ""}
           onChange={(e) => handleChange("awards", e.target.value)}
           sx={getColorfulInputStyle(THEME_COLORS.ACHIEVEMENT)}
           InputProps={{
@@ -144,8 +146,8 @@ export default function AchievementsTab({
           {...commonProps}
           multiline
           rows={3}
-          label="Sở hữu trí tuệ"
-          value={formData.intellectualProperty}
+          label={t("profile.fields.intellectualProperty")}
+          value={formData.intellectualProperty || ""}
           onChange={(e) => handleChange("intellectualProperty", e.target.value)}
           sx={getColorfulInputStyle(THEME_COLORS.ACHIEVEMENT)}
           InputProps={{

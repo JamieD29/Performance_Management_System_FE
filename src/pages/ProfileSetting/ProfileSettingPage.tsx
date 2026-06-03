@@ -1,4 +1,4 @@
-// src/pages/ProfileSetting/index.tsx
+// src/pages/ProfileSetting/ProfileSettingPage.tsx
 
 import {
   Box,
@@ -24,8 +24,10 @@ import ProfileHeader from "./components/ProfileHeader";
 import PersonalInfoTab from "./components/PersonalInfoTab";
 import WorkEducationTab from "./components/WorkEducationTab";
 import AchievementsTab from "./components/AchievementsTab";
+import { useTranslation } from "react-i18next";
 
 export default function ProfileSetting() {
+  const { t } = useTranslation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
@@ -42,7 +44,7 @@ export default function ProfileSetting() {
     formData,
     errors,
     departments,
-    getDepartmentName, // <-- Đã lấy 2 biến này ra
+    getDepartmentName,
     handleChange,
     handleDobChange,
     handleJoinDateChange,
@@ -77,11 +79,11 @@ export default function ProfileSetting() {
       {/* BANNER XANH PHÍA TRÊN */}
       <Box
         sx={{
-          height: 220, // Tăng chiều cao lên chút cho thoáng
+          height: 220,
           background: "linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%)",
           borderRadius: { xs: "20px", md: "40px" },
-          mb: -12, // Đẩy content lên trên banner một chút
-          boxShadow: "0 4px 20px rgba(37, 99, 235, 0.15)", // Đổ bóng nhẹ
+          mb: -12,
+          boxShadow: "0 4px 20px rgba(37, 99, 235, 0.15)",
         }}
       />
 
@@ -95,7 +97,7 @@ export default function ProfileSetting() {
           onSave={handleSave}
           onCancel={handleCancel}
           onAvatarChange={handleAvatarChange}
-          getDepartmentName={getDepartmentName} // <-- TRUYỀN XUỐNG ĐÂY
+          getDepartmentName={getDepartmentName}
         />
 
         {/* --- MAIN LAYOUT: VERTICAL TABS + CONTENT --- */}
@@ -128,7 +130,7 @@ export default function ProfileSetting() {
                 letterSpacing: 1,
               }}
             >
-              Danh mục
+              {t("profile.category")}
             </Typography>
             <Tabs
               orientation={isMobile ? "horizontal" : "vertical"}
@@ -137,7 +139,7 @@ export default function ProfileSetting() {
               onChange={(_, v) => setActiveTab(v)}
               sx={{
                 borderRight: { md: "1px solid #f1f5f9" },
-                "& .MuiTabs-indicator": { display: "none" }, // Ẩn thanh gạch dưới
+                "& .MuiTabs-indicator": { display: "none" },
                 "& .MuiTab-root": {
                   alignItems: "center",
                   justifyContent: "flex-start",
@@ -171,17 +173,17 @@ export default function ProfileSetting() {
               }}
             >
               <Tab
-                label="Thông tin cá nhân"
+                label={t("profile.personalInfo")}
                 icon={<Person />}
                 iconPosition="start"
               />
               <Tab
-                label="Công việc & Học vấn"
+                label={t("profile.workEducation")}
                 icon={<School />}
                 iconPosition="start"
               />
               <Tab
-                label="Thành tích & Khác"
+                label={t("profile.achievementsMore")}
                 icon={<Star />}
                 iconPosition="start"
               />
@@ -214,9 +216,9 @@ export default function ProfileSetting() {
                 fontWeight="bold"
                 sx={{ color: "#1e293b" }}
               >
-                {activeTab === 0 && "Thông tin cá nhân"}
-                {activeTab === 1 && "Công việc và Học vấn"}
-                {activeTab === 2 && "Thành tích và Nghiên cứu"}
+                {activeTab === 0 && t("profile.personalInfo")}
+                {activeTab === 1 && t("profile.workEducationTitle")}
+                {activeTab === 2 && t("profile.achievementsResearch")}
               </Typography>
             </Box>
             <Box sx={{ p: 4 }}>
@@ -245,8 +247,8 @@ export default function ProfileSetting() {
                       handleTeachingHoursChange={handleTeachingHoursChange}
                       handlePreventInvalidChars={handlePreventInvalidChars}
                       handleSmartPaste={handleSmartPaste}
-                      departments={departments} // <-- TRUYỀN XUỐNG ĐÂY
-                      getDepartmentName={getDepartmentName} // <-- TRUYỀN XUỐNG ĐÂY
+                      departments={departments}
+                      getDepartmentName={getDepartmentName}
                       jobTitles={beJobTitles}
                       academicRanks={beAcademicRanks}
                       degrees={beDegrees}

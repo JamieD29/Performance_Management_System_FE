@@ -1,4 +1,7 @@
+import { useTranslation } from "react-i18next";
+
 export const useProfileValidation = () => {
+  const { t } = useTranslation();
   const MIN_AGE_THRESHOLD = 20;
   const minJoinDateStr = "1995-01-01";
 
@@ -55,8 +58,8 @@ export const useProfileValidation = () => {
     const age = calculateAgeAtDate(dob, joinDate);
     if (age < MIN_AGE_THRESHOLD) {
       return {
-        dobError: `Độ tuổi tại thời điểm vào trường chỉ ${age} tuổi (yêu cầu ít nhất ${MIN_AGE_THRESHOLD} tuổi).`,
-        joinDateError: `Tại thời điểm ngày vào trường, người dùng chỉ ${age} tuổi (cần ít nhất ${MIN_AGE_THRESHOLD} tuổi).`,
+        dobError: t("profile.validation.ageAtJoinDob", { age, minAge: MIN_AGE_THRESHOLD }),
+        joinDateError: t("profile.validation.ageAtJoinDate", { age, minAge: MIN_AGE_THRESHOLD }),
         isAgeWarning: true,
       };
     }
@@ -77,10 +80,10 @@ export const useProfileValidation = () => {
     const minimumDate = new Date(minDateStr);
 
     if (selectedDate > currentDate) {
-      return "Ngày vào trường không thể ở tương lai.";
+      return t("profile.validation.joinDateFuture");
     }
     if (selectedDate < minimumDate) {
-      return `Ngày vào trường không hợp lệ (phải từ ngày 01/01/1995).`;
+      return t("profile.validation.joinDateInvalid");
     }
     return "";
   };

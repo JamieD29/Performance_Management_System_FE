@@ -23,6 +23,7 @@ import {
 } from "@mui/icons-material";
 import type { UserProfileForm, FormErrors } from "../profile.types";
 import { THEME_COLORS, FALLBACK_GENDERS } from "../profile.constants";
+import { useTranslation } from "react-i18next";
 
 // --- HÀM STYLE & COMPONENT PHỤ DÙNG CHUNG CHO TAB NÀY ---
 const getColorfulInputStyle = (color: string) => ({
@@ -48,66 +49,69 @@ const RequiredLabel = ({ label }: { label: string }) => (
 );
 
 // Component hiển thị thông tin dạng thẻ (View Mode)
-const ProfileField = ({ icon, label, value, color, disabled }: any) => (
-  <Box sx={{ mb: 3 }}>
-    <Typography
-      variant="caption"
-      sx={{
-        color: "#64748b",
-        fontWeight: 700,
-        textTransform: "uppercase",
-        ml: 1,
-        mb: 0.5,
-        display: "block",
-        fontSize: "0.75rem",
-        letterSpacing: "0.5px",
-      }}
-    >
-      {label}
-    </Typography>
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        p: 2,
-        borderRadius: 3,
-        bgcolor: "#fff",
-        border: "1px solid",
-        borderColor: `${color}40`,
-        boxShadow: `0 2px 4px ${color}10`,
-        transition: "all 0.2s",
-        "&:hover": { borderColor: color, boxShadow: `0 4px 8px ${color}20` },
-      }}
-    >
-      <Box
+const ProfileField = ({ icon, label, value, color, disabled }: any) => {
+  const { t } = useTranslation();
+  return (
+    <Box sx={{ mb: 3 }}>
+      <Typography
+        variant="caption"
         sx={{
-          color: color,
-          mr: 2,
-          display: "flex",
-          p: 1,
-          borderRadius: "50%",
-          bgcolor: `${color}10`,
+          color: "#64748b",
+          fontWeight: 700,
+          textTransform: "uppercase",
+          ml: 1,
+          mb: 0.5,
+          display: "block",
+          fontSize: "0.75rem",
+          letterSpacing: "0.5px",
         }}
       >
-        {React.cloneElement(icon as React.ReactElement<any>, {
-          fontSize: "small",
-        })}
-      </Box>
-      <Typography
-        variant="body1"
-        sx={{ color: "#1e293b", fontWeight: 600, flexGrow: 1 }}
-      >
-        {value || (
-          <span
-            style={{ color: "#94a3b8", fontWeight: 400, fontStyle: "italic" }}
-          >
-            Chưa cập nhật
-          </span>
-        )}
+        {label}
       </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          p: 2,
+          borderRadius: 3,
+          bgcolor: "#fff",
+          border: "1px solid",
+          borderColor: `${color}40`,
+          boxShadow: `0 2px 4px ${color}10`,
+          transition: "all 0.2s",
+          "&:hover": { borderColor: color, boxShadow: `0 4px 8px ${color}20` },
+        }}
+      >
+        <Box
+          sx={{
+            color: color,
+            mr: 2,
+            display: "flex",
+            p: 1,
+            borderRadius: "50%",
+            bgcolor: `${color}10`,
+          }}
+        >
+          {React.cloneElement(icon as React.ReactElement<any>, {
+            fontSize: "small",
+          })}
+        </Box>
+        <Typography
+          variant="body1"
+          sx={{ color: "#1e293b", fontWeight: 600, flexGrow: 1 }}
+        >
+          {value || (
+            <span
+              style={{ color: "#94a3b8", fontWeight: 400, fontStyle: "italic" }}
+            >
+              {t("profile.notUpdated")}
+            </span>
+          )}
+        </Typography>
+      </Box>
     </Box>
-  </Box>
-);
+  );
+};
 
 // --- ĐỊNH NGHĨA PROPS CHO COMPONENT ---
 interface PersonalInfoTabProps {
@@ -133,10 +137,19 @@ export default function PersonalInfoTab({
   genders,
   ageWarning,
 }: PersonalInfoTabProps) {
+  const { t, i18n } = useTranslation();
   const _genders = genders && genders.length > 0 ? genders : FALLBACK_GENDERS;
   // Biến giới hạn ngày tháng
   const todayStr = new Date().toISOString().split("T")[0];
   const minJoinDateStr = "1995-01-01";
+
+  // Định dạng ngày theo locale
+  const formatDateLocale = (dateStr?: string) => {
+    if (!dateStr) return "";
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return dateStr;
+    return date.toLocaleDateString(i18n.language === "vi" ? "vi-VN" : "en-US");
+  };
 
   // Các props mặc định cho TextField
   const commonProps = {
@@ -154,19 +167,19 @@ export default function PersonalInfoTab({
         <Grid size={{ xs: 12, md: 6 }}>
           <ProfileField
             icon={<Person />}
-            label="Họ và tên"
+            label={t("profile.fields.fullName")}
             value={formData.name}
             color={THEME_COLORS.IDENTITY}
           />
           <ProfileField
             icon={<Badge />}
-            label="Mã cán bộ"
+            label={t("profile.fields.staffCode")}
             value={formData.staffCode}
             color={THEME_COLORS.IDENTITY}
           />
           <ProfileField
             icon={<Email />}
-            label="Email liên hệ"
+            label={t("profile.fields.email")}
             value={formData.email}
             color={THEME_COLORS.IDENTITY}
           />
@@ -174,20 +187,20 @@ export default function PersonalInfoTab({
         <Grid size={{ xs: 12, md: 6 }}>
           <ProfileField
             icon={<EventIcon />}
-            label="Ngày tháng năm sinh"
-            value={formData.dob}
+            label={t("profile.fields.dob")}
+            value={formatDateLocale(formData.dob)}
             color={THEME_COLORS.IDENTITY}
           />
           <ProfileField
             icon={<Wc />}
-            label="Giới tính"
-            value={formData.gender}
+            label={t("profile.fields.gender")}
+            value={formData.gender ? t(`profile.enums.gender.${formData.gender}`, { defaultValue: formData.gender }) : undefined}
             color={THEME_COLORS.IDENTITY}
           />
           <ProfileField
             icon={<DateRange />}
-            label="Ngày vào trường"
-            value={formData.joinDate}
+            label={t("profile.fields.joinDate")}
+            value={formatDateLocale(formData.joinDate)}
             color={THEME_COLORS.IDENTITY}
           />
         </Grid>
@@ -203,7 +216,7 @@ export default function PersonalInfoTab({
       <Grid size={{ xs: 12, md: 6 }}>
         <TextField
           {...commonProps}
-          label={<RequiredLabel label="Họ và tên" />}
+          label={<RequiredLabel label={t("profile.fields.fullName")} />}
           value={formData.name}
           onChange={(e) => {
             const val = e.target.value;
@@ -226,7 +239,7 @@ export default function PersonalInfoTab({
         <TextField
           {...commonProps}
           disabled
-          label="Mã cán bộ"
+          label={t("profile.fields.staffCode")}
           value={formData.staffCode}
           sx={{ ...getColorfulInputStyle("#94a3b8"), bgcolor: "#f1f5f9" }}
           InputProps={{
@@ -243,7 +256,7 @@ export default function PersonalInfoTab({
         <TextField
           {...commonProps}
           disabled
-          label="Email"
+          label={t("profile.fields.email")}
           value={formData.email}
           sx={{ ...getColorfulInputStyle("#94a3b8"), bgcolor: "#f1f5f9" }}
           InputProps={{
@@ -260,7 +273,7 @@ export default function PersonalInfoTab({
         <TextField
           {...commonProps}
           type="date"
-          label="Ngày tháng năm sinh"
+          label={t("profile.fields.dob")}
           InputLabelProps={{ shrink: true }}
           inputProps={{ max: todayStr }}
           value={formData.dob || ""}
@@ -283,10 +296,10 @@ export default function PersonalInfoTab({
           fullWidth
           sx={getColorfulInputStyle(THEME_COLORS.IDENTITY)}
         >
-          <InputLabel>Giới tính</InputLabel>
+          <InputLabel>{t("profile.fields.gender")}</InputLabel>
           <Select
             value={formData.gender}
-            label="Giới tính"
+            label={t("profile.fields.gender")}
             onChange={(e) => handleChange("gender", e.target.value)}
             startAdornment={
               <InputAdornment position="start" sx={{ mr: 2, ml: 1 }}>
@@ -296,7 +309,7 @@ export default function PersonalInfoTab({
           >
             {_genders.map((g) => (
               <MenuItem key={g} value={g}>
-                {g}
+                {t(`profile.enums.gender.${g}`, { defaultValue: g })}
               </MenuItem>
             ))}
           </Select>
@@ -307,16 +320,14 @@ export default function PersonalInfoTab({
         <TextField
           {...commonProps}
           type="date"
-          label="Ngày vào trường"
+          label={t("profile.fields.joinDate")}
           InputLabelProps={{ shrink: true }}
-          // Khóa lịch
           inputProps={{
             max: todayStr,
             min: minJoinDateStr,
           }}
           value={formData.joinDate || ""}
           onChange={handleJoinDateChange}
-          // Báo lỗi viền đỏ
           error={!!errors.joinDate}
           helperText={errors.joinDate}
           sx={getColorfulInputStyle(THEME_COLORS.IDENTITY)}
@@ -327,10 +338,10 @@ export default function PersonalInfoTab({
       {ageWarning && (
         <Grid size={{ xs: 12 }}>
           <Alert severity="warning" sx={{ borderRadius: "12px" }}>
-            <strong>⚠️ Cảnh báo độ tuổi:</strong> {ageWarning}
+            <strong>{t("profile.warnings.ageTitle")}</strong> {ageWarning}
             <br />
             <Typography variant="caption" color="text.secondary">
-              Vui lòng kiểm tra lại ngày sinh và ngày vào trường. Nếu chính xác, bạn vẫn có thể lưu bằng cách nhấn Lưu lần nữa.
+              {t("profile.warnings.ageDesc")}
             </Typography>
           </Alert>
         </Grid>

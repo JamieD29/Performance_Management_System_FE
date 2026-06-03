@@ -23,8 +23,10 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../../../services/api";
 import { showError, showSuccess, confirmDelete } from "../../../utils/swal";
 import TemplateEditorDialog from "./TemplateEditorDialog";
+import { useTranslation } from "react-i18next";
 
 export default function TemplateListTab() {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [templates, setTemplates] = useState<any[]>([]);
   const [openEditor, setOpenEditor] = useState(false);
@@ -78,23 +80,23 @@ export default function TemplateListTab() {
 
     try {
       await api.delete(`/okr-templates/${tmpl.id}`);
-      showSuccess("Đã xóa template thành công!");
+      showSuccess(t("okrTemplates.list.deleteSuccess"));
       fetchTemplates();
     } catch (error) {
       console.error("Error deleting template:", error);
-      showError("Lỗi", "Không thể xóa template. Vui lòng thử lại sau.");
+      showError(t("okrTemplates.list.errorTitle"), t("okrTemplates.list.deleteError"));
     }
   };
 
   console.log(templates);
 
   const filteredTemplates = useMemo(() => {
-    return templates.filter((t) => {
+    return templates.filter((tmpl) => {
       const term = searchTerm.toLowerCase();
-      const matchTitle = t.title?.toLowerCase().includes(term);
-      const matchPosition = t.positionName?.toLowerCase().includes(term);
-      const matchJob = t.jobTitle?.toLowerCase().includes(term);
-      const matchAuthor = t.createdByName?.toLowerCase().includes(term);
+      const matchTitle = tmpl.title?.toLowerCase().includes(term);
+      const matchPosition = tmpl.positionName?.toLowerCase().includes(term);
+      const matchJob = tmpl.jobTitle?.toLowerCase().includes(term);
+      const matchAuthor = tmpl.createdByName?.toLowerCase().includes(term);
       return matchTitle || matchPosition || matchJob || matchAuthor;
     });
   }, [templates, searchTerm]);
@@ -110,12 +112,12 @@ export default function TemplateListTab() {
         }}
       >
         <Typography variant="h6" color="text.secondary">
-          Danh sách OKR Templates (Mẫu)
+          {t("okrTemplates.list.title")}
         </Typography>
         <Box sx={{ display: "flex", gap: 2 }}>
           <TextField
             size="small"
-            placeholder="Tìm kiếm template..."
+            placeholder={t("okrTemplates.list.searchPlaceholder")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             InputProps={{
@@ -132,7 +134,7 @@ export default function TemplateListTab() {
             startIcon={<Add />}
             onClick={handleCreateNew}
           >
-            Tạo Template mới
+            {t("okrTemplates.list.createBtn")}
           </Button>
         </Box>
       </Box>
@@ -145,11 +147,11 @@ export default function TemplateListTab() {
         <Table>
           <TableHead sx={{ bgcolor: "#f1f5f9" }}>
             <TableRow>
-              <TableCell sx={{ fontWeight: "bold", width: { xs: "30%", md: "40%" } }}>Tên Template</TableCell>
-              <TableCell sx={{ fontWeight: "bold", width: "20%", whiteSpace: "nowrap" }}>Chức vụ / Chức danh</TableCell>
-              {isAdmin && <TableCell sx={{ fontWeight: "bold", width: "15%", whiteSpace: "nowrap" }}>Tác giả</TableCell>}
-              <TableCell sx={{ fontWeight: "bold", width: "15%", whiteSpace: "nowrap" }}>Ngày tạo</TableCell>
-              <TableCell align="right" sx={{ fontWeight: "bold", width: "10%", whiteSpace: "nowrap" }}>Thao tác</TableCell>
+              <TableCell sx={{ fontWeight: "bold", width: { xs: "30%", md: "40%" } }}>{t("okrTemplates.list.table.title")}</TableCell>
+              <TableCell sx={{ fontWeight: "bold", width: "20%", whiteSpace: "nowrap" }}>{t("okrTemplates.list.table.positionJob")}</TableCell>
+              {isAdmin && <TableCell sx={{ fontWeight: "bold", width: "15%", whiteSpace: "nowrap" }}>{t("okrTemplates.list.table.author")}</TableCell>}
+              <TableCell sx={{ fontWeight: "bold", width: "15%", whiteSpace: "nowrap" }}>{t("okrTemplates.list.table.createdAt")}</TableCell>
+              <TableCell align="right" sx={{ fontWeight: "bold", width: "10%", whiteSpace: "nowrap" }}>{t("okrTemplates.list.table.actions")}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -170,14 +172,14 @@ export default function TemplateListTab() {
                   align="center"
                   sx={{ py: 3, color: "text.secondary" }}
                 >
-                  Không tìm thấy template nào.
+                  {t("okrTemplates.list.noTemplates")}
                 </TableCell>
               </TableRow>
             ) : (
-              filteredTemplates.map((t) => (
-                <TableRow key={t.id} hover>
+              filteredTemplates.map((tmpl) => (
+                <TableRow key={tmpl.id} hover>
                   <TableCell sx={{ maxWidth: { xs: 150, sm: 200, md: 300 } }}>
-                    <Tooltip title={t.title}>
+                    <Tooltip title={tmpl.title}>
                       <Typography
                         variant="body2"
                         sx={{
@@ -190,30 +192,30 @@ export default function TemplateListTab() {
                           wordBreak: "break-word",
                         }}
                       >
-                        {t.title}
+                        {tmpl.title}
                       </Typography>
                     </Tooltip>
                   </TableCell>
                   <TableCell>
-                    {t.positionName && (
+                    {tmpl.positionName && (
                       <Chip
-                        label={t.positionName}
+                        label={tmpl.positionName}
                         size="small"
                         color="secondary"
                         sx={{ mr: 0.5 }}
                       />
                     )}
-                    {t.jobTitle ? (
+                    {tmpl.jobTitle ? (
                       <Chip
-                        label={t.jobTitle}
+                        label={tmpl.jobTitle}
                         size="small"
                         color="primary"
                         variant="outlined"
                       />
                     ) : (
-                      !t.positionName && (
+                      !tmpl.positionName && (
                         <Chip
-                          label="Tất cả"
+                          label={t("okrTemplates.list.all")}
                           size="small"
                           color="default"
                           variant="outlined"
@@ -223,20 +225,20 @@ export default function TemplateListTab() {
                   </TableCell>
                   {isAdmin && (
                     <TableCell>
-                      {t.createdByUserId ? (
+                      {tmpl.createdByUserId ? (
                         <Box
                           sx={{ display: "flex", alignItems: "center", gap: 1, cursor: "pointer", "&:hover .author-name": { textDecoration: "underline" } }}
-                          onClick={() => navigate(`/departments/users/${t.createdByUserId}`, { state: { parentName: "OKR Bộ Môn", parentUrl: "/departments/okr" } })}
+                          onClick={() => navigate(`/departments/users/${tmpl.createdByUserId}`, { state: { parentName: "OKR Bộ Môn", parentUrl: "/departments/okr" } })}
                         >
                           <Avatar sx={{ width: 24, height: 24, fontSize: 12, bgcolor: "#dbeafe", color: "#1e40af", fontWeight: "bold" }}>
-                            {t.createdByName ? t.createdByName.charAt(0).toUpperCase() : "U"}
+                            {tmpl.createdByName ? tmpl.createdByName.charAt(0).toUpperCase() : "U"}
                           </Avatar>
                           <Typography
                             variant="body2"
                             className="author-name"
                             sx={{ color: "primary.main" }}
                           >
-                            {t.createdByName || "—"}
+                            {tmpl.createdByName || "—"}
                           </Typography>
                         </Box>
                       ) : (
@@ -245,24 +247,24 @@ export default function TemplateListTab() {
                     </TableCell>
                   )}
                   <TableCell>
-                    {new Date(t.createdAt).toLocaleDateString("vi-VN")}
+                    {new Date(tmpl.createdAt).toLocaleDateString(i18n.language === "vi" ? "vi-VN" : "en-US")}
                   </TableCell>
                   <TableCell align="right">
-                    <Tooltip title="Chỉnh sửa">
+                    <Tooltip title={t("okrTemplates.list.tooltip.edit")}>
                       <IconButton
                         size="small"
                         color="primary"
-                        onClick={() => handleEdit(t)}
+                        onClick={() => handleEdit(tmpl)}
                         sx={{ mr: 1 }}
                       >
                         <Edit fontSize="small" />
                       </IconButton>
                     </Tooltip>
-                    <Tooltip title="Xóa">
+                    <Tooltip title={t("okrTemplates.list.tooltip.delete")}>
                       <IconButton
                         size="small"
                         color="error"
-                        onClick={() => handleDelete(t)}
+                        onClick={() => handleDelete(tmpl)}
                       >
                         <Delete fontSize="small" />
                       </IconButton>

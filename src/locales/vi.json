@@ -598,5 +598,116 @@
       "removeConfirmTitle": "Gỡ chức vụ?",
       "removeConfirmText": "Gỡ chức vụ quản lý của \"{{name}}\"?"
     }
+  },
+  "okrTemplates": {
+    "list": {
+      "title": "Danh sách OKR Templates (Mẫu)",
+      "searchPlaceholder": "Tìm kiếm template...",
+      "createBtn": "Tạo Template mới",
+      "deleteSuccess": "Đã xóa template thành công!",
+      "deleteError": "Không thể xóa template. Vui lòng thử lại sau.",
+      "errorTitle": "Lỗi",
+      "noTemplates": "Không tìm thấy template nào.",
+      "table": {
+        "title": "Tên Template",
+        "positionJob": "Chức danh / Chức vụ",
+        "author": "Tác giả",
+        "createdAt": "Ngày tạo",
+        "actions": "Thao tác"
+      },
+      "all": "Tất cả",
+      "tooltip": {
+        "edit": "Chỉnh sửa",
+        "delete": "Xóa"
+      }
+    }
+  },
+  "profile": {
+    "category": "Danh mục",
+    "personalInfo": "Thông tin cá nhân",
+    "workEducation": "Công việc & Học vấn",
+    "achievementsMore": "Thành tích & Khác",
+    "achievementsResearch": "Thành tích và Nghiên cứu",
+    "workEducationTitle": "Công việc và Học vấn",
+    "notUpdated": "Chưa cập nhật",
+    "loading": "Đang tải...",
+    "saving": "Đang lưu...",
+    "saveBtn": "Lưu lại",
+    "editBtn": "Chỉnh sửa",
+    "cancelBtn": "Hủy",
+    "changeAvatar": "Đổi ảnh đại diện",
+    "loadingData": "Đang tải dữ liệu...",
+    "requiredLabel": "{{label}} *",
+    "noData": "Chưa có dữ liệu",
+    "fields": {
+      "fullName": "Họ và tên",
+      "staffCode": "Mã cán bộ",
+      "email": "Email liên hệ",
+      "dob": "Ngày tháng năm sinh",
+      "gender": "Giới tính",
+      "joinDate": "Ngày vào trường",
+      "department": "Đơn vị công tác",
+      "degree": "Học vị",
+      "academicRank": "Học hàm",
+      "jobTitle": "Chức danh nghề nghiệp",
+      "teachingHours": "Giờ giảng/năm",
+      "hoursSuffix": "Tiết",
+      "awards": "Khen thưởng & Danh hiệu",
+      "awardsTitle": "KHEN THƯỞNG & DANH HIỆU",
+      "intellectualProperty": "Sở hữu trí tuệ",
+      "intellectualPropertyTitle": "SỞ HỮU TRÍ TUỆ / CÔNG TRÌNH"
+    },
+    "warnings": {
+      "ageTitle": "⚠️ Cảnh báo độ tuổi:",
+      "ageDesc": "Vui lòng kiểm tra lại ngày sinh và ngày vào trường. Nếu chính xác, bạn vẫn có thể lưu bằng cách nhấn Lưu lần nữa.",
+      "onlyNumbers": "Chỉ được dán ký tự số vào ô Giờ giảng.",
+      "requiredFields": "Vui lòng điền đầy đủ các trường bắt buộc (*)"
+    },
+    "messages": {
+      "loadError": "Lỗi khi tải thông tin. Vui lòng thử lại.",
+      "saveSuccess": "Cập nhật thông tin hồ sơ thành công!",
+      "saveError": "Có lỗi xảy ra khi lưu thông tin. Vui lòng thử lại.",
+      "errorDefault": "Có lỗi xảy ra"
+    },
+    "validation": {
+      "ageAtJoinDob": "Độ tuổi tại thời điểm vào trường chỉ {{age}} tuổi (yêu cầu ít nhất {{minAge}} tuổi).",
+      "ageAtJoinDate": "Tại thời điểm ngày vào trường, người dùng chỉ {{age}} tuổi (cần ít nhất {{minAge}} tuổi).",
+      "joinDateFuture": "Ngày vào trường không thể ở tương lai.",
+      "joinDateInvalid": "Ngày vào trường không hợp lệ (phải từ ngày 01/01/1995)."
+    },
+    "enums": {
+      "gender": {
+        "Nam": "Nam",
+        "Nữ": "Nữ",
+        "Khác": "Khác"
+      },
+      "degree": {
+        "Cử nhân": "Cử nhân",
+        "Thạc sĩ": "Thạc sĩ",
+        "Tiến sĩ": "Tiến sĩ",
+        "Không": "Không"
+      },
+      "academicRank": {
+        "Giáo sư": "Giáo sư",
+        "Phó giáo sư": "Phó giáo sư",
+        "Không": "Không"
+      },
+      "jobTitle": {
+        "Giảng viên": "Giảng viên",
+        "Giảng viên chính": "Giảng viên chính",
+        "Trợ giảng": "Trợ giảng",
+        "Giáo vụ": "Giáo vụ",
+        "Nghiên cứu viên": "Nghiên cứu viên",
+        "Chuyên viên": "Chuyên viên",
+        "Kỹ thuật viên": "Kỹ thuật viên",
+        "Nhân viên hỗ trợ": "Nhân viên hỗ trợ"
+      },
+      "managementPosition": {
+        "Trưởng khoa": "Trưởng khoa",
+        "Phó khoa": "Phó khoa",
+        "Trưởng bộ môn": "Trưởng bộ môn",
+        "Phó bộ môn": "Phó bộ môn"
+      }
+    }
   }
 }

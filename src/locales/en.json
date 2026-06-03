@@ -598,5 +598,116 @@
       "removeConfirmTitle": "Remove position?",
       "removeConfirmText": "Remove management position of \"{{name}}\"?"
     }
+  },
+  "okrTemplates": {
+    "list": {
+      "title": "OKR Templates List",
+      "searchPlaceholder": "Search templates...",
+      "createBtn": "Create New Template",
+      "deleteSuccess": "Successfully deleted template!",
+      "deleteError": "Failed to delete the template. Please try again later.",
+      "errorTitle": "Error",
+      "noTemplates": "No templates found.",
+      "table": {
+        "title": "Template Name",
+        "positionJob": "Position / Job Title",
+        "author": "Author",
+        "createdAt": "Created Date",
+        "actions": "Actions"
+      },
+      "all": "All",
+      "tooltip": {
+        "edit": "Edit",
+        "delete": "Delete"
+      }
+    }
+  },
+  "profile": {
+    "category": "Category",
+    "personalInfo": "Personal Info",
+    "workEducation": "Work & Education",
+    "achievementsMore": "Achievements & More",
+    "achievementsResearch": "Achievements and Research",
+    "workEducationTitle": "Work and Education",
+    "notUpdated": "Not updated",
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "saveBtn": "Save",
+    "editBtn": "Edit",
+    "cancelBtn": "Cancel",
+    "changeAvatar": "Change avatar",
+    "loadingData": "Loading data...",
+    "requiredLabel": "{{label}} *",
+    "noData": "No data available",
+    "fields": {
+      "fullName": "Full Name",
+      "staffCode": "Staff Code",
+      "email": "Contact Email",
+      "dob": "Date of Birth",
+      "gender": "Gender",
+      "joinDate": "Join Date",
+      "department": "Department",
+      "degree": "Degree",
+      "academicRank": "Academic Rank",
+      "jobTitle": "Job Title",
+      "teachingHours": "Teaching Hours/Year",
+      "hoursSuffix": "Hours",
+      "awards": "Awards & Titles",
+      "awardsTitle": "AWARDS & TITLES",
+      "intellectualProperty": "Intellectual Property",
+      "intellectualPropertyTitle": "INTELLECTUAL PROPERTY / WORKS"
+    },
+    "warnings": {
+      "ageTitle": "⚠️ Age Warning:",
+      "ageDesc": "Please double check date of birth and join date. If correct, you can still save by clicking Save again.",
+      "onlyNumbers": "Only numbers can be pasted into Teaching Hours.",
+      "requiredFields": "Please fill in all required fields (*)"
+    },
+    "messages": {
+      "loadError": "Error loading profile info. Please try again.",
+      "saveSuccess": "Successfully updated profile information!",
+      "saveError": "An error occurred while saving profile. Please try again.",
+      "errorDefault": "An error occurred"
+    },
+    "validation": {
+      "ageAtJoinDob": "Age at join date is only {{age}} (requires at least {{minAge}}).",
+      "ageAtJoinDate": "At join date, user is only {{age}} years old (requires at least {{minAge}}).",
+      "joinDateFuture": "Join date cannot be in the future.",
+      "joinDateInvalid": "Invalid join date (must be from 01/01/1995)."
+    },
+    "enums": {
+      "gender": {
+        "Nam": "Male",
+        "Nữ": "Female",
+        "Khác": "Other"
+      },
+      "degree": {
+        "Cử nhân": "Bachelor",
+        "Thạc sĩ": "Master",
+        "Tiến sĩ": "PhD",
+        "Không": "None"
+      },
+      "academicRank": {
+        "Giáo sư": "Professor",
+        "Phó giáo sư": "Associate Professor",
+        "Không": "None"
+      },
+      "jobTitle": {
+        "Giảng viên": "Lecturer",
+        "Giảng viên chính": "Senior Lecturer",
+        "Trợ giảng": "Teaching Assistant",
+        "Giáo vụ": "Academic Staff",
+        "Nghiên cứu viên": "Researcher",
+        "Chuyên viên": "Specialist",
+        "Kỹ thuật viên": "Technician",
+        "Nhân viên hỗ trợ": "Support Staff"
+      },
+      "managementPosition": {
+        "Trưởng khoa": "Dean",
+        "Phó khoa": "Deputy Dean",
+        "Trưởng bộ môn": "Department Head",
+        "Phó bộ môn": "Deputy Department Head"
+      }
+    }
   }
 }
