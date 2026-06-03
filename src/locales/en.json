@@ -469,5 +469,73 @@
       "C": "C - Good / Meets Expectations",
       "D": "D - Unsatisfactory"
     }
+  },
+  "departmentOverview": {
+    "home": "Home",
+    "departments": "Units",
+    "title": "Units List",
+    "listDescription": "Performance management system OKR/KPI for {{count}} departments.",
+    "members": "{{count}} staff",
+    "headOfDept": "Head of Department",
+    "notUpdated": "Not updated",
+    "noData": "No departments found.",
+    "back": "Back",
+    "reportsAndStats": "Department Performance Reports & Statistics",
+    "cycleLabel": "Evaluation Cycle",
+    "cycleOpen": " (Open)",
+    "metrics": {
+      "staff": "Staff",
+      "staffSub": "Faculty & Staff",
+      "totalOkrsAssigned": "Total OKRs Assigned",
+      "okrsSub": "OKR forms for staff",
+      "completionRate": "Completion Rate",
+      "completionSub": "Submitted / Graded OKRs",
+      "attentionRequired": "Attention Required",
+      "attentionSub": "Negotiating / Pending OKRs"
+    },
+    "okrTable": {
+      "title": "Staff OKR Status",
+      "staffCount": "{{count}} staff",
+      "staff": "Staff",
+      "okrName": "Objective",
+      "status": "Status",
+      "selfScore": "Self Score",
+      "managerScore": "Manager Score",
+      "noOkrAssigned": "No OKR assigned",
+      "noData": "No staff OKR data available"
+    },
+    "evalTable": {
+      "title": "Staff Performance Evaluations",
+      "staff": "Staff",
+      "status": "Status",
+      "selfRating": "Self-Rating",
+      "managerRating": "Manager Rating",
+      "selfScore": "Self Score",
+      "principalScore": "Principal Score",
+      "noData": "No evaluation data available"
+    },
+    "pagination": {
+      "rowsPerPage": "Rows per page:"
+    },
+    "status": {
+      "pending": "Pending Feedback",
+      "negotiating": "Negotiating",
+      "accepted": "Finalized",
+      "submitted": "Submitted (Self)",
+      "completed": "Graded",
+      "atRisk": "At Risk",
+      "offTrack": "Off Track",
+      "pendingEvaluation": "Pending Evaluation",
+      "submittedEval": "Submitted",
+      "evaluated": "Evaluated",
+      "none": "None"
+    },
+    "rating": {
+      "excellent": "Excellent",
+      "good": "Good",
+      "fair": "Fair",
+      "average": "Average",
+      "poor": "Poor"
+    }
   }
 }

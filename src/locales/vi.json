@@ -469,5 +469,73 @@
       "C": "C - Hoàn thành",
       "D": "D - Không hoàn thành"
     }
+  },
+  "departmentOverview": {
+    "home": "Trang chủ",
+    "departments": "Danh sách Đơn vị",
+    "title": "Danh sách Đơn vị",
+    "listDescription": "Hệ thống quản lý hiệu suất OKR/KPI cho {{count}} đơn vị trực thuộc.",
+    "members": "{{count}} nhân sự",
+    "headOfDept": "Trưởng đơn vị",
+    "notUpdated": "Chưa cập nhật",
+    "noData": "Không tìm thấy bộ môn nào.",
+    "back": "Quay lại",
+    "reportsAndStats": "Báo cáo & Thống kê hiệu suất bộ môn",
+    "cycleLabel": "Kỳ/Quý đánh giá",
+    "cycleOpen": " (Đang mở)",
+    "metrics": {
+      "staff": "Nhân sự",
+      "staffSub": "Giảng viên & Nhân viên",
+      "totalOkrsAssigned": "Tổng OKR đã giao",
+      "okrsSub": "Bản OKR cho nhân viên",
+      "completionRate": "Tỉ lệ hoàn thành",
+      "completionSub": "OKR đã nộp / đã chấm",
+      "attentionRequired": "Cần chú ý",
+      "attentionSub": "OKR đang đàm phán / chờ phản hồi"
+    },
+    "okrTable": {
+      "title": "Trạng thái OKR theo nhân sự",
+      "staffCount": "{{count}} nhân sự",
+      "staff": "Nhân sự",
+      "okrName": "Tên OKR",
+      "status": "Trạng thái",
+      "selfScore": "Điểm tự khai",
+      "managerScore": "Điểm quản lý",
+      "noOkrAssigned": "Chưa được giao OKR",
+      "noData": "Không có dữ liệu OKR nhân sự"
+    },
+    "evalTable": {
+      "title": "Phiếu Đánh Giá theo nhân sự",
+      "staff": "Nhân sự",
+      "status": "Trạng thái",
+      "selfRating": "Tự đánh giá",
+      "managerRating": "Xếp loại (Quản lý)",
+      "selfScore": "Điểm tự khai",
+      "principalScore": "Điểm Hiệu trưởng",
+      "noData": "Không có dữ liệu phiếu đánh giá"
+    },
+    "pagination": {
+      "rowsPerPage": "Số dòng mỗi trang:"
+    },
+    "status": {
+      "pending": "Chờ phản hồi",
+      "negotiating": "Đang đàm phán",
+      "accepted": "Đã chốt",
+      "submitted": "Đã nộp tự khai",
+      "completed": "Đã chấm điểm",
+      "atRisk": "Rủi ro",
+      "offTrack": "Chậm tiến độ",
+      "pendingEvaluation": "Chờ đánh giá",
+      "submittedEval": "Đã nộp",
+      "evaluated": "Đã đánh giá",
+      "none": "Chưa có"
+    },
+    "rating": {
+      "excellent": "Xuất sắc",
+      "good": "Tốt",
+      "fair": "Khá",
+      "average": "Trung bình",
+      "poor": "Yếu"
+    }
   }
 }

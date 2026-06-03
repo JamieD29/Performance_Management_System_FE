@@ -54,36 +54,39 @@ interface Department {
 }
 
 // --- STATUS HELPERS ---
-const OKR_STATUS_CONFIG: Record<string, { label: string; color: "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning"; icon?: string }> = {
-  PENDING: { label: "Chờ phản hồi", color: "warning", icon: "⏳" },
-  NEGOTIATING: { label: "Đang đàm phán", color: "info", icon: "💬" },
-  ACCEPTED: { label: "Đã chốt", color: "primary", icon: "📋" },
-  SUBMITTED: { label: "Đã nộp tự khai", color: "secondary", icon: "📤" },
-  COMPLETED: { label: "Đã chấm điểm", color: "success", icon: "✅" },
-  AT_RISK: { label: "Rủi ro", color: "error", icon: "⚠️" },
-  OFF_TRACK: { label: "Chậm tiến độ", color: "error", icon: "🔴" },
+const OKR_STATUS_CONFIG: Record<string, { labelKey: string; color: "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning"; icon?: string }> = {
+  PENDING: { labelKey: "departmentOverview.status.pending", color: "warning", icon: "⏳" },
+  NEGOTIATING: { labelKey: "departmentOverview.status.negotiating", color: "info", icon: "💬" },
+  ACCEPTED: { labelKey: "departmentOverview.status.accepted", color: "primary", icon: "📋" },
+  SUBMITTED: { labelKey: "departmentOverview.status.submitted", color: "secondary", icon: "📤" },
+  COMPLETED: { labelKey: "departmentOverview.status.completed", color: "success", icon: "✅" },
+  AT_RISK: { labelKey: "departmentOverview.status.atRisk", color: "error", icon: "⚠️" },
+  OFF_TRACK: { labelKey: "departmentOverview.status.offTrack", color: "error", icon: "🔴" },
 };
 
-const EVAL_STATUS_CONFIG: Record<string, { label: string; color: "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" }> = {
-  PENDING_EVALUATION: { label: "Chờ đánh giá", color: "warning" },
-  SUBMITTED: { label: "Đã nộp", color: "info" },
-  EVALUATED: { label: "Đã đánh giá", color: "success" },
+const EVAL_STATUS_CONFIG: Record<string, { labelKey: string; color: "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" }> = {
+  PENDING_EVALUATION: { labelKey: "departmentOverview.status.pendingEvaluation", color: "warning" },
+  SUBMITTED: { labelKey: "departmentOverview.status.submittedEval", color: "info" },
+  EVALUATED: { labelKey: "departmentOverview.status.evaluated", color: "success" },
 };
 
 const RATING_LABELS: Record<string, string> = {
-  EXCELLENT: "Xuất sắc",
-  GOOD: "Tốt",
-  FAIR: "Khá",
-  AVERAGE: "Trung bình",
-  POOR: "Yếu",
+  EXCELLENT: "departmentOverview.rating.excellent",
+  GOOD: "departmentOverview.rating.good",
+  FAIR: "departmentOverview.rating.fair",
+  AVERAGE: "departmentOverview.rating.average",
+  POOR: "departmentOverview.rating.poor",
 };
 
-function getOkrStatusChip(status: string) {
-  const config = OKR_STATUS_CONFIG[status] || { label: status, color: "default" as const };
+function getOkrStatusChip(status: string, t: any) {
+  const config = OKR_STATUS_CONFIG[status];
+  const label = config ? t(config.labelKey) : status;
+  const icon = config?.icon || "";
+  const color = config?.color || "default";
   return (
     <Chip
-      label={`${config.icon || ""} ${config.label}`}
-      color={config.color}
+      label={`${icon} ${label}`}
+      color={color}
       size="small"
       variant="outlined"
       sx={{ fontWeight: 600, fontSize: "0.78rem" }}
@@ -91,13 +94,15 @@ function getOkrStatusChip(status: string) {
   );
 }
 
-function getEvalStatusChip(status: string | null) {
-  if (!status) return <Chip label="Chưa có" color="default" size="small" variant="outlined" sx={{ fontWeight: 600, fontSize: "0.78rem" }} />;
-  const config = EVAL_STATUS_CONFIG[status] || { label: status, color: "default" as const };
+function getEvalStatusChip(status: string | null, t: any) {
+  if (!status) return <Chip label={t("departmentOverview.status.none")} color="default" size="small" variant="outlined" sx={{ fontWeight: 600, fontSize: "0.78rem" }} />;
+  const config = EVAL_STATUS_CONFIG[status];
+  const label = config ? t(config.labelKey) : status;
+  const color = config?.color || "default";
   return (
     <Chip
-      label={config.label}
-      color={config.color}
+      label={label}
+      color={color}
       size="small"
       variant="outlined"
       sx={{ fontWeight: 600, fontSize: "0.78rem" }}
@@ -160,7 +165,7 @@ export default function DepartmentOverview() {
         setSearchParams({ deptId: data[0].id });
       }
     } catch (error) {
-      console.error("Lỗi tải danh sách bộ môn:", error);
+      console.error("Error loading departments list:", error);
     } finally {
       setLoading(false);
     }
@@ -176,7 +181,7 @@ export default function DepartmentOverview() {
         setSelectedCycle(openCycle ? openCycle.id : data[0].id);
       }
     } catch (error) {
-      console.error("Lỗi tải danh sách kỳ đánh giá:", error);
+      console.error("Error loading evaluation cycles:", error);
     }
   };
 
@@ -434,15 +439,15 @@ export default function DepartmentOverview() {
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           {cycles.length > 0 && (
             <FormControl size="small" sx={{ minWidth: 220, bgcolor: "white" }}>
-              <InputLabel>Kỳ/Quý đánh giá</InputLabel>
+              <InputLabel>{t("departmentOverview.cycleLabel")}</InputLabel>
               <Select
-                label="Kỳ/Quý đánh giá"
+                label={t("departmentOverview.cycleLabel")}
                 value={selectedCycle}
                 onChange={(e) => setSelectedCycle(e.target.value)}
               >
                 {cycles.map((c) => (
                   <MenuItem key={c.id} value={c.id}>
-                    {c.name} {c.status === "OPEN" ? "(Đang mở)" : ""}
+                    {c.name} {c.status === "OPEN" ? t("departmentOverview.cycleOpen") : ""}
                   </MenuItem>
                 ))}
               </Select>
@@ -475,7 +480,7 @@ export default function DepartmentOverview() {
                 <Users size={24} color="#3b82f6" />
               </Box>
               <Typography fontWeight="bold" color="#1e3a8a">
-                Nhân sự
+                {t("departmentOverview.metrics.staff")}
               </Typography>
             </Box>
             <Typography
@@ -486,7 +491,7 @@ export default function DepartmentOverview() {
               {overviewData ? overviewData.department.memberCount : (selectedDept.memberCount || 0)}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              Giảng viên & Nhân viên
+              {t("departmentOverview.metrics.staffSub")}
             </Typography>
           </Paper>
         </Grid>
@@ -508,7 +513,7 @@ export default function DepartmentOverview() {
                 <ClipboardList size={24} color="#7c3aed" />
               </Box>
               <Typography fontWeight="bold" color="#4c1d95">
-                Tổng OKR đã giao
+                {t("departmentOverview.metrics.totalOkrsAssigned")}
               </Typography>
             </Box>
             <Typography
@@ -519,7 +524,7 @@ export default function DepartmentOverview() {
               {overviewData ? overviewData.metrics.totalOkrs : "--"}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              Bản OKR cho nhân viên
+              {t("departmentOverview.metrics.okrsSub")}
             </Typography>
           </Paper>
         </Grid>
@@ -541,7 +546,7 @@ export default function DepartmentOverview() {
                 <TrendingUp size={24} color="#16a34a" />
               </Box>
               <Typography fontWeight="bold" color="#14532d">
-                Tỉ lệ hoàn thành
+                {t("departmentOverview.metrics.completionRate")}
               </Typography>
             </Box>
             <Typography
@@ -552,7 +557,7 @@ export default function DepartmentOverview() {
               {overviewData ? `${overviewData.metrics.completionRate}%` : "--"}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              OKR đã nộp / đã chấm
+              {t("departmentOverview.metrics.completionSub")}
             </Typography>
           </Paper>
         </Grid>
@@ -574,7 +579,7 @@ export default function DepartmentOverview() {
                 <AlertCircle size={24} color="#ea580c" />
               </Box>
               <Typography fontWeight="bold" color="#7c2d12">
-                Cần chú ý
+                {t("departmentOverview.metrics.attentionRequired")}
               </Typography>
             </Box>
             <Typography
@@ -585,7 +590,7 @@ export default function DepartmentOverview() {
               {overviewData ? overviewData.metrics.actionRequired : "0"}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              OKR đang đàm phán / chờ phản hồi
+              {t("departmentOverview.metrics.attentionSub")}
             </Typography>
           </Paper>
         </Grid>
@@ -610,10 +615,10 @@ export default function DepartmentOverview() {
               <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 3 }}>
                 <Target size={20} color="#64748b" />
                 <Typography variant="h6" fontWeight="bold">
-                  Trạng thái OKR theo nhân sự
+                  {t("departmentOverview.okrTable.title")}
                 </Typography>
                 <Chip
-                  label={`${overviewData.staffOkrStatus.length} nhân sự`}
+                  label={t("departmentOverview.okrTable.staffCount", { count: overviewData.staffOkrStatus.length })}
                   size="small"
                   sx={{ ml: 1, bgcolor: "#f1f5f9", fontWeight: 600 }}
                 />
@@ -628,18 +633,18 @@ export default function DepartmentOverview() {
                           direction={okrOrderBy === "name" ? okrOrder : "asc"}
                           onClick={() => handleOkrSortRequest("name")}
                         >
-                          Nhân sự
+                          {t("departmentOverview.okrTable.staff")}
                         </TableSortLabel>
                       </TableCell>
-                      <TableCell sx={{ fontWeight: 'bold' }}>Tên OKR</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold', minWidth: 150 }}>Trạng thái</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold' }}>{t("departmentOverview.okrTable.okrName")}</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', minWidth: 150 }}>{t("departmentOverview.okrTable.status")}</TableCell>
                       <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>
                         <TableSortLabel
                           active={okrOrderBy === "totalScore"}
                           direction={okrOrderBy === "totalScore" ? okrOrder : "asc"}
                           onClick={() => handleOkrSortRequest("totalScore")}
                         >
-                          Điểm tự khai
+                          {t("departmentOverview.okrTable.selfScore")}
                         </TableSortLabel>
                       </TableCell>
                       <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>
@@ -648,7 +653,7 @@ export default function DepartmentOverview() {
                           direction={okrOrderBy === "managerScore" ? okrOrder : "asc"}
                           onClick={() => handleOkrSortRequest("managerScore")}
                         >
-                          Điểm quản lý
+                          {t("departmentOverview.okrTable.managerScore")}
                         </TableSortLabel>
                       </TableCell>
                     </TableRow>
@@ -675,7 +680,7 @@ export default function DepartmentOverview() {
                               <TableCell>
                                 <Typography fontSize="0.88rem">{okr.objective}</Typography>
                               </TableCell>
-                              <TableCell>{getOkrStatusChip(okr.status)}</TableCell>
+                              <TableCell>{getOkrStatusChip(okr.status, t)}</TableCell>
                               <TableCell align="center">
                                 <Typography
                                   fontWeight="bold"
@@ -711,7 +716,7 @@ export default function DepartmentOverview() {
                             </TableCell>
                             <TableCell colSpan={4}>
                               <Typography color="text.secondary" fontStyle="italic" fontSize="0.88rem">
-                                Chưa được giao OKR
+                                {t("departmentOverview.okrTable.noOkrAssigned")}
                               </Typography>
                             </TableCell>
                           </TableRow>
@@ -720,7 +725,7 @@ export default function DepartmentOverview() {
                     ) : (
                       <TableRow>
                         <TableCell colSpan={5} align="center">
-                          <Typography color="text.secondary">Không có dữ liệu OKR nhân sự</Typography>
+                          <Typography color="text.secondary">{t("departmentOverview.okrTable.noData")}</Typography>
                         </TableCell>
                       </TableRow>
                     )}
@@ -738,7 +743,7 @@ export default function DepartmentOverview() {
                   setOkrRowsPerPage(parseInt(e.target.value, 10));
                   setOkrPage(0);
                 }}
-                labelRowsPerPage="Số dòng mỗi trang:"
+                labelRowsPerPage={t("departmentOverview.pagination.rowsPerPage")}
               />
             </Paper>
           </Grid>
@@ -749,7 +754,7 @@ export default function DepartmentOverview() {
               <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 3 }}>
                 <CheckCircle2 size={20} color="#64748b" />
                 <Typography variant="h6" fontWeight="bold">
-                  Phiếu Đánh Giá theo nhân sự
+                  {t("departmentOverview.evalTable.title")}
                 </Typography>
               </Box>
               <TableContainer>
@@ -762,19 +767,19 @@ export default function DepartmentOverview() {
                           direction={evalOrderBy === "name" ? evalOrder : "asc"}
                           onClick={() => handleEvalSortRequest("name")}
                         >
-                          Nhân sự
+                          {t("departmentOverview.evalTable.staff")}
                         </TableSortLabel>
                       </TableCell>
-                      <TableCell sx={{ fontWeight: 'bold', minWidth: 120 }}>Trạng thái</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold' }}>Tự đánh giá</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold' }}>Xếp loại (Quản lý)</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', minWidth: 120 }}>{t("departmentOverview.evalTable.status")}</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold' }}>{t("departmentOverview.evalTable.selfRating")}</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold' }}>{t("departmentOverview.evalTable.managerRating")}</TableCell>
                       <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>
                         <TableSortLabel
                           active={evalOrderBy === "selfScoreTotal"}
                           direction={evalOrderBy === "selfScoreTotal" ? evalOrder : "asc"}
                           onClick={() => handleEvalSortRequest("selfScoreTotal")}
                         >
-                          Điểm tự khai
+                          {t("departmentOverview.evalTable.selfScore")}
                         </TableSortLabel>
                       </TableCell>
                       <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>
@@ -783,7 +788,7 @@ export default function DepartmentOverview() {
                           direction={evalOrderBy === "principalScoreTotal" ? evalOrder : "asc"}
                           onClick={() => handleEvalSortRequest("principalScoreTotal")}
                         >
-                          Điểm Hiệu trưởng
+                          {t("departmentOverview.evalTable.principalScore")}
                         </TableSortLabel>
                       </TableCell>
                     </TableRow>
@@ -803,15 +808,15 @@ export default function DepartmentOverview() {
                               </Box>
                             </Box>
                           </TableCell>
-                          <TableCell>{getEvalStatusChip(staff.status)}</TableCell>
+                          <TableCell>{getEvalStatusChip(staff.status, t)}</TableCell>
                           <TableCell>
                             <Typography fontSize="0.88rem">
-                              {staff.selfRating ? (RATING_LABELS[staff.selfRating] || staff.selfRating) : "--"}
+                              {staff.selfRating ? (RATING_LABELS[staff.selfRating] ? t(RATING_LABELS[staff.selfRating]) : staff.selfRating) : "--"}
                             </Typography>
                           </TableCell>
                           <TableCell>
                             <Typography fontSize="0.88rem" fontWeight={staff.managerRating ? 600 : 400}>
-                              {staff.managerRating ? (RATING_LABELS[staff.managerRating] || staff.managerRating) : "--"}
+                              {staff.managerRating ? (RATING_LABELS[staff.managerRating] ? t(RATING_LABELS[staff.managerRating]) : staff.managerRating) : "--"}
                             </Typography>
                           </TableCell>
                           <TableCell align="center">
@@ -837,7 +842,7 @@ export default function DepartmentOverview() {
                     ) : (
                       <TableRow>
                         <TableCell colSpan={6} align="center">
-                          <Typography color="text.secondary">Không có dữ liệu phiếu đánh giá</Typography>
+                          <Typography color="text.secondary">{t("departmentOverview.evalTable.noData")}</Typography>
                         </TableCell>
                       </TableRow>
                     )}
@@ -855,7 +860,7 @@ export default function DepartmentOverview() {
                   setEvalRowsPerPage(parseInt(e.target.value, 10));
                   setEvalPage(0);
                 }}
-                labelRowsPerPage="Số dòng mỗi trang:"
+                labelRowsPerPage={t("departmentOverview.pagination.rowsPerPage")}
               />
             </Paper>
           </Grid>
