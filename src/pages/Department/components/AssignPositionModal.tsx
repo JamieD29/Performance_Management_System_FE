@@ -18,6 +18,7 @@ import {
 import { Badge } from "@mui/icons-material";
 import { api } from "../../../services/api";
 import { confirmAction } from "../../../utils/swal";
+import { useTranslation } from "react-i18next";
 
 interface ManagementPosition {
   id: string;
@@ -46,6 +47,7 @@ export default function AssignPositionModal({
   user,
   onSuccess,
 }: AssignPositionModalProps) {
+  const { t } = useTranslation();
   const [positions, setPositions] = useState<ManagementPosition[]>([]);
   const [assignedUsers, setAssignedUsers] = useState<any[]>([]);
   const [selectedPositionId, setSelectedPositionId] = useState<string>("");
@@ -72,10 +74,10 @@ export default function AssignPositionModal({
           // Set giá trị hiện tại
           setSelectedPositionId(user?.managementPosition?.id || "");
         })
-        .catch(() => setError("Không thể tải danh sách chức vụ và phân công"))
+        .catch(() => setError(t("departmentDetail.assignPositionModal.errorLoad")))
         .finally(() => setLoading(false));
     }
-  }, [open, user]);
+  }, [open, user, t]);
 
   const handleSave = async () => {
     if (!user) return;
@@ -88,7 +90,7 @@ export default function AssignPositionModal({
       onSuccess();
       onClose();
     } catch (err: any) {
-      setError(err.response?.data?.message || "Có lỗi xảy ra");
+      setError(err.response?.data?.message || t("departmentDetail.assignPositionModal.errorSave"));
     } finally {
       setSubmitting(false);
     }
@@ -97,10 +99,10 @@ export default function AssignPositionModal({
   const handleRemovePosition = async () => {
     if (!user) return;
     const ok = await confirmAction({
-      title: "Gỡ chức vụ?",
-      text: `Gỡ chức vụ quản lý của "${user.name}"?`,
+      title: t("departmentDetail.assignPositionModal.removeConfirmTitle"),
+      text: t("departmentDetail.assignPositionModal.removeConfirmText", { name: user.name }),
       icon: "warning",
-      confirmText: "Gỡ chức vụ",
+      confirmText: t("departmentDetail.assignPositionModal.removeBtn"),
       confirmColor: "#dc2626",
     });
     if (!ok) return;
@@ -113,7 +115,7 @@ export default function AssignPositionModal({
       onSuccess();
       onClose();
     } catch (err: any) {
-      setError(err.response?.data?.message || "Có lỗi xảy ra");
+      setError(err.response?.data?.message || t("departmentDetail.assignPositionModal.errorSave"));
     } finally {
       setSubmitting(false);
     }
@@ -133,17 +135,24 @@ export default function AssignPositionModal({
         }}
       >
         <Badge />
-        Gán chức vụ quản lý
+        {t("departmentDetail.assignPositionModal.title")}
       </DialogTitle>
       <DialogContent>
         <Box sx={{ mb: 2, mt: 1 }}>
-          <Typography variant="body2" color="text.secondary">
-            Gán chức vụ quản lý cho: <strong>{user.name}</strong> ({user.email})
-          </Typography>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            dangerouslySetInnerHTML={{
+              __html: t("departmentDetail.assignPositionModal.subtitle", {
+                name: user.name,
+                email: user.email,
+              }),
+            }}
+          />
           {user.managementPosition && (
             <Box sx={{ mt: 1, display: "flex", alignItems: "center", gap: 1 }}>
               <Typography variant="body2" color="text.secondary">
-                Chức vụ hiện tại:
+                {t("departmentDetail.assignPositionModal.currentPosition")}
               </Typography>
               <Chip
                 label={user.managementPosition.name}
@@ -168,19 +177,18 @@ export default function AssignPositionModal({
           </Box>
         ) : positions.length === 0 ? (
           <Alert severity="warning">
-            Chưa có chức vụ quản lý nào. Vui lòng vào Admin Settings → Chức vụ
-            quản lý để tạo trước.
+            {t("departmentDetail.assignPositionModal.noPositionsAlert")}
           </Alert>
         ) : (
           <FormControl fullWidth>
-            <InputLabel>Chọn chức vụ</InputLabel>
+            <InputLabel>{t("departmentDetail.assignPositionModal.selectLabel")}</InputLabel>
             <Select
               value={selectedPositionId}
               onChange={(e) => setSelectedPositionId(e.target.value)}
-              label="Chọn chức vụ"
+              label={t("departmentDetail.assignPositionModal.selectLabel")}
             >
               <MenuItem value="">
-                <em>— Không có chức vụ —</em>
+                <em>{t("departmentDetail.assignPositionModal.noPositionItem")}</em>
               </MenuItem>
               {positions.map((pos) => {
                 let isTaken = false;
@@ -238,7 +246,7 @@ export default function AssignPositionModal({
                       </Box>
                       {isTaken && (
                         <Chip
-                          label={`Đã gán: ${takenBy}`}
+                          label={t("departmentDetail.assignPositionModal.assignedChip", { name: takenBy })}
                           size="small"
                           color="error"
                           variant="outlined"
@@ -262,13 +270,13 @@ export default function AssignPositionModal({
               disabled={submitting}
               sx={{ textTransform: "none" }}
             >
-              Gỡ chức vụ
+              {t("departmentDetail.assignPositionModal.removeBtn")}
             </Button>
           )}
         </Box>
         <Box sx={{ display: "flex", gap: 1 }}>
           <Button onClick={onClose} sx={{ textTransform: "none" }}>
-            Hủy
+            {t("departmentDetail.assignPositionModal.cancelBtn")}
           </Button>
           <Button
             variant="contained"
@@ -281,7 +289,7 @@ export default function AssignPositionModal({
               "&:hover": { bgcolor: "#1e40af" },
             }}
           >
-            {submitting ? <CircularProgress size={20} /> : "Lưu"}
+            {submitting ? <CircularProgress size={20} /> : t("departmentDetail.assignPositionModal.saveBtn")}
           </Button>
         </Box>
       </DialogActions>

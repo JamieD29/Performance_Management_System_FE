@@ -537,5 +537,66 @@
       "average": "Average",
       "poor": "Poor"
     }
+  },
+  "departmentDetail": {
+    "staff": "Staff",
+    "search": {
+      "placeholder": "Search by {{field}}...",
+      "all": "All",
+      "name": "Full Name",
+      "email": "Email",
+      "staffCode": "Staff Code",
+      "jobTitle": "Job Title",
+      "clearFilter": "Clear filter"
+    },
+    "header": {
+      "noDescription": "No description available",
+      "staffCount": "<strong>{{count}}</strong> staff",
+      "membersCount": "{{count}} members",
+      "managersCount": "{{count}} managers"
+    },
+    "table": {
+      "id": "ID",
+      "staff": "STAFF",
+      "email": "EMAIL",
+      "jobTitle": "JOB TITLE",
+      "managementPosition": "MANAGEMENT POSITION",
+      "actions": "ACTIONS",
+      "loading": "Loading staff list...",
+      "noStaffFound": "No staff members found",
+      "noStaffInDept": "No staff in this department yet",
+      "noStaffFoundDesc": "Try searching with a different keyword or filter by \"{{field}}\"",
+      "noStaffInDeptDesc": "Contact the Admin to assign staff to this department",
+      "displayCount": "Showing {{filtered}} / {{total}} staff"
+    },
+    "tooltip": {
+      "assignPosition": "Assign management position",
+      "removeFromDept": "Remove from department"
+    },
+    "swal": {
+      "removeConfirmTitle": "Remove from department?",
+      "removeConfirmText": "Are you sure you want to remove staff member \"{{name}}\" from this department?",
+      "removeConfirmBtn": "Remove",
+      "successTitle": "Success",
+      "successText": "Successfully removed \"{{name}}\" from the department.",
+      "errorTitle": "Error",
+      "errorDefaultText": "An error occurred while removing from the department."
+    },
+    "assignPositionModal": {
+      "title": "Assign Management Position",
+      "subtitle": "Assign management position to: <strong>{{name}}</strong> ({{email}})",
+      "currentPosition": "Current position:",
+      "errorLoad": "Failed to load management positions and assignments",
+      "errorSave": "An error occurred",
+      "noPositionsAlert": "No management positions available. Please go to Admin Settings → Management Positions to create them first.",
+      "selectLabel": "Select position",
+      "noPositionItem": "— No position —",
+      "assignedChip": "Assigned to: {{name}}",
+      "removeBtn": "Remove position",
+      "cancelBtn": "Cancel",
+      "saveBtn": "Save",
+      "removeConfirmTitle": "Remove position?",
+      "removeConfirmText": "Remove management position of \"{{name}}\"?"
+    }
   }
 }

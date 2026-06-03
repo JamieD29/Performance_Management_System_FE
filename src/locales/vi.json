@@ -537,5 +537,66 @@
       "average": "Trung bình",
       "poor": "Yếu"
     }
+  },
+  "departmentDetail": {
+    "staff": "Nhân sự",
+    "search": {
+      "placeholder": "Tìm kiếm theo {{field}}...",
+      "all": "Tất cả",
+      "name": "Họ tên",
+      "email": "Email",
+      "staffCode": "Mã NV",
+      "jobTitle": "Chức danh",
+      "clearFilter": "Xóa bộ lọc"
+    },
+    "header": {
+      "noDescription": "Chưa có mô tả",
+      "staffCount": "<strong>{{count}}</strong> nhân sự",
+      "membersCount": "{{count}} thành viên",
+      "managersCount": "{{count}} quản lý"
+    },
+    "table": {
+      "id": "ID",
+      "staff": "NHÂN VIÊN",
+      "email": "EMAIL",
+      "jobTitle": "CHỨC DANH",
+      "managementPosition": "CHỨC VỤ QUẢN LÝ",
+      "actions": "THAO TÁC",
+      "loading": "Đang tải danh sách nhân sự...",
+      "noStaffFound": "Không tìm thấy nhân viên nào",
+      "noStaffInDept": "Chưa có nhân sự trong đơn vị này",
+      "noStaffFoundDesc": "Thử tìm kiếm với từ khóa khác hoặc lọc theo \"{{field}}\"",
+      "noStaffInDeptDesc": "Liên hệ Admin để thêm nhân sự vào đơn vị",
+      "displayCount": "Hiển thị {{filtered}} / {{total}} nhân sự"
+    },
+    "tooltip": {
+      "assignPosition": "Gán chức vụ quản lý",
+      "removeFromDept": "Gỡ khỏi bộ môn"
+    },
+    "swal": {
+      "removeConfirmTitle": "Gỡ khỏi bộ môn?",
+      "removeConfirmText": "Bạn có chắc chắn muốn gỡ nhân sự \"{{name}}\" khỏi bộ môn này không?",
+      "removeConfirmBtn": "Gỡ bộ môn",
+      "successTitle": "Thành công",
+      "successText": "Đã gỡ nhân sự \"{{name}}\" khỏi bộ môn.",
+      "errorTitle": "Lỗi",
+      "errorDefaultText": "Có lỗi xảy ra khi gỡ bộ môn."
+    },
+    "assignPositionModal": {
+      "title": "Gán chức vụ quản lý",
+      "subtitle": "Gán chức vụ quản lý cho: <strong>{{name}}</strong> ({{email}})",
+      "currentPosition": "Chức vụ hiện tại:",
+      "errorLoad": "Không thể tải danh sách chức vụ và phân công",
+      "errorSave": "Có lỗi xảy ra",
+      "noPositionsAlert": "Chưa có chức vụ quản lý nào. Vui lòng vào Admin Settings → Chức vụ quản lý để tạo trước.",
+      "selectLabel": "Chọn chức vụ",
+      "noPositionItem": "— Không có chức vụ —",
+      "assignedChip": "Đã gán: {{name}}",
+      "removeBtn": "Gỡ chức vụ",
+      "cancelBtn": "Hủy",
+      "saveBtn": "Lưu",
+      "removeConfirmTitle": "Gỡ chức vụ?",
+      "removeConfirmText": "Gỡ chức vụ quản lý của \"{{name}}\"?"
+    }
   }
 }

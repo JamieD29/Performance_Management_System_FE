@@ -37,6 +37,7 @@ import { api } from "../../../services/api";
 import AssignPositionModal from "./AssignPositionModal";
 import type { User, Department } from "../department.types";
 import { confirmAction, showSuccess, showError } from "../../../utils/swal";
+import { useTranslation } from "react-i18next";
 
 interface DepartmentDetailViewProps {
   department: Department;
@@ -51,6 +52,7 @@ export default function DepartmentDetailView({
   isDonVi,
   onBack,
 }: DepartmentDetailViewProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [users, setUsers] = useState<User[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
@@ -71,7 +73,7 @@ export default function DepartmentDetailView({
       const data = Array.isArray(res.data) ? res.data : res.data.data || [];
       setUsers(data);
     } catch (error) {
-      console.error("Lỗi tải user", error);
+      console.error("Error loading users", error);
     } finally {
       setLoadingUsers(false);
     }
@@ -88,10 +90,10 @@ export default function DepartmentDetailView({
 
   const handleRemoveFromDepartment = async (user: User) => {
     const ok = await confirmAction({
-      title: "Gỡ khỏi bộ môn?",
-      text: `Bạn có chắc chắn muốn gỡ nhân sự "${user.name}" khỏi bộ môn này không?`,
+      title: t("departmentDetail.swal.removeConfirmTitle"),
+      text: t("departmentDetail.swal.removeConfirmText", { name: user.name }),
       icon: "warning",
-      confirmText: "Gỡ bộ môn",
+      confirmText: t("departmentDetail.swal.removeConfirmBtn"),
       confirmColor: "#d97706",
     });
     if (!ok) return;
@@ -100,11 +102,11 @@ export default function DepartmentDetailView({
       await api.put(`/users/${user.id}/department`, {
         departmentId: null,
       });
-      showSuccess("Thành công", `Đã gỡ nhân sự "${user.name}" khỏi bộ môn.`);
+      showSuccess(t("departmentDetail.swal.successTitle"), t("departmentDetail.swal.successText", { name: user.name }));
       reloadUsers();
     } catch (error: any) {
       console.error(error);
-      showError("Lỗi", error?.response?.data?.message || "Có lỗi xảy ra khi gỡ bộ môn.");
+      showError(t("departmentDetail.swal.errorTitle"), error?.response?.data?.message || t("departmentDetail.swal.errorDefaultText"));
     }
   };
 
@@ -133,11 +135,11 @@ export default function DepartmentDetailView({
   }, [users, userSearch, searchField]);
 
   const searchFieldLabels: Record<string, string> = {
-    all: "Tất cả",
-    name: "Họ tên",
-    email: "Email",
-    staffCode: "Mã NV",
-    jobTitle: "Chức danh",
+    all: t("departmentDetail.search.all"),
+    name: t("departmentDetail.search.name"),
+    email: t("departmentDetail.search.email"),
+    staffCode: t("departmentDetail.search.staffCode"),
+    jobTitle: t("departmentDetail.search.jobTitle"),
   };
 
   return (
@@ -156,7 +158,7 @@ export default function DepartmentDetailView({
           onClick={() => !isDonVi && onBack()}
         >
           <School sx={{ mr: 0.5 }} fontSize="inherit" />
-          Nhân sự
+          {t("departmentDetail.staff")}
         </Typography>
         <Typography color="text.primary" fontWeight={600} sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
           <Building2 size={16} />
@@ -178,7 +180,7 @@ export default function DepartmentDetailView({
                 {department.name}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {department.code} • {department.description || "Chưa có mô tả"} • <strong>{users.length}</strong> nhân sự
+                {department.code} • {department.description || t("departmentDetail.header.noDescription")} • <span dangerouslySetInnerHTML={{ __html: t("departmentDetail.header.staffCount", { count: users.length }) }} />
               </Typography>
             </Box>
           </Box>
@@ -186,13 +188,13 @@ export default function DepartmentDetailView({
           <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
             <Chip
               icon={<Groups style={{ fontSize: 16 }} />}
-              label={`${users.length} thành viên`}
+              label={t("departmentDetail.header.membersCount", { count: users.length })}
               sx={{ bgcolor: "#eff6ff", color: "#1e40af", fontWeight: 600, border: "1px solid #dbeafe" }}
             />
             {users.filter((u) => u.managementPosition).length > 0 && (
               <Chip
                 icon={<BadgeOutlined style={{ fontSize: 16 }} />}
-                label={`${users.filter((u) => u.managementPosition).length} quản lý`}
+                label={t("departmentDetail.header.managersCount", { count: users.filter((u) => u.managementPosition).length })}
                 sx={{ bgcolor: "#f0fdf4", color: "#166534", fontWeight: 600, border: "1px solid #dcfce7" }}
               />
             )}
@@ -205,7 +207,7 @@ export default function DepartmentDetailView({
         <Paper elevation={0} sx={{ p: 2, mb: 3, borderRadius: 3, border: "1px solid #e2e8f0", bgcolor: "#fafbfc", display: "flex", gap: 2, alignItems: "center", flexWrap: "wrap" }}>
           <TextField
             size="small"
-            placeholder={`Tìm kiếm theo ${searchFieldLabels[searchField]}...`}
+            placeholder={t("departmentDetail.search.placeholder", { field: searchFieldLabels[searchField] })}
             value={userSearch}
             onChange={(e) => setUserSearch(e.target.value)}
             InputProps={{ startAdornment: (<InputAdornment position="start"><Search color="action" /></InputAdornment>) }}
@@ -234,12 +236,12 @@ export default function DepartmentDetailView({
           <Table>
             <TableHead sx={{ bgcolor: "#f8fafc" }}>
               <TableRow>
-                <TableCell sx={{ fontWeight: "bold", color: "#475569", width: 50 }}>ID</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#475569" }}>NHÂN VIÊN</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#475569" }}>EMAIL</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#475569" }}>CHỨC DANH</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#475569" }}>CHỨC VỤ QUẢN LÝ</TableCell>
-                <TableCell align="right" sx={{ fontWeight: "bold", color: "#475569" }}>THAO TÁC</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#475569", width: 50 }}>{t("departmentDetail.table.id")}</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#475569" }}>{t("departmentDetail.table.staff")}</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#475569" }}>{t("departmentDetail.table.email")}</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#475569" }}>{t("departmentDetail.table.jobTitle")}</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#475569" }}>{t("departmentDetail.table.managementPosition")}</TableCell>
+                <TableCell align="right" sx={{ fontWeight: "bold", color: "#475569" }}>{t("departmentDetail.table.actions")}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -247,7 +249,7 @@ export default function DepartmentDetailView({
                 <TableRow>
                   <TableCell colSpan={6} align="center" sx={{ py: 8 }}>
                     <CircularProgress size={32} />
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>Đang tải danh sách nhân sự...</Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>{t("departmentDetail.table.loading")}</Typography>
                   </TableCell>
                 </TableRow>
               ) : filteredUsers.length > 0 ? (
@@ -286,10 +288,10 @@ export default function DepartmentDetailView({
                     <TableCell align="right">
                       {isAdmin && (
                         <>
-                          <Tooltip title="Gán chức vụ quản lý">
+                          <Tooltip title={t("departmentDetail.tooltip.assignPosition")}>
                             <IconButton size="small" color="primary" onClick={(e) => { e.stopPropagation(); setAssignModalUser(user); setAssignModalOpen(true); }} sx={{ "&:hover": { bgcolor: "#dbeafe" }, ml: 1 }}><BadgeOutlined fontSize="small" /></IconButton>
                           </Tooltip>
-                          <Tooltip title="Gỡ khỏi bộ môn">
+                          <Tooltip title={t("departmentDetail.tooltip.removeFromDept")}>
                             <IconButton size="small" color="error" onClick={(e) => { e.stopPropagation(); handleRemoveFromDepartment(user); }} sx={{ "&:hover": { bgcolor: "#fee2e2" }, ml: 1 }}><PersonRemove fontSize="small" /></IconButton>
                           </Tooltip>
                         </>
@@ -302,8 +304,16 @@ export default function DepartmentDetailView({
                   <TableCell colSpan={6} align="center" sx={{ py: 8, color: "text.secondary" }}>
                     <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
                       <Users size={40} style={{ color: "#cbd5e1", marginBottom: 8 }} />
-                      <Typography variant="body1" fontWeight={500}>{userSearch ? "Không tìm thấy nhân viên nào" : "Chưa có nhân sự trong đơn vị này"}</Typography>
-                      <Typography variant="body2" color="text.secondary">{userSearch ? `Thử tìm kiếm với từ khóa khác hoặc lọc theo "${searchFieldLabels[searchField]}"` : "Liên hệ Admin để thêm nhân sự vào đơn vị"}</Typography>
+                      <Typography variant="body1" fontWeight={500}>
+                        {userSearch
+                          ? t("departmentDetail.table.noStaffFound")
+                          : t("departmentDetail.table.noStaffInDept")}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {userSearch
+                          ? t("departmentDetail.table.noStaffFoundDesc", { field: searchFieldLabels[searchField] })
+                          : t("departmentDetail.table.noStaffInDeptDesc")}
+                      </Typography>
                     </Box>
                   </TableCell>
                 </TableRow>
@@ -312,9 +322,20 @@ export default function DepartmentDetailView({
           </Table>
           {!loadingUsers && filteredUsers.length > 0 && (
             <Box sx={{ px: 2, py: 1.5, bgcolor: "#f8fafc", borderTop: "1px solid #e2e8f0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <Typography variant="caption" color="text.secondary">Hiển thị {filteredUsers.length} / {users.length} nhân sự</Typography>
+              <Typography variant="caption" color="text.secondary">
+                {t("departmentDetail.table.displayCount", { filtered: filteredUsers.length, total: users.length })}
+              </Typography>
               {userSearch && (
-                <Chip label="Xóa bộ lọc" size="small" variant="outlined" onDelete={() => { setUserSearch(""); setSearchField("all"); }} sx={{ fontSize: 11 }} />
+                <Chip
+                  label={t("departmentDetail.search.clearFilter")}
+                  size="small"
+                  variant="outlined"
+                  onDelete={() => {
+                    setUserSearch("");
+                    setSearchField("all");
+                  }}
+                  sx={{ fontSize: 11 }}
+                />
               )}
             </Box>
           )}
