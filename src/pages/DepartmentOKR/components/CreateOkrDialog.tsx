@@ -19,6 +19,7 @@ import {
   Divider,
 } from "@mui/material";
 import { Add, Delete, Flag } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
 
 interface CreateOkrDialogProps {
   open: boolean;
@@ -31,6 +32,8 @@ export default function CreateOkrDialog({
   onClose,
   onSave,
 }: CreateOkrDialogProps) {
+  const { t, i18n } = useTranslation();
+
   // 1. State lưu dữ liệu Form
   const [title, setTitle] = useState("");
   const [cycleId, setCycleId] = useState("");
@@ -68,7 +71,7 @@ export default function CreateOkrDialog({
         setDepartmentId(deptList[0].id); // Tự động chọn Bộ môn đầu tiên
       }
     } catch (error) {
-      console.error("❌ Lỗi khi tải dữ liệu Bộ môn / Học kỳ:", error);
+      console.error(t("departmentOkr.createDialog.errorLoad"), error);
     }
   };
 
@@ -125,7 +128,7 @@ export default function CreateOkrDialog({
           fontWeight: "bold",
         }}
       >
-        <Flag /> Tạo Mục Tiêu (OKR) Bộ Môn
+        <Flag /> {t("departmentOkr.createDialog.title")}
       </DialogTitle>
       <Divider />
 
@@ -135,7 +138,7 @@ export default function CreateOkrDialog({
           <Grid size={{ xs: 12, md: 12 }}>
             <TextField
               fullWidth
-              label="Tên Mục tiêu (VD: Cải tiến chất lượng đào tạo...)"
+              label={t("departmentOkr.createDialog.objectiveLabel")}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
@@ -144,10 +147,10 @@ export default function CreateOkrDialog({
 
           <Grid size={{ xs: 12, md: 6 }}>
             <FormControl fullWidth required>
-              <InputLabel>Giao cho Bộ môn</InputLabel>
+              <InputLabel>{t("departmentOkr.createDialog.assignDeptLabel")}</InputLabel>
               <Select
                 value={departmentId}
-                label="Giao cho Bộ môn"
+                label={t("departmentOkr.createDialog.assignDeptLabel")}
                 onChange={(e) => setDepartmentId(e.target.value)}
               >
                 {/* 🔄 Lặp data Bộ môn thật từ DB */}
@@ -162,19 +165,19 @@ export default function CreateOkrDialog({
 
           <Grid size={{ xs: 12, md: 6 }}>
             <FormControl fullWidth required>
-              <InputLabel>Học kỳ áp dụng</InputLabel>
+              <InputLabel>{t("departmentOkr.createDialog.semesterLabel")}</InputLabel>
               <Select
                 value={cycleId}
-                label="Học kỳ áp dụng"
+                label={t("departmentOkr.createDialog.semesterLabel")}
                 onChange={(e) => setCycleId(e.target.value)}
               >
                 {/* 🔄 Lặp data Học kỳ thật từ DB */}
                 {cycles.map((cycle) => {
                   const start = cycle.startDate
-                    ? new Date(cycle.startDate).toLocaleDateString("vi-VN")
+                    ? new Date(cycle.startDate).toLocaleDateString(i18n.language === "vi" ? "vi-VN" : "en-US")
                     : "N/A";
                   const end = cycle.endDate
-                    ? new Date(cycle.endDate).toLocaleDateString("vi-VN")
+                    ? new Date(cycle.endDate).toLocaleDateString(i18n.language === "vi" ? "vi-VN" : "en-US")
                     : "N/A";
                   return (
                     <MenuItem key={cycle.id} value={cycle.id}>
@@ -201,7 +204,7 @@ export default function CreateOkrDialog({
             fontWeight="bold"
             color="text.secondary"
           >
-            Danh sách Kết quả then chốt (KRs)
+            {t("departmentOkr.createDialog.krListTitle")}
           </Typography>
           <Button
             startIcon={<Add />}
@@ -209,7 +212,7 @@ export default function CreateOkrDialog({
             variant="outlined"
             onClick={handleAddKR}
           >
-            Thêm KR
+            {t("departmentOkr.createDialog.addKrBtn")}
           </Button>
         </Box>
 
@@ -239,10 +242,11 @@ export default function CreateOkrDialog({
                 </Typography>
               </Grid>
               <Grid size={{ xs: 6 }}>
+                <Typography component="div" sx={{ display: "none" }} />
                 <TextField
                   fullWidth
                   size="small"
-                  label="Nội dung kết quả"
+                  label={t("departmentOkr.createDialog.krContentLabel")}
                   value={kr.title}
                   onChange={(e) =>
                     handleKRChange(kr.id, "title", e.target.value)
@@ -254,7 +258,7 @@ export default function CreateOkrDialog({
                   fullWidth
                   size="small"
                   type="number"
-                  label="Mục tiêu số"
+                  label={t("departmentOkr.createDialog.krTargetLabel")}
                   value={kr.target}
                   onChange={(e) =>
                     handleKRChange(kr.id, "target", Number(e.target.value))
@@ -265,7 +269,7 @@ export default function CreateOkrDialog({
                 <TextField
                   fullWidth
                   size="small"
-                  label="Đơn vị (%, Bài...)"
+                  label={t("departmentOkr.createDialog.krUnitLabel")}
                   value={kr.unit}
                   onChange={(e) =>
                     handleKRChange(kr.id, "unit", e.target.value)
@@ -288,7 +292,7 @@ export default function CreateOkrDialog({
 
       <DialogActions sx={{ p: 3, pt: 0 }}>
         <Button onClick={onClose} color="inherit">
-          Hủy
+          {t("departmentOkr.createDialog.cancelBtn")}
         </Button>
         {/* Nút lưu sẽ bị mờ nếu chưa chọn đủ Bộ môn, Học kỳ, Tên */}
         <Button
@@ -296,7 +300,7 @@ export default function CreateOkrDialog({
           onClick={handleSubmit}
           disabled={!title || !departmentId || !cycleId}
         >
-          Lưu OKR
+          {t("departmentOkr.createDialog.saveBtn")}
         </Button>
       </DialogActions>
     </Dialog>

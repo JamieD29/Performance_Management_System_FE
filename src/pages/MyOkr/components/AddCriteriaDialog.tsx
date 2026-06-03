@@ -8,6 +8,7 @@ import {
   Button,
   TextField,
 } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 interface AddCriteriaDialogProps {
   open: boolean;
@@ -34,22 +35,26 @@ const AddCriteriaDialog: React.FC<AddCriteriaDialogProps> = ({
   unit,
   setUnit,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>
-        {parentType === 'KR' ? 'Thêm Tiêu chí mới' : 'Thêm Tiêu chí con mới'}
+        {parentType === 'KR'
+          ? t("departmentOkr.managerTree.addCriteriaDialog.titleCriteria")
+          : t("departmentOkr.managerTree.addCriteriaDialog.titleSubCriteria")}
       </DialogTitle>
       <DialogContent dividers>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
           <TextField 
-            label="Nội dung tiêu chí" 
+            label={t("departmentOkr.managerTree.addCriteriaDialog.contentLabel")} 
             fullWidth 
             value={title} 
             onChange={(e) => setTitle(e.target.value)} 
           />
           <Box sx={{ display: 'flex', gap: 2 }}>
             <TextField 
-              label="Điểm / Đơn vị" 
+              label={t("departmentOkr.managerTree.addCriteriaDialog.unitScoreLabel")} 
               type="number" 
               fullWidth 
               value={unitScore} 
@@ -61,18 +66,18 @@ const AddCriteriaDialog: React.FC<AddCriteriaDialogProps> = ({
               }}
             />
             <TextField 
-              label="Đơn vị tính" 
+              label={t("departmentOkr.managerTree.addCriteriaDialog.unitLabel")} 
               fullWidth 
               value={unit} 
               onChange={(e) => setUnit(e.target.value)} 
-              placeholder="VD: bài, đv, giờ..."
+              placeholder={t("departmentOkr.managerTree.addCriteriaDialog.unitPlaceholder")}
             />
           </Box>
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Hủy</Button>
-        <Button variant="contained" onClick={onSave}>Lưu tạm</Button>
+        <Button onClick={onClose}>{t("departmentOkr.managerTree.addCriteriaDialog.cancelBtn")}</Button>
+        <Button variant="contained" onClick={onSave}>{t("departmentOkr.managerTree.addCriteriaDialog.saveBtn")}</Button>
       </DialogActions>
     </Dialog>
   );

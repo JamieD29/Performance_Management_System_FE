@@ -23,6 +23,7 @@ import { ObjectiveRow, KeyResultRow, SubKRRow, SubSubKRRow } from "./RowComponen
 import { motion, AnimatePresence } from "framer-motion";
 import { showError } from "../../../utils/swal";
 import { validateStructureScores } from "./TemplateEditorDialog";
+import { useTranslation } from "react-i18next";
 
 interface VariantEditorDialogProps {
   open: boolean;
@@ -37,6 +38,7 @@ export default function VariantEditorDialog({
   baseTemplate,
   onSaveVariant,
 }: VariantEditorDialogProps) {
+  const { t } = useTranslation();
   const [title, setTitle] = useState("");
 
   const {
@@ -56,16 +58,16 @@ export default function VariantEditorDialog({
 
   useEffect(() => {
     if (open && baseTemplate) {
-      setTitle(`${baseTemplate.title} (Tùy biến)`);
+      setTitle(`${baseTemplate.title} ${t("departmentOkr.variantEditor.titleSuffix")}`);
       // Deep copy structure
       setStructure(JSON.parse(JSON.stringify(baseTemplate.structure || [])));
     }
   }, [open, baseTemplate]);
 
   const handleSubmit = () => {
-    const validationError = validateStructureScores(structure);
+    const validationError = validateStructureScores(structure, t);
     if (validationError) {
-      showError("Lỗi cấu trúc điểm OKR", validationError);
+      showError(t("departmentOkr.variantEditor.validationErrorTitle"), validationError);
       return;
     }
 
@@ -87,7 +89,7 @@ export default function VariantEditorDialog({
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
       <DialogTitle sx={{ bgcolor: "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
         <Typography variant="h6" fontWeight="bold" color="#1e3a8a">
-          Tạo Phiên bản Tùy biến OKR
+          {t("departmentOkr.variantEditor.title")}
         </Typography>
       </DialogTitle>
 
@@ -95,7 +97,7 @@ export default function VariantEditorDialog({
         <Box sx={{ mb: 4, mt: 1 }}>
           <TextField
             fullWidth
-            label="Tên Phiên bản (VD: OKR dành cho Phó Bộ môn)"
+            label={t("departmentOkr.variantEditor.nameLabel")}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
@@ -106,9 +108,9 @@ export default function VariantEditorDialog({
         <Divider sx={{ mb: 3 }} />
 
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-          <Typography variant="h6" fontWeight="bold">Tùy chỉnh Cấu trúc OKR</Typography>
+          <Typography variant="h6" fontWeight="bold">{t("departmentOkr.variantEditor.structureTitle")}</Typography>
           <Button variant="contained" startIcon={<Add />} onClick={handleAddObjective}>
-            Thêm Mục tiêu lớn (A, B, C...)
+            {t("departmentOkr.variantEditor.addObjectiveBtn")}
           </Button>
         </Box>
 
@@ -116,12 +118,12 @@ export default function VariantEditorDialog({
           <Table size="small">
             <TableHead sx={{ bgcolor: "#f1f5f9" }}>
               <TableRow>
-                <TableCell width="60">Mã</TableCell>
-                <TableCell>Nội dung (Mục tiêu / Tiêu chí)</TableCell>
-                <TableCell width="120">Điểm tối đa</TableCell>
-                <TableCell width="120">Điểm/Đơn vị</TableCell>
-                <TableCell width="120">Đơn vị</TableCell>
-                <TableCell width="150">Thao tác</TableCell>
+                <TableCell width="60">{t("departmentOkr.variantEditor.tableCode")}</TableCell>
+                <TableCell>{t("departmentOkr.variantEditor.tableContent")}</TableCell>
+                <TableCell width="120">{t("departmentOkr.variantEditor.tableMaxScore")}</TableCell>
+                <TableCell width="120">{t("departmentOkr.variantEditor.tableUnitScore")}</TableCell>
+                <TableCell width="120">{t("departmentOkr.variantEditor.tableUnit")}</TableCell>
+                <TableCell width="150">{t("departmentOkr.variantEditor.tableActions")}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -184,9 +186,9 @@ export default function VariantEditorDialog({
         </TableContainer>
       </DialogContent>
       <DialogActions sx={{ p: 3 }}>
-        <Button onClick={onClose} color="inherit">Hủy</Button>
+        <Button onClick={onClose} color="inherit">{t("departmentOkr.variantEditor.cancelBtn")}</Button>
         <Button variant="contained" onClick={handleSubmit} startIcon={<Save />} disabled={!isFormValid}>
-          Lưu Phiên bản
+          {t("departmentOkr.variantEditor.saveBtn")}
         </Button>
       </DialogActions>
       </motion.div>

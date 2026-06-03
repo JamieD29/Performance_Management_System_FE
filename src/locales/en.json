@@ -86,6 +86,152 @@
         "createdAt": "Created At",
         "actions": "Actions"
       }
+    },
+    "createDialog": {
+      "title": "Create Department Objectives (OKR)",
+      "objectiveLabel": "Objective Name (e.g. Improve training quality...)",
+      "assignDeptLabel": "Assign to Department",
+      "semesterLabel": "Applied Semester",
+      "krListTitle": "Key Results List (KRs)",
+      "addKrBtn": "Add KR",
+      "krContentLabel": "Result Content",
+      "krTargetLabel": "Numeric Target",
+      "krUnitLabel": "Unit (%, Paper...)",
+      "cancelBtn": "Cancel",
+      "saveBtn": "Save OKR",
+      "errorLoad": "Error loading department / semester data:"
+    },
+    "managerTree": {
+      "proposedChanges": {
+        "oldPrefix": "[Old] ",
+        "newPrefix": "[New] ",
+        "unitSuffix": "unit"
+      },
+      "chat": {
+        "title": "Discussion content:",
+        "senderUser": "Staff",
+        "senderManager": "You",
+        "noExchange": "No discussion yet.",
+        "inputPlaceholder": "Enter response/proposal...",
+        "sendBtn": "Send",
+        "errorSend": "Error sending negotiation message",
+        "errorSendMsg": "Unable to send message.",
+        "errorInputRequired": "Please enter a message."
+      },
+      "buttons": {
+        "saveStructure": "Save Structural Changes",
+        "addCriteria": "Add Objective/Criteria",
+        "addSubCriteria": "Add Sub-criteria",
+        "undoChanges": "Undo changes",
+        "edit": "Edit",
+        "acceptChanges": "Accept changes",
+        "deleteCriteria": "Delete criteria",
+        "deleteSubCriteria": "Delete sub-criteria",
+        "acceptDelete": "Accept deletion",
+        "restore": "Restore"
+      },
+      "table": {
+        "code": "Code",
+        "content": "Content",
+        "maxScore": "Max Score",
+        "unitScore": "Points/Unit",
+        "actions": "Actions",
+        "deletedItemsHeader": "Deleted Criteria"
+      },
+      "swal": {
+        "errorTitle": "Error",
+        "validationErrorTitle": "OKR Score Structure Error",
+        "successTitle": "Success",
+        "successSave": "Structural changes saved successfully.",
+        "errorSave": "Failed to update structural changes."
+      },
+      "editDialog": {
+        "title": "Edit Criteria",
+        "contentLabel": "Criteria Content",
+        "maxScoreLabel": "Max Score",
+        "unitScoreLabel": "Points / Unit",
+        "unitLabel": "Unit",
+        "unitPlaceholder": "e.g. paper, unit, hour...",
+        "cancelBtn": "Cancel",
+        "saveBtn": "Save temporary changes"
+      },
+      "addCriteriaDialog": {
+        "titleCriteria": "Add New Criteria",
+        "titleSubCriteria": "Add New Sub-criteria",
+        "contentLabel": "Criteria Content",
+        "unitScoreLabel": "Points / Unit",
+        "unitLabel": "Unit",
+        "unitPlaceholder": "e.g. paper, unit, hour...",
+        "cancelBtn": "Cancel",
+        "saveBtn": "Save temporary"
+      }
+    },
+    "templateEditor": {
+      "titleEdit": "Edit OKR Template",
+      "titleCreate": "Create New OKR Template",
+      "importExcel": "Import Excel",
+      "downloadSampleTooltip": "Download sample Excel file",
+      "templateNameLabel": "OKR Template Name (e.g. Lecturer OKR 2024)",
+      "jobTitleLabel": "Applicable Job Title",
+      "jobTitleAll": "-- All --",
+      "structureTitle": "OKR Structure",
+      "addObjectiveBtn": "Add Objective (A, B, C...)",
+      "tableCode": "Code",
+      "tableContent": "Content (Objective / Criteria)",
+      "tableMaxScore": "Max Score",
+      "tableUnitScore": "Points/Unit",
+      "tableUnit": "Unit",
+      "tableUnitTooltip": "Unit of measurement (e.g. paper, activity, program, course, ...)",
+      "tableActions": "Actions",
+      "emptyState": "No data yet. Add an Objective or Import from Excel.",
+      "cancelBtn": "Cancel",
+      "saveBtn": "Save Template",
+      "importSuccess": "Excel data imported successfully!",
+      "importError": "Excel file format error. Please check the template again.",
+      "swal": {
+        "validationErrorTitle": "OKR Score Structure Error",
+        "successTitle": "Success",
+        "successUpdate": "OKR Template updated successfully.",
+        "successCreate": "New OKR Template created successfully.",
+        "errorTitle": "Error",
+        "errorSave": "An error occurred while saving the template."
+      },
+      "validation": {
+        "emptyStructure": "OKR structure must have at least 1 Objective.",
+        "negativeMaxScore": "Max score of Objective \"{{title}}\" must not be negative.",
+        "emptyKR": "Objective \"{{title}}\" must have at least 1 Key Result (KR).",
+        "negativeChildMax": "Max score of \"{{title}}\" must not be negative.",
+        "negativeChildUnit": "Points/Unit of \"{{title}}\" must not be negative.",
+        "unitExceedsObjMax": "Points/Unit of Criteria \"{{childTitle}}\" ({{childScore}}) must not exceed Max Score of Objective \"{{objTitle}}\" ({{objScore}}).",
+        "childrenExceedParent": "Total max score of children under \"{{title}}\" ({{childTotal}}) must not exceed max score of \"{{title}}\" ({{parentMax}}).",
+        "childrenBelowParent": "Total max score of children under \"{{title}}\" ({{childTotal}}) must not be less than max score of \"{{title}}\" ({{parentMax}}) (must equal exactly {{parentMax}}).",
+        "totalNot100": "Total max score (maxScore) of all Objectives must equal exactly 100. Currently it is {{total}}."
+      }
+    },
+    "rowComponents": {
+      "objectivePlaceholder": "Objective name...",
+      "addCriteria": "Criteria",
+      "krPlaceholder": "Criteria content...",
+      "addDetail": "Detail",
+      "subKrPlaceholder": "Sub-criteria content...",
+      "addSubItem": "a,b,c",
+      "subSubKrPlaceholder": "Specific description (a, b, c...)"
+    },
+    "variantEditor": {
+      "title": "Create Custom OKR Variant",
+      "titleSuffix": "(Custom)",
+      "nameLabel": "Variant Name (e.g. OKR for Deputy Head)",
+      "structureTitle": "Customize OKR Structure",
+      "addObjectiveBtn": "Add Objective (A, B, C...)",
+      "tableCode": "Code",
+      "tableContent": "Content (Objective / Criteria)",
+      "tableMaxScore": "Max Score",
+      "tableUnitScore": "Points/Unit",
+      "tableUnit": "Unit",
+      "tableActions": "Actions",
+      "cancelBtn": "Cancel",
+      "saveBtn": "Save Variant",
+      "validationErrorTitle": "OKR Score Structure Error"
     }
   },
   "departmentMaster": {

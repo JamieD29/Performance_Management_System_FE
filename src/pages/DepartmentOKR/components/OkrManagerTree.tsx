@@ -32,6 +32,7 @@ import { api } from "../../../services/api";
 import { showError, showSuccess } from "../../../utils/swal";
 import AddCriteriaDialog from "../../MyOkr/components/AddCriteriaDialog";
 import { validateStructureScores } from "./TemplateEditorDialog";
+import { useTranslation } from "react-i18next";
 
 export default function OkrManagerTree({
   okr,
@@ -40,6 +41,7 @@ export default function OkrManagerTree({
   okr: any;
   onRefresh: () => void;
 }) {
+  const { t, i18n } = useTranslation();
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [chatMessage, setChatMessage] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
@@ -157,7 +159,7 @@ export default function OkrManagerTree({
         <TableCell
           sx={{ textDecoration: "line-through", color: "text.secondary" }}
         >
-          [Cũ] {oldItem.title}
+          {t("departmentOkr.managerTree.proposedChanges.oldPrefix")}{oldItem.title}
         </TableCell>
         <TableCell
           sx={{ textDecoration: "line-through", color: "text.secondary" }}
@@ -168,7 +170,7 @@ export default function OkrManagerTree({
           sx={{ textDecoration: "line-through", color: "text.secondary" }}
         >
           {oldItem.unitScore
-            ? `+${oldItem.unitScore}/${oldItem.unit || "đv"}`
+            ? `+${oldItem.unitScore}/${oldItem.unit || t("departmentOkr.managerTree.proposedChanges.unitSuffix")}`
             : "—"}
         </TableCell>
         <TableCell align="center"></TableCell>
@@ -277,8 +279,8 @@ export default function OkrManagerTree({
       }));
       setChatMessage("");
     } catch (error: any) {
-      console.error("Lỗi gửi tin nhắn đàm phán", error);
-      showError("Lỗi", error?.response?.data?.message || "Không thể gửi tin nhắn.");
+      console.error(t("departmentOkr.managerTree.chat.errorSend"), error);
+      showError(t("departmentOkr.managerTree.swal.errorTitle"), error?.response?.data?.message || t("departmentOkr.managerTree.chat.errorSendMsg"));
     } finally {
       setChatLoading(false);
     }
@@ -300,7 +302,7 @@ export default function OkrManagerTree({
 
   const handleSaveNewCriteria = () => {
     if (!newCriteriaTitle.trim()) {
-      showError("Lỗi", "Vui lòng nhập nội dung.");
+      showError(t("departmentOkr.managerTree.swal.errorTitle"), t("departmentOkr.managerTree.chat.errorInputRequired"));
       return;
     }
     const newStructure = JSON.parse(JSON.stringify(localStructure));
@@ -762,7 +764,7 @@ export default function OkrManagerTree({
 
   const handleSaveEditCriteria = () => {
     if (!editCriteriaTitle.trim()) {
-      showError("Lỗi", "Vui lòng nhập nội dung.");
+      showError(t("departmentOkr.managerTree.swal.errorTitle"), t("departmentOkr.managerTree.chat.errorInputRequired"));
       return;
     }
     const newStructure = JSON.parse(JSON.stringify(localStructure));
@@ -798,9 +800,9 @@ export default function OkrManagerTree({
   };
 
   const handleSubmitChanges = async () => {
-    const validationError = validateStructureScores(localStructure);
+    const validationError = validateStructureScores(localStructure, t);
     if (validationError) {
-      showError("Lỗi cấu trúc điểm OKR", validationError);
+      showError(t("departmentOkr.managerTree.swal.validationErrorTitle"), validationError);
       return;
     }
     try {
@@ -813,9 +815,9 @@ export default function OkrManagerTree({
       setHasChanges(false);
       setLocalComments({});
       onRefresh();
-      showSuccess("Thành công", "Đã lưu lại cấu trúc thay đổi.");
+      showSuccess(t("departmentOkr.managerTree.swal.successTitle"), t("departmentOkr.managerTree.swal.successSave"));
     } catch (error) {
-      showError("Lỗi", "Không thể cập nhật cấu trúc.");
+      showError(t("departmentOkr.managerTree.swal.errorTitle"), t("departmentOkr.managerTree.swal.errorSave"));
     }
   };
 
@@ -841,7 +843,7 @@ export default function OkrManagerTree({
             }}
           >
             <Typography variant="subtitle2" sx={{ mb: 1, color: "#92400e" }}>
-              Nội dung trao đổi:
+              {t("departmentOkr.managerTree.chat.title")}
             </Typography>
             {history.length > 0 ? (
               <Box sx={{ mb: 2, maxHeight: 150, overflowY: "auto" }}>
@@ -861,8 +863,8 @@ export default function OkrManagerTree({
                       fontWeight="bold"
                       color={msg.sender === "USER" ? "primary" : "warning.main"}
                     >
-                      {msg.sender === "USER" ? "Nhân viên" : "Bạn"} -{" "}
-                      {new Date(msg.createdAt).toLocaleString("vi-VN")}
+                      {msg.sender === "USER" ? t("departmentOkr.managerTree.chat.senderUser") : t("departmentOkr.managerTree.chat.senderManager")} -{" "}
+                      {new Date(msg.createdAt).toLocaleString(i18n.language === "vi" ? "vi-VN" : "en-US")}
                     </Typography>
                     <Typography variant="body2">{msg.message}</Typography>
                   </Box>
@@ -870,7 +872,7 @@ export default function OkrManagerTree({
               </Box>
             ) : (
               <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                Chưa có trao đổi nào.
+                {t("departmentOkr.managerTree.chat.noExchange")}
               </Typography>
             )}
 
@@ -878,7 +880,7 @@ export default function OkrManagerTree({
               <TextField
                 size="small"
                 fullWidth
-                placeholder="Nhập phản hồi/đề xuất..."
+                placeholder={t("departmentOkr.managerTree.chat.inputPlaceholder")}
                 value={chatMessage}
                 onChange={(e) => setChatMessage(e.target.value)}
                 onKeyDown={(e) => {
@@ -892,7 +894,7 @@ export default function OkrManagerTree({
                 onClick={() => handleSendChat(itemId)}
                 startIcon={<Send />}
               >
-                Gửi
+                {t("departmentOkr.managerTree.chat.sendBtn")}
               </Button>
             </Box>
           </Box>
@@ -911,7 +913,7 @@ export default function OkrManagerTree({
             onClick={handleSubmitChanges}
             startIcon={<Save />}
           >
-            Lưu lại cấu trúc thay đổi
+            {t("departmentOkr.managerTree.buttons.saveStructure")}
           </Button>
         </Box>
       )}
@@ -924,21 +926,21 @@ export default function OkrManagerTree({
           <TableHead sx={{ bgcolor: "#f1f5f9" }}>
             <TableRow>
               <TableCell sx={{ fontWeight: "bold", width: "10%" }}>
-                Mã
+                {t("departmentOkr.managerTree.table.code")}
               </TableCell>
               <TableCell sx={{ fontWeight: "bold", width: "45%" }}>
-                Nội dung
+                {t("departmentOkr.managerTree.table.content")}
               </TableCell>
               <TableCell sx={{ fontWeight: "bold", width: "15%" }}>
-                Điểm tối đa
+                {t("departmentOkr.managerTree.table.maxScore")}
               </TableCell>
               <TableCell sx={{ fontWeight: "bold", width: "15%" }}>
-                Điểm/Đơn vị
+                {t("departmentOkr.managerTree.table.unitScore")}
               </TableCell>
               <TableCell
                 sx={{ fontWeight: "bold", width: "15%", textAlign: "center" }}
               >
-                Thao tác
+                {t("departmentOkr.managerTree.table.actions")}
               </TableCell>
             </TableRow>
           </TableHead>
@@ -956,7 +958,7 @@ export default function OkrManagerTree({
                   >
                     <TableCell sx={{ fontWeight: "bold" }}>{obj.id}</TableCell>
                     <TableCell sx={{ fontWeight: "bold" }}>
-                      {isObjChanged ? "[Mới] " : ""}
+                      {isObjChanged ? t("departmentOkr.managerTree.proposedChanges.newPrefix") : ""}
                       {obj.title}
                     </TableCell>
                     <TableCell sx={{ fontWeight: "bold" }}>
@@ -974,7 +976,7 @@ export default function OkrManagerTree({
                         <IconButton
                           size="small"
                           onClick={() => handleOpenAddDialog("KR", obj.id)}
-                          title="Thêm tiêu chí"
+                          title={t("departmentOkr.managerTree.buttons.addCriteria")}
                         >
                           <Add fontSize="small" color="success" />
                         </IconButton>
@@ -982,7 +984,7 @@ export default function OkrManagerTree({
                           <IconButton
                             size="small"
                             onClick={() => handleUndoItem("OBJ", obj.id)}
-                            title="Hoàn tác thay đổi"
+                            title={t("departmentOkr.managerTree.buttons.undoChanges")}
                           >
                             <Undo fontSize="small" color="primary" />
                           </IconButton>
@@ -990,7 +992,7 @@ export default function OkrManagerTree({
                         <IconButton
                           size="small"
                           onClick={() => handleOpenEditDialog("OBJ", obj.id)}
-                          title="Chỉnh sửa"
+                          title={t("departmentOkr.managerTree.buttons.edit")}
                         >
                           <Edit fontSize="small" color="info" />
                         </IconButton>
@@ -1053,13 +1055,13 @@ export default function OkrManagerTree({
                                   : "normal",
                             }}
                           >
-                            {isKrChanged ? "[Mới] " : ""}
+                            {isKrChanged ? t("departmentOkr.managerTree.proposedChanges.newPrefix") : ""}
                             {kr.title}
                           </TableCell>
                           <TableCell>{kr.maxScore}</TableCell>
                           <TableCell>
                             {kr.unitScore
-                              ? `+${kr.unitScore}/${kr.unit || "đv"}`
+                              ? `+${kr.unitScore}/${kr.unit || t("departmentOkr.managerTree.proposedChanges.unitSuffix")}`
                               : "—"}
                           </TableCell>
                           <TableCell align="center">
@@ -1075,7 +1077,7 @@ export default function OkrManagerTree({
                                 onClick={() =>
                                   handleOpenAddDialog("SUBKR", obj.id, kr.id)
                                 }
-                                title="Thêm tiêu chí con"
+                                title={t("departmentOkr.managerTree.buttons.addSubCriteria")}
                               >
                                 <Add fontSize="small" color="success" />
                               </IconButton>
@@ -1086,7 +1088,7 @@ export default function OkrManagerTree({
                                     onClick={() =>
                                       handleAcceptItem("KR", obj.id, kr.id)
                                     }
-                                    title="Chấp nhận thay đổi"
+                                    title={t("departmentOkr.managerTree.buttons.acceptChanges")}
                                   >
                                     <Check fontSize="small" color="success" />
                                   </IconButton>
@@ -1095,7 +1097,7 @@ export default function OkrManagerTree({
                                     onClick={() =>
                                       handleUndoItem("KR", obj.id, kr.id)
                                     }
-                                    title="Hoàn tác thay đổi"
+                                    title={t("departmentOkr.managerTree.buttons.undoChanges")}
                                   >
                                     <Undo fontSize="small" color="primary" />
                                   </IconButton>
@@ -1106,7 +1108,7 @@ export default function OkrManagerTree({
                                 onClick={() =>
                                   handleOpenEditDialog("KR", obj.id, kr.id)
                                 }
-                                title="Chỉnh sửa"
+                                title={t("departmentOkr.managerTree.buttons.edit")}
                               >
                                 <Edit fontSize="small" color="info" />
                               </IconButton>
@@ -1131,7 +1133,7 @@ export default function OkrManagerTree({
                               <IconButton
                                 size="small"
                                 onClick={() => handleDeleteItem(obj.id, kr.id)}
-                                title="Xóa tiêu chí"
+                                title={t("departmentOkr.managerTree.buttons.deleteCriteria")}
                               >
                                 <Delete fontSize="small" color="error" />
                               </IconButton>
@@ -1182,13 +1184,13 @@ export default function OkrManagerTree({
                                         : "normal",
                                   }}
                                 >
-                                  {isSubChanged ? "[Mới] " : ""}
+                                  {isSubChanged ? t("departmentOkr.managerTree.proposedChanges.newPrefix") : ""}
                                   {sub.title}
                                 </TableCell>
                                 <TableCell>{sub.maxScore}</TableCell>
                                 <TableCell>
                                   {sub.unitScore
-                                    ? `+${sub.unitScore}/${sub.unit || "đv"}`
+                                    ? `+${sub.unitScore}/${sub.unit || t("departmentOkr.managerTree.proposedChanges.unitSuffix")}`
                                     : "—"}
                                 </TableCell>
                                 <TableCell align="center">
@@ -1209,7 +1211,7 @@ export default function OkrManagerTree({
                                           sub.id,
                                         )
                                       }
-                                      title="Chỉnh sửa"
+                                      title={t("departmentOkr.managerTree.buttons.edit")}
                                     >
                                       <Edit fontSize="small" color="info" />
                                     </IconButton>
@@ -1227,7 +1229,7 @@ export default function OkrManagerTree({
                                                 sub.id,
                                               )
                                             }
-                                            title="Chấp nhận thay đổi"
+                                            title={t("departmentOkr.managerTree.buttons.acceptChanges")}
                                           >
                                             <Check
                                               fontSize="small"
@@ -1244,7 +1246,7 @@ export default function OkrManagerTree({
                                                 sub.id,
                                               )
                                             }
-                                            title="Hoàn tác thay đổi"
+                                            title={t("departmentOkr.managerTree.buttons.undoChanges")}
                                           >
                                             <Undo
                                               fontSize="small"
@@ -1279,7 +1281,7 @@ export default function OkrManagerTree({
                                       onClick={() =>
                                         handleDeleteItem(obj.id, kr.id, sub.id)
                                       }
-                                      title="Xóa tiêu chí con"
+                                      title={t("departmentOkr.managerTree.buttons.deleteSubCriteria")}
                                     >
                                       <Delete fontSize="small" color="error" />
                                     </IconButton>
@@ -1346,7 +1348,7 @@ export default function OkrManagerTree({
                                                 : "normal",
                                           }}
                                         >
-                                          {isSubSubChanged ? "[Mới] " : ""}
+                                          {isSubSubChanged ? t("departmentOkr.managerTree.proposedChanges.newPrefix") : ""}
                                           {subsub.title}
                                         </TableCell>
                                         <TableCell
@@ -1363,7 +1365,7 @@ export default function OkrManagerTree({
                                         </TableCell>
                                         <TableCell>
                                           {subsub.unitScore
-                                            ? `+${subsub.unitScore}/${subsub.unit || "đv"}`
+                                            ? `+${subsub.unitScore}/${subsub.unit || t("departmentOkr.managerTree.proposedChanges.unitSuffix")}`
                                             : "—"}
                                         </TableCell>
                                         <TableCell align="center">
@@ -1385,7 +1387,7 @@ export default function OkrManagerTree({
                                                   subsub.id,
                                                 )
                                               }
-                                              title="Chỉnh sửa"
+                                              title={t("departmentOkr.managerTree.buttons.edit")}
                                             >
                                               <Edit
                                                 fontSize="small"
@@ -1407,7 +1409,7 @@ export default function OkrManagerTree({
                                                         subsub.id,
                                                       )
                                                     }
-                                                    title="Chấp nhận thay đổi"
+                                                    title={t("departmentOkr.managerTree.buttons.acceptChanges")}
                                                   >
                                                     <Check
                                                       fontSize="small"
@@ -1425,7 +1427,7 @@ export default function OkrManagerTree({
                                                         subsub.id,
                                                       )
                                                     }
-                                                    title="Hoàn tác thay đổi"
+                                                    title={t("departmentOkr.managerTree.buttons.undoChanges")}
                                                   >
                                                     <Undo
                                                       fontSize="small"
@@ -1467,7 +1469,7 @@ export default function OkrManagerTree({
                                                   subsub.id,
                                                 )
                                               }
-                                              title="Xóa tiêu chí con"
+                                              title={t("departmentOkr.managerTree.buttons.deleteSubCriteria")}
                                             >
                                               <Delete
                                                 fontSize="small"
@@ -1505,7 +1507,7 @@ export default function OkrManagerTree({
                       color: "#b91c1c",
                     }}
                   >
-                    Các tiêu chí đã bị xóa
+                    {t("departmentOkr.managerTree.table.deletedItemsHeader")}
                   </TableCell>
                 </TableRow>
                 {deletedItems.map((delItem, idx) => (
@@ -1549,7 +1551,7 @@ export default function OkrManagerTree({
                       }}
                     >
                       {delItem.unitScore
-                        ? `+${delItem.unitScore}/${delItem.unit || "đv"}`
+                        ? `+${delItem.unitScore}/${delItem.unit || t("departmentOkr.managerTree.proposedChanges.unitSuffix")}`
                         : "—"}
                     </TableCell>
                     <TableCell align="center">
@@ -1565,14 +1567,14 @@ export default function OkrManagerTree({
                           onClick={() =>
                             handleAcceptDeleteOriginalItem(delItem)
                           }
-                          title="Chấp nhận xóa"
+                          title={t("departmentOkr.managerTree.buttons.acceptDelete")}
                         >
                           <Check fontSize="small" color="success" />
                         </IconButton>
                         <IconButton
                           size="small"
                           onClick={() => handleRestoreDeletedItem(delItem)}
-                          title="Khôi phục"
+                          title={t("departmentOkr.managerTree.buttons.restore")}
                         >
                           <Undo fontSize="small" color="primary" />
                         </IconButton>
@@ -1606,17 +1608,17 @@ export default function OkrManagerTree({
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle>Chỉnh sửa Tiêu chí</DialogTitle>
+        <DialogTitle>{t("departmentOkr.managerTree.editDialog.title")}</DialogTitle>
         <DialogContent dividers>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
             <TextField
-              label="Nội dung tiêu chí"
+              label={t("departmentOkr.managerTree.editDialog.contentLabel")}
               fullWidth
               value={editCriteriaTitle}
               onChange={(e) => setEditCriteriaTitle(e.target.value)}
             />
             <TextField
-              label="Điểm tối đa"
+              label={t("departmentOkr.managerTree.editDialog.maxScoreLabel")}
               type="number"
               fullWidth
               value={editCriteriaMaxScore}
@@ -1630,7 +1632,7 @@ export default function OkrManagerTree({
             />
             <Box sx={{ display: "flex", gap: 2 }}>
               <TextField
-                label="Điểm / Đơn vị"
+                label={t("departmentOkr.managerTree.editDialog.unitScoreLabel")}
                 type="number"
                 fullWidth
                 value={editCriteriaUnitScore}
@@ -1642,19 +1644,19 @@ export default function OkrManagerTree({
                 }}
               />
               <TextField
-                label="Đơn vị tính"
+                label={t("departmentOkr.managerTree.editDialog.unitLabel")}
                 fullWidth
                 value={editCriteriaUnit}
                 onChange={(e) => setEditCriteriaUnit(e.target.value)}
-                placeholder="VD: bài, đv, giờ..."
+                placeholder={t("departmentOkr.managerTree.editDialog.unitPlaceholder")}
               />
             </Box>
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenEditDialog(false)}>Hủy</Button>
+          <Button onClick={() => setOpenEditDialog(false)}>{t("departmentOkr.managerTree.editDialog.cancelBtn")}</Button>
           <Button variant="contained" onClick={handleSaveEditCriteria}>
-            Lưu thay đổi tạm thời
+            {t("departmentOkr.managerTree.editDialog.saveBtn")}
           </Button>
         </DialogActions>
       </Dialog>

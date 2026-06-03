@@ -38,10 +38,11 @@ import { showSuccess, showError } from "../../../utils/swal";
 import { useTemplateStructure } from "../hooks/useTemplateStructure";
 import { ObjectiveRow, KeyResultRow, SubKRRow, SubSubKRRow } from "./RowComponents";
 import { parseExcelToStructure } from "../../../utils/excelParser";
+import { useTranslation } from "react-i18next";
 
-export const validateStructureScores = (items: any[]): string | null => {
+export const validateStructureScores = (items: any[], t?: (key: string, opts?: any) => string): string | null => {
   if (!items || items.length === 0) {
-    return "Cấu trúc OKR phải có ít nhất 1 Mục tiêu (Objective).";
+    return t ? t("departmentOkr.templateEditor.validation.emptyStructure") : "Cấu trúc OKR phải có ít nhất 1 Mục tiêu (Objective).";
   }
 
   let totalMaxScore = 0;
@@ -49,12 +50,16 @@ export const validateStructureScores = (items: any[]): string | null => {
   for (const obj of items) {
     const objMaxScore = Number(obj.maxScore) || 0;
     if (objMaxScore < 0) {
-      return `Điểm số tối đa của Mục tiêu "${obj.title || obj.id}" không được là số âm.`;
+      return t
+        ? t("departmentOkr.templateEditor.validation.negativeMaxScore", { title: obj.title || obj.id })
+        : `Điểm số tối đa của Mục tiêu "${obj.title || obj.id}" không được là số âm.`;
     }
     totalMaxScore += objMaxScore;
 
     if (!obj.items || obj.items.length === 0) {
-      return `Mục tiêu lớn "${obj.title || obj.id}" phải có ít nhất 1 Kết quả then chốt (KR).`;
+      return t
+        ? t("departmentOkr.templateEditor.validation.emptyKR", { title: obj.title || obj.id })
+        : `Mục tiêu lớn "${obj.title || obj.id}" phải có ít nhất 1 Kết quả then chốt (KR).`;
     }
 
     // Traverse and check children recursively
@@ -67,15 +72,21 @@ export const validateStructureScores = (items: any[]): string | null => {
         const childUnitScore = Number(child.unitScore) || 0;
 
         if (childMaxScore < 0) {
-          return `Điểm tối đa của "${child.title || child.id}" không được là số âm.`;
+          return t
+            ? t("departmentOkr.templateEditor.validation.negativeChildMax", { title: child.title || child.id })
+            : `Điểm tối đa của "${child.title || child.id}" không được là số âm.`;
         }
         if (childUnitScore < 0) {
-          return `Điểm/Đơn vị của "${child.title || child.id}" không được là số âm.`;
+          return t
+            ? t("departmentOkr.templateEditor.validation.negativeChildUnit", { title: child.title || child.id })
+            : `Điểm/Đơn vị của "${child.title || child.id}" không được là số âm.`;
         }
 
         // Điểm đơn vị của các key result không được quá điểm tối đa của object
         if (childUnitScore > objMaxScore) {
-          return `Điểm/Đơn vị của Tiêu chí "${child.title || child.id}" (${childUnitScore}) không được vượt quá Điểm tối đa của Mục tiêu lớn "${obj.title || obj.id}" (${objMaxScore}).`;
+          return t
+            ? t("departmentOkr.templateEditor.validation.unitExceedsObjMax", { childTitle: child.title || child.id, childScore: childUnitScore, objTitle: obj.title || obj.id, objScore: objMaxScore })
+            : `Điểm/Đơn vị của Tiêu chí "${child.title || child.id}" (${childUnitScore}) không được vượt quá Điểm tối đa của Mục tiêu lớn "${obj.title || obj.id}" (${objMaxScore}).`;
         }
 
         childrenTotal += childMaxScore;
@@ -87,9 +98,13 @@ export const validateStructureScores = (items: any[]): string | null => {
       const parentMaxScore = Number(parent.maxScore) || 0;
       if (childrenTotal > 0 && childrenTotal !== parentMaxScore) {
         if (childrenTotal > parentMaxScore) {
-          return `Tổng điểm tối đa của các mục con thuộc "${parent.title || parent.id}" (${childrenTotal}) không được vượt quá điểm tối đa của mục "${parent.title || parent.id}" (${parentMaxScore}).`;
+          return t
+            ? t("departmentOkr.templateEditor.validation.childrenExceedParent", { title: parent.title || parent.id, childTotal: childrenTotal, parentMax: parentMaxScore })
+            : `Tổng điểm tối đa của các mục con thuộc "${parent.title || parent.id}" (${childrenTotal}) không được vượt quá điểm tối đa của mục "${parent.title || parent.id}" (${parentMaxScore}).`;
         } else {
-          return `Tổng điểm tối đa của các mục con thuộc "${parent.title || parent.id}" (${childrenTotal}) không được nhỏ hơn điểm tối đa của mục "${parent.title || parent.id}" (${parentMaxScore}) (phải bằng chính xác ${parentMaxScore}).`;
+          return t
+            ? t("departmentOkr.templateEditor.validation.childrenBelowParent", { title: parent.title || parent.id, childTotal: childrenTotal, parentMax: parentMaxScore })
+            : `Tổng điểm tối đa của các mục con thuộc "${parent.title || parent.id}" (${childrenTotal}) không được nhỏ hơn điểm tối đa của mục "${parent.title || parent.id}" (${parentMaxScore}) (phải bằng chính xác ${parentMaxScore}).`;
         }
       }
       return null;
@@ -100,7 +115,9 @@ export const validateStructureScores = (items: any[]): string | null => {
   }
 
   if (totalMaxScore !== 100) {
-    return `Tổng điểm tối đa (maxScore) của tất cả các Mục tiêu lớn phải chính xác bằng 100. Hiện tại đang là ${totalMaxScore}.`;
+    return t
+      ? t("departmentOkr.templateEditor.validation.totalNot100", { total: totalMaxScore })
+      : `Tổng điểm tối đa (maxScore) của tất cả các Mục tiêu lớn phải chính xác bằng 100. Hiện tại đang là ${totalMaxScore}.`;
   }
 
   return null;
@@ -119,6 +136,7 @@ export default function TemplateEditorDialog({
   template,
   onRefresh,
 }: TemplateEditorDialogProps) {
+  const { t } = useTranslation();
   const [title, setTitle] = useState("");
   const [positionId, setPositionId] = useState("");
   const [jobTitle, setJobTitle] = useState("");
@@ -183,14 +201,14 @@ export default function TemplateEditorDialog({
       setStructure(importedStructure);
       setSnackbar({
         open: true,
-        message: "Import dữ liệu từ Excel thành công!",
+        message: t("departmentOkr.templateEditor.importSuccess"),
         severity: "success",
       });
     } catch (error: any) {
       console.error("Excel parse error:", error);
       setSnackbar({
         open: true,
-        message: error.message || "Lỗi định dạng file Excel. Vui lòng kiểm tra lại template.",
+        message: error.message || t("departmentOkr.templateEditor.importError"),
         severity: "error",
       });
     } finally {
@@ -199,9 +217,9 @@ export default function TemplateEditorDialog({
   };
 
   const handleSubmit = async () => {
-    const validationError = validateStructureScores(structure);
+    const validationError = validateStructureScores(structure, t);
     if (validationError) {
-      showError("Lỗi cấu trúc điểm OKR", validationError);
+      showError(t("departmentOkr.templateEditor.swal.validationErrorTitle"), validationError);
       return;
     }
 
@@ -215,16 +233,16 @@ export default function TemplateEditorDialog({
 
       if (template?.id) {
         const res = await api.put(`/okr-templates/${template.id}`, payload);
-        showSuccess("Thành công", res.data?.message || "Đã cập nhật OKR Template.");
+        showSuccess(t("departmentOkr.templateEditor.swal.successTitle"), res.data?.message || t("departmentOkr.templateEditor.swal.successUpdate"));
       } else {
         const res = await api.post("/okr-templates", payload);
-        showSuccess("Thành công", res.data?.message || "Đã tạo OKR Template mới.");
+        showSuccess(t("departmentOkr.templateEditor.swal.successTitle"), res.data?.message || t("departmentOkr.templateEditor.swal.successCreate"));
       }
       onRefresh();
       onClose();
     } catch (error: any) {
       console.error(error);
-      showError("Lỗi", error.response?.data?.message || "Có lỗi xảy ra khi lưu template.");
+      showError(t("departmentOkr.templateEditor.swal.errorTitle"), error.response?.data?.message || t("departmentOkr.templateEditor.swal.errorSave"));
     }
   };
 
@@ -237,7 +255,7 @@ export default function TemplateEditorDialog({
       <DialogTitle sx={{ bgcolor: "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <Typography variant="h5" fontWeight="bold" color="#1e3a8a">
-            {template ? "Chỉnh sửa OKR Template" : "Tạo OKR Template mới"}
+            {template ? t("departmentOkr.templateEditor.titleEdit") : t("departmentOkr.templateEditor.titleCreate")}
           </Typography>
           <Box>
             <Button
@@ -246,10 +264,10 @@ export default function TemplateEditorDialog({
               startIcon={<UploadFile />}
               sx={{ mr: 1 }}
             >
-              Import Excel
+              {t("departmentOkr.templateEditor.importExcel")}
               <input type="file" hidden accept=".xlsx, .xls" onChange={handleFileUpload} />
             </Button>
-            <Tooltip title="Tải file mẫu Excel">
+            <Tooltip title={t("departmentOkr.templateEditor.downloadSampleTooltip")}>
               <IconButton size="small" color="primary">
                 <HelpOutline />
               </IconButton>
@@ -262,7 +280,7 @@ export default function TemplateEditorDialog({
         <Box sx={{ display: "flex", gap: 3, mb: 4, mt: 1 }}>
           <TextField
             fullWidth
-            label="Tên Template OKR (VD: OKR Giảng viên 2024)"
+            label={t("departmentOkr.templateEditor.templateNameLabel")}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
@@ -282,15 +300,15 @@ export default function TemplateEditorDialog({
             </Select>
           </FormControl> */}
           <FormControl sx={{ minWidth: 250 }}>
-            <InputLabel>Chức danh áp dụng</InputLabel>
+            <InputLabel>{t("departmentOkr.templateEditor.jobTitleLabel")}</InputLabel>
             <Select
               value={jobTitle}
-              label="Chức danh áp dụng"
+              label={t("departmentOkr.templateEditor.jobTitleLabel")}
               onChange={(e) => setJobTitle(e.target.value)}
             >
-              <MenuItem value="Tất cả">-- Tất cả --</MenuItem>
-              {jobTitles.map((t) => (
-                <MenuItem key={t.value} value={t.value}>{t.label}</MenuItem>
+              <MenuItem value="Tất cả">{t("departmentOkr.templateEditor.jobTitleAll")}</MenuItem>
+              {jobTitles.map((jt) => (
+                <MenuItem key={jt.value} value={jt.value}>{jt.label}</MenuItem>
               ))}
             </Select>
           </FormControl>
@@ -299,9 +317,9 @@ export default function TemplateEditorDialog({
         <Divider sx={{ mb: 3 }} />
 
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-          <Typography variant="h6" fontWeight="bold">Cấu trúc OKR</Typography>
+          <Typography variant="h6" fontWeight="bold">{t("departmentOkr.templateEditor.structureTitle")}</Typography>
           <Button variant="contained" startIcon={<Add />} onClick={handleAddObjective}>
-            Thêm Mục tiêu lớn (A, B, C...)
+            {t("departmentOkr.templateEditor.addObjectiveBtn")}
           </Button>
         </Box>
 
@@ -309,17 +327,17 @@ export default function TemplateEditorDialog({
           <Table size="small">
             <TableHead sx={{ bgcolor: "#f1f5f9" }}>
               <TableRow>
-                <TableCell width="60">Mã</TableCell>
-                <TableCell>Nội dung (Mục tiêu / Tiêu chí)</TableCell>
-                <TableCell width="120">Điểm tối đa</TableCell>
-                <TableCell width="120">Điểm/Đơn vị</TableCell>
+                <TableCell width="60">{t("departmentOkr.templateEditor.tableCode")}</TableCell>
+                <TableCell>{t("departmentOkr.templateEditor.tableContent")}</TableCell>
+                <TableCell width="120">{t("departmentOkr.templateEditor.tableMaxScore")}</TableCell>
+                <TableCell width="120">{t("departmentOkr.templateEditor.tableUnitScore")}</TableCell>
                 <TableCell width="120">
-                  Đơn vị
-                  <Tooltip title="Đơn vị tính (VD: bài báo, hoạt động, chương trình, môn học,... )">
+                  {t("departmentOkr.templateEditor.tableUnit")}
+                  <Tooltip title={t("departmentOkr.templateEditor.tableUnitTooltip")}>
                     <HelpOutline sx={{ fontSize: 16, ml: 0.5, color: "text.secondary", cursor: "pointer", verticalAlign: "middle" }} />
                   </Tooltip>
                 </TableCell>
-                <TableCell width="150">Thao tác</TableCell>
+                <TableCell width="150">{t("departmentOkr.templateEditor.tableActions")}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -378,7 +396,7 @@ export default function TemplateEditorDialog({
               {structure.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={6} align="center" sx={{ py: 3, color: "text.secondary" }}>
-                    Chưa có dữ liệu. Hãy thêm Mục tiêu lớn hoặc Import từ Excel.
+                    {t("departmentOkr.templateEditor.emptyState")}
                   </TableCell>
                 </TableRow>
               )}
@@ -387,9 +405,9 @@ export default function TemplateEditorDialog({
         </TableContainer>
       </DialogContent>
       <DialogActions sx={{ p: 3 }}>
-        <Button onClick={onClose} color="inherit">Hủy</Button>
+        <Button onClick={onClose} color="inherit">{t("departmentOkr.templateEditor.cancelBtn")}</Button>
         <Button variant="contained" onClick={handleSubmit} startIcon={<Save />} disabled={!isFormValid}>
-          Lưu Template
+          {t("departmentOkr.templateEditor.saveBtn")}
         </Button>
       </DialogActions>
 

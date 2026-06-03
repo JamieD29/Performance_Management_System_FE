@@ -86,6 +86,152 @@
         "createdAt": "Ngày tạo",
         "actions": "Thao tác"
       }
+    },
+    "createDialog": {
+      "title": "Tạo Mục Tiêu (OKR) Bộ Môn",
+      "objectiveLabel": "Tên Mục tiêu (VD: Cải tiến chất lượng đào tạo...)",
+      "assignDeptLabel": "Giao cho Bộ môn",
+      "semesterLabel": "Học kỳ áp dụng",
+      "krListTitle": "Danh sách Kết quả then chốt (KRs)",
+      "addKrBtn": "Thêm KR",
+      "krContentLabel": "Nội dung kết quả",
+      "krTargetLabel": "Mục tiêu số",
+      "krUnitLabel": "Đơn vị (%, Bài...)",
+      "cancelBtn": "Hủy",
+      "saveBtn": "Lưu OKR",
+      "errorLoad": "Lỗi khi tải dữ liệu Bộ môn / Học kỳ:"
+    },
+    "managerTree": {
+      "proposedChanges": {
+        "oldPrefix": "[Cũ] ",
+        "newPrefix": "[Mới] ",
+        "unitSuffix": "đv"
+      },
+      "chat": {
+        "title": "Nội dung trao đổi:",
+        "senderUser": "Nhân viên",
+        "senderManager": "Bạn",
+        "noExchange": "Chưa có trao đổi nào.",
+        "inputPlaceholder": "Nhập phản hồi/đề xuất...",
+        "sendBtn": "Gửi",
+        "errorSend": "Lỗi gửi tin nhắn đàm phán",
+        "errorSendMsg": "Không thể gửi tin nhắn.",
+        "errorInputRequired": "Vui lòng nhập nội dung."
+      },
+      "buttons": {
+        "saveStructure": "Lưu lại cấu trúc thay đổi",
+        "addCriteria": "Thêm tiêu chí",
+        "addSubCriteria": "Thêm tiêu chí con",
+        "undoChanges": "Hoàn tác thay đổi",
+        "edit": "Chỉnh sửa",
+        "acceptChanges": "Chấp nhận thay đổi",
+        "deleteCriteria": "Xóa tiêu chí",
+        "deleteSubCriteria": "Xóa tiêu chí con",
+        "acceptDelete": "Chấp nhận xóa",
+        "restore": "Khôi phục"
+      },
+      "table": {
+        "code": "Mã",
+        "content": "Nội dung",
+        "maxScore": "Điểm tối đa",
+        "unitScore": "Điểm/Đơn vị",
+        "actions": "Thao tác",
+        "deletedItemsHeader": "Các tiêu chí đã bị xóa"
+      },
+      "swal": {
+        "errorTitle": "Lỗi",
+        "validationErrorTitle": "Lỗi cấu trúc điểm OKR",
+        "successTitle": "Thành công",
+        "successSave": "Đã lưu lại cấu trúc thay đổi.",
+        "errorSave": "Không thể cập nhật cấu trúc."
+      },
+      "editDialog": {
+        "title": "Chỉnh sửa Tiêu chí",
+        "contentLabel": "Nội dung tiêu chí",
+        "maxScoreLabel": "Điểm tối đa",
+        "unitScoreLabel": "Điểm / Đơn vị",
+        "unitLabel": "Đơn vị tính",
+        "unitPlaceholder": "VD: bài, đv, giờ...",
+        "cancelBtn": "Hủy",
+        "saveBtn": "Lưu thay đổi tạm thời"
+      },
+      "addCriteriaDialog": {
+        "titleCriteria": "Thêm Tiêu chí mới",
+        "titleSubCriteria": "Thêm Tiêu chí con mới",
+        "contentLabel": "Nội dung tiêu chí",
+        "unitScoreLabel": "Điểm / Đơn vị",
+        "unitLabel": "Đơn vị tính",
+        "unitPlaceholder": "VD: bài, đv, giờ...",
+        "cancelBtn": "Hủy",
+        "saveBtn": "Lưu tạm"
+      }
+    },
+    "templateEditor": {
+      "titleEdit": "Chỉnh sửa OKR Template",
+      "titleCreate": "Tạo OKR Template mới",
+      "importExcel": "Import Excel",
+      "downloadSampleTooltip": "Tải file mẫu Excel",
+      "templateNameLabel": "Tên Template OKR (VD: OKR Giảng viên 2024)",
+      "jobTitleLabel": "Chức danh áp dụng",
+      "jobTitleAll": "-- Tất cả --",
+      "structureTitle": "Cấu trúc OKR",
+      "addObjectiveBtn": "Thêm Mục tiêu lớn (A, B, C...)",
+      "tableCode": "Mã",
+      "tableContent": "Nội dung (Mục tiêu / Tiêu chí)",
+      "tableMaxScore": "Điểm tối đa",
+      "tableUnitScore": "Điểm/Đơn vị",
+      "tableUnit": "Đơn vị",
+      "tableUnitTooltip": "Đơn vị tính (VD: bài báo, hoạt động, chương trình, môn học,... )",
+      "tableActions": "Thao tác",
+      "emptyState": "Chưa có dữ liệu. Hãy thêm Mục tiêu lớn hoặc Import từ Excel.",
+      "cancelBtn": "Hủy",
+      "saveBtn": "Lưu Template",
+      "importSuccess": "Import dữ liệu từ Excel thành công!",
+      "importError": "Lỗi định dạng file Excel. Vui lòng kiểm tra lại template.",
+      "swal": {
+        "validationErrorTitle": "Lỗi cấu trúc điểm OKR",
+        "successTitle": "Thành công",
+        "successUpdate": "Đã cập nhật OKR Template.",
+        "successCreate": "Đã tạo OKR Template mới.",
+        "errorTitle": "Lỗi",
+        "errorSave": "Có lỗi xảy ra khi lưu template."
+      },
+      "validation": {
+        "emptyStructure": "Cấu trúc OKR phải có ít nhất 1 Mục tiêu (Objective).",
+        "negativeMaxScore": "Điểm số tối đa của Mục tiêu \"{{title}}\" không được là số âm.",
+        "emptyKR": "Mục tiêu lớn \"{{title}}\" phải có ít nhất 1 Kết quả then chốt (KR).",
+        "negativeChildMax": "Điểm tối đa của \"{{title}}\" không được là số âm.",
+        "negativeChildUnit": "Điểm/Đơn vị của \"{{title}}\" không được là số âm.",
+        "unitExceedsObjMax": "Điểm/Đơn vị của Tiêu chí \"{{childTitle}}\" ({{childScore}}) không được vượt quá Điểm tối đa của Mục tiêu lớn \"{{objTitle}}\" ({{objScore}}).",
+        "childrenExceedParent": "Tổng điểm tối đa của các mục con thuộc \"{{title}}\" ({{childTotal}}) không được vượt quá điểm tối đa của mục \"{{title}}\" ({{parentMax}}).",
+        "childrenBelowParent": "Tổng điểm tối đa của các mục con thuộc \"{{title}}\" ({{childTotal}}) không được nhỏ hơn điểm tối đa của mục \"{{title}}\" ({{parentMax}}) (phải bằng chính xác {{parentMax}}).",
+        "totalNot100": "Tổng điểm tối đa (maxScore) của tất cả các Mục tiêu lớn phải chính xác bằng 100. Hiện tại đang là {{total}}."
+      }
+    },
+    "rowComponents": {
+      "objectivePlaceholder": "Tên Mục tiêu lớn...",
+      "addCriteria": "Tiêu chí",
+      "krPlaceholder": "Nội dung Tiêu chí...",
+      "addDetail": "Chi tiết",
+      "subKrPlaceholder": "Nội dung tiêu chí nhỏ...",
+      "addSubItem": "a,b,c",
+      "subSubKrPlaceholder": "Mô tả cụ thể (a, b, c...)"
+    },
+    "variantEditor": {
+      "title": "Tạo Phiên bản Tùy biến OKR",
+      "titleSuffix": "(Tùy biến)",
+      "nameLabel": "Tên Phiên bản (VD: OKR dành cho Phó Bộ môn)",
+      "structureTitle": "Tùy chỉnh Cấu trúc OKR",
+      "addObjectiveBtn": "Thêm Mục tiêu lớn (A, B, C...)",
+      "tableCode": "Mã",
+      "tableContent": "Nội dung (Mục tiêu / Tiêu chí)",
+      "tableMaxScore": "Điểm tối đa",
+      "tableUnitScore": "Điểm/Đơn vị",
+      "tableUnit": "Đơn vị",
+      "tableActions": "Thao tác",
+      "cancelBtn": "Hủy",
+      "saveBtn": "Lưu Phiên bản",
+      "validationErrorTitle": "Lỗi cấu trúc điểm OKR"
     }
   },
   "departmentMaster": {
