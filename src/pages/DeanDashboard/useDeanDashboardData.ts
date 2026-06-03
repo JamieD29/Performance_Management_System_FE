@@ -52,12 +52,6 @@ export interface StaffRankItem {
   status: string;
 }
 
-export interface TimelinePoint {
-  week: string;
-  weekLabel: string;
-  completed: number;
-  submitted: number;
-}
 
 export interface ActionItem {
   type: string;
@@ -85,7 +79,7 @@ export interface DeanDashboardData {
   staffRanking: StaffRankItem[];
   ratingDistribution: Record<string, number>;
   ratingDetails: Record<string, RatingPersonItem[]>;
-  timelineData: TimelinePoint[];
+
   actionItems: ActionItem[];
 }
 
