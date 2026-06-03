@@ -18,9 +18,11 @@ import { Send } from "@mui/icons-material";
 import { api } from "../../../services/api";
 import AssignTemplateDialog from "./AssignTemplateDialog";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export default function AssignOkrTab() {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
   const [templates, setTemplates] = useState<any[]>([]);
   const [openAssign, setOpenAssign] = useState(false);
   const [assignTemplate, setAssignTemplate] = useState<any>(null);
@@ -61,7 +63,7 @@ export default function AssignOkrTab() {
     <Box>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
         <Typography variant="h6" color="text.secondary">
-          Chọn Template để gán cho nhân sự
+          {t("departmentOkr.assignTab.title")}
         </Typography>
       </Box>
 
@@ -69,25 +71,25 @@ export default function AssignOkrTab() {
         <Table>
           <TableHead sx={{ bgcolor: "#f1f5f9" }}>
             <TableRow>
-              <TableCell sx={{ fontWeight: "bold", width: { xs: "30%", md: "40%" } }}>Tên Template</TableCell>
-              <TableCell sx={{ fontWeight: "bold", width: "20%", whiteSpace: "nowrap" }}>Chức vụ / Chức danh</TableCell>
-              {isAdmin && <TableCell sx={{ fontWeight: "bold", width: "15%", whiteSpace: "nowrap" }}>Tác giả</TableCell>}
-              <TableCell sx={{ fontWeight: "bold", width: "15%", whiteSpace: "nowrap" }}>Ngày tạo</TableCell>
-              <TableCell align="right" sx={{ fontWeight: "bold", width: "10%", whiteSpace: "nowrap" }}>Thao tác</TableCell>
+              <TableCell sx={{ fontWeight: "bold", width: { xs: "30%", md: "40%" } }}>{t("departmentOkr.assignTab.table.templateName")}</TableCell>
+              <TableCell sx={{ fontWeight: "bold", width: "20%", whiteSpace: "nowrap" }}>{t("departmentOkr.assignTab.table.positionJobTitle")}</TableCell>
+              {isAdmin && <TableCell sx={{ fontWeight: "bold", width: "15%", whiteSpace: "nowrap" }}>{t("departmentOkr.assignTab.table.author")}</TableCell>}
+              <TableCell sx={{ fontWeight: "bold", width: "15%", whiteSpace: "nowrap" }}>{t("departmentOkr.assignTab.table.createdAt")}</TableCell>
+              <TableCell align="right" sx={{ fontWeight: "bold", width: "10%", whiteSpace: "nowrap" }}>{t("departmentOkr.assignTab.table.actions")}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {templates.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={isAdmin ? 5 : 4} align="center" sx={{ py: 3, color: "text.secondary" }}>
-                  Chưa có template nào.
+                  {t("departmentOkr.assignTab.noTemplates")}
                 </TableCell>
               </TableRow>
             ) : (
-              templates.map((t) => (
-                <TableRow key={t.id} hover>
+              templates.map((tmpl) => (
+                <TableRow key={tmpl.id} hover>
                   <TableCell sx={{ maxWidth: { xs: 150, sm: 200, md: 300 } }}>
-                    <Tooltip title={t.title}>
+                    <Tooltip title={tmpl.title}>
                       <Typography
                         variant="body2"
                         sx={{
@@ -100,38 +102,38 @@ export default function AssignOkrTab() {
                           wordBreak: "break-word",
                         }}
                       >
-                        {t.title}
+                        {tmpl.title}
                       </Typography>
                     </Tooltip>
                   </TableCell>
                   <TableCell>
-                    {t.positionName && (
-                      <Chip label={t.positionName} size="small" color="secondary" sx={{ mr: 0.5 }} />
+                    {tmpl.positionName && (
+                      <Chip label={tmpl.positionName} size="small" color="secondary" sx={{ mr: 0.5 }} />
                     )}
-                    {t.jobTitle ? (
-                      <Chip label={t.jobTitle} size="small" color="primary" variant="outlined" />
+                    {tmpl.jobTitle ? (
+                      <Chip label={t("profile.enums.jobTitle." + tmpl.jobTitle, { defaultValue: tmpl.jobTitle })} size="small" color="primary" variant="outlined" />
                     ) : (
-                      !t.positionName && (
-                        <Chip label="Tất cả" size="small" color="default" variant="outlined" />
+                      !tmpl.positionName && (
+                        <Chip label={t("departmentOkr.assignTab.all")} size="small" color="default" variant="outlined" />
                       )
                     )}
                   </TableCell>
                   {isAdmin && (
                     <TableCell>
-                      {t.createdByUserId ? (
+                      {tmpl.createdByUserId ? (
                         <Box
                           sx={{ display: "flex", alignItems: "center", gap: 1, cursor: "pointer", "&:hover .author-name": { textDecoration: "underline" } }}
-                          onClick={() => navigate(`/departments/users/${t.createdByUserId}`, { state: { parentName: "OKR Bộ Môn", parentUrl: "/departments/okr" } })}
+                          onClick={() => navigate(`/departments/users/${tmpl.createdByUserId}`, { state: { parentName: "OKR Bộ Môn", parentUrl: "/departments/okr" } })}
                         >
                           <Avatar sx={{ width: 24, height: 24, fontSize: 12, bgcolor: "#dbeafe", color: "#1e40af", fontWeight: "bold" }}>
-                            {t.createdByName ? t.createdByName.charAt(0).toUpperCase() : "U"}
+                            {tmpl.createdByName ? tmpl.createdByName.charAt(0).toUpperCase() : "U"}
                           </Avatar>
                           <Typography
                             variant="body2"
                             className="author-name"
                             sx={{ color: "primary.main" }}
                           >
-                            {t.createdByName || "—"}
+                            {tmpl.createdByName || "—"}
                           </Typography>
                         </Box>
                       ) : (
@@ -139,10 +141,10 @@ export default function AssignOkrTab() {
                       )}
                     </TableCell>
                   )}
-                  <TableCell sx={{ whiteSpace: "nowrap" }}>{new Date(t.createdAt).toLocaleDateString("vi-VN")}</TableCell>
+                  <TableCell sx={{ whiteSpace: "nowrap" }}>{new Date(tmpl.createdAt).toLocaleDateString(i18n.language === "vi" ? "vi-VN" : "en-US")}</TableCell>
                   <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
-                    <Button size="small" color="success" variant="contained" startIcon={<Send />} onClick={() => handleAssign(t)}>
-                      Gán OKR
+                    <Button size="small" color="success" variant="contained" startIcon={<Send />} onClick={() => handleAssign(tmpl)}>
+                      {t("departmentOkr.assignTab.assignBtn")}
                     </Button>
                   </TableCell>
                 </TableRow>

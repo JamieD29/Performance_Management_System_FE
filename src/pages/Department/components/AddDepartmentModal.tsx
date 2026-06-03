@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import { api } from "../../../services/api"; // ⚠️ Check đường dẫn api
 import { showSuccess, showError } from "../../../utils/swal";
+import { useTranslation } from "react-i18next";
 
 interface AddDepartmentModalProps {
   open: boolean;
@@ -25,6 +26,7 @@ export default function AddDepartmentModal({
   onSuccess,
   initialData,
 }: AddDepartmentModalProps) {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: "",
     code: "",
@@ -52,7 +54,7 @@ export default function AddDepartmentModal({
   const handleSubmit = async () => {
     // Validate cơ bản
     if (!formData.name || !formData.code) {
-      setError("Tên và Mã bộ môn là bắt buộc");
+      setError(t("departmentDetail.addModal.nameRequired"));
       return;
     }
 
@@ -61,10 +63,10 @@ export default function AddDepartmentModal({
     try {
       if (initialData?.id) {
         await api.patch(`/departments/${initialData.id}`, formData);
-        showSuccess("Thành công", "Cập nhật bộ môn thành công!");
+        showSuccess(t("departmentDetail.addModal.successTitle"), t("departmentDetail.addModal.successUpdate"));
       } else {
         await api.post("/departments", formData);
-        showSuccess("Thành công", "Thêm bộ môn mới thành công!");
+        showSuccess(t("departmentDetail.addModal.successTitle"), t("departmentDetail.addModal.successCreate"));
       }
       if (!initialData) {
         setFormData({ name: "", code: "", description: "" }); // Reset form only when adding
@@ -74,7 +76,7 @@ export default function AddDepartmentModal({
     } catch (err: any) {
       // NestJS thường trả về message dạng mảng string, hoặc string đơn
       const errorMsg = err.response?.data?.message;
-      let finalMsg = "Có lỗi xảy ra";
+      let finalMsg = t("departmentDetail.addModal.errorDefault");
 
       if (Array.isArray(errorMsg)) {
         // Nếu là mảng nhiều lỗi -> Ghép lại bằng dấu phẩy
@@ -84,7 +86,7 @@ export default function AddDepartmentModal({
       }
 
       setError(finalMsg);
-      showError("Lỗi", finalMsg);
+      showError(t("departmentDetail.addModal.errorTitle"), finalMsg);
     } finally {
       setLoading(false);
     }
@@ -93,7 +95,7 @@ export default function AddDepartmentModal({
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle sx={{ fontWeight: "bold", color: "#1e293b" }}>
-        {initialData ? "Chỉnh Sửa Bộ Môn" : "Thêm Bộ Môn Mới"}
+        {initialData ? t("departmentDetail.addModal.editTitle") : t("departmentDetail.addModal.createTitle")}
       </DialogTitle>
       <DialogContent dividers>
         <Stack spacing={2} sx={{ mt: 1 }}>
@@ -113,25 +115,25 @@ export default function AddDepartmentModal({
           )}
 
           <TextField
-            label="Tên bộ môn"
+            label={t("departmentDetail.addModal.nameLabel")}
             name="name"
             required
             fullWidth
             value={formData.name}
             onChange={handleChange}
-            placeholder="Ví dụ: Công nghệ phần mềm"
+            placeholder={t("departmentDetail.addModal.namePlaceholder")}
           />
           <TextField
-            label="Mã bộ môn (Code)"
+            label={t("departmentDetail.addModal.codeLabel")}
             name="code"
             required
             fullWidth
             value={formData.code}
             onChange={handleChange}
-            placeholder="Ví dụ: SE, IT, CS..."
+            placeholder={t("departmentDetail.addModal.codePlaceholder")}
           />
           <TextField
-            label="Mô tả"
+            label={t("departmentDetail.addModal.descLabel")}
             name="description"
             fullWidth
             multiline
@@ -143,10 +145,10 @@ export default function AddDepartmentModal({
       </DialogContent>
       <DialogActions sx={{ p: 2 }}>
         <Button onClick={onClose} color="inherit">
-          Hủy
+          {t("departmentDetail.addModal.cancelBtn")}
         </Button>
         <Button onClick={handleSubmit} variant="contained" disabled={loading}>
-          {loading ? "Đang lưu..." : initialData ? "Lưu Thay Đổi" : "Tạo mới"}
+          {loading ? t("departmentDetail.addModal.saving") : initialData ? t("departmentDetail.addModal.saveBtn") : t("departmentDetail.addModal.createBtn")}
         </Button>
       </DialogActions>
     </Dialog>

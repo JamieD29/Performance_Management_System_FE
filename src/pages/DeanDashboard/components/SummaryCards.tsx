@@ -13,7 +13,6 @@ interface Props {
 const cards = [
   {
     key: "pendingApproval",
-    label: "Chờ duyệt",
     icon: ClipboardCheck,
     bgColor: "#fef2f2",
     borderColor: "#fecaca",
@@ -23,7 +22,6 @@ const cards = [
   },
   {
     key: "awaitingReview",
-    label: "Chờ chấm",
     icon: FileSearch,
     bgColor: "#fffbeb",
     borderColor: "#fde68a",
@@ -33,7 +31,6 @@ const cards = [
   },
   {
     key: "completed",
-    label: "Hoàn thành",
     icon: CheckCircle2,
     bgColor: "#f0fdf4",
     borderColor: "#bbf7d0",
@@ -42,7 +39,6 @@ const cards = [
   },
   {
     key: "totalStaff",
-    label: "Tổng nhân sự",
     icon: Users,
     bgColor: "#eff6ff",
     borderColor: "#bfdbfe",
@@ -72,7 +68,7 @@ export default function SummaryCards({ summary, actionItems }: Props) {
           ? actionItems.find(a => a.type === (card as any).actionType)
           : null;
 
-        const displayLabel = t(`deanDashboard.summary.${card.key}`, { defaultValue: card.label });
+        const displayLabel = t(`deanDashboard.summary.${card.key}`);
 
         return (
           <motion.div

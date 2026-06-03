@@ -2,6 +2,7 @@
 import React from "react";
 import { X } from "lucide-react";
 import type { User } from "../../../types/index";
+import { useTranslation } from "react-i18next";
 
 interface MemberDetailModalProps {
   member: User | null;
@@ -12,6 +13,8 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
   member,
   onClose,
 }) => {
+  const { t } = useTranslation();
+
   if (!member) return null;
 
   return (
@@ -24,26 +27,26 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
           <X size={20} />
         </button>
         <h2 className="text-xl font-bold mb-4 text-blue-900 border-b pb-2">
-          Thông tin thành viên
+          {t("departmentDetail.memberDetailModal.title")}
         </h2>
 
         <div className="space-y-3">
           <div>
-            <span className="font-semibold text-gray-600">Họ tên:</span>{" "}
+            <span className="font-semibold text-gray-600">{t("departmentDetail.memberDetailModal.fullName")}</span>{" "}
             {member.name}
           </div>
           <div>
-            <span className="font-semibold text-gray-600">Email:</span>{" "}
+            <span className="font-semibold text-gray-600">{t("departmentDetail.memberDetailModal.email")}</span>{" "}
             {member.email}
           </div>
           <div>
-            <span className="font-semibold text-gray-600">Vai trò:</span>{" "}
+            <span className="font-semibold text-gray-600">{t("departmentDetail.memberDetailModal.role")}</span>{" "}
             <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-sm">
               {member.jobTitle}
             </span>
           </div>
           <div>
-            <span className="font-semibold text-gray-600">Tiến độ OKR:</span>
+            <span className="font-semibold text-gray-600">{t("departmentDetail.memberDetailModal.okrProgress")}</span>
             <div className="w-full bg-gray-200 rounded-full h-2.5 mt-1">
               <div
                 className="bg-green-600 h-2.5 rounded-full"
@@ -51,7 +54,7 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
               ></div>
             </div>
             <div className="text-right text-xs text-gray-500 mt-1">
-              60% hoàn thành
+              60% {t("departmentDetail.memberDetailModal.completed")}
             </div>
           </div>
         </div>
@@ -61,10 +64,10 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
             onClick={onClose}
             className="px-4 py-2 border rounded hover:bg-gray-50"
           >
-            Đóng
+            {t("departmentDetail.memberDetailModal.close")}
           </button>
           <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-            Xem chi tiết OKR
+            {t("departmentDetail.memberDetailModal.viewOkr")}
           </button>
         </div>
       </div>

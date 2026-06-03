@@ -1,6 +1,7 @@
 import { Box, Paper, Typography, FormControl, Select, MenuItem, Chip } from "@mui/material";
 import { Calendar } from "lucide-react";
 import type { CycleInfo } from "../useDeanDashboardData";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   cycles: CycleInfo[];
@@ -10,7 +11,22 @@ interface Props {
 }
 
 export default function CycleSelectorBar({ cycles, selectedCycleId, onCycleChange, currentCycle }: Props) {
+  const { t, i18n } = useTranslation();
+
   if (cycles.length === 0) return null;
+
+  const formatDateLocale = (dateStr?: string) => {
+    if (!dateStr) return "";
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return dateStr;
+    return date.toLocaleDateString(i18n.language === "vi" ? "vi-VN" : "en-US");
+  };
+
+  const getStatusLabel = (status: string) => {
+    if (status === "OPEN") return t("deanDashboard.cycleSelector.status.open");
+    if (status === "UPCOMING") return t("deanDashboard.cycleSelector.status.upcoming");
+    return t("deanDashboard.cycleSelector.status.closed");
+  };
 
   return (
     <Paper
@@ -42,7 +58,7 @@ export default function CycleSelectorBar({ cycles, selectedCycleId, onCycleChang
         </Box>
         <Box>
           <Typography variant="subtitle2" fontWeight={600} color="text.secondary">
-            Kỳ Đánh Giá
+            {t("deanDashboard.cycleSelector.title")}
           </Typography>
           <FormControl size="small" variant="standard" sx={{ minWidth: 200 }}>
             <Select
@@ -64,14 +80,14 @@ export default function CycleSelectorBar({ cycles, selectedCycleId, onCycleChang
       {currentCycle && (
         <Box sx={{ display: "flex", gap: 1 }}>
           <Chip
-            label={currentCycle.status === "OPEN" ? "Đang mở" : currentCycle.status === "UPCOMING" ? "Sắp tới" : "Đã đóng"}
+            label={getStatusLabel(currentCycle.status)}
             color={currentCycle.status === "OPEN" ? "success" : currentCycle.status === "UPCOMING" ? "warning" : "default"}
             size="small"
             sx={{ fontWeight: 600 }}
           />
           {currentCycle.startDate && currentCycle.endDate && (
             <Chip
-              label={`${new Date(currentCycle.startDate).toLocaleDateString("vi-VN")} - ${new Date(currentCycle.endDate).toLocaleDateString("vi-VN")}`}
+              label={`${formatDateLocale(currentCycle.startDate)} - ${formatDateLocale(currentCycle.endDate)}`}
               variant="outlined"
               size="small"
             />

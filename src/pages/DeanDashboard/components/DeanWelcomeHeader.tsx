@@ -2,6 +2,7 @@ import { Box, Typography, LinearProgress, Chip, FormControl, Select, MenuItem } 
 import { GraduationCap, Calendar, Clock } from "lucide-react";
 import { motion } from "framer-motion";
 import type { CycleInfo } from "../useDeanDashboardData";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   userName: string;
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export default function DeanWelcomeHeader({ userName, cycle, allCycles, selectedCycleId, onCycleChange }: Props) {
+  const { t } = useTranslation();
   const statusColor: Record<string, string> = {
     OPEN: "#16a34a",
     CLOSED: "#dc2626",
@@ -79,10 +81,14 @@ export default function DeanWelcomeHeader({ userName, cycle, allCycles, selected
           </Box>
           <Box>
             <Typography variant="h5" fontWeight={700} sx={{ letterSpacing: "-0.01em" }}>
-              Xin chào, {userName}
+              {t("deanDashboard.welcome.greeting")}, {userName}
             </Typography>
             <Typography variant="body2" sx={{ opacity: 0.8 }}>
-              Dashboard Quản lý — Tổng quan hiệu suất {isDepartmentManager ? "bộ môn" : "toàn khoa"}
+              {t("deanDashboard.welcome.subtitle", {
+                scope: isDepartmentManager
+                  ? t("deanDashboard.welcome.scope.department")
+                  : t("deanDashboard.welcome.scope.faculty")
+              })}
             </Typography>
           </Box>
         </Box>
@@ -122,7 +128,7 @@ export default function DeanWelcomeHeader({ userName, cycle, allCycles, selected
               </FormControl>
               {cycle && (
                 <Chip
-                  label={cycle.status}
+                  label={t(`deanDashboard.cycleSelector.status.${cycle.status.toLowerCase()}`, { defaultValue: cycle.status })}
                   size="small"
                   sx={{
                     bgcolor: statusColor[cycle.status] || "#6b7280",
@@ -143,9 +149,9 @@ export default function DeanWelcomeHeader({ userName, cycle, allCycles, selected
                 <Clock size={16} />
                 <Typography variant="body2" sx={{ opacity: 0.9 }}>
                   {cycle.daysRemaining !== null && cycle.daysRemaining > 0
-                    ? `Còn ${cycle.daysRemaining} ngày`
+                    ? t("deanDashboard.welcome.daysRemaining", { days: cycle.daysRemaining })
                     : cycle.daysRemaining !== null && cycle.daysRemaining <= 0
-                      ? "Đã hết hạn"
+                      ? t("deanDashboard.welcome.expired")
                       : "—"}
                 </Typography>
               </Box>
@@ -153,7 +159,7 @@ export default function DeanWelcomeHeader({ userName, cycle, allCycles, selected
               <Box sx={{ flex: 1, minWidth: 200 }}>
                 <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>
                   <Typography variant="caption" sx={{ opacity: 0.7 }}>
-                    Tiến độ kỳ
+                    {t("deanDashboard.welcome.progress")}
                   </Typography>
                   <Typography variant="caption" fontWeight={700}>
                     {cycle.progressPercent}%

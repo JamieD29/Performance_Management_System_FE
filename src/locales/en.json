@@ -73,6 +73,19 @@
       "approveProposals": "Approve Proposals",
       "reports": "OKR Reports",
       "approveForms": "Approve Forms"
+    },
+    "assignTab": {
+      "title": "Select Template to Assign to Personnel",
+      "noTemplates": "No templates available.",
+      "all": "All",
+      "assignBtn": "Assign OKR",
+      "table": {
+        "templateName": "Template Name",
+        "positionJobTitle": "Position / Job Title",
+        "author": "Author",
+        "createdAt": "Created At",
+        "actions": "Actions"
+      }
     }
   },
   "departmentMaster": {
@@ -597,6 +610,50 @@
       "saveBtn": "Save",
       "removeConfirmTitle": "Remove position?",
       "removeConfirmText": "Remove management position of \"{{name}}\"?"
+    },
+    "addModal": {
+      "editTitle": "Edit Department",
+      "createTitle": "Add New Department",
+      "nameLabel": "Department Name",
+      "nameRequired": "Name and Code are required",
+      "namePlaceholder": "Example: Software Engineering",
+      "codeLabel": "Department Code",
+      "codePlaceholder": "Example: SE, IT, CS...",
+      "descLabel": "Description",
+      "cancelBtn": "Cancel",
+      "saveBtn": "Save Changes",
+      "createBtn": "Create",
+      "saving": "Saving...",
+      "successTitle": "Success",
+      "successUpdate": "Department updated successfully!",
+      "successCreate": "New department added successfully!",
+      "errorTitle": "Error",
+      "errorDefault": "An error occurred"
+    },
+    "memberDetailModal": {
+      "title": "Member Information",
+      "fullName": "Full Name:",
+      "email": "Email:",
+      "role": "Role:",
+      "okrProgress": "OKR Progress:",
+      "completed": "completed",
+      "close": "Close",
+      "viewOkr": "View OKR Details"
+    },
+    "memberTable": {
+      "title": "Staff List: {{departmentName}}",
+      "addStaff": "+ Add Staff",
+      "noStaff": "No staff members in this department yet.",
+      "teachingHours": "{{count}} periods",
+      "featureUnderDevelopment": "This feature is under development.",
+      "noticeTitle": "Notice",
+      "headers": {
+        "nameEmail": "Name / Email",
+        "jobTitle": "Job Title",
+        "academicRankDegree": "Academic Rank / Degree",
+        "teachingHours": "Teaching Hours",
+        "actions": "Actions"
+      }
     }
   },
   "okrTemplates": {
@@ -776,6 +833,32 @@
         "AWAITING_REVIEW": "There are {{count}} evaluations waiting for Dean's grading",
         "PENDING_EVALUATION": "There are {{count}} staff members who haven't completed self-evaluation",
         "LATE_SUBMISSION": "There are {{count}} late submissions"
+      }
+    },
+    "welcome": {
+      "greeting": "Welcome",
+      "defaultName": "Dean",
+      "subtitle": "Manager Dashboard — Performance overview of {{scope}}",
+      "scope": {
+        "department": "department",
+        "faculty": "faculty"
+      },
+      "daysRemaining": "{{days}} days remaining",
+      "expired": "Expired",
+      "progress": "Period progress"
+    },
+    "loading": "Loading Manager Dashboard...",
+    "error": {
+      "title": "Error",
+      "fetchFailed": "Unable to load dashboard data. Please try again."
+    },
+    "cycleSelector": {
+      "title": "Evaluation Cycle",
+      "status": {
+        "open": "Open",
+        "upcoming": "Upcoming",
+        "closed": "Closed",
+        "archived": "Archived"
       }
     }
   }

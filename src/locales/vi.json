@@ -73,6 +73,19 @@
       "approveProposals": "Duyệt đề xuất",
       "reports": "Báo cáo OKR",
       "approveForms": "Xét duyệt Phiếu"
+    },
+    "assignTab": {
+      "title": "Chọn Template để gán cho nhân sự",
+      "noTemplates": "Chưa có template nào.",
+      "all": "Tất cả",
+      "assignBtn": "Gán OKR",
+      "table": {
+        "templateName": "Tên Template",
+        "positionJobTitle": "Chức vụ / Chức danh",
+        "author": "Tác giả",
+        "createdAt": "Ngày tạo",
+        "actions": "Thao tác"
+      }
     }
   },
   "departmentMaster": {
@@ -597,6 +610,50 @@
       "saveBtn": "Lưu",
       "removeConfirmTitle": "Gỡ chức vụ?",
       "removeConfirmText": "Gỡ chức vụ quản lý của \"{{name}}\"?"
+    },
+    "addModal": {
+      "editTitle": "Chỉnh Sửa Bộ Môn",
+      "createTitle": "Thêm Bộ Môn Mới",
+      "nameLabel": "Tên bộ môn",
+      "nameRequired": "Tên và Mã bộ môn là bắt buộc",
+      "namePlaceholder": "Ví dụ: Công nghệ phần mềm",
+      "codeLabel": "Mã bộ môn (Code)",
+      "codePlaceholder": "Ví dụ: SE, IT, CS...",
+      "descLabel": "Mô tả",
+      "cancelBtn": "Hủy",
+      "saveBtn": "Lưu Thay Đổi",
+      "createBtn": "Tạo mới",
+      "saving": "Đang lưu...",
+      "successTitle": "Thành công",
+      "successUpdate": "Cập nhật bộ môn thành công!",
+      "successCreate": "Thêm bộ môn mới thành công!",
+      "errorTitle": "Lỗi",
+      "errorDefault": "Có lỗi xảy ra"
+    },
+    "memberDetailModal": {
+      "title": "Thông tin thành viên",
+      "fullName": "Họ tên:",
+      "email": "Email:",
+      "role": "Vai trò:",
+      "okrProgress": "Tiến độ OKR:",
+      "completed": "hoàn thành",
+      "close": "Đóng",
+      "viewOkr": "Xem chi tiết OKR"
+    },
+    "memberTable": {
+      "title": "Danh sách nhân sự: {{departmentName}}",
+      "addStaff": "+ Thêm nhân sự",
+      "noStaff": "Chưa có nhân sự nào trong đơn vị này.",
+      "teachingHours": "{{count}} tiết",
+      "featureUnderDevelopment": "Tính năng đang được phát triển.",
+      "noticeTitle": "Thông báo",
+      "headers": {
+        "nameEmail": "Họ tên / Email",
+        "jobTitle": "Chức danh",
+        "academicRankDegree": "Học hàm / Học vị",
+        "teachingHours": "Giờ dạy",
+        "actions": "Thao tác"
+      }
     }
   },
   "okrTemplates": {
@@ -776,6 +833,32 @@
         "AWAITING_REVIEW": "Có {{count}} đánh giá chờ Trưởng khoa chấm điểm",
         "PENDING_EVALUATION": "Có {{count}} nhân sự chưa hoàn thành tự khai",
         "LATE_SUBMISSION": "Có {{count}} nhân sự nộp trễ hạn"
+      }
+    },
+    "welcome": {
+      "greeting": "Xin chào",
+      "defaultName": "Trưởng khoa",
+      "subtitle": "Dashboard Quản lý — Tổng quan hiệu suất {{scope}}",
+      "scope": {
+        "department": "bộ môn",
+        "faculty": "toàn khoa"
+      },
+      "daysRemaining": "Còn {{days}} ngày",
+      "expired": "Đã hết hạn",
+      "progress": "Tiến độ kỳ"
+    },
+    "loading": "Đang tải Dashboard Quản lý...",
+    "error": {
+      "title": "Lỗi",
+      "fetchFailed": "Không thể tải dữ liệu dashboard. Vui lòng thử lại."
+    },
+    "cycleSelector": {
+      "title": "Kỳ Đánh Giá",
+      "status": {
+        "open": "Đang mở",
+        "upcoming": "Sắp tới",
+        "closed": "Đã đóng",
+        "archived": "Đã lưu trữ"
       }
     }
   }

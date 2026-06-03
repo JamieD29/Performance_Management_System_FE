@@ -13,8 +13,10 @@ import SummaryCards from "./components/SummaryCards";
 import StaffRankingTable from "./components/StaffRankingTable";
 import DepartmentComparison from "./components/DepartmentComparison";
 import RatingDistribution from "./components/RatingDistribution";
+import { useTranslation } from "react-i18next";
 
 export default function DeanDashboard() {
+  const { t } = useTranslation();
   const [selectedCycleId, setSelectedCycleId] = useState<string>("");
   // Truyền selectedCycleId vào hook (nếu empty thì backend sẽ tự lấy kỳ mặc định)
   const { data, loading, error } = useDeanDashboardData(selectedCycleId || undefined);
@@ -27,11 +29,11 @@ export default function DeanDashboard() {
   }, [data?.cycle?.id, selectedCycleId]);
 
   // Lấy user từ session
-  let userName = "Trưởng khoa";
+  let userName = t("deanDashboard.welcome.defaultName", { defaultValue: "Trưởng khoa" });
   try {
     const userStr = localStorage.getItem("user");
     const user = userStr ? JSON.parse(userStr) : {};
-    userName = user.name || "Trưởng khoa";
+    userName = user.name || t("deanDashboard.welcome.defaultName", { defaultValue: "Trưởng khoa" });
   } catch {
     // ignore
   }
@@ -50,7 +52,7 @@ export default function DeanDashboard() {
       >
         <CircularProgress size={48} sx={{ color: "#2563eb" }} />
         <Typography color="text.secondary" variant="body2">
-          Đang tải Dashboard Quản lý...
+          {t("deanDashboard.loading")}
         </Typography>
       </Box>
     );
@@ -60,8 +62,8 @@ export default function DeanDashboard() {
     return (
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <Alert severity="error">
-          <AlertTitle>Lỗi</AlertTitle>
-          {error}
+          <AlertTitle>{t("deanDashboard.error.title")}</AlertTitle>
+          {error === "Không thể tải dữ liệu dashboard. Vui lòng thử lại." ? t("deanDashboard.error.fetchFailed") : error}
         </Alert>
       </Container>
     );

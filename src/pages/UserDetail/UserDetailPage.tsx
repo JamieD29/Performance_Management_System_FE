@@ -69,8 +69,17 @@ export default function UserDetailPage() {
                 sx={{ display: "flex", alignItems: "center", cursor: "pointer", color: "text.secondary", "&:hover": { color: "#1e293b", textDecoration: "underline" } }}
                 onClick={() => navigate(state.parentUrl || "/")}
               >
-                {state.parentName === t("userDetail.departmentOkr") ? <Assessment sx={{ mr: 0.5, fontSize: 18 }} /> : <Building2 size={16} style={{ marginRight: 4 }} />}
-                {state.parentName}
+                {(state.parentName === "OKR Bộ Môn" || state.parentName === "Department OKRs" || state.parentName === t("userDetail.departmentOkr")) ? (
+                  <>
+                    <Assessment sx={{ mr: 0.5, fontSize: 18 }} />
+                    {t("userDetail.departmentOkr")}
+                  </>
+                ) : (
+                  <>
+                    <Building2 size={16} style={{ marginRight: 4 }} />
+                    {state.parentName}
+                  </>
+                )}
               </Typography>
             )}
 
