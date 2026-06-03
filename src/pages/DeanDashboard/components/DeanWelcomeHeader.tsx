@@ -18,6 +18,10 @@ export default function DeanWelcomeHeader({ userName, cycle, allCycles, selected
     ARCHIVED: "#6b7280",
   };
 
+  const userStr = localStorage.getItem("user");
+  const user = userStr ? JSON.parse(userStr) : null;
+  const isDepartmentManager = user?.managementPosition?.permissionLevel === 'DON_VI';
+
   return (
     <motion.div
       initial={{ opacity: 0, y: -10 }}
@@ -78,7 +82,7 @@ export default function DeanWelcomeHeader({ userName, cycle, allCycles, selected
               Xin chào, {userName}
             </Typography>
             <Typography variant="body2" sx={{ opacity: 0.8 }}>
-              Dashboard Quản lý — Tổng quan hiệu suất toàn khoa
+              Dashboard Quản lý — Tổng quan hiệu suất {isDepartmentManager ? "bộ môn" : "toàn khoa"}
             </Typography>
           </Box>
         </Box>

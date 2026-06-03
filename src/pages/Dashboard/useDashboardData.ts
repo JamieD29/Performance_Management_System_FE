@@ -369,12 +369,16 @@ function computeAction(
 // HOOK
 // ============================================================
 
-export function useDashboardData() {
+export function useDashboardData(skip?: boolean) {
   const [data, setData] = useState<DashboardData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(skip ? false : true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
+    if (skip) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError(null);
 
@@ -491,11 +495,13 @@ export function useDashboardData() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [skip]);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    if (!skip) {
+      fetchData();
+    }
+  }, [fetchData, skip]);
 
   return { data, loading, error, refetch: fetchData };
 }

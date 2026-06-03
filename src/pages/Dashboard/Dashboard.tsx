@@ -1,4 +1,5 @@
-import React from "react";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -19,9 +20,34 @@ import CycleProgress from "./components/CycleProgress";
 import EvaluationStatus from "./components/EvaluationStatus";
 
 export default function Dashboard() {
-  const { data, loading, error } = useDashboardData();
+  const navigate = useNavigate();
 
-  if (loading) {
+  // Retrieve user and roles to check for redirection
+  const userStr = localStorage.getItem("user");
+  const user = userStr ? JSON.parse(userStr) : null;
+  const rawRoles = user?.roles || [];
+  const userRoles = Array.isArray(rawRoles)
+    ? rawRoles.map((r: any) => {
+        const val = typeof r === "string" ? r : r.slug || r.name || "";
+        return val.toString().toUpperCase();
+      })
+    : [];
+  const isAdmin = userRoles.includes("ADMIN");
+  const hasManagementPosition = !!user?.managementPosition;
+
+  const shouldRedirect = isAdmin || hasManagementPosition;
+
+  useEffect(() => {
+    if (isAdmin) {
+      navigate("/admin-dashboard", { replace: true });
+    } else if (hasManagementPosition) {
+      navigate("/dean-dashboard", { replace: true });
+    }
+  }, [isAdmin, hasManagementPosition, navigate]);
+
+  const { data, loading, error } = useDashboardData(shouldRedirect);
+
+  if (shouldRedirect || loading) {
     return (
       <Box
         sx={{

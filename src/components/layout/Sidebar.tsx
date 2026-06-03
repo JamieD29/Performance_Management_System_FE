@@ -84,8 +84,13 @@ export default function Sidebar({
   const hasManagementPosition = !!user?.managementPosition;
   const canManage = isAdmin || hasManagementPosition;
   
-  const isDean = user?.managementPosition?.slug === 'TRUONG_KHOA';
-  const canViewDeanDashboard = isAdmin || isDean;
+  const canViewDeanDashboard = isAdmin || hasManagementPosition;
+
+  const isActive = (path: string) => location.pathname === path;
+
+  const dashboardPath = hasManagementPosition ? "/dean-dashboard" : "/dashboard";
+  const dashboardLabel = hasManagementPosition ? t("sidebar.deanDashboard") : t("sidebar.dashboard");
+  const dashboardActive = isActive(dashboardPath);
 
   // Admin, hoặc bất kỳ user nào có chức vụ quản lý đều thấy tab Nhân sự
   const canViewUsers = canManage;
@@ -97,8 +102,6 @@ export default function Sidebar({
     onClose();
     handlePopoverClose();
   };
-
-  const isActive = (path: string) => location.pathname === path;
 
   // Popover handlers
   const handlePopoverOpen = (
@@ -240,7 +243,7 @@ export default function Sidebar({
   // 4. POPOVER SUB-MENUS (collapsed mode)
   // ==========================================
   const deptSubItems = [
-    ...(canViewDeanDashboard
+    ...(canViewDeanDashboard && !hasManagementPosition
       ? [
           {
             label: t("sidebar.deanDashboard"),
@@ -464,19 +467,19 @@ export default function Sidebar({
               {/* ── Dashboard ── */}
           <Box sx={{ px: collapsed ? 0.5 : 1, mb: 3 }}>
             <Tooltip
-              title={collapsed ? t("sidebar.dashboard") : ""}
+              title={collapsed ? dashboardLabel : ""}
               placement="right"
               arrow
             >
               <ListItemButton
-                onClick={() => handleNavigate("/dashboard")}
+                onClick={() => handleNavigate(dashboardPath)}
                 sx={{
-                  ...getItemStyles("/dashboard"),
-                  bgcolor: isActive("/dashboard")
+                  ...getItemStyles(dashboardPath),
+                  bgcolor: dashboardActive
                     ? "#BDE8F5"
                     : "rgba(255, 255, 255, 0.1)",
-                  color: isActive("/dashboard") ? colors.bg : colors.textBright,
-                  boxShadow: isActive("/dashboard")
+                  color: dashboardActive ? colors.bg : colors.textBright,
+                  boxShadow: dashboardActive
                     ? "0 4px 12px rgba(0, 0, 0, 0.2)"
                     : "none",
                   borderRadius: "16px",
@@ -486,16 +489,16 @@ export default function Sidebar({
                   py: 1.2,
                   zIndex: 1,
                   "& .MuiListItemIcon-root": {
-                    color: isActive("/dashboard") ? colors.bg : colors.accent2,
+                    color: dashboardActive ? colors.bg : colors.accent2,
                   },
                   "&:hover": {
-                    bgcolor: isActive("/dashboard")
+                    bgcolor: dashboardActive
                       ? "#BDE8F5"
                       : "rgba(255, 255, 255, 0.2)",
                     transform: collapsed ? "none" : "translateY(-2px)",
                     boxShadow: "0 8px 16px rgba(0, 0, 0, 0.2)",
                     "& .MuiListItemIcon-root": {
-                      color: isActive("/dashboard")
+                      color: dashboardActive
                         ? colors.bg
                         : colors.textBright,
                     },
@@ -504,12 +507,12 @@ export default function Sidebar({
                 }}
               >
                 <ListItemIcon
-                  sx={{ ...getIconStyles("/dashboard"), color: "inherit" }}
+                  sx={{ ...getIconStyles(dashboardPath), color: "inherit" }}
                 >
-                  <LayoutDashboard size={21} />
+                  {hasManagementPosition ? <BarChart3 size={21} /> : <LayoutDashboard size={21} />}
                 </ListItemIcon>
                 <ListItemText
-                  primary={t("sidebar.dashboard")}
+                  primary={dashboardLabel}
                   sx={{
                     opacity: collapsed ? 0 : 1,
                     width: collapsed ? 0 : "auto",
@@ -518,7 +521,7 @@ export default function Sidebar({
                     whiteSpace: "nowrap",
                   }}
                   primaryTypographyProps={{
-                    fontWeight: isActive("/dashboard") ? 700 : 600,
+                    fontWeight: dashboardActive ? 700 : 600,
                     fontSize: "0.95rem",
                   }}
                 />
@@ -940,7 +943,7 @@ export default function Sidebar({
               {!collapsed && (
                 <Collapse in={openDept} timeout={300} unmountOnExit>
                   <List component="div" disablePadding>
-                    {canViewDeanDashboard && (
+                    {canViewDeanDashboard && !hasManagementPosition && (
                       <ListItemButton
                         sx={{ ...getItemStyles("/dean-dashboard"), pl: 4 }}
                         onClick={() => handleNavigate("/dean-dashboard")}
