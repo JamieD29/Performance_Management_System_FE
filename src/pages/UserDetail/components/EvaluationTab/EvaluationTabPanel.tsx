@@ -5,21 +5,23 @@ import { EVALUATION_STATUS_MAP } from "../../userDetail.constants";
 import ScoreComparisonBar from "./ScoreComparisonBar";
 import TaskGroupTable from "./TaskGroupTable";
 import CommentSection from "./CommentSection";
+import { useTranslation } from "react-i18next";
 
 interface EvaluationTabPanelProps {
   evaluation: StaffEvaluation | null;
 }
 
 export default function EvaluationTabPanel({ evaluation }: EvaluationTabPanelProps) {
+  const { t } = useTranslation();
   if (!evaluation) {
     return (
       <Box sx={{ py: 8, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
         <Assessment sx={{ fontSize: 64, color: "#e2e8f0", mb: 2 }} />
         <Typography variant="h6" color="text.secondary">
-          Không có phiếu đánh giá
+          {t("userDetail.evaluation.noEvaluation")}
         </Typography>
         <Typography variant="body2" color="text.disabled">
-          Nhân sự chưa được đánh giá hoặc chưa nộp phiếu trong kỳ này.
+          {t("userDetail.evaluation.noEvaluationDesc")}
         </Typography>
       </Box>
     );
@@ -31,10 +33,10 @@ export default function EvaluationTabPanel({ evaluation }: EvaluationTabPanelPro
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Typography variant="h6" fontWeight="bold" sx={{ color: "#1e293b" }}>
-          Phiếu đánh giá hiệu suất
+          {t("userDetail.evaluation.sheetTitle")}
         </Typography>
         <Chip
-          label={statusConfig.label}
+          label={t(statusConfig.labelKey)}
           sx={{ bgcolor: statusConfig.bgcolor, color: statusConfig.color, fontWeight: 600 }}
         />
       </Box>

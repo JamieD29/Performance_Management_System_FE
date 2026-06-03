@@ -3,6 +3,7 @@ import { ExpandMore, Flag } from "@mui/icons-material";
 import type { StaffOkr } from "../../userDetail.types";
 import { OKR_STATUS_MAP } from "../../userDetail.constants";
 import KeyResultRow from "./KeyResultRow";
+import { useTranslation } from "react-i18next";
 
 interface OkrObjectiveCardProps {
   okr: StaffOkr;
@@ -10,6 +11,7 @@ interface OkrObjectiveCardProps {
 }
 
 export default function OkrObjectiveCard({ okr, defaultExpanded = true }: OkrObjectiveCardProps) {
+  const { t } = useTranslation();
   const statusConfig = OKR_STATUS_MAP[okr.status] || OKR_STATUS_MAP.PENDING;
 
   // Tính tổng điểm thực tế từ các KR (nếu chưa có totalScore)
@@ -36,14 +38,14 @@ export default function OkrObjectiveCard({ okr, defaultExpanded = true }: OkrObj
               {okr.objective}
             </Typography>
             <Chip
-              label={statusConfig.label}
+              label={t(statusConfig.labelKey)}
               size="small"
               sx={{ bgcolor: statusConfig.bgcolor, color: statusConfig.color, fontWeight: 600, fontSize: "0.7rem" }}
             />
           </Box>
           <Box sx={{ textAlign: "right" }}>
             <Typography variant="caption" color="text.secondary" display="block">
-              Tổng điểm (Tự động)
+              {t("userDetail.okr.totalScore")}
             </Typography>
             <Typography variant="subtitle2" fontWeight="bold" color="#0f766e">
               {displayScore.toFixed(1)}
@@ -54,7 +56,7 @@ export default function OkrObjectiveCard({ okr, defaultExpanded = true }: OkrObj
       <AccordionDetails sx={{ p: 3, bgcolor: "#fff" }}>
         {okr.keyResults.length === 0 ? (
           <Typography variant="body2" color="text.secondary" sx={{ fontStyle: "italic" }}>
-            Không có kết quả then chốt nào.
+            {t("userDetail.okr.noKeyResults")}
           </Typography>
         ) : (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>

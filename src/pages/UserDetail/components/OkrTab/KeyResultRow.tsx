@@ -1,6 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import type { KeyResult } from "../../userDetail.types";
 import { LinearProgress } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 interface KeyResultRowProps {
   kr: KeyResult;
@@ -9,6 +10,7 @@ interface KeyResultRowProps {
 }
 
 export default function KeyResultRow({ kr, selfEvidence, managerScore }: KeyResultRowProps) {
+  const { t } = useTranslation();
   const progress = kr.target > 0 ? (kr.actual / kr.target) * 100 : 0;
   const clampedProgress = Math.min(Math.max(progress, 0), 100);
 
@@ -50,35 +52,35 @@ export default function KeyResultRow({ kr, selfEvidence, managerScore }: KeyResu
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mt: 1.5, bgcolor: "#f8fafc", p: 1.5, borderRadius: 2 }}>
         <Box sx={{ flex: 1, minWidth: 200 }}>
           <Typography variant="caption" color="text.secondary" display="block">
-            Minh chứng tự khai:
+            {t("userDetail.okr.selfEvidence")}
           </Typography>
           <Typography variant="body2" sx={{ color: "#475569", mt: 0.5, fontStyle: selfEvidence ? "normal" : "italic" }}>
-            {selfEvidence || "Chưa có minh chứng"}
+            {selfEvidence || t("userDetail.okr.noEvidence")}
           </Typography>
         </Box>
         <Box sx={{ display: "flex", gap: 3 }}>
           <Box>
             <Typography variant="caption" color="text.secondary" display="block">
-              Trọng số / Max
+              {t("userDetail.okr.weightMax")}
             </Typography>
             <Typography variant="body2" fontWeight={500}>
-              {kr.weight}% / {kr.maxScore}đ
+              {kr.weight}% / {kr.maxScore}{t("userDetail.okr.scoreUnit")}
             </Typography>
           </Box>
           <Box>
             <Typography variant="caption" color="text.secondary" display="block">
-              Điểm hệ thống
+              {t("userDetail.okr.systemScore")}
             </Typography>
             <Typography variant="body2" fontWeight={500} color="#3b82f6">
-              {kr.score?.toFixed(1) || 0}đ
+              {kr.score?.toFixed(1) || 0}{t("userDetail.okr.scoreUnit")}
             </Typography>
           </Box>
           <Box>
             <Typography variant="caption" color="text.secondary" display="block">
-              Điểm quản lý
+              {t("userDetail.okr.managerScore")}
             </Typography>
             <Typography variant="body2" fontWeight="bold" color={managerScore !== undefined ? "#059669" : "text.disabled"}>
-              {managerScore !== undefined ? `${managerScore.toFixed(1)}đ` : "—"}
+              {managerScore !== undefined ? `${managerScore.toFixed(1)}${t("userDetail.okr.scoreUnit")}` : "—"}
             </Typography>
           </Box>
         </Box>

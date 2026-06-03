@@ -2,6 +2,7 @@ import { Box, MenuItem, Select, Typography } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material";
 import { CalendarMonth } from "@mui/icons-material";
 import type { CycleOption } from "../userDetail.types";
+import { useTranslation } from "react-i18next";
 
 interface CycleSelectorProps {
   cycles: CycleOption[];
@@ -10,10 +11,11 @@ interface CycleSelectorProps {
 }
 
 export default function CycleSelector({ cycles, selectedId, onChange }: CycleSelectorProps) {
+  const { t } = useTranslation();
   if (!cycles || cycles.length === 0) {
     return (
       <Typography variant="body2" color="text.secondary">
-        Chưa có kỳ đánh giá nào.
+        {t("userDetail.cycle.noCycle")}
       </Typography>
     );
   }
@@ -25,7 +27,7 @@ export default function CycleSelector({ cycles, selectedId, onChange }: CycleSel
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
       <Typography variant="body2" color="text.secondary" fontWeight={500}>
-        Kỳ đánh giá:
+        {t("userDetail.cycle.label")}
       </Typography>
       <Select
         value={selectedId}
@@ -44,7 +46,7 @@ export default function CycleSelector({ cycles, selectedId, onChange }: CycleSel
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <CalendarMonth fontSize="small" sx={{ color: "#64748b" }} />
               <Typography variant="body2" fontWeight={500}>
-                {c?.name || "Chọn kỳ"}
+                {c?.name || t("userDetail.cycle.placeholder")}
               </Typography>
             </Box>
           );
@@ -57,7 +59,7 @@ export default function CycleSelector({ cycles, selectedId, onChange }: CycleSel
                 {cycle.name}
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                {cycle.type === "SEMESTER" ? "Học kỳ" : cycle.type === "QUARTER" ? "Quý" : "Khác"}
+                {cycle.type === "SEMESTER" ? t("userDetail.cycle.semester") : cycle.type === "QUARTER" ? t("userDetail.cycle.quarter") : t("userDetail.cycle.other")}
               </Typography>
             </Box>
           </MenuItem>

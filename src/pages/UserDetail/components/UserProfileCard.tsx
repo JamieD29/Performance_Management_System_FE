@@ -1,13 +1,15 @@
-import { Box, Paper, Typography, Avatar, Chip, alpha } from "@mui/material";
-import { Email, Work, Business, Person, School, Badge, CalendarToday, VerifiedUser } from "@mui/icons-material";
+import { Box, Paper, Typography, Avatar, alpha } from "@mui/material";
+import { Email, Work, Business, Person, School, Badge, CalendarToday } from "@mui/icons-material";
 import type { User } from "../../../types";
 import { THEME_COLORS } from "../../ProfileSetting/profile.constants";
+import { useTranslation } from "react-i18next";
 
 interface UserProfileCardProps {
   user: User;
 }
 
 export default function UserProfileCard({ user }: UserProfileCardProps) {
+  const { t, i18n } = useTranslation();
   const mainColor = THEME_COLORS.IDENTITY;
 
   // Component nhỏ để hiển thị các thông tin phụ
@@ -126,12 +128,12 @@ export default function UserProfileCard({ user }: UserProfileCardProps) {
           />
           <InfoBadge
             icon={<Badge fontSize="small" sx={{ color: THEME_COLORS.WORK }} />}
-            text={user.staffCode || "Chưa có mã NV"}
+            text={user.staffCode || t("userDetail.profile.noStaffCode")}
             colorBg={alpha(THEME_COLORS.WORK, 0.08)}
           />
           <InfoBadge
             icon={<Business fontSize="small" sx={{ color: THEME_COLORS.ACHIEVEMENT }} />}
-            text={user.department?.name || "Chưa phân bổ"}
+            text={user.department?.name || t("userDetail.profile.unassignedDept")}
             colorBg={alpha(THEME_COLORS.ACHIEVEMENT, 0.08)}
           />
         </Box>
@@ -151,25 +153,25 @@ export default function UserProfileCard({ user }: UserProfileCardProps) {
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <Work sx={{ color: "#94a3b8", fontSize: 20 }} />
             <Typography variant="body2" color="text.secondary">
-              Chức danh: <Typography component="span" fontWeight={500} color="#1e293b">{user.jobTitle || "N/A"}</Typography>
+              {t("userDetail.profile.jobTitle")} <Typography component="span" fontWeight={500} color="#1e293b">{user.jobTitle || "N/A"}</Typography>
             </Typography>
           </Box>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <Person sx={{ color: "#94a3b8", fontSize: 20 }} />
             <Typography variant="body2" color="text.secondary">
-              Chức vụ: <Typography component="span" fontWeight={500} color="#1e293b">{user.managementPosition?.name || "N/A"}</Typography>
+              {t("userDetail.profile.position")} <Typography component="span" fontWeight={500} color="#1e293b">{user.managementPosition?.name || "N/A"}</Typography>
             </Typography>
           </Box>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <School sx={{ color: "#94a3b8", fontSize: 20 }} />
             <Typography variant="body2" color="text.secondary">
-              Học vị/Học hàm: <Typography component="span" fontWeight={500} color="#1e293b">{user.degree || "N/A"} {user.academicRank && user.academicRank !== "Không" ? ` - ${user.academicRank}` : ""}</Typography>
+              {t("userDetail.profile.degreeAcademicRank")} <Typography component="span" fontWeight={500} color="#1e293b">{user.degree || "N/A"} {user.academicRank && user.academicRank !== "Không" && user.academicRank !== "None" ? ` - ${user.academicRank}` : ""}</Typography>
             </Typography>
           </Box>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <CalendarToday sx={{ color: "#94a3b8", fontSize: 20 }} />
             <Typography variant="body2" color="text.secondary">
-              Ngày vào: <Typography component="span" fontWeight={500} color="#1e293b">{user.joinDate ? new Date(user.joinDate).toLocaleDateString("vi-VN") : "N/A"}</Typography>
+              {t("userDetail.profile.joinDate")} <Typography component="span" fontWeight={500} color="#1e293b">{user.joinDate ? new Date(user.joinDate).toLocaleDateString(i18n.language === "vi" ? "vi-VN" : "en-US") : "N/A"}</Typography>
             </Typography>
           </Box>
         </Box>

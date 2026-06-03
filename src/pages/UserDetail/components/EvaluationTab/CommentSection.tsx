@@ -1,6 +1,7 @@
 import { Box, Paper, Typography, Chip } from "@mui/material";
 import { Person, SupportAgent } from "@mui/icons-material";
 import { RATING_LABELS } from "../../userDetail.constants";
+import { useTranslation } from "react-i18next";
 
 interface CommentSectionProps {
   selfComment?: string;
@@ -15,6 +16,7 @@ export default function CommentSection({
   managerComment,
   managerRating,
 }: CommentSectionProps) {
+  const { t } = useTranslation();
   return (
     <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
       <Box>
@@ -22,16 +24,16 @@ export default function CommentSection({
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
             <Person sx={{ color: "#3b82f6" }} />
             <Typography variant="subtitle2" fontWeight="bold" color="#1e293b">
-              Nhân sự tự nhận xét
+              {t("userDetail.comment.selfCommentTitle")}
             </Typography>
           </Box>
           <Typography variant="body2" sx={{ color: "#475569", mb: 2, minHeight: 60, whiteSpace: "pre-wrap" }}>
-            {selfComment || "Chưa có nhận xét."}
+            {selfComment || t("userDetail.comment.noSelfComment")}
           </Typography>
           <Box>
-            <Typography variant="caption" color="text.secondary" display="block" mb={0.5}>Tự xếp loại:</Typography>
+            <Typography variant="caption" color="text.secondary" display="block" mb={0.5}>{t("userDetail.comment.selfRatingLabel")}</Typography>
             <Chip 
-              label={selfRating ? RATING_LABELS[selfRating] || selfRating : "Chưa xếp loại"} 
+              label={selfRating ? (RATING_LABELS[selfRating] ? t(RATING_LABELS[selfRating]) : selfRating) : t("userDetail.status.noRating")} 
               size="small" 
               color="primary" 
               variant="outlined" 
@@ -45,16 +47,16 @@ export default function CommentSection({
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
             <SupportAgent sx={{ color: "#059669" }} />
             <Typography variant="subtitle2" fontWeight="bold" color="#1e293b">
-              Quản lý nhận xét
+              {t("userDetail.comment.managerCommentTitle")}
             </Typography>
           </Box>
           <Typography variant="body2" sx={{ color: "#475569", mb: 2, minHeight: 60, whiteSpace: "pre-wrap" }}>
-            {managerComment || "Quản lý chưa nhận xét."}
+            {managerComment || t("userDetail.comment.noManagerComment")}
           </Typography>
           <Box>
-            <Typography variant="caption" color="text.secondary" display="block" mb={0.5}>Quản lý xếp loại:</Typography>
+            <Typography variant="caption" color="text.secondary" display="block" mb={0.5}>{t("userDetail.comment.managerRatingLabel")}</Typography>
             <Chip 
-              label={managerRating ? RATING_LABELS[managerRating] || managerRating : "Chưa xếp loại"} 
+              label={managerRating ? (RATING_LABELS[managerRating] ? t(RATING_LABELS[managerRating]) : managerRating) : t("userDetail.status.noRating")} 
               size="small" 
               color="success" 
             />

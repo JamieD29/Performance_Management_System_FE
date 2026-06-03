@@ -365,5 +365,109 @@
       "viewDetails": "Detailed evaluation",
       "quickApprove": "Accept self-reported scores"
     }
+  },
+  "myOkrPage": {
+    "title": "My OKRs",
+    "subtitle": "View details of assigned OKRs, report self-scores, and track status.",
+    "selectCycle": "Select Evaluation Cycle",
+    "openStatus": "(Open)",
+    "closedStatus": "(Closed)",
+    "cycleLabel": "Evaluation Cycle: ",
+    "timeLabel": "Time: ",
+    "assignedDateLabel": "OKR Assigned Date: ",
+    "negotiationComplete": "Negotiation Completed",
+    "finalizedOn": "OKR finalized on ",
+    "negotiationDeadline": "Negotiation & Finalization Deadline:",
+    "pendingAlert": "You have {{count}} OKR(s) pending response in this cycle.",
+    "pendingAlertDesc": " Click to view details and Accept or Propose adjustments.",
+    "acceptedAlert": "You have {{count}} OKR(s) ready for self-reporting in this cycle.",
+    "acceptedAlertDesc": " Click, enter quantities and evidence, then submit.",
+    "loading": "Loading data...",
+    "noOkr": "You have not been assigned any OKRs. Please wait for the Dean to assign OKRs to you.",
+    "noOkrInCycle": "No OKRs found in the selected evaluation cycle."
+  },
+  "userDetail": {
+    "notFound": "Staff information not found",
+    "category": "Categories",
+    "tabOkr": "Objectives (OKR)",
+    "tabEvaluation": "Performance Evaluation",
+    "tabTrend": "Development Trend",
+    "departmentUnit": "Unit",
+    "departmentOkr": "Department OKRs",
+    "errorLoad": "Failed to load staff details",
+    "profile": {
+      "noStaffCode": "No staff code",
+      "unassignedDept": "Unassigned",
+      "jobTitle": "Job Title:",
+      "position": "Position:",
+      "degreeAcademicRank": "Degree/Academic Rank:",
+      "joinDate": "Join Date:"
+    },
+    "cycle": {
+      "noCycle": "No evaluation cycles found.",
+      "label": "Evaluation Cycle:",
+      "placeholder": "Select cycle",
+      "semester": "Semester",
+      "quarter": "Quarter",
+      "other": "Other"
+    },
+    "okr": {
+      "noOkrData": "No OKR Data",
+      "noOkrDataDesc": "This staff member has not been assigned or has not created OKRs for this cycle.",
+      "totalScore": "Total Score (Auto)",
+      "noKeyResults": "No key results.",
+      "selfEvidence": "Self-reported Evidence:",
+      "noEvidence": "No evidence provided",
+      "weightMax": "Weight / Max",
+      "systemScore": "System Score",
+      "managerScore": "Manager Score",
+      "scoreUnit": "pts"
+    },
+    "evaluation": {
+      "noEvaluation": "No evaluation form found",
+      "noEvaluationDesc": "This staff member has not been evaluated or has not submitted their form for this cycle.",
+      "sheetTitle": "Performance Evaluation Form",
+      "totalEvaluationScore": "Total Evaluation Score",
+      "selfEvaluation": "Self-Evaluation",
+      "managerEvaluation": "Manager Evaluation",
+      "taskGroup": "TASK GROUP",
+      "maxScore": "MAX SCORE",
+      "selfScore": "SELF SCORE",
+      "managerScore": "MANAGER SCORE",
+      "weight": "Weight:"
+    },
+    "comment": {
+      "selfCommentTitle": "Staff Self-Comments",
+      "noSelfComment": "No comments provided.",
+      "selfRatingLabel": "Self-Rating:",
+      "managerCommentTitle": "Manager Comments",
+      "noManagerComment": "Manager has not provided comments.",
+      "managerRatingLabel": "Manager Rating:"
+    },
+    "trend": {
+      "title": "Evaluation Trend",
+      "maxScore": "Max Score",
+      "achievedScore": "Achieved Score",
+      "demoWarning": "* Chart data is currently in demo mode. Historical data from past cycles will be integrated in the future."
+    },
+    "status": {
+      "pending": "Pending",
+      "negotiating": "Negotiating",
+      "accepted": "Approved",
+      "rejected": "Rejected",
+      "submitted": "Submitted (Self)",
+      "completed": "Finalized",
+      "draft": "Draft",
+      "waitingManager": "Awaiting Manager Approval",
+      "managerEvaluated": "Evaluated by Manager",
+      "finalized": "Finalized",
+      "noRating": "Not rated yet"
+    },
+    "rating": {
+      "A": "A - Excellent",
+      "B": "B - Very Good",
+      "C": "C - Good / Meets Expectations",
+      "D": "D - Unsatisfactory"
+    }
   }
 }

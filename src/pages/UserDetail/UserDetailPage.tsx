@@ -3,6 +3,7 @@ import { Person, Assessment, TrendingUp, NavigateNext, School, ArrowBack } from 
 import { Building2 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useUserDetailData } from "./useUserDetailData";
 import UserProfileCard from "./components/UserProfileCard";
 import CycleSelector from "./components/CycleSelector";
@@ -13,6 +14,7 @@ import { THEME_COLORS } from "../ProfileSetting/profile.constants";
 
 export default function UserDetailPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const location = useLocation();
   const state = location.state as { parentName?: string; parentUrl?: string } | null;
   const { data, loading, error, selectedCycleId, setSelectedCycleId } = useUserDetailData();
@@ -29,7 +31,9 @@ export default function UserDetailPage() {
   if (error || !data) {
     return (
       <Box sx={{ textAlign: "center", py: 8 }}>
-        <Typography color="error" variant="h6">{error || "Không tìm thấy thông tin nhân sự"}</Typography>
+        <Typography color="error" variant="h6">
+          {error ? (error.startsWith("userDetail.") ? t(error) : error) : t("userDetail.notFound")}
+        </Typography>
       </Box>
     );
   }
@@ -60,12 +64,12 @@ export default function UserDetailPage() {
               Đơn vị
             </Typography> */}
 
-            {state?.parentName && state.parentName !== "Đơn vị" && (
+            {state?.parentName && state.parentName !== t("userDetail.departmentUnit") && (
               <Typography
                 sx={{ display: "flex", alignItems: "center", cursor: "pointer", color: "text.secondary", "&:hover": { color: "#1e293b", textDecoration: "underline" } }}
                 onClick={() => navigate(state.parentUrl || "/")}
               >
-                {state.parentName === "OKR Bộ Môn" ? <Assessment sx={{ mr: 0.5, fontSize: 18 }} /> : <Building2 size={16} style={{ marginRight: 4 }} />}
+                {state.parentName === t("userDetail.departmentOkr") ? <Assessment sx={{ mr: 0.5, fontSize: 18 }} /> : <Building2 size={16} style={{ marginRight: 4 }} />}
                 {state.parentName}
               </Typography>
             )}
@@ -123,7 +127,7 @@ export default function UserDetailPage() {
                 letterSpacing: 1,
               }}
             >
-              Danh mục
+              {t("userDetail.category")}
             </Typography>
             <Tabs
               orientation="vertical"
@@ -145,9 +149,9 @@ export default function UserDetailPage() {
                 },
               }}
             >
-              <Tab icon={<Person />} iconPosition="start" label="Mục tiêu (OKR)" />
-              <Tab icon={<Assessment />} iconPosition="start" label="Đánh giá hiệu suất" />
-              <Tab icon={<TrendingUp />} iconPosition="start" label="Xu hướng phát triển" />
+              <Tab icon={<Person />} iconPosition="start" label={t("userDetail.tabOkr")} />
+              <Tab icon={<Assessment />} iconPosition="start" label={t("userDetail.tabEvaluation")} />
+              <Tab icon={<TrendingUp />} iconPosition="start" label={t("userDetail.tabTrend")} />
             </Tabs>
             <Box sx={{ mb: 2 }} />
           </Paper>
@@ -179,9 +183,9 @@ export default function UserDetailPage() {
                 fontWeight="bold"
                 sx={{ color: "#1e293b" }}
               >
-                {activeTab === 0 && "Mục tiêu (OKR)"}
-                {activeTab === 1 && "Đánh giá hiệu suất"}
-                {activeTab === 2 && "Xu hướng phát triển"}
+                {activeTab === 0 && t("userDetail.tabOkr")}
+                {activeTab === 1 && t("userDetail.tabEvaluation")}
+                {activeTab === 2 && t("userDetail.tabTrend")}
               </Typography>
 
               <CycleSelector

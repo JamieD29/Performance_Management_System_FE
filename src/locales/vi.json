@@ -365,5 +365,109 @@
       "viewDetails": "Đánh giá chi tiết",
       "quickApprove": "Chấp nhận điểm tự khai"
     }
+  },
+  "myOkrPage": {
+    "title": "OKR Của Tôi",
+    "subtitle": "Xem chi tiết OKR được giao, tự khai điểm, và theo dõi trạng thái.",
+    "selectCycle": "Chọn Kỳ đánh giá",
+    "openStatus": "(Đang mở)",
+    "closedStatus": "(Đã đóng)",
+    "cycleLabel": "Kỳ đánh giá: ",
+    "timeLabel": "Thời gian: ",
+    "assignedDateLabel": "Ngày được giao OKR: ",
+    "negotiationComplete": "Hoàn tất đàm phán",
+    "finalizedOn": "Đã chốt OKR ngày ",
+    "negotiationDeadline": "Hạn chót đàm phán & chốt OKR:",
+    "pendingAlert": "Bạn có {{count}} OKR đang chờ phản hồi trong kỳ này.",
+    "pendingAlertDesc": " Nhấn vào để xem chi tiết và Chấp nhận hoặc Đề xuất điều chỉnh.",
+    "acceptedAlert": "Bạn có {{count}} OKR sẵn sàng tự khai điểm trong kỳ này.",
+    "acceptedAlertDesc": " Nhấn vào, nhập số lượng và minh chứng, rồi nộp bài.",
+    "loading": "Đang tải dữ liệu...",
+    "noOkr": "Bạn chưa được giao OKR nào. Hãy đợi Trưởng khoa giao OKR cho bạn.",
+    "noOkrInCycle": "Không tìm thấy OKR nào trong kỳ đánh giá được chọn."
+  },
+  "userDetail": {
+    "notFound": "Không tìm thấy thông tin nhân sự",
+    "category": "Danh mục",
+    "tabOkr": "Mục tiêu (OKR)",
+    "tabEvaluation": "Đánh giá hiệu suất",
+    "tabTrend": "Xu hướng phát triển",
+    "departmentUnit": "Đơn vị",
+    "departmentOkr": "OKR Bộ Môn",
+    "errorLoad": "Không thể tải thông tin nhân sự",
+    "profile": {
+      "noStaffCode": "Chưa có mã NV",
+      "unassignedDept": "Chưa phân bổ",
+      "jobTitle": "Chức danh:",
+      "position": "Chức vụ:",
+      "degreeAcademicRank": "Học vị/Học hàm:",
+      "joinDate": "Ngày vào:"
+    },
+    "cycle": {
+      "noCycle": "Chưa có kỳ đánh giá nào.",
+      "label": "Kỳ đánh giá:",
+      "placeholder": "Chọn kỳ",
+      "semester": "Học kỳ",
+      "quarter": "Quý",
+      "other": "Khác"
+    },
+    "okr": {
+      "noOkrData": "Không có dữ liệu OKR",
+      "noOkrDataDesc": "Nhân sự này chưa được giao hoặc chưa tạo OKR trong kỳ này.",
+      "totalScore": "Tổng điểm (Tự động)",
+      "noKeyResults": "Không có kết quả then chốt nào.",
+      "selfEvidence": "Minh chứng tự khai:",
+      "noEvidence": "Chưa có minh chứng",
+      "weightMax": "Trọng số / Max",
+      "systemScore": "Điểm hệ thống",
+      "managerScore": "Điểm quản lý",
+      "scoreUnit": "đ"
+    },
+    "evaluation": {
+      "noEvaluation": "Không có phiếu đánh giá",
+      "noEvaluationDesc": "Nhân sự chưa được đánh giá hoặc chưa nộp phiếu trong kỳ này.",
+      "sheetTitle": "Phiếu đánh giá hiệu suất",
+      "totalEvaluationScore": "Tổng điểm đánh giá",
+      "selfEvaluation": "Tự đánh giá",
+      "managerEvaluation": "Quản lý đánh giá",
+      "taskGroup": "NHÓM NHIỆM VỤ",
+      "maxScore": "MAX ĐIỂM",
+      "selfScore": "TỰ CHẤM",
+      "managerScore": "QUẢN LÝ CHẤM",
+      "weight": "Trọng số:"
+    },
+    "comment": {
+      "selfCommentTitle": "Nhân sự tự nhận xét",
+      "noSelfComment": "Chưa có nhận xét.",
+      "selfRatingLabel": "Tự xếp loại:",
+      "managerCommentTitle": "Quản lý nhận xét",
+      "noManagerComment": "Quản lý chưa nhận xét.",
+      "managerRatingLabel": "Quản lý xếp loại:"
+    },
+    "trend": {
+      "title": "Xu hướng đánh giá",
+      "maxScore": "Điểm tối đa",
+      "achievedScore": "Điểm đạt được",
+      "demoWarning": "* Dữ liệu biểu đồ đang ở chế độ demo. Sẽ tích hợp API lấy lịch sử các kỳ trong tương lai."
+    },
+    "status": {
+      "pending": "Chờ duyệt",
+      "negotiating": "Đang đàm phán",
+      "accepted": "Đã duyệt",
+      "rejected": "Từ chối",
+      "submitted": "Đã nộp tự khai",
+      "completed": "Đã chốt điểm",
+      "draft": "Bản nháp",
+      "waitingManager": "Chờ quản lý duyệt",
+      "managerEvaluated": "Quản lý đã chấm",
+      "finalized": "Đã chốt",
+      "noRating": "Chưa xếp loại"
+    },
+    "rating": {
+      "A": "A - Hoàn thành xuất sắc",
+      "B": "B - Hoàn thành tốt",
+      "C": "C - Hoàn thành",
+      "D": "D - Không hoàn thành"
+    }
   }
 }

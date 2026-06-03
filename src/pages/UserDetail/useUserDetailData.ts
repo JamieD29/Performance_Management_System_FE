@@ -31,8 +31,8 @@ export const useUserDetailData = () => {
           setSelectedCycleId(result.allCycles[0].id);
         }
       } catch (err: any) {
-        console.error("Lỗi khi tải chi tiết nhân sự:", err);
-        setError(err.response?.data?.message || "Không thể tải thông tin nhân sự");
+        console.error("Error loading staff details:", err);
+        setError(err.response?.data?.message || "userDetail.errorLoad");
       } finally {
         setLoading(false);
       }

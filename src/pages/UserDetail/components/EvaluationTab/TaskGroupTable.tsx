@@ -9,12 +9,14 @@ import {
   Typography,
 } from "@mui/material";
 import type { TaskGroupData } from "../../userDetail.types";
+import { useTranslation } from "react-i18next";
 
 interface TaskGroupTableProps {
   groups: TaskGroupData[];
 }
 
 export default function TaskGroupTable({ groups }: TaskGroupTableProps) {
+  const { t } = useTranslation();
   if (!groups || groups.length === 0) return null;
 
   return (
@@ -22,10 +24,10 @@ export default function TaskGroupTable({ groups }: TaskGroupTableProps) {
       <Table>
         <TableHead sx={{ bgcolor: "#f8fafc" }}>
           <TableRow>
-            <TableCell sx={{ fontWeight: "bold", color: "#475569" }}>NHÓM NHIỆM VỤ</TableCell>
-            <TableCell align="right" sx={{ fontWeight: "bold", color: "#475569" }}>MAX ĐIỂM</TableCell>
-            <TableCell align="right" sx={{ fontWeight: "bold", color: "#3b82f6" }}>TỰ CHẤM</TableCell>
-            <TableCell align="right" sx={{ fontWeight: "bold", color: "#059669" }}>QUẢN LÝ CHẤM</TableCell>
+            <TableCell sx={{ fontWeight: "bold", color: "#475569" }}>{t("userDetail.evaluation.taskGroup")}</TableCell>
+            <TableCell align="right" sx={{ fontWeight: "bold", color: "#475569" }}>{t("userDetail.evaluation.maxScore")}</TableCell>
+            <TableCell align="right" sx={{ fontWeight: "bold", color: "#3b82f6" }}>{t("userDetail.evaluation.selfScore")}</TableCell>
+            <TableCell align="right" sx={{ fontWeight: "bold", color: "#059669" }}>{t("userDetail.evaluation.managerScore")}</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -36,7 +38,7 @@ export default function TaskGroupTable({ groups }: TaskGroupTableProps) {
                   {group.groupCode}. {group.groupName}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
-                  Trọng số: {group.weight}%
+                  {t("userDetail.evaluation.weight")} {group.weight}%
                 </Typography>
               </TableCell>
               <TableCell align="right">

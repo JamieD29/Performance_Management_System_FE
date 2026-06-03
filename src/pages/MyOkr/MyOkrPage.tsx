@@ -13,6 +13,7 @@ import {
 import {
   Assignment,
 } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
 import { api } from "../../services/api";
 import OkrCard from "./components/OkrCard";
 
@@ -20,9 +21,12 @@ import OkrCard from "./components/OkrCard";
 // Main Page
 // ============================
 export default function MyOkrPage() {
+  const { t, i18n } = useTranslation();
   const [okrs, setOkrs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCycleId, setSelectedCycleId] = useState<string>("");
+
+  const dateLocale = i18n.language === "en" ? "en-US" : "vi-VN";
 
   useEffect(() => {
     fetchMyOkrs();
@@ -112,26 +116,26 @@ export default function MyOkrPage() {
             color="#1e3a8a"
             sx={{ display: "flex", alignItems: "center", gap: 1 }}
           >
-            <Assignment /> OKR Của Tôi
+            <Assignment /> {t("myOkrPage.title")}
           </Typography>
           <Typography color="text.secondary">
-            Xem chi tiết OKR được giao, tự khai điểm, và theo dõi trạng thái.
+            {t("myOkrPage.subtitle")}
           </Typography>
         </Box>
 
         {/* Cycle Selector */}
         {!loading && sortedCycles.length > 0 && (
           <FormControl size="small" sx={{ minWidth: 250 }}>
-            <InputLabel id="select-cycle-label">Chọn Kỳ đánh giá</InputLabel>
+            <InputLabel id="select-cycle-label">{t("myOkrPage.selectCycle")}</InputLabel>
             <Select
               labelId="select-cycle-label"
               value={selectedCycleId}
-              label="Chọn Kỳ đánh giá"
+              label={t("myOkrPage.selectCycle")}
               onChange={(e) => setSelectedCycleId(e.target.value as string)}
             >
               {sortedCycles.map((c: any) => (
                 <MenuItem key={c.id} value={c.id}>
-                  {c.name} {c.status === "OPEN" ? "(Đang mở)" : "(Đã đóng)"}
+                  {c.name} {c.status === "OPEN" ? t("myOkrPage.openStatus") : t("myOkrPage.closedStatus")}
                 </MenuItem>
               ))}
             </Select>
@@ -154,23 +158,23 @@ export default function MyOkrPage() {
           <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 2 }}>
             <Box>
               <Typography variant="subtitle1" fontWeight="bold" color="#1e3a8a">
-                Kỳ đánh giá: {selectedCycle.name}
+                {t("myOkrPage.cycleLabel")}{selectedCycle.name}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                Thời gian: {selectedCycle.startDate ? new Date(selectedCycle.startDate).toLocaleDateString("vi-VN") : "N/A"} 
+                {t("myOkrPage.timeLabel")}{selectedCycle.startDate ? new Date(selectedCycle.startDate).toLocaleDateString(dateLocale) : "N/A"} 
                 {" → "} 
-                {selectedCycle.endDate ? new Date(selectedCycle.endDate).toLocaleDateString("vi-VN") : "N/A"}
+                {selectedCycle.endDate ? new Date(selectedCycle.endDate).toLocaleDateString(dateLocale) : "N/A"}
               </Typography>
               {filteredOkrs.length > 0 && filteredOkrs[0]?.createdAt && (
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
-                  📅 Ngày được giao OKR:{" "}
+                  📅 {t("myOkrPage.assignedDateLabel")}{" "}
                   <strong>
                     {new Date(
                       filteredOkrs
                         .map((o) => o.createdAt)
                         .filter(Boolean)
                         .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())[0]
-                    ).toLocaleDateString("vi-VN")}
+                    ).toLocaleDateString(dateLocale)}
                   </strong>
                 </Typography>
               )}
@@ -181,19 +185,19 @@ export default function MyOkrPage() {
                 {isNegotiationComplete ? (
                   <>
                     <Typography variant="caption" fontWeight="bold" color="#15803d" display="block">
-                      ✅ Hoàn tất đàm phán
+                      ✅ {t("myOkrPage.negotiationComplete")}
                     </Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
-                      Đã chốt OKR ngày {acceptedOkrDate ? new Date(acceptedOkrDate).toLocaleDateString("vi-VN") : new Date(selectedCycleDeadline).toLocaleDateString("vi-VN")}
+                      {t("myOkrPage.finalizedOn")}{acceptedOkrDate ? new Date(acceptedOkrDate).toLocaleDateString(dateLocale) : new Date(selectedCycleDeadline).toLocaleDateString(dateLocale)}
                     </Typography>
                   </>
                 ) : (
                   <>
                     <Typography variant="caption" fontWeight="bold" color="#b45309" display="block">
-                      ⏳ Hạn chót đàm phán & chốt OKR:
+                      ⏳ {t("myOkrPage.negotiationDeadline")}
                     </Typography>
                     <Typography variant="subtitle1" fontWeight="extrabold" color="#b45309">
-                      {new Date(selectedCycleDeadline).toLocaleDateString("vi-VN")}
+                      {new Date(selectedCycleDeadline).toLocaleDateString(dateLocale)}
                     </Typography>
                   </>
                 )}
@@ -205,29 +209,27 @@ export default function MyOkrPage() {
 
       {pendingCount > 0 && (
         <Alert severity="warning" sx={{ mb: 2, borderRadius: 2 }}>
-          <strong>Bạn có {pendingCount} OKR đang chờ phản hồi trong kỳ này.</strong> Nhấn vào
-          để xem chi tiết và Chấp nhận hoặc Đề xuất điều chỉnh.
+          <strong>{t("myOkrPage.pendingAlert", { count: pendingCount })}</strong>{t("myOkrPage.pendingAlertDesc")}
         </Alert>
       )}
 
       {acceptedCount > 0 && (
         <Alert severity="info" sx={{ mb: 2, borderRadius: 2 }}>
-          <strong>Bạn có {acceptedCount} OKR sẵn sàng tự khai điểm trong kỳ này.</strong>{" "}
-          Nhấn vào, nhập số lượng và minh chứng, rồi nộp bài.
+          <strong>{t("myOkrPage.acceptedAlert", { count: acceptedCount })}</strong>{t("myOkrPage.acceptedAlertDesc")}
         </Alert>
       )}
 
       {loading ? (
         <Paper sx={{ p: 4, textAlign: "center" }}>
-          <Typography color="text.secondary">Đang tải dữ liệu...</Typography>
+          <Typography color="text.secondary">{t("myOkrPage.loading")}</Typography>
         </Paper>
       ) : okrs.length === 0 ? (
         <Paper sx={{ p: 4, textAlign: "center", color: "text.secondary" }}>
-          Bạn chưa được giao OKR nào. Hãy đợi Trưởng khoa giao OKR cho bạn.
+          {t("myOkrPage.noOkr")}
         </Paper>
       ) : filteredOkrs.length === 0 ? (
         <Paper sx={{ p: 4, textAlign: "center", color: "text.secondary" }}>
-          Không tìm thấy OKR nào trong kỳ đánh giá được chọn.
+          {t("myOkrPage.noOkrInCycle")}
         </Paper>
       ) : (
         filteredOkrs.map((okr) => (
