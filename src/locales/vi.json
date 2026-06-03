@@ -709,5 +709,23 @@
         "Phó bộ môn": "Phó bộ môn"
       }
     }
+  },
+  "deanDashboard": {
+    "ranking": {
+      "title": "Bảng Xếp Hạng Cá Nhân",
+      "subtitle": "Xếp theo điểm Trưởng khoa chấm (cao → thấp)",
+      "noData": "Chưa có dữ liệu xếp hạng trong kỳ này",
+      "status": {
+        "completed": "Hoàn thành",
+        "submitted": "Chờ chấm"
+      },
+      "table": {
+        "name": "Họ tên",
+        "dept": "Bộ môn",
+        "selfScore": "Tự khai",
+        "managerScore": "TK chấm",
+        "status": "Trạng thái"
+      }
+    }
   }
 }

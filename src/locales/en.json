@@ -709,5 +709,23 @@
         "Phó bộ môn": "Deputy Department Head"
       }
     }
+  },
+  "deanDashboard": {
+    "ranking": {
+      "title": "Staff Performance Ranking",
+      "subtitle": "Sorted by Dean's score (high → low)",
+      "noData": "No ranking data available for this cycle",
+      "status": {
+        "completed": "Completed",
+        "submitted": "Pending Review"
+      },
+      "table": {
+        "name": "Name",
+        "dept": "Department",
+        "selfScore": "Self Score",
+        "managerScore": "Dean Score",
+        "status": "Status"
+      }
+    }
   }
 }
