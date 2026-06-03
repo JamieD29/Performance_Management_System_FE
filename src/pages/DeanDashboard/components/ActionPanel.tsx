@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import type { ActionItem } from "../useDeanDashboardData";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   items: ActionItem[];
@@ -30,6 +31,7 @@ const severityColors: Record<string, { bg: string; border: string; iconBg: strin
 };
 
 export default function ActionPanel({ items, daysRemaining }: Props) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   if (items.length === 0 && (daysRemaining === null || daysRemaining > 30)) {
@@ -66,13 +68,17 @@ export default function ActionPanel({ items, daysRemaining }: Props) {
             <AlertTriangle size={20} color="#dc2626" />
           </Box>
           <Typography variant="h6" fontWeight={700} sx={{ color: "#1e293b" }}>
-            Cần Hành Động
+            {t("deanDashboard.actionPanel.title")}
           </Typography>
         </Box>
 
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
           {items.map((item, i) => {
             const sc = severityColors[item.severity] || severityColors.info;
+            const displayLabel = t(`deanDashboard.actionPanel.items.${item.type}`, {
+              count: item.count,
+              defaultValue: item.label,
+            });
             return (
               <Box
                 key={i}
@@ -107,7 +113,7 @@ export default function ActionPanel({ items, daysRemaining }: Props) {
                     {iconMap[item.type] || <AlertTriangle size={18} />}
                   </Box>
                   <Typography variant="body2" fontWeight={600} sx={{ color: sc.text }}>
-                    {item.label}
+                    {displayLabel}
                   </Typography>
                 </Box>
                 <Button
@@ -122,7 +128,7 @@ export default function ActionPanel({ items, daysRemaining }: Props) {
                     "&:hover": { bgcolor: `${sc.border}40` },
                   }}
                 >
-                  Xử lý
+                  {t("deanDashboard.actionPanel.action")}
                 </Button>
               </Box>
             );
@@ -148,7 +154,7 @@ export default function ActionPanel({ items, daysRemaining }: Props) {
                   fontWeight={600}
                   sx={{ color: daysRemaining <= 7 ? "#991b1b" : "#1e40af" }}
                 >
-                  ⏰ Kỳ đánh giá kết thúc trong {daysRemaining} ngày
+                  {t("deanDashboard.actionPanel.deadline", { days: daysRemaining })}
                 </Typography>
               </Box>
             </>

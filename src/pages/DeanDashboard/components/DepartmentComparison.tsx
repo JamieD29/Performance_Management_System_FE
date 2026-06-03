@@ -23,6 +23,7 @@ import {
 } from "recharts";
 import { motion } from "framer-motion";
 import type { DepartmentStat } from "../useDeanDashboardData";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   stats: DepartmentStat[];
@@ -31,6 +32,7 @@ interface Props {
 const COLORS = ["#2563eb", "#16a34a", "#d97706", "#dc2626", "#7c3aed", "#0891b2", "#e11d48", "#4f46e5"];
 
 export default function DepartmentComparison({ stats }: Props) {
+  const { t } = useTranslation();
   const chartData = stats
     .filter((d) => d.avgScore !== null)
     .map((d) => ({ name: d.deptCode || d.deptName, score: d.avgScore }));
@@ -58,10 +60,10 @@ export default function DepartmentComparison({ stats }: Props) {
           </Box>
           <Box>
             <Typography variant="h6" fontWeight={700} sx={{ color: "#1e293b" }}>
-              So Sánh Đơn Vị / Bộ Môn
+              {t("deanDashboard.comparison.title")}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              Tổng quan tiến độ và hiệu suất từng đơn vị
+              {t("deanDashboard.comparison.subtitle")}
             </Typography>
           </Box>
         </Box>
@@ -71,13 +73,13 @@ export default function DepartmentComparison({ stats }: Props) {
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell sx={{ fontWeight: 700, bgcolor: "#f8fafc" }}>Đơn vị</TableCell>
-                <TableCell sx={{ fontWeight: 700, bgcolor: "#f8fafc", textAlign: "center" }}>Nhân sự</TableCell>
-                <TableCell sx={{ fontWeight: 700, bgcolor: "#f8fafc", textAlign: "center" }}>Hoàn thành</TableCell>
-                <TableCell sx={{ fontWeight: 700, bgcolor: "#f8fafc", width: 180 }}>Tỷ lệ</TableCell>
-                <TableCell sx={{ fontWeight: 700, bgcolor: "#f8fafc", textAlign: "center" }}>Chờ chấm</TableCell>
-                <TableCell sx={{ fontWeight: 700, bgcolor: "#f8fafc", textAlign: "center" }}>Chưa nộp</TableCell>
-                <TableCell sx={{ fontWeight: 700, bgcolor: "#f8fafc", textAlign: "center" }}>ĐTB</TableCell>
+                <TableCell sx={{ fontWeight: 700, bgcolor: "#f8fafc" }}>{t("deanDashboard.comparison.table.dept")}</TableCell>
+                <TableCell sx={{ fontWeight: 700, bgcolor: "#f8fafc", textAlign: "center" }}>{t("deanDashboard.comparison.table.members")}</TableCell>
+                <TableCell sx={{ fontWeight: 700, bgcolor: "#f8fafc", textAlign: "center" }}>{t("deanDashboard.comparison.table.completed")}</TableCell>
+                <TableCell sx={{ fontWeight: 700, bgcolor: "#f8fafc", width: 180 }}>{t("deanDashboard.comparison.table.rate")}</TableCell>
+                <TableCell sx={{ fontWeight: 700, bgcolor: "#f8fafc", textAlign: "center" }}>{t("deanDashboard.comparison.table.submitted")}</TableCell>
+                <TableCell sx={{ fontWeight: 700, bgcolor: "#f8fafc", textAlign: "center" }}>{t("deanDashboard.comparison.table.unsubmitted")}</TableCell>
+                <TableCell sx={{ fontWeight: 700, bgcolor: "#f8fafc", textAlign: "center" }}>{t("deanDashboard.comparison.table.avgScore")}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -167,7 +169,7 @@ export default function DepartmentComparison({ stats }: Props) {
           "& *:focus": { outline: "none !important" }
         }}>
           <Typography variant="subtitle2" fontWeight={600} color="text.secondary" sx={{ mb: 1 }}>
-            Điểm Trung Bình Theo Đơn Vị
+            {t("deanDashboard.comparison.chartTitle")}
           </Typography>
           <ResponsiveContainer width="100%" height={200} style={{ outline: "none" }}>
             <BarChart data={chartData.length > 0 ? chartData : [{ name: "—", score: 0 }]} margin={{ top: 5, right: 10, left: -10, bottom: 5 }} style={{ outline: "none" }}>
@@ -182,8 +184,7 @@ export default function DepartmentComparison({ stats }: Props) {
                   boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
                   fontSize: 13,
                 }}
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                formatter={(value: any) => [`${value} điểm`, "ĐTB"]}
+                formatter={(value: any) => [`${value} ${t("deanDashboard.comparison.points")}`, t("deanDashboard.comparison.avgScore")]}
               />
               <Bar dataKey="score" radius={[6, 6, 0, 0]} maxBarSize={48}>
                 {(chartData.length > 0 ? chartData : [{ name: "—", score: 0 }]).map((_, i) => (

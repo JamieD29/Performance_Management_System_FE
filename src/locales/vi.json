@@ -726,6 +726,57 @@
         "managerScore": "TK chấm",
         "status": "Trạng thái"
       }
+    },
+    "distribution": {
+      "title": "Phân Bổ Xếp Loại",
+      "subtitle": "Tổng {{total}} phiếu đánh giá đã xếp loại",
+      "empty": "Trống",
+      "tooltip": "{{value}} người ({{percent}}%) - Click để xem",
+      "noData": "Chưa có phiếu đánh giá được xếp loại",
+      "dialog": {
+        "title": "Danh sách xếp loại: {{label}}",
+        "staffCount": "{{count}} nhân sự",
+        "empty": "Không có nhân sự nào được xếp loại này.",
+        "table": {
+          "staff": "Nhân sự",
+          "dept": "Đơn vị / Bộ môn",
+          "selfScore": "Điểm Tự Khai",
+          "managerScore": "Điểm TK Duyệt"
+        }
+      }
+    },
+    "comparison": {
+      "title": "So Sánh Đơn Vị / Bộ Môn",
+      "subtitle": "Tổng quan tiến độ và hiệu suất từng đơn vị",
+      "chartTitle": "Điểm Trung Bình Theo Đơn Vị",
+      "points": "điểm",
+      "avgScore": "ĐTB",
+      "table": {
+        "dept": "Đơn vị",
+        "members": "Nhân sự",
+        "completed": "Hoàn thành",
+        "rate": "Tỷ lệ",
+        "submitted": "Chờ chấm",
+        "unsubmitted": "Chưa nộp"
+      }
+    },
+    "summary": {
+      "pendingApproval": "Chờ duyệt",
+      "awaitingReview": "Chờ chấm",
+      "completed": "Hoàn thành",
+      "totalStaff": "Tổng nhân sự",
+      "action": "Xử lý"
+    },
+    "actionPanel": {
+      "title": "Cần Hành Động",
+      "action": "Xử lý",
+      "deadline": "⏰ Kỳ đánh giá kết thúc trong {{days}} ngày",
+      "items": {
+        "PENDING_APPROVAL": "Có {{count}} phiếu OKR cần phê duyệt",
+        "AWAITING_REVIEW": "Có {{count}} đánh giá chờ Trưởng khoa chấm điểm",
+        "PENDING_EVALUATION": "Có {{count}} nhân sự chưa hoàn thành tự khai",
+        "LATE_SUBMISSION": "Có {{count}} nhân sự nộp trễ hạn"
+      }
     }
   }
 }

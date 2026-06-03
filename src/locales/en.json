@@ -726,6 +726,57 @@
         "managerScore": "Dean Score",
         "status": "Status"
       }
+    },
+    "distribution": {
+      "title": "Rating Distribution",
+      "subtitle": "Total of {{total}} graded evaluations",
+      "empty": "Empty",
+      "tooltip": "{{value}} people ({{percent}}%) - Click to view",
+      "noData": "No evaluations graded yet",
+      "dialog": {
+        "title": "Rating list: {{label}}",
+        "staffCount": "{{count}} staff",
+        "empty": "No staff members have this rating.",
+        "table": {
+          "staff": "Staff",
+          "dept": "Department / Unit",
+          "selfScore": "Self Score",
+          "managerScore": "Dean Score"
+        }
+      }
+    },
+    "comparison": {
+      "title": "Department Comparison",
+      "subtitle": "Overview of progress and performance for each department",
+      "chartTitle": "Average Score by Department",
+      "points": "points",
+      "avgScore": "AVG",
+      "table": {
+        "dept": "Department",
+        "members": "Staff",
+        "completed": "Completed",
+        "rate": "Rate",
+        "submitted": "Pending Review",
+        "unsubmitted": "Not Submitted"
+      }
+    },
+    "summary": {
+      "pendingApproval": "Pending Approval",
+      "awaitingReview": "Pending Review",
+      "completed": "Completed",
+      "totalStaff": "Total Staff",
+      "action": "Handle"
+    },
+    "actionPanel": {
+      "title": "Action Required",
+      "action": "Handle",
+      "deadline": "⏰ Evaluation period ends in {{days}} days",
+      "items": {
+        "PENDING_APPROVAL": "There are {{count}} OKR forms pending approval",
+        "AWAITING_REVIEW": "There are {{count}} evaluations waiting for Dean's grading",
+        "PENDING_EVALUATION": "There are {{count}} staff members who haven't completed self-evaluation",
+        "LATE_SUBMISSION": "There are {{count}} late submissions"
+      }
     }
   }
 }

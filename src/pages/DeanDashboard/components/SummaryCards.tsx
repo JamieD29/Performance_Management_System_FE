@@ -3,6 +3,7 @@ import { Users, ClipboardCheck, CheckCircle2, FileSearch } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import type { DashboardSummary, ActionItem } from "../useDeanDashboardData";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   summary: DashboardSummary;
@@ -51,6 +52,7 @@ const cards = [
 ] as const;
 
 export default function SummaryCards({ summary, actionItems }: Props) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   return (
@@ -69,6 +71,8 @@ export default function SummaryCards({ summary, actionItems }: Props) {
         const actionItem = (card as any).actionType 
           ? actionItems.find(a => a.type === (card as any).actionType)
           : null;
+
+        const displayLabel = t(`deanDashboard.summary.${card.key}`, { defaultValue: card.label });
 
         return (
           <motion.div
@@ -112,7 +116,7 @@ export default function SummaryCards({ summary, actionItems }: Props) {
                   <Icon size={20} color={card.iconColor} />
                 </Box>
                 <Typography variant="body2" fontWeight={600} sx={{ color: card.textColor, opacity: 0.8 }}>
-                  {card.label}
+                  {displayLabel}
                 </Typography>
               </Box>
               
@@ -141,7 +145,7 @@ export default function SummaryCards({ summary, actionItems }: Props) {
                       },
                     }}
                   >
-                    Xử lý
+                    {t("deanDashboard.summary.action")}
                   </Button>
                 )}
               </Box>

@@ -5,19 +5,12 @@ import { PieChart, Pie, Cell, Tooltip } from "recharts";
 import { motion } from "framer-motion";
 import type { RatingPersonItem } from "../useDeanDashboardData";
 import RatingDetailDialog from "./RatingDetailDialog";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   distribution: Record<string, number>;
   ratingDetails: Record<string, RatingPersonItem[]>;
 }
-
-const ratingLabels: Record<string, string> = {
-  EXCELLENT: "Xuất sắc",
-  GOOD: "Tốt",
-  FAIR: "Khá",
-  AVERAGE: "Trung bình",
-  POOR: "Yếu",
-};
 
 const ratingColors: Record<string, string> = {
   EXCELLENT: "#16a34a",
@@ -28,13 +21,18 @@ const ratingColors: Record<string, string> = {
 };
 
 export default function RatingDistribution({ distribution, ratingDetails }: Props) {
+  const { t } = useTranslation();
   const [selectedRating, setSelectedRating] = useState<string | null>(null);
+
+  const getRatingLabel = (key: string) => {
+    return t(`userDetail.rating.${key.toLowerCase()}`, { defaultValue: key });
+  };
 
   const entries = Object.entries(distribution);
   const total = entries.reduce((s, [, v]) => s + v, 0);
   const chartData = entries.map(([key, value]) => ({
     key,
-    name: ratingLabels[key] || key,
+    name: getRatingLabel(key),
     value,
     color: ratingColors[key] || "#6b7280",
   }));
@@ -43,7 +41,7 @@ export default function RatingDistribution({ distribution, ratingDetails }: Prop
 
   const selectedData = selectedRating ? {
     key: selectedRating,
-    label: ratingLabels[selectedRating] || selectedRating,
+    label: getRatingLabel(selectedRating),
     color: ratingColors[selectedRating] || "#6b7280",
     people: ratingDetails[selectedRating] || []
   } : null;
@@ -83,10 +81,10 @@ export default function RatingDistribution({ distribution, ratingDetails }: Prop
           </Box>
           <Box>
             <Typography variant="h6" fontWeight={700} sx={{ color: "#1e293b" }}>
-              Phân Bổ Xếp Loại
+              {t("deanDashboard.distribution.title")}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              Tổng {total} phiếu đánh giá đã xếp loại
+              {t("deanDashboard.distribution.subtitle", { total })}
             </Typography>
           </Box>
         </Box>
@@ -103,7 +101,7 @@ export default function RatingDistribution({ distribution, ratingDetails }: Prop
         }}>
           <PieChart width={200} height={200} style={{ outline: "none" }}>
             <Pie
-              data={chartData.length > 0 ? chartData : [{ name: "Trống", value: 1, color: "#e2e8f0" }]}
+              data={chartData.length > 0 ? chartData : [{ name: t("deanDashboard.distribution.empty"), value: 1, color: "#e2e8f0" }]}
               cx="50%"
               cy="50%"
               innerRadius={50}
@@ -118,22 +116,27 @@ export default function RatingDistribution({ distribution, ratingDetails }: Prop
                 }
               }}
             >
-              {(chartData.length > 0 ? chartData : [{ name: "Trống", value: 1, color: "#e2e8f0" }]).map((entry, i) => (
+              {(chartData.length > 0 ? chartData : [{ name: t("deanDashboard.distribution.empty"), value: 1, color: "#e2e8f0" }]).map((entry, i) => (
                 <Cell key={i} fill={entry.color} style={{ outline: "none" }} />
               ))}
             </Pie>
             {chartData.length > 0 && (
-            <Tooltip
-              contentStyle={{
-                borderRadius: 10,
-                border: "1px solid #e2e8f0",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
-                fontSize: 13,
-                cursor: "pointer"
-              }}
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              formatter={(value: any, name: any) => [`${value} người (${total > 0 ? Math.round((value / total) * 100) : 0}%) - Click để xem`, name]}
-            />
+              <Tooltip
+                contentStyle={{
+                  borderRadius: 10,
+                  border: "1px solid #e2e8f0",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
+                  fontSize: 13,
+                  cursor: "pointer"
+                }}
+                formatter={(value: any, name: any) => [
+                  t("deanDashboard.distribution.tooltip", {
+                    value,
+                    percent: total > 0 ? Math.round((value / total) * 100) : 0,
+                  }),
+                  name,
+                ]}
+              />
             )}
           </PieChart>
         </Box>
@@ -178,7 +181,7 @@ export default function RatingDistribution({ distribution, ratingDetails }: Prop
             </Box>
           )) : (
             <Typography variant="body2" color="text.secondary" sx={{ textAlign: "center", py: 2 }}>
-              Chưa có phiếu đánh giá được xếp loại
+              {t("deanDashboard.distribution.noData")}
             </Typography>
           )}
         </Box>

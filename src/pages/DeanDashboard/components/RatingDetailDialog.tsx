@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import { Close } from "@mui/icons-material";
 import type { RatingPersonItem } from "../useDeanDashboardData";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   open: boolean;
@@ -27,16 +28,18 @@ interface Props {
 }
 
 export default function RatingDetailDialog({ open, onClose, ratingLabel, ratingColor, people }: Props) {
+  const { t } = useTranslation();
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", pb: 1 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
           <Box sx={{ width: 12, height: 12, borderRadius: "50%", bgcolor: ratingColor }} />
           <Typography variant="h6" fontWeight="bold">
-            Danh sách xếp loại: {ratingLabel}
+            {t("deanDashboard.distribution.dialog.title", { label: ratingLabel })}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ ml: 1, bgcolor: "#f1f5f9", px: 1, py: 0.5, borderRadius: 2 }}>
-            {people.length} nhân sự
+            {t("deanDashboard.distribution.dialog.staffCount", { count: people.length })}
           </Typography>
         </Box>
         <IconButton onClick={onClose} size="small"><Close /></IconButton>
@@ -47,17 +50,17 @@ export default function RatingDetailDialog({ open, onClose, ratingLabel, ratingC
       <DialogContent sx={{ p: 0 }}>
         {people.length === 0 ? (
           <Box sx={{ p: 4, textAlign: "center" }}>
-            <Typography color="text.secondary">Không có nhân sự nào được xếp loại này.</Typography>
+            <Typography color="text.secondary">{t("deanDashboard.distribution.dialog.empty")}</Typography>
           </Box>
         ) : (
           <TableContainer>
             <Table>
               <TableHead>
                 <TableRow sx={{ bgcolor: "#f8fafc" }}>
-                  <TableCell sx={{ fontWeight: 600 }}>Nhân sự</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Đơn vị / Bộ môn</TableCell>
-                  <TableCell sx={{ fontWeight: 600, textAlign: "center" }}>Điểm Tự Khai</TableCell>
-                  <TableCell sx={{ fontWeight: 600, textAlign: "center" }}>Điểm TK Duyệt</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>{t("deanDashboard.distribution.dialog.table.staff")}</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>{t("deanDashboard.distribution.dialog.table.dept")}</TableCell>
+                  <TableCell sx={{ fontWeight: 600, textAlign: "center" }}>{t("deanDashboard.distribution.dialog.table.selfScore")}</TableCell>
+                  <TableCell sx={{ fontWeight: 600, textAlign: "center" }}>{t("deanDashboard.distribution.dialog.table.managerScore")}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
