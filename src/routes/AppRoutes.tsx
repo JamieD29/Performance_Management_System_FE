@@ -83,6 +83,29 @@ function ManagerRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+// 2c. Component bảo vệ route Trưởng khoa (Admin HOẶC chức vụ quản lý là Trưởng khoa)
+function DeanRoute({ children }: { children: React.ReactNode }) {
+  const userStr = localStorage.getItem('user');
+  const user = userStr ? JSON.parse(userStr) : {};
+  const rawRoles = user.roles || [];
+
+  const isAdmin =
+    Array.isArray(rawRoles) &&
+    rawRoles.some((r: any) => {
+      const val = typeof r === 'string' ? r : r.slug || r.name || '';
+      return val.toString().toUpperCase() === 'ADMIN';
+    });
+
+  const isDean = user?.managementPosition?.slug === 'TRUONG_KHOA';
+
+  if (!isAdmin && !isDean) {
+    console.warn('⛔ Access Denied: Not Dean or Admin -> Redirecting to Dashboard');
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <>{children}</>;
+}
+
 // 3. Component bảo vệ Route thường
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuth();
@@ -184,7 +207,7 @@ export default function AppRoutes() {
         {/* 3. GROUP BỘ MÔN (Chỉ cho Admin hoặc User có chức vụ quản lý) */}
         {/* Tổng quan */}
         {/* Dashboard Quản lý (Trưởng khoa) */}
-        <Route path="/dean-dashboard" element={<ManagerRoute><DeanDashboard /></ManagerRoute>} />
+        <Route path="/dean-dashboard" element={<DeanRoute><DeanDashboard /></DeanRoute>} />
         <Route path="/departments/overview" element={<ManagerRoute><DepartmentOverview /></ManagerRoute>} />
         {/* OKR Bộ môn */}
         <Route path="/departments/okr" element={<ManagerRoute><DepartmentOKR /></ManagerRoute>} />
