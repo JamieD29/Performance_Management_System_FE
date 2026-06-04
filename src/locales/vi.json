@@ -1390,5 +1390,9 @@
       "fallbackError": "Có lỗi xảy ra",
       "deleteError": "Xóa thất bại"
     }
+  },
+  "roleManagementTab": {
+    "systemRoles": "Roles Hệ thống",
+    "managementPositions": "Chức vụ quản lý"
   }
 }

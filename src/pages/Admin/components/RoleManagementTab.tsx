@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { Box, Tabs, Tab } from "@mui/material";
+import { useTranslation } from "react-i18next";
 import { AdminPanelSettings, BadgeOutlined } from "@mui/icons-material";
 import UserRoleManager from "./UserRoleManager";
 import ManagementPositionManager from "./ManagementPositionManager";
 
 export default function RoleManagementTab() {
+  const { t } = useTranslation();
   const [tabIndex, setTabIndex] = useState(0);
 
   return (
@@ -35,12 +37,12 @@ export default function RoleManagementTab() {
           <Tab
             icon={<AdminPanelSettings fontSize="small" />}
             iconPosition="start"
-            label="Roles Hệ thống"
+            label={t("roleManagementTab.systemRoles")}
           />
           <Tab
             icon={<BadgeOutlined fontSize="small" />}
             iconPosition="start"
-            label="Chức vụ quản lý"
+            label={t("roleManagementTab.managementPositions")}
           />
         </Tabs>
       </Box>
