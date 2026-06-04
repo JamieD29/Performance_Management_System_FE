@@ -1,6 +1,7 @@
 import { Box, Container, Typography, CircularProgress, Alert, AlertTitle, Button } from "@mui/material";
 import { Settings } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAdminDashboardData } from "./useAdminDashboardData";
 import AdminHeroHeader from "./components/AdminHeroHeader";
 import AdminMetricCards from "./components/AdminMetricCards";
@@ -8,6 +9,7 @@ import SystemHealthPanel from "./components/SystemHealthPanel";
 import ActivityFeed from "./components/ActivityFeed";
 
 export default function AdminDashboard() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data, loading, healthLoading, error, refetch, refetchHealth, refetchLogs } =
     useAdminDashboardData();
@@ -36,7 +38,7 @@ export default function AdminDashboard() {
       >
         <CircularProgress size={48} sx={{ color: "#2563eb" }} />
         <Typography color="text.secondary" variant="body2">
-          Đang tải Admin Dashboard...
+          {t("adminDashboard.loading")}
         </Typography>
       </Box>
     );
@@ -46,7 +48,7 @@ export default function AdminDashboard() {
     return (
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <Alert severity="error">
-          <AlertTitle>Lỗi tải dữ liệu</AlertTitle>
+          <AlertTitle>{t("adminDashboard.loadError")}</AlertTitle>
           {error}
         </Alert>
       </Container>
@@ -80,7 +82,7 @@ export default function AdminDashboard() {
             },
           }}
         >
-          Cấu hình hệ thống
+          {t("adminDashboard.systemConfig")}
         </Button>
       </Box>
 

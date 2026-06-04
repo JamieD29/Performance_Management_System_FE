@@ -10,6 +10,7 @@ import {
   History,
   Refresh,
 } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
 import type { SystemLog } from "../useAdminDashboardData";
 
 interface Props {
@@ -18,32 +19,32 @@ interface Props {
   onRefresh?: () => Promise<void>;
 }
 
-function getActionMeta(action: string) {
+function getActionMeta(action: string, t: any) {
   switch (action) {
     case "CREATE":
-      return { icon: <Add fontSize="small" />, color: "#10b981", bg: "rgba(16,185,129,0.12)", label: "Tạo mới" };
+      return { icon: <Add fontSize="small" />, color: "#10b981", bg: "rgba(16,185,129,0.12)", label: t("activityFeed.actions.create") };
     case "UPDATE":
-      return { icon: <Edit fontSize="small" />, color: "#3b82f6", bg: "rgba(59,130,246,0.12)", label: "Cập nhật" };
+      return { icon: <Edit fontSize="small" />, color: "#3b82f6", bg: "rgba(59,130,246,0.12)", label: t("activityFeed.actions.update") };
     case "DELETE":
-      return { icon: <Delete fontSize="small" />, color: "#ef4444", bg: "rgba(239,68,68,0.12)", label: "Xóa" };
+      return { icon: <Delete fontSize="small" />, color: "#ef4444", bg: "rgba(239,68,68,0.12)", label: t("activityFeed.actions.delete") };
     case "LOGIN":
-      return { icon: <Login fontSize="small" />, color: "#8b5cf6", bg: "rgba(139,92,246,0.12)", label: "Đăng nhập" };
+      return { icon: <Login fontSize="small" />, color: "#8b5cf6", bg: "rgba(139,92,246,0.12)", label: t("activityFeed.actions.login") };
     case "LOGOUT":
-      return { icon: <Logout fontSize="small" />, color: "#6b7280", bg: "rgba(107,114,128,0.12)", label: "Đăng xuất" };
+      return { icon: <Logout fontSize="small" />, color: "#6b7280", bg: "rgba(107,114,128,0.12)", label: t("activityFeed.actions.logout") };
     default:
       return { icon: <HelpOutline fontSize="small" />, color: "#64748b", bg: "rgba(100,116,139,0.12)", label: action };
   }
 }
 
-function formatRelativeTime(dateStr: string) {
+function formatRelativeTime(dateStr: string, t: any) {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "Vừa xong";
-  if (mins < 60) return `${mins} phút trước`;
+  if (mins < 1) return t("activityFeed.time.justNow");
+  if (mins < 60) return t("activityFeed.time.minutesAgo", { count: mins });
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours} giờ trước`;
+  if (hours < 24) return t("activityFeed.time.hoursAgo", { count: hours });
   const days = Math.floor(hours / 24);
-  return `${days} ngày trước`;
+  return t("activityFeed.time.daysAgo", { count: days });
 }
 
 function formatClockTime(date: Date) {
@@ -74,6 +75,7 @@ function LogSkeleton() {
 }
 
 export default function ActivityFeed({ logs, loading, onRefresh }: Props) {
+  const { t } = useTranslation();
   const [refreshing, setRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
@@ -115,7 +117,7 @@ export default function ActivityFeed({ logs, loading, onRefresh }: Props) {
         <History sx={{ color: "#60a5fa", fontSize: 20 }} />
         <Box flex={1}>
           <Typography variant="subtitle2" fontWeight={700} color="#ffffff">
-            Hoạt động gần đây
+            {t("activityFeed.title")}
           </Typography>
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mt: 0.25 }}>
             <Box
@@ -133,7 +135,7 @@ export default function ActivityFeed({ logs, loading, onRefresh }: Props) {
               }}
             />
             <Typography variant="caption" color="rgba(255,255,255,0.65)" fontWeight={600} sx={{ letterSpacing: "0.03em" }}>
-              Trực tiếp (Real-time)
+              {t("activityFeed.realtime")}
             </Typography>
           </Box>
         </Box>
@@ -161,12 +163,12 @@ export default function ActivityFeed({ logs, loading, onRefresh }: Props) {
           >
             <History sx={{ fontSize: 40, color: "#cbd5e1" }} />
             <Typography variant="body2" color="#94a3b8">
-              Chưa có hoạt động nào được ghi nhận
+              {t("activityFeed.empty")}
             </Typography>
           </Box>
         ) : (
           logs.slice(0, 10).map((log, idx) => {
-            const meta = getActionMeta(log.action);
+            const meta = getActionMeta(log.action, t);
             const isFailed = log.status === "FAILED";
             return (
               <Box
@@ -237,7 +239,7 @@ export default function ActivityFeed({ logs, loading, onRefresh }: Props) {
                       </>
                     )}
                     <Typography variant="caption" color="#94a3b8">
-                      {formatRelativeTime(log.createdAt)}
+                      {formatRelativeTime(log.createdAt, t)}
                     </Typography>
                   </Box>
                 </Box>

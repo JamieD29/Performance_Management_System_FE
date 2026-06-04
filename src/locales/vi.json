@@ -1194,5 +1194,63 @@
       "errorTitle": "Lỗi",
       "errorUpdate": "Cập nhật thất bại."
     }
+  },
+  "systemHealth": {
+    "title": "Sức khỏe Hệ thống",
+    "realtime": "Trực tiếp (Real-time)",
+    "cpuLoad": "CPU Load",
+    "ram": "RAM",
+    "nodeHeap": "Node.js Heap",
+    "uptime": "Thời gian hoạt động",
+    "platform": "Hệ điều hành",
+    "nodeVersion": "Phiên bản Node.js",
+    "pid": "PID Tiến trình",
+    "rss": "Bộ nhớ RSS",
+    "lastUpdate": "Cập nhật lúc {{time}}",
+    "status": {
+      "critical": "Tải cao",
+      "warning": "Bình thường",
+      "healthy": "Ổn định"
+    }
+  },
+  "adminDashboard": {
+    "loading": "Đang tải Bảng Điều khiển...",
+    "loadError": "Lỗi tải dữ liệu",
+    "systemConfig": "Cấu hình hệ thống"
+  },
+  "adminHeroHeader": {
+    "facultyName": "Khoa Công Nghệ Thông Tin",
+    "systemName": "Hệ thống quản lý OKR-KPI",
+    "cycleLabel": "Chu kỳ đánh giá",
+    "cycleStatusOpen": "Đang mở",
+    "cycleStatusClosed": "Đã đóng",
+    "progressLabel": "Tiến độ",
+    "ended": "Đã kết thúc",
+    "daysRemaining": "Còn {{count}} ngày",
+    "noCycle": "Chưa có chu kỳ đánh giá nào",
+    "noCycleTooltip": "Vào Admin Settings → Evaluation Cycles để tạo chu kỳ mới",
+    "greets": {
+      "morning": "Chào buổi sáng",
+      "afternoon": "Chào buổi chiều",
+      "evening": "Chào buổi tối"
+    }
+  },
+  "activityFeed": {
+    "title": "Hoạt động gần đây",
+    "realtime": "Trực tiếp (Real-time)",
+    "empty": "Chưa có hoạt động nào được ghi nhận",
+    "actions": {
+      "create": "Tạo mới",
+      "update": "Cập nhật",
+      "delete": "Xóa",
+      "login": "Đăng nhập",
+      "logout": "Đăng xuất"
+    },
+    "time": {
+      "justNow": "Vừa xong",
+      "minutesAgo": "{{count}} phút trước",
+      "hoursAgo": "{{count}} giờ trước",
+      "daysAgo": "{{count}} ngày trước"
+    }
   }
 }

@@ -1,5 +1,6 @@
 import { Box, Typography, LinearProgress, Tooltip, Skeleton, IconButton, Chip } from "@mui/material";
 import { Refresh, Memory, Speed, AccessTime, Computer, FiberManualRecord } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
 import type { SystemHealth } from "../useAdminDashboardData";
 
 interface Props {
@@ -84,6 +85,7 @@ function InfoRow({ label, value, loading }: { label: string; value: string; load
 }
 
 export default function SystemHealthPanel({ health, loading, onRefresh }: Props) {
+  const { t } = useTranslation();
   const lastUpdate = health?.timestamp
     ? new Date(health.timestamp).toLocaleTimeString("vi-VN")
     : null;
@@ -125,7 +127,7 @@ export default function SystemHealthPanel({ health, loading, onRefresh }: Props)
           <Computer sx={{ color: "#60a5fa", fontSize: 20 }} />
           <Box>
             <Typography variant="subtitle2" fontWeight={700} color="#ffffff">
-              System Health
+              {t("systemHealth.title")}
             </Typography>
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mt: 0.25 }}>
               <Box
@@ -143,7 +145,7 @@ export default function SystemHealthPanel({ health, loading, onRefresh }: Props)
                 }}
               />
               <Typography variant="caption" color="rgba(255,255,255,0.65)" fontWeight={600} sx={{ letterSpacing: "0.03em" }}>
-                Trực tiếp (Real-time)
+                {t("systemHealth.realtime")}
               </Typography>
             </Box>
           </Box>
@@ -175,10 +177,10 @@ export default function SystemHealthPanel({ health, loading, onRefresh }: Props)
             }
             label={
               overallStatus === "critical"
-                ? "Tải cao"
+                ? t("systemHealth.status.critical")
                 : overallStatus === "warning"
-                  ? "Bình thường"
-                  : "Ổn định"
+                  ? t("systemHealth.status.warning")
+                  : t("systemHealth.status.healthy")
             }
             sx={{
               bgcolor:
@@ -193,13 +195,12 @@ export default function SystemHealthPanel({ health, loading, onRefresh }: Props)
                   : overallStatus === "warning"
                     ? "#fbbf24"
                     : "#4ade80",
-              border: `1px solid ${
-                overallStatus === "critical"
+              border: `1px solid ${overallStatus === "critical"
                   ? "rgba(239,68,68,0.35)"
                   : overallStatus === "warning"
                     ? "rgba(251,191,36,0.35)"
                     : "rgba(74,222,128,0.35)"
-              }`,
+                }`,
               fontWeight: 600,
               fontSize: "0.65rem",
               height: 22,
@@ -212,7 +213,7 @@ export default function SystemHealthPanel({ health, loading, onRefresh }: Props)
       <Box sx={{ p: 3 }}>
         {/* Gauge bars */}
         <GaugeBar
-          label="CPU Load"
+          label={t("systemHealth.cpuLoad")}
           value={cpuPercent}
           displayLabel={`${cpuPercent}% · ${health?.cpu.coreCount ?? "?"} cores`}
           color={getColor(cpuPercent)}
@@ -221,7 +222,7 @@ export default function SystemHealthPanel({ health, loading, onRefresh }: Props)
         />
 
         <GaugeBar
-          label="RAM Hệ thống"
+          label={t("systemHealth.ram")}
           value={ramPercent}
           displayLabel={`${health?.memory.usedGB ?? "?"} / ${health?.memory.totalGB ?? "?"}  GB`}
           color={getColor(ramPercent)}
@@ -230,7 +231,7 @@ export default function SystemHealthPanel({ health, loading, onRefresh }: Props)
         />
 
         <GaugeBar
-          label="Node.js Heap"
+          label={t("systemHealth.nodeHeap")}
           value={nodeHeapPercent}
           displayLabel={`${health?.nodeProcess.heapUsedMB ?? "?"}  / ${health?.nodeProcess.heapTotalMB ?? "?"}  MB`}
           color={getColor(nodeHeapPercent)}
@@ -244,27 +245,27 @@ export default function SystemHealthPanel({ health, loading, onRefresh }: Props)
         {/* Info rows */}
         <Box>
           <InfoRow
-            label="Uptime Server"
+            label={t("systemHealth.uptime")}
             value={health?.uptime.label ?? "—"}
             loading={loading && !health}
           />
           <InfoRow
-            label="Platform"
+            label={t("systemHealth.platform")}
             value={`${health?.system.platform ?? "—"} (${health?.system.arch ?? "—"})`}
             loading={loading && !health}
           />
           <InfoRow
-            label="Node.js"
+            label={t("systemHealth.nodeVersion")}
             value={health?.nodeProcess.nodeVersion ?? "—"}
             loading={loading && !health}
           />
           <InfoRow
-            label="PID Process"
+            label={t("systemHealth.pid")}
             value={health?.nodeProcess.pid?.toString() ?? "—"}
             loading={loading && !health}
           />
           <InfoRow
-            label="RSS Memory"
+            label={t("systemHealth.rss")}
             value={health?.nodeProcess.rssMB ? `${health.nodeProcess.rssMB} MB` : "—"}
             loading={loading && !health}
           />
@@ -275,7 +276,7 @@ export default function SystemHealthPanel({ health, loading, onRefresh }: Props)
           <Box sx={{ mt: 2, display: "flex", alignItems: "center", gap: 0.5 }}>
             <AccessTime sx={{ fontSize: 12, color: "#94a3b8" }} />
             <Typography variant="caption" color="#94a3b8">
-              Cập nhật lúc {lastUpdate}
+              {t("systemHealth.lastUpdate", { time: lastUpdate })}
             </Typography>
           </Box>
         )}

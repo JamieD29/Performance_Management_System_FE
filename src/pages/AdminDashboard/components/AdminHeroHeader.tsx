@@ -5,6 +5,7 @@ import {
   TrendingUp,
   School,
 } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
 import type { EvaluationCycle } from "../useAdminDashboardData";
 
 interface Props {
@@ -12,8 +13,8 @@ interface Props {
   adminName?: string;
 }
 
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString("vi-VN", {
+function formatDate(dateStr: string, locale: string) {
+  return new Date(dateStr).toLocaleDateString(locale, {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -21,13 +22,15 @@ function formatDate(dateStr: string) {
 }
 
 export default function AdminHeroHeader({ cycle, adminName }: Props) {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === "vi" ? "vi-VN" : "en-US";
   const now = new Date();
   const timeGreet =
     now.getHours() < 12
-      ? "Chào buổi sáng"
+      ? t("adminHeroHeader.greets.morning")
       : now.getHours() < 18
-        ? "Chào buổi chiều"
-        : "Chào buổi tối";
+        ? t("adminHeroHeader.greets.afternoon")
+        : t("adminHeroHeader.greets.evening");
 
   const cycleStatus = cycle?.status === "OPEN" ? "OPEN" : "CLOSED";
   const daysLeft = cycle?.daysRemaining ?? null;
@@ -115,7 +118,7 @@ export default function AdminHeroHeader({ cycle, adminName }: Props) {
                 letterSpacing="-0.5px"
                 lineHeight={1.1}
               >
-                Khoa Công Nghệ Thông Tin
+                {t("adminHeroHeader.facultyName")}
               </Typography>
               <Typography variant="body2" color="rgba(255,255,255,0.6)" mt={0.25}>
                 {timeGreet}{adminName ? `, ${adminName}` : ""} · Admin Portal
@@ -168,11 +171,11 @@ export default function AdminHeroHeader({ cycle, adminName }: Props) {
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <CalendarToday sx={{ color: "#93c5fd", fontSize: 16 }} />
                 <Typography variant="caption" color="#93c5fd" fontWeight={600} textTransform="uppercase" letterSpacing="0.08em">
-                  Chu kỳ đánh giá
+                  {t("adminHeroHeader.cycleLabel")}
                 </Typography>
               </Box>
               <Chip
-                label={cycleStatus === "OPEN" ? "Đang mở" : "Đã đóng"}
+                label={cycleStatus === "OPEN" ? t("adminHeroHeader.cycleStatusOpen") : t("adminHeroHeader.cycleStatusClosed")}
                 size="small"
                 sx={{
                   bgcolor: cycleStatus === "OPEN" ? "rgba(34,197,94,0.2)" : "rgba(239,68,68,0.2)",
@@ -193,7 +196,7 @@ export default function AdminHeroHeader({ cycle, adminName }: Props) {
                   {cycle.name}
                 </Typography>
                 <Typography variant="caption" color="rgba(255,255,255,0.5)" sx={{ display: "block", mt: 0.25 }}>
-                  {formatDate(cycle.startDate)} → {formatDate(cycle.endDate)}
+                  {formatDate(cycle.startDate, locale)} → {formatDate(cycle.endDate, locale)}
                 </Typography>
               </Box>
 
@@ -205,7 +208,7 @@ export default function AdminHeroHeader({ cycle, adminName }: Props) {
                 <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>
                   <Typography variant="caption" color="rgba(255,255,255,0.6)">
                     <TrendingUp sx={{ fontSize: 12, mr: 0.5, verticalAlign: "middle" }} />
-                    Tiến độ
+                    {t("adminHeroHeader.progressLabel")}
                   </Typography>
                   <Typography variant="caption" color="#93c5fd" fontWeight={700}>
                     {progress}%
@@ -235,7 +238,7 @@ export default function AdminHeroHeader({ cycle, adminName }: Props) {
                       fontWeight={600}
                       color={daysLeft <= 0 ? "#f87171" : daysLeft <= 7 ? "#fb923c" : "#fbbf24"}
                     >
-                      {daysLeft <= 0 ? "Đã kết thúc" : `Còn ${daysLeft} ngày`}
+                      {daysLeft <= 0 ? t("adminHeroHeader.ended") : t("adminHeroHeader.daysRemaining", { count: daysLeft })}
                     </Typography>
                   </Box>
                 )}
@@ -253,9 +256,9 @@ export default function AdminHeroHeader({ cycle, adminName }: Props) {
               textAlign: "center",
             }}
           >
-            <Tooltip title="Vào Admin Settings → Evaluation Cycles để tạo chu kỳ mới">
+            <Tooltip title={t("adminHeroHeader.noCycleTooltip")}>
               <Typography variant="body2" color="rgba(255,255,255,0.5)">
-                Chưa có chu kỳ đánh giá nào
+                {t("adminHeroHeader.noCycle")}
               </Typography>
             </Tooltip>
           </Box>

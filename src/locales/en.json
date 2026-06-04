@@ -1194,5 +1194,63 @@
       "errorTitle": "Error",
       "errorUpdate": "Failed to update role."
     }
+  },
+  "systemHealth": {
+    "title": "System Health",
+    "realtime": "Live (Real-time)",
+    "cpuLoad": "CPU Load",
+    "ram": "RAM",
+    "nodeHeap": "Node.js Heap",
+    "uptime": "Server Uptime",
+    "platform": "Platform",
+    "nodeVersion": "Node.js Version",
+    "pid": "Process PID",
+    "rss": "RSS Memory",
+    "lastUpdate": "Updated at {{time}}",
+    "status": {
+      "critical": "High Load",
+      "warning": "Normal",
+      "healthy": "Stable"
+    }
+  },
+  "adminDashboard": {
+    "loading": "Loading Admin Dashboard...",
+    "loadError": "Failed to load data",
+    "systemConfig": "System Configuration"
+  },
+  "adminHeroHeader": {
+    "facultyName": "Faculty of Information Technology",
+    "systemName": "OKR-KPI Management System",
+    "cycleLabel": "Evaluation Cycle",
+    "cycleStatusOpen": "Open",
+    "cycleStatusClosed": "Closed",
+    "progressLabel": "Progress",
+    "ended": "Ended",
+    "daysRemaining": "{{count}} days remaining",
+    "noCycle": "No evaluation cycles configured",
+    "noCycleTooltip": "Go to Admin Settings → Evaluation Cycles to create a new cycle",
+    "greets": {
+      "morning": "Good morning",
+      "afternoon": "Good afternoon",
+      "evening": "Good evening"
+    }
+  },
+  "activityFeed": {
+    "title": "Recent Activity",
+    "realtime": "Live (Real-time)",
+    "empty": "No recent activity recorded",
+    "actions": {
+      "create": "Create",
+      "update": "Update",
+      "delete": "Delete",
+      "login": "Login",
+      "logout": "Logout"
+    },
+    "time": {
+      "justNow": "Just now",
+      "minutesAgo": "{{count}} mins ago",
+      "hoursAgo": "{{count}} hours ago",
+      "daysAgo": "{{count}} days ago"
+    }
   }
 }
