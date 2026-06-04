@@ -28,6 +28,7 @@ import {
 import Grid from "@mui/material/Grid";
 import { Search, Refresh, DeleteForever } from "@mui/icons-material";
 import { api } from "../../../services/api";
+import { useTranslation } from "react-i18next";
 
 // --- INTERFACE ---
 interface SystemLog {
@@ -44,6 +45,7 @@ interface SystemLog {
 }
 
 export default function SystemLogs() {
+  const { t, i18n } = useTranslation();
   const [logs, setLogs] = useState<SystemLog[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -65,7 +67,7 @@ export default function SystemLogs() {
       const logData = Array.isArray(res.data) ? res.data : res.data?.data || [];
       setLogs(logData);
     } catch (error) {
-      console.error("Lỗi khi tải nhật ký hệ thống:", error);
+      console.error(t("systemLogs.errors.fetch"), error);
     } finally {
       setLoading(false);
     }
@@ -80,7 +82,7 @@ export default function SystemLogs() {
       setPage(0);
       setDeleteDialogOpen(false);
     } catch (error) {
-      console.error("Lỗi khi xóa nhật ký:", error);
+      console.error(t("systemLogs.errors.clear"), error);
     } finally {
       setDeleting(false);
     }
@@ -164,7 +166,7 @@ export default function SystemLogs() {
             <TextField
               fullWidth
               size="small"
-              placeholder="Tìm theo nội dung, tên, email người dùng..."
+              placeholder={t("systemLogs.searchPlaceholder")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               InputProps={{
@@ -178,18 +180,18 @@ export default function SystemLogs() {
           </Grid>
           <Grid size={{ xs: 12, md: 3 }}>
             <FormControl fullWidth size="small">
-              <InputLabel>Loại thao tác</InputLabel>
+              <InputLabel>{t("systemLogs.actionLabel")}</InputLabel>
               <Select
                 value={filterAction}
-                label="Loại thao tác"
+                label={t("systemLogs.actionLabel")}
                 onChange={(e) => setFilterAction(e.target.value)}
               >
-                <MenuItem value="ALL">Tất cả thao tác</MenuItem>
-                <MenuItem value="CREATE">Tạo mới (CREATE)</MenuItem>
-                <MenuItem value="UPDATE">Cập nhật (UPDATE)</MenuItem>
-                <MenuItem value="DELETE">Xóa (DELETE)</MenuItem>
-                <MenuItem value="LOGIN">Đăng nhập (LOGIN)</MenuItem>
-                <MenuItem value="LOGOUT">Đăng xuất (LOGOUT)</MenuItem>
+                <MenuItem value="ALL">{t("systemLogs.actions.all")}</MenuItem>
+                <MenuItem value="CREATE">{t("systemLogs.actions.create")}</MenuItem>
+                <MenuItem value="UPDATE">{t("systemLogs.actions.update")}</MenuItem>
+                <MenuItem value="DELETE">{t("systemLogs.actions.delete")}</MenuItem>
+                <MenuItem value="LOGIN">{t("systemLogs.actions.login")}</MenuItem>
+                <MenuItem value="LOGOUT">{t("systemLogs.actions.logout")}</MenuItem>
               </Select>
             </FormControl>
           </Grid>
@@ -219,7 +221,7 @@ export default function SystemLogs() {
                 },
               }}
             >
-              Làm mới
+              {t("systemLogs.refreshBtn")}
             </Button>
           </Grid>
           <Grid
@@ -248,7 +250,7 @@ export default function SystemLogs() {
                 },
               }}
             >
-              Xóa tất cả
+              {t("systemLogs.clearAllBtn")}
             </Button>
           </Grid>
         </Grid>
@@ -279,12 +281,12 @@ export default function SystemLogs() {
                 },
               }}
             >
-              <TableCell width="15%">Thời gian</TableCell>
-              <TableCell width="20%">Người thực hiện</TableCell>
-              <TableCell width="15%">Hành động</TableCell>
-              <TableCell width="35%">Chi tiết</TableCell>
+              <TableCell width="15%">{t("systemLogs.table.time")}</TableCell>
+              <TableCell width="20%">{t("systemLogs.table.user")}</TableCell>
+              <TableCell width="15%">{t("systemLogs.table.action")}</TableCell>
+              <TableCell width="35%">{t("systemLogs.table.details")}</TableCell>
               <TableCell width="10%" align="center">
-                Trạng thái
+                {t("systemLogs.table.status")}
               </TableCell>
             </TableRow>
           </TableHead>
@@ -302,7 +304,7 @@ export default function SystemLogs() {
                   align="center"
                   sx={{ py: 5, color: "text.secondary" }}
                 >
-                  Chưa có nhật ký nào được ghi nhận.
+                  {t("systemLogs.table.empty")}
                 </TableCell>
               </TableRow>
             ) : (
@@ -310,18 +312,18 @@ export default function SystemLogs() {
                 <TableRow key={log.id} hover sx={{ "& td": { py: 1.5 } }}>
                   <TableCell>
                     <Typography variant="body2" fontWeight={500}>
-                      {new Date(log.createdAt).toLocaleDateString("vi-VN")}
+                      {new Date(log.createdAt).toLocaleDateString(i18n.language === "vi" ? "vi-VN" : "en-US")}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      {new Date(log.createdAt).toLocaleTimeString("vi-VN")}
+                      {new Date(log.createdAt).toLocaleTimeString(i18n.language === "vi" ? "vi-VN" : "en-US")}
                     </Typography>
                   </TableCell>
                   <TableCell>
                     <Typography variant="body2" fontWeight={500}>
-                      {log.user?.name || "Hệ thống"}
+                      {log.user?.name || t("systemLogs.table.systemUser")}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      {log.user?.email || "System Action"}
+                      {log.user?.email || t("systemLogs.table.systemEmail")}
                     </Typography>
                   </TableCell>
                   <TableCell>
@@ -360,9 +362,9 @@ export default function SystemLogs() {
         rowsPerPage={rowsPerPage}
         onRowsPerPageChange={handleChangeRowsPerPage}
         rowsPerPageOptions={[10, 20, 50]}
-        labelRowsPerPage="Số dòng mỗi trang:"
+        labelRowsPerPage={t("systemLogs.pagination.rowsPerPage")}
         labelDisplayedRows={({ from, to, count }) =>
-          `${from}–${to} trong tổng ${count} nhật ký`
+          t("systemLogs.pagination.displayedRows", { from, to, count })
         }
         sx={{
           borderTop: "1px solid #e2e8f0",
@@ -377,15 +379,11 @@ export default function SystemLogs() {
         onClose={() => setDeleteDialogOpen(false)}
       >
         <DialogTitle sx={{ fontWeight: "bold", color: "#dc2626" }}>
-          ⚠️ Xác nhận xóa toàn bộ nhật ký
+          {t("systemLogs.dialog.title")}
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Bạn đang chuẩn bị <strong>xóa tất cả {logs.length} nhật ký</strong>{" "}
-            khỏi hệ thống. Hành động này <strong>không thể hoàn tác</strong>.
-            <br />
-            <br />
-            Bạn có chắc chắn muốn tiếp tục?
+            {t("systemLogs.dialog.content", { count: logs.length })}
           </DialogContentText>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
@@ -393,7 +391,7 @@ export default function SystemLogs() {
             onClick={() => setDeleteDialogOpen(false)}
             disabled={deleting}
           >
-            Hủy bỏ
+            {t("systemLogs.dialog.cancel")}
           </Button>
           <Button
             onClick={handleClearAll}
@@ -408,7 +406,7 @@ export default function SystemLogs() {
               )
             }
           >
-            {deleting ? "Đang xóa..." : "Xóa tất cả"}
+            {deleting ? t("systemLogs.dialog.deleting") : t("systemLogs.dialog.delete")}
           </Button>
         </DialogActions>
       </Dialog>

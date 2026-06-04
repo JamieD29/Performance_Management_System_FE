@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Box,
   Typography,
@@ -40,6 +41,7 @@ interface ManagementPosition {
 }
 
 export default function ManagementPositionManager() {
+  const { t } = useTranslation();
   const [positions, setPositions] = useState<ManagementPosition[]>([]);
   const [loading, setLoading] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -64,7 +66,7 @@ export default function ManagementPositionManager() {
       const res = await api.get("/management-positions");
       setPositions(Array.isArray(res.data) ? res.data : []);
     } catch (error) {
-      console.error("Lỗi tải chức vụ:", error);
+      console.error(t("managementPositionManager.alerts.fetchError"), error);
     } finally {
       setLoading(false);
     }
@@ -127,21 +129,21 @@ export default function ManagementPositionManager() {
         );
         setSnackbar({
           open: true,
-          message: `Đã cập nhật chức vụ "${formData.name}"`,
+          message: t("managementPositionManager.alerts.updateSuccess", { name: formData.name }),
           severity: "success",
         });
       } else {
         await api.post("/management-positions", formData);
         setSnackbar({
           open: true,
-          message: `Đã tạo chức vụ "${formData.name}"`,
+          message: t("managementPositionManager.alerts.createSuccess", { name: formData.name }),
           severity: "success",
         });
       }
       setDialogOpen(false);
       fetchPositions();
     } catch (error: any) {
-      const msg = error.response?.data?.message || "Có lỗi xảy ra";
+      const msg = error.response?.data?.message || t("managementPositionManager.alerts.fallbackError");
       setSnackbar({ open: true, message: msg, severity: "error" });
     } finally {
       setSubmitting(false);
@@ -150,10 +152,10 @@ export default function ManagementPositionManager() {
 
   const handleDelete = async (pos: ManagementPosition) => {
     const ok = await confirmAction({
-      title: `Xóa chức vụ "${pos.name}"?`,
-      text: "Tất cả nhân sự đang giữ chức vụ này sẽ bị gỡ chức vụ. Hành động này không thể hoàn tác.",
+      title: t("managementPositionManager.alerts.deleteConfirmTitle", { name: pos.name }),
+      text: t("managementPositionManager.alerts.deleteConfirmText"),
       icon: "warning",
-      confirmText: "Xóa",
+      confirmText: t("managementPositionManager.alerts.deleteConfirmBtn"),
       confirmColor: "#dc2626",
     });
     if (!ok) return;
@@ -161,12 +163,12 @@ export default function ManagementPositionManager() {
       await api.delete(`/management-positions/${pos.id}`);
       setSnackbar({
         open: true,
-        message: `Đã xóa chức vụ "${pos.name}"`,
+        message: t("managementPositionManager.alerts.deleteSuccess", { name: pos.name }),
         severity: "success",
       });
       fetchPositions();
     } catch (error: any) {
-      const msg = error.response?.data?.message || "Xóa thất bại";
+      const msg = error.response?.data?.message || t("managementPositionManager.alerts.deleteError");
       setSnackbar({ open: true, message: msg, severity: "error" });
     }
   };
@@ -174,13 +176,13 @@ export default function ManagementPositionManager() {
   const getPermissionLabel = (level?: string) => {
     switch (level) {
       case "SYSTEM":
-        return "Cấp Hệ Thống / BGH";
+        return t("managementPositionManager.permissionLabels.system");
       case "KHOA":
-        return "Cấp Khoa";
+        return t("managementPositionManager.permissionLabels.khoa");
       case "DON_VI":
-        return "Cấp Đơn vị (Bộ môn/Phòng)";
+        return t("managementPositionManager.permissionLabels.donVi");
       default:
-        return "Không cấp quyền";
+        return t("managementPositionManager.permissionLabels.none");
     }
   };
 
@@ -210,8 +212,7 @@ export default function ManagementPositionManager() {
       >
         <Box sx={{ mr: 2 }}>
           <Typography variant="body2" color="text.secondary">
-            Định nghĩa các chức vụ quản lý cấp cao cho bộ môn / khoa. Các chức
-            vụ này sẽ được gán cho nhân sự trong tab Nhân sự.
+            {t("managementPositionManager.description")}
           </Typography>
         </Box>
         <Button
@@ -229,7 +230,7 @@ export default function ManagementPositionManager() {
             "&:hover": { bgcolor: "#1e40af" },
           }}
         >
-          Thêm chức vụ
+          {t("managementPositionManager.addPositionBtn")}
         </Button>
       </Box>
 
@@ -243,22 +244,22 @@ export default function ManagementPositionManager() {
           <TableHead sx={{ bgcolor: "#f8fafc" }}>
             <TableRow>
               <TableCell sx={{ fontWeight: "bold", color: "#475569" }}>
-                CHỨC VỤ
+                {t("managementPositionManager.table.headers.position")}
               </TableCell>
               <TableCell sx={{ fontWeight: "bold", color: "#475569" }}>
-                SLUG
+                {t("managementPositionManager.table.headers.slug")}
               </TableCell>
               <TableCell sx={{ fontWeight: "bold", color: "#475569" }}>
-                MỨC QUYỀN HẠN
+                {t("managementPositionManager.table.headers.permissionLevel")}
               </TableCell>
               <TableCell sx={{ fontWeight: "bold", color: "#475569" }}>
-                MÔ TẢ
+                {t("managementPositionManager.table.headers.description")}
               </TableCell>
               <TableCell
                 align="right"
                 sx={{ fontWeight: "bold", color: "#475569" }}
               >
-                THAO TÁC
+                {t("managementPositionManager.table.headers.actions")}
               </TableCell>
             </TableRow>
           </TableHead>
@@ -316,7 +317,7 @@ export default function ManagementPositionManager() {
                     </Typography>
                   </TableCell>
                   <TableCell align="right" sx={{ py: 1 }}>
-                    <Tooltip title="Chỉnh sửa">
+                    <Tooltip title={t("managementPositionManager.table.tooltips.edit")}>
                       <IconButton
                         size="small"
                         onClick={() => handleOpenEdit(pos)}
@@ -324,7 +325,7 @@ export default function ManagementPositionManager() {
                         <Edit fontSize="small" />
                       </IconButton>
                     </Tooltip>
-                    <Tooltip title="Xóa">
+                    <Tooltip title={t("managementPositionManager.table.tooltips.delete")}>
                       <IconButton
                         size="small"
                         color="error"
@@ -339,13 +340,13 @@ export default function ManagementPositionManager() {
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={4}
+                  colSpan={5}
                   align="center"
                   sx={{ py: 4, color: "text.secondary" }}
                 >
                   <Groups sx={{ fontSize: 32, mb: 1, opacity: 0.3 }} />
                   <Typography variant="body2">
-                    Chưa có chức vụ quản lý nào. Bấm "Thêm chức vụ" để tạo mới.
+                    {t("managementPositionManager.table.empty")}
                   </Typography>
                 </TableCell>
               </TableRow>
@@ -362,15 +363,15 @@ export default function ManagementPositionManager() {
         fullWidth
       >
         <DialogTitle sx={{ fontWeight: "bold", color: "#1e3a8a" }}>
-          {editingPosition ? "Chỉnh sửa chức vụ" : "Thêm chức vụ quản lý mới"}
+          {editingPosition ? t("managementPositionManager.dialog.titleEdit") : t("managementPositionManager.dialog.titleCreate")}
         </DialogTitle>
         <DialogContent>
           <Box
             sx={{ display: "flex", flexDirection: "column", gap: 2.5, mt: 1 }}
           >
             <TextField
-              label="Tên chức vụ"
-              placeholder="VD: Trưởng khoa, Phó bộ môn..."
+              label={t("managementPositionManager.dialog.fields.name.label")}
+              placeholder={t("managementPositionManager.dialog.fields.name.placeholder")}
               value={formData.name}
               onChange={(e) => handleNameChange(e.target.value)}
               fullWidth
@@ -378,8 +379,8 @@ export default function ManagementPositionManager() {
               autoFocus
             />
             <TextField
-              label="Slug (mã định danh)"
-              placeholder="Tự động tạo từ tên"
+              label={t("managementPositionManager.dialog.fields.slug.label")}
+              placeholder={t("managementPositionManager.dialog.fields.slug.placeholder")}
               value={formData.slug}
               onChange={(e) =>
                 setFormData((prev) => ({
@@ -388,14 +389,14 @@ export default function ManagementPositionManager() {
                 }))
               }
               fullWidth
-              helperText="Mã duy nhất, dùng trong code. Tự động tạo từ tên chức vụ."
+              helperText={t("managementPositionManager.dialog.fields.slug.helper")}
               InputProps={{
                 style: { fontFamily: "monospace" },
               }}
             />
             <TextField
-              label="Mô tả (tuỳ chọn)"
-              placeholder="VD: Quản lý toàn bộ hoạt động của khoa..."
+              label={t("managementPositionManager.dialog.fields.description.label")}
+              placeholder={t("managementPositionManager.dialog.fields.description.placeholder")}
               value={formData.description}
               onChange={(e) =>
                 setFormData((prev) => ({
@@ -409,11 +410,11 @@ export default function ManagementPositionManager() {
             />
             <FormControl fullWidth>
               <InputLabel>
-                Mức quản lý / Quyền hạn (Permission Level)
+                {t("managementPositionManager.dialog.fields.permission.label")}
               </InputLabel>
               <Select
                 value={formData.permissionLevel}
-                label="Mức quản lý / Quyền hạn (Permission Level)"
+                label={t("managementPositionManager.dialog.fields.permission.label")}
                 onChange={(e) =>
                   setFormData((prev) => ({
                     ...prev,
@@ -424,22 +425,20 @@ export default function ManagementPositionManager() {
                 <MenuItem value="NONE">
                   <Box>
                     <Typography variant="body2" fontWeight={600}>
-                      Không cấp quyền
+                      {t("managementPositionManager.dialog.fields.permission.options.none.title")}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      Chỉ hiển thị như một nhãn danh dự, không can thiệp hệ
-                      thống
+                      {t("managementPositionManager.dialog.fields.permission.options.none.caption")}
                     </Typography>
                   </Box>
                 </MenuItem>
                 <MenuItem value="DON_VI">
                   <Box>
                     <Typography variant="body2" fontWeight={600}>
-                      Cấp Đơn vị (Bộ môn/Phòng ban)
+                      {t("managementPositionManager.dialog.fields.permission.options.donVi.title")}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      Được quản lý nhân sự thuộc nội bộ phòng/bộ môn quản lý
-                      chức vụ
+                      {t("managementPositionManager.dialog.fields.permission.options.donVi.caption")}
                     </Typography>
                   </Box>
                 </MenuItem>
@@ -450,20 +449,20 @@ export default function ManagementPositionManager() {
                       fontWeight={600}
                       color="#1d4ed8"
                     >
-                      Cấp Khoa (Ban CN Khoa)
+                      {t("managementPositionManager.dialog.fields.permission.options.khoa.title")}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      Thấy toàn bộ danh sách khoa, không gán quyền
+                      {t("managementPositionManager.dialog.fields.permission.options.khoa.caption")}
                     </Typography>
                   </Box>
                 </MenuItem>
                 <MenuItem value="SYSTEM">
                   <Box>
                     <Typography variant="body2" fontWeight={600} color="error">
-                      Cấp Hệ thống (BGH/BGD)
+                      {t("managementPositionManager.dialog.fields.permission.options.system.title")}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      View all
+                      {t("managementPositionManager.dialog.fields.permission.options.system.caption")}
                     </Typography>
                   </Box>
                 </MenuItem>
@@ -476,7 +475,7 @@ export default function ManagementPositionManager() {
             onClick={() => setDialogOpen(false)}
             sx={{ textTransform: "none" }}
           >
-            Hủy
+            {t("managementPositionManager.dialog.cancel")}
           </Button>
           <Button
             variant="contained"
@@ -492,9 +491,9 @@ export default function ManagementPositionManager() {
             {submitting ? (
               <CircularProgress size={20} />
             ) : editingPosition ? (
-              "Lưu thay đổi"
+              t("managementPositionManager.dialog.save")
             ) : (
-              "Tạo chức vụ"
+              t("managementPositionManager.dialog.create")
             )}
           </Button>
         </DialogActions>

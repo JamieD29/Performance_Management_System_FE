@@ -184,7 +184,7 @@ export default function Login() {
 
   const handleMockLogin = async () => {
     if (!mockEmail) {
-      setError("Vui lòng nhập Email để thực hiện Mock Login.");
+      setError(t("login.mock.emailRequired"));
       return;
     }
     setError("");
@@ -209,8 +209,7 @@ export default function Login() {
     } catch (err: any) {
       console.error("Mock Login Error:", err);
       setError(
-        "Bypass Login thất bại: " +
-          (err.response?.data?.message || err.message)
+        t("login.mock.loginFailed", { error: err.response?.data?.message || err.message })
       );
     } finally {
       setIsLoading(false);
@@ -460,43 +459,43 @@ export default function Login() {
               {showMock && (
                 <Box sx={{ mt: 3, p: 2.5, border: "1px dashed #3b82f6", borderRadius: "12px", bgcolor: "#f8fafc" }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: "bold", color: "#1e3a8a", mb: 1.5, display: "flex", alignItems: "center", gap: 1 }}>
-                    🧪 Tester Bypass / Mock Login
+                    {t("login.mock.title")}
                   </Typography>
                   <Stack spacing={1.5}>
                     <TextField
                       id="mock-email-input"
                       size="small"
-                      label="Mock Email"
-                      placeholder="VD: dean@hcmus.edu.vn"
+                      label={t("login.mock.emailLabel")}
+                      placeholder={t("login.mock.emailPlaceholder")}
                       value={mockEmail}
                       onChange={(e) => setMockEmail(e.target.value)}
                       fullWidth
                     />
                     <FormControl size="small" fullWidth>
-                      <InputLabel id="mock-role-label">Mock Role</InputLabel>
+                      <InputLabel id="mock-role-label">{t("login.mock.roleLabel")}</InputLabel>
                       <Select
                         labelId="mock-role-label"
                         id="mock-role-select"
                         value={mockRole}
-                        label="Mock Role"
+                        label={t("login.mock.roleLabel")}
                         onChange={(e) => setMockRole(e.target.value)}
                       >
-                        <MenuItem value="USER">User (Giảng viên / Nhân sự)</MenuItem>
-                        <MenuItem value="ADMIN">Admin</MenuItem>
+                        <MenuItem value="USER">{t("login.mock.roleOptions.user")}</MenuItem>
+                        <MenuItem value="ADMIN">{t("login.mock.roleOptions.admin")}</MenuItem>
                       </Select>
                     </FormControl>
                     <FormControl size="small" fullWidth>
-                      <InputLabel id="mock-position-label">Mock Chức vụ quản lý</InputLabel>
+                      <InputLabel id="mock-position-label">{t("login.mock.positionLabel")}</InputLabel>
                       <Select
                         labelId="mock-position-label"
                         id="mock-position-select"
                         value={mockPosition}
-                        label="Mock Chức vụ quản lý"
+                        label={t("login.mock.positionLabel")}
                         onChange={(e) => setMockPosition(e.target.value)}
                       >
-                        <MenuItem value="">Không có (Nhân sự thường)</MenuItem>
-                        <MenuItem value="DEAN">Trưởng khoa (DEAN)</MenuItem>
-                        <MenuItem value="VICE_DEAN">Phó khoa (VICE_DEAN)</MenuItem>
+                        <MenuItem value="">{t("login.mock.positionOptions.none")}</MenuItem>
+                        <MenuItem value="DEAN">{t("login.mock.positionOptions.dean")}</MenuItem>
+                        <MenuItem value="VICE_DEAN">{t("login.mock.positionOptions.viceDean")}</MenuItem>
                       </Select>
                     </FormControl>
                     <Button
@@ -508,7 +507,7 @@ export default function Login() {
                       fullWidth
                       sx={{ textTransform: "none", fontWeight: "bold", borderRadius: "8px" }}
                     >
-                      Đăng nhập Tester
+                      {t("login.mock.loginBtn")}
                     </Button>
                   </Stack>
                 </Box>
@@ -521,7 +520,7 @@ export default function Login() {
                     sx={{ color: "text.secondary", cursor: "pointer", "&:hover": { textDecoration: "underline" } }}
                     onClick={() => setShowMock(!showMock)}
                   >
-                    {showMock ? "Ẩn công cụ Tester" : "Hiện công cụ Tester (Bypass Login)"}
+                    {showMock ? t("login.mock.toggleHide") : t("login.mock.toggleShow")}
                   </Typography>
                 </Box>
               )}

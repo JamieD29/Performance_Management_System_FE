@@ -11,7 +11,28 @@
     "authorizedDomains": "Only accounts ending in <1>{{domains}}</1> are authorized.",
     "errorAuthFailed": "❌ Authentication failed. Please try again.",
     "errorAccessDenied": "❌ You have denied access.",
-    "errorDefault": "❌ Error: {{error}}"
+    "errorDefault": "❌ Error: {{error}}",
+    "mock": {
+      "title": "🧪 Tester Bypass / Mock Login",
+      "emailLabel": "Mock Email",
+      "emailPlaceholder": "e.g., dean@hcmus.edu.vn",
+      "roleLabel": "Mock Role",
+      "roleOptions": {
+        "user": "User (Faculty / Personnel)",
+        "admin": "Admin"
+      },
+      "positionLabel": "Mock Management Position",
+      "positionOptions": {
+        "none": "None (Regular Staff)",
+        "dean": "Dean (DEAN)",
+        "viceDean": "Vice Dean (VICE_DEAN)"
+      },
+      "loginBtn": "Mock Login",
+      "toggleShow": "Show Tester Tool (Bypass Login)",
+      "toggleHide": "Hide Tester Tool",
+      "emailRequired": "Please enter Email for Mock Login.",
+      "loginFailed": "Bypass Login failed: {{error}}"
+    }
   },
   "header": {
     "profile": "My Profile",
@@ -1251,6 +1272,123 @@
       "minutesAgo": "{{count}} mins ago",
       "hoursAgo": "{{count}} hours ago",
       "daysAgo": "{{count}} days ago"
+    }
+  },
+  "systemLogs": {
+    "searchPlaceholder": "Search by content, name, email...",
+    "actionLabel": "Action type",
+    "actions": {
+      "all": "All actions",
+      "create": "Create (CREATE)",
+      "update": "Update (UPDATE)",
+      "delete": "Delete (DELETE)",
+      "login": "Login (LOGIN)",
+      "logout": "Logout (LOGOUT)"
+    },
+    "refreshBtn": "Refresh",
+    "clearAllBtn": "Clear all",
+    "table": {
+      "time": "Time",
+      "user": "Executor",
+      "action": "Action",
+      "details": "Details",
+      "status": "Status",
+      "empty": "No logs recorded.",
+      "systemUser": "System",
+      "systemEmail": "System Action"
+    },
+    "pagination": {
+      "rowsPerPage": "Rows per page:",
+      "displayedRows": "{{from}}–{{to}} of {{count}} logs"
+    },
+    "dialog": {
+      "title": "⚠️ Confirm deletion of all logs",
+      "content": "You are about to delete all {{count}} logs from the system. This action cannot be undone. Are you sure you want to continue?",
+      "cancel": "Cancel",
+      "delete": "Delete all",
+      "deleting": "Deleting..."
+    },
+    "errors": {
+      "fetch": "Error loading system logs:",
+      "clear": "Error clearing logs:"
+    }
+  },
+  "managementPositionManager": {
+    "description": "Define high-level management positions for department/faculty. These positions will be assigned to personnel in the Personnel tab.",
+    "addPositionBtn": "Add Position",
+    "table": {
+      "headers": {
+        "position": "POSITION",
+        "slug": "SLUG",
+        "permissionLevel": "PERMISSION LEVEL",
+        "description": "DESCRIPTION",
+        "actions": "ACTIONS"
+      },
+      "empty": "No management positions available. Click \"Add Position\" to create one.",
+      "tooltips": {
+        "edit": "Edit",
+        "delete": "Delete"
+      }
+    },
+    "permissionLabels": {
+      "system": "System Level / Presidential Board",
+      "khoa": "Faculty Level",
+      "donVi": "Department/Room Level",
+      "none": "No permission"
+    },
+    "dialog": {
+      "titleCreate": "Add New Management Position",
+      "titleEdit": "Edit Position",
+      "fields": {
+        "name": {
+          "label": "Position Name",
+          "placeholder": "e.g., Dean, Vice Head of Department..."
+        },
+        "slug": {
+          "label": "Slug (Identifier)",
+          "placeholder": "Auto-generated from name",
+          "helper": "Unique code used in system. Auto-generated from position name."
+        },
+        "description": {
+          "label": "Description (optional)",
+          "placeholder": "e.g., Manages all activities of the department..."
+        },
+        "permission": {
+          "label": "Management / Permission Level",
+          "options": {
+            "none": {
+              "title": "No permission",
+              "caption": "Only displays as an honorary label, no system intervention"
+            },
+            "donVi": {
+              "title": "Department Level (Department/Room)",
+              "caption": "Manages personnel within the assigned department/room"
+            },
+            "khoa": {
+              "title": "Faculty Level (Faculty Board)",
+              "caption": "Views all faculty members, no role assignment"
+            },
+            "system": {
+              "title": "System Level (Board of Trustees/Presidency)",
+              "caption": "View all data"
+            }
+          }
+        }
+      },
+      "cancel": "Cancel",
+      "save": "Save Changes",
+      "create": "Create Position"
+    },
+    "alerts": {
+      "fetchError": "Error loading positions:",
+      "createSuccess": "Created position \"{{name}}\"",
+      "updateSuccess": "Updated position \"{{name}}\"",
+      "deleteSuccess": "Deleted position \"{{name}}\"",
+      "deleteConfirmTitle": "Delete position \"{{name}}\"?",
+      "deleteConfirmText": "All personnel currently holding this position will have it removed. This action cannot be undone.",
+      "deleteConfirmBtn": "Delete",
+      "fallbackError": "An error occurred",
+      "deleteError": "Deletion failed"
     }
   }
 }

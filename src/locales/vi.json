@@ -11,7 +11,28 @@
     "authorizedDomains": "Chỉ các tài khoản có đuôi <1>{{domains}}</1> mới được phép truy cập.",
     "errorAuthFailed": "❌ Đăng nhập thất bại. Vui lòng thử lại.",
     "errorAccessDenied": "❌ Bạn đã từ chối cấp quyền truy cập.",
-    "errorDefault": "❌ Lỗi: {{error}}"
+    "errorDefault": "❌ Lỗi: {{error}}",
+    "mock": {
+      "title": "🧪 Tester Bypass / Mock Login",
+      "emailLabel": "Mock Email",
+      "emailPlaceholder": "VD: dean@hcmus.edu.vn",
+      "roleLabel": "Mock Role",
+      "roleOptions": {
+        "user": "User (Giảng viên / Nhân sự)",
+        "admin": "Admin"
+      },
+      "positionLabel": "Mock Chức vụ quản lý",
+      "positionOptions": {
+        "none": "Không có (Nhân sự thường)",
+        "dean": "Trưởng khoa (DEAN)",
+        "viceDean": "Phó khoa (VICE_DEAN)"
+      },
+      "loginBtn": "Đăng nhập Tester",
+      "toggleShow": "Hiện công cụ Tester (Bypass Login)",
+      "toggleHide": "Ẩn công cụ Tester",
+      "emailRequired": "Vui lòng nhập Email để thực hiện Mock Login.",
+      "loginFailed": "Bypass Login thất bại: {{error}}"
+    }
   },
   "header": {
     "profile": "Hồ sơ cá nhân",
@@ -1251,6 +1272,123 @@
       "minutesAgo": "{{count}} phút trước",
       "hoursAgo": "{{count}} giờ trước",
       "daysAgo": "{{count}} ngày trước"
+    }
+  },
+  "systemLogs": {
+    "searchPlaceholder": "Tìm theo nội dung, tên, email người dùng...",
+    "actionLabel": "Loại thao tác",
+    "actions": {
+      "all": "Tất cả thao tác",
+      "create": "Tạo mới (CREATE)",
+      "update": "Cập nhật (UPDATE)",
+      "delete": "Xóa (DELETE)",
+      "login": "Đăng nhập (LOGIN)",
+      "logout": "Đăng xuất (LOGOUT)"
+    },
+    "refreshBtn": "Làm mới",
+    "clearAllBtn": "Xóa tất cả",
+    "table": {
+      "time": "Thời gian",
+      "user": "Người thực hiện",
+      "action": "Hành động",
+      "details": "Chi tiết",
+      "status": "Trạng thái",
+      "empty": "Chưa có nhật ký nào được ghi nhận.",
+      "systemUser": "Hệ thống",
+      "systemEmail": "System Action"
+    },
+    "pagination": {
+      "rowsPerPage": "Số dòng mỗi trang:",
+      "displayedRows": "{{from}}–{{to}} trong tổng {{count}} nhật ký"
+    },
+    "dialog": {
+      "title": "⚠️ Xác nhận xóa toàn bộ nhật ký",
+      "content": "Bạn đang chuẩn bị xóa tất cả {{count}} nhật ký khỏi hệ thống. Hành động này không thể hoàn tác. Bạn có chắc chắn muốn tiếp tục?",
+      "cancel": "Hủy bỏ",
+      "delete": "Xóa tất cả",
+      "deleting": "Đang xóa..."
+    },
+    "errors": {
+      "fetch": "Lỗi khi tải nhật ký hệ thống:",
+      "clear": "Lỗi khi xóa nhật ký:"
+    }
+  },
+  "managementPositionManager": {
+    "description": "Định nghĩa các chức vụ quản lý cấp cao cho bộ môn / khoa. Các chức vụ này sẽ được gán cho nhân sự trong tab Nhân sự.",
+    "addPositionBtn": "Thêm chức vụ",
+    "table": {
+      "headers": {
+        "position": "CHỨC VỤ",
+        "slug": "SLUG",
+        "permissionLevel": "MỨC QUYỀN HẠN",
+        "description": "MÔ TẢ",
+        "actions": "THAO TÁC"
+      },
+      "empty": "Chưa có chức vụ quản lý nào. Bấm \"Thêm chức vụ\" để tạo mới.",
+      "tooltips": {
+        "edit": "Chỉnh sửa",
+        "delete": "Xóa"
+      }
+    },
+    "permissionLabels": {
+      "system": "Cấp Hệ Thống / BGH",
+      "khoa": "Cấp Khoa",
+      "donVi": "Cấp Đơn vị (Bộ môn/Phòng)",
+      "none": "Không cấp quyền"
+    },
+    "dialog": {
+      "titleCreate": "Thêm chức vụ quản lý mới",
+      "titleEdit": "Chỉnh sửa chức vụ",
+      "fields": {
+        "name": {
+          "label": "Tên chức vụ",
+          "placeholder": "VD: Trưởng khoa, Phó bộ môn..."
+        },
+        "slug": {
+          "label": "Slug (mã định danh)",
+          "placeholder": "Tự động tạo từ tên",
+          "helper": "Mã duy nhất, dùng trong code. Tự động tạo từ tên chức vụ."
+        },
+        "description": {
+          "label": "Mô tả (tuỳ chọn)",
+          "placeholder": "VD: Quản lý toàn bộ hoạt động của khoa..."
+        },
+        "permission": {
+          "label": "Mức quản lý / Quyền hạn (Permission Level)",
+          "options": {
+            "none": {
+              "title": "Không cấp quyền",
+              "caption": "Chỉ hiển thị như một nhãn danh dự, không can thiệp hệ thống"
+            },
+            "donVi": {
+              "title": "Cấp Đơn vị (Bộ môn/Phòng ban)",
+              "caption": "Được quản lý nhân sự thuộc nội bộ phòng/bộ môn quản lý chức vụ"
+            },
+            "khoa": {
+              "title": "Cấp Khoa (Ban CN Khoa)",
+              "caption": "Thấy toàn bộ danh sách khoa, không gán quyền"
+            },
+            "system": {
+              "title": "Cấp Hệ thống (BGH/BGD)",
+              "caption": "Xem toàn bộ dữ liệu"
+            }
+          }
+        }
+      },
+      "cancel": "Hủy",
+      "save": "Lưu thay đổi",
+      "create": "Tạo chức vụ"
+    },
+    "alerts": {
+      "fetchError": "Lỗi tải chức vụ:",
+      "createSuccess": "Đã tạo chức vụ \"{{name}}\"",
+      "updateSuccess": "Đã cập nhật chức vụ \"{{name}}\"",
+      "deleteSuccess": "Đã xóa chức vụ \"{{name}}\"",
+      "deleteConfirmTitle": "Xóa chức vụ \"{{name}}\"?",
+      "deleteConfirmText": "Tất cả nhân sự đang giữ chức vụ này sẽ bị gỡ chức vụ. Hành động này không thể hoàn tác.",
+      "deleteConfirmBtn": "Xóa",
+      "fallbackError": "Có lỗi xảy ra",
+      "deleteError": "Xóa thất bại"
     }
   }
 }
