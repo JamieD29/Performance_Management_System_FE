@@ -1,4 +1,5 @@
 import { Box, Typography, Skeleton } from "@mui/material";
+import { useTranslation } from "react-i18next";
 import {
   PeopleAlt,
   PersonOff,
@@ -118,41 +119,42 @@ function MetricCard({
 }
 
 export default function AdminMetricCards({ stats, loading }: Props) {
+  const { t } = useTranslation();
   const u = stats?.users;
 
   const cards: MetricCardProps[] = [
     {
       icon: <PeopleAlt fontSize="medium" />,
-      label: "Tổng nhân sự",
+      label: t("adminMetricCards.totalStaff"),
       value: u?.total ?? null,
-      subtitle: "Tất cả tài khoản trong hệ thống",
+      subtitle: t("adminMetricCards.totalStaffSubtitle"),
       color: "#2563eb",
       bgGradient: "linear-gradient(135deg, #3b82f6, #1d4ed8)",
       loading,
     },
     {
       icon: <VerifiedUser fontSize="medium" />,
-      label: "Đang hoạt động",
+      label: t("adminMetricCards.active"),
       value: u?.active ?? null,
-      subtitle: "Có tương tác trong 30 ngày qua",
+      subtitle: t("adminMetricCards.activeSubtitle"),
       color: "#059669",
       bgGradient: "linear-gradient(135deg, #10b981, #059669)",
       loading,
     },
     {
       icon: <CheckCircle fontSize="medium" />,
-      label: "Đã hoàn chỉnh hồ sơ",
+      label: t("adminMetricCards.completedProfile"),
       value: u?.completedProfile ?? null,
-      subtitle: "Đã điền đầy đủ thông tin cá nhân",
+      subtitle: t("adminMetricCards.completedProfileSubtitle"),
       color: "#7c3aed",
       bgGradient: "linear-gradient(135deg, #8b5cf6, #6d28d9)",
       loading,
     },
     {
       icon: <PersonOff fontSize="medium" />,
-      label: "Chưa setup hồ sơ",
+      label: t("adminMetricCards.incompleteProfile"),
       value: u?.incompleteProfile ?? null,
-      subtitle: "Cần nhắc nhở hoàn thiện thông tin",
+      subtitle: t("adminMetricCards.incompleteProfileSubtitle"),
       color: "#dc2626",
       bgGradient: "linear-gradient(135deg, #f87171, #dc2626)",
       loading,

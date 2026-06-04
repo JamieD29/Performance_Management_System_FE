@@ -1007,5 +1007,15 @@
         "archived": "Archived"
       }
     }
+  },
+  "adminMetricCards": {
+    "totalStaff": "Total Staff",
+    "totalStaffSubtitle": "All accounts in the system",
+    "active": "Active",
+    "activeSubtitle": "Interacted within the last 30 days",
+    "completedProfile": "Profile Completed",
+    "completedProfileSubtitle": "Filled in all personal information",
+    "incompleteProfile": "Profile Incomplete",
+    "incompleteProfileSubtitle": "Needs a reminder to complete profile"
   }
 }

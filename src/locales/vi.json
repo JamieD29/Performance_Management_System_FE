@@ -1007,5 +1007,15 @@
         "archived": "Đã lưu trữ"
       }
     }
+  },
+  "adminMetricCards": {
+    "totalStaff": "Tổng nhân sự",
+    "totalStaffSubtitle": "Tất cả tài khoản trong hệ thống",
+    "active": "Đang hoạt động",
+    "activeSubtitle": "Có tương tác trong 30 ngày qua",
+    "completedProfile": "Đã hoàn chỉnh hồ sơ",
+    "completedProfileSubtitle": "Đã điền đầy đủ thông tin cá nhân",
+    "incompleteProfile": "Chưa setup hồ sơ",
+    "incompleteProfileSubtitle": "Cần nhắc nhở hoàn thiện thông tin"
   }
 }
