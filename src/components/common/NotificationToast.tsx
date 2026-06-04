@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import type { SlideProps } from "@mui/material";
 import { Close, NotificationsActive } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
 import { api } from "../../services/api";
 
 interface NotificationItem {
@@ -26,6 +27,7 @@ function SlideTransition(props: SlideProps) {
 const POLL_INTERVAL = 10000; // 10 giây
 
 export default function NotificationToast() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [currentNotification, setCurrentNotification] =
@@ -204,7 +206,7 @@ export default function NotificationToast() {
         }}
       >
         <AlertTitle sx={{ fontWeight: 700, fontSize: 14, color: "#ffffff" }}>
-          Thông báo mới
+          {t("notificationToast.title")}
         </AlertTitle>
         <Typography variant="body2" sx={{ opacity: 0.95, fontSize: 13, color: "#f1f5f9" }}>
           {currentNotification.message}
@@ -214,7 +216,7 @@ export default function NotificationToast() {
             variant="caption"
             sx={{ opacity: 0.7, mt: 0.5, display: "block", color: "#94a3b8" }}
           >
-            +{notifications.length - 1} thông báo khác
+            {t("notificationToast.otherNotifications", { count: notifications.length - 1 })}
           </Typography>
         )}
       </Alert>

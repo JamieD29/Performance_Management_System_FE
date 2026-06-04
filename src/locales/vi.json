@@ -493,7 +493,11 @@
       "noReportsInProgress": "Không có báo cáo nào đang thực hiện.",
       "noReportsPendingReview": "Không có báo cáo nào cần đánh giá.",
       "noEvaluationHistory": "Không có lịch sử đánh giá.",
-      "noFilteredReportsFound": "Không tìm thấy báo cáo nào khớp với điều kiện lọc."
+      "noFilteredReportsFound": "Không tìm thấy báo cáo nào khớp với điều kiện lọc.",
+      "bulkApproveMaintenance": "Chức năng Duyệt hàng loạt hiện đang được bảo trì cho quy trình tính điểm phức hợp.",
+      "noticeTitle": "Thông báo",
+      "errorTitle": "Lỗi",
+      "errorUpdateFailed": "Không thể cập nhật đánh giá."
     },
     "accordion": {
       "inProgressCount": "{{count}} đang thực hiện",
@@ -1017,5 +1021,178 @@
     "completedProfileSubtitle": "Đã điền đầy đủ thông tin cá nhân",
     "incompleteProfile": "Chưa setup hồ sơ",
     "incompleteProfileSubtitle": "Cần nhắc nhở hoàn thiện thông tin"
+  },
+  "notificationBell": {
+    "title": "Thông báo",
+    "markAllAsRead": "Đánh dấu tất cả đã đọc",
+    "filters": {
+      "all": "Tất cả",
+      "unread": "Chưa đọc"
+    },
+    "emptyStates": {
+      "noUnread": "Bạn không có thông báo chưa đọc nào",
+      "noNotifications": "Không có thông báo nào"
+    },
+    "loadMore": "Xem thêm thông báo trước đó"
+  },
+  "notificationToast": {
+    "title": "Thông báo mới",
+    "otherNotifications": "+{{count}} thông báo khác"
+  },
+  "adminSettings": {
+    "portalTitle": "Cổng Quản trị",
+    "systemConfig": "Cấu hình hệ thống",
+    "backDashboard": "Quay lại Dashboard",
+    "modules": "Phân hệ",
+    "tabs": {
+      "cycles": "Kỳ đánh giá",
+      "whitelist": "Danh sách Domain",
+      "roles": "Quản lý Vai trò",
+      "logs": "Nhật ký hệ thống",
+      "factoryReset": "Khôi phục cài đặt gốc"
+    }
+  },
+  "cycleManagement": {
+    "title": "Quản lý Kỳ Đánh Giá",
+    "createBtn": "Tạo kỳ mới",
+    "searchPlaceholder": "Tìm kiếm tên kỳ...",
+    "schoolYear": "Năm học",
+    "allYears": "Tất cả các năm",
+    "filterType": {
+      "all": "Tất cả",
+      "semester": "Học kỳ",
+      "quarter": "Quý",
+      "other": "Khác"
+    },
+    "table": {
+      "headers": {
+        "name": "Tên Kỳ",
+        "time": "Thời gian",
+        "progress": "Tiến trình",
+        "status": "Trạng thái",
+        "actions": "Thao tác"
+      },
+      "empty": "Chưa có kỳ đánh giá nào. Vui lòng bấm nút 'Tạo kỳ mới' để bắt đầu!",
+      "statusOpen": "Đang mở",
+      "statusClosed": "Đã đóng",
+      "actionClose": "Đóng kỳ",
+      "actionOpen": "Mở kỳ",
+      "actionDelete": "Xóa"
+    },
+    "timeStatus": {
+      "upcoming": "Chưa bắt đầu",
+      "completed": "Đã kết thúc",
+      "inProgress": "Đang diễn ra"
+    },
+    "dialog": {
+      "title": "Tạo Kỳ Đánh Giá Mới",
+      "nameLabel": "Tên kỳ (VD: Học kỳ 2 - 2026)",
+      "typeLabel": "Loại kỳ đánh giá",
+      "typeOptions": {
+        "semester": "Theo Học kỳ",
+        "quarter": "Theo Quý",
+        "other": "Khác (Linh hoạt)"
+      },
+      "bypassValidation": "⚠️ Bypass kiểm tra ngày (Chế độ kiểm thử)",
+      "startDate": "Ngày bắt đầu",
+      "startDateHelperBypass": "Đang cho phép chọn ngày quá khứ",
+      "startDateHelperNormal": "Không được chọn ngày quá khứ",
+      "endDate": "Ngày kết thúc",
+      "endDateHelper": "Phải sau ngày bắt đầu",
+      "summaryTitle": "📋 Tóm tắt kỳ đánh giá",
+      "summaryDuration": "Thời lượng: {{days}} ngày",
+      "summaryStatus": "Trạng thái mặc định: ",
+      "cancelBtn": "Hủy",
+      "saveBtn": "Lưu lại"
+    },
+    "alerts": {
+      "missingInfo": "Thiếu thông tin",
+      "enterName": "Vui lòng nhập tên kỳ đánh giá.",
+      "selectDates": "Vui lòng chọn ngày bắt đầu và ngày kết thúc.",
+      "invalidDate": "Ngày không hợp lệ",
+      "startInPast": "Ngày bắt đầu không được ở quá khứ. Vui lòng chọn từ hôm nay trở đi.",
+      "endBeforeStart": "Ngày kết thúc phải sau ngày bắt đầu.",
+      "successTitle": "Thành công!",
+      "createSuccess": "Tạo kỳ đánh giá thành công. Kỳ mới ở trạng thái Đã đóng.",
+      "errorTitle": "Lỗi",
+      "createError": "Không thể tạo kỳ đánh giá. Vui lòng thử lại.",
+      "cycleEndedTitle": "⚠️ Kỳ đã kết thúc!",
+      "cycleEndedText": "Kỳ \"{{name}}\" đã kết thúc vào {{date}}. Mở lại kỳ này có thể cho phép chỉnh sửa dữ liệu cũ. Bạn có chắc chắn muốn tiếp tục?",
+      "keepOpen": "Vẫn mở kỳ",
+      "cancel": "Hủy bỏ",
+      "pastCycleWarning": "Kỳ này đã kết thúc. Dữ liệu có thể bị ảnh hưởng khi mở lại.",
+      "updateStatusError": "Không thể cập nhật trạng thái.",
+      "deleteConfirmTitle": "Xác nhận xóa?",
+      "deleteConfirmText": "Bạn có chắc chắn muốn xóa kỳ đánh giá \"{{name}}\"? Thao tác này không thể hoàn tác.",
+      "deleteBtn": "Xóa kỳ",
+      "deleteSuccess": "Đã xóa kỳ đánh giá \"{{name}}\" thành công.",
+      "deleteError": "Không thể xóa kỳ đánh giá. Vui lòng thử lại."
+    }
+  },
+  "whitelistManager": {
+    "title": "Tên miền email được phép",
+    "description": "Thêm các tên miền email được ủy quyền truy cập hệ thống.",
+    "placeholder": "example.com",
+    "helperText": "Chỉ cho phép chữ thường, số, dấu gạch ngang",
+    "addBtn": "THÊM",
+    "empty": "Chưa cấu hình tên miền nào.",
+    "userCount": "({{count}} người dùng)",
+    "addedAt": "Đã thêm: {{date}}",
+    "tooltips": {
+      "cannotDeleteActive": "Không thể xóa vì đang có {{count}} người dùng",
+      "atLeastOne": "Hệ thống phải có ít nhất 1 tên miền hoạt động",
+      "delete": "Xóa tên miền"
+    },
+    "policy": {
+      "title": "Chính sách Tên miền",
+      "rule1": "• Bạn có thể thêm bất kỳ tên miền hợp lệ nào (VD: gmail.com)",
+      "rule2": "• Người dùng có email khớp với các tên miền này sẽ được phép đăng nhập.",
+      "rule3": "• Xóa một tên miền sẽ ngay lập tức thu hồi quyền truy cập của những người dùng đó."
+    },
+    "dialog": {
+      "title": "Xóa tên miền?",
+      "content": "Hành động này sẽ xóa tên miền khỏi hệ thống. Người dùng thuộc tên miền này sẽ mất quyền truy cập.",
+      "confirmBtn": "Xóa ngay"
+    },
+    "alerts": {
+      "enterDomain": "Vui lòng nhập tên miền",
+      "invalidDomain": "Định dạng tên miền không hợp lệ",
+      "domainExists": "Tên miền đã tồn tại",
+      "addSuccess": "Đã thêm @{{domain}}",
+      "addError": "Thêm thất bại",
+      "deleteSuccess": "Đã xóa tên miền",
+      "deleteError": "Xóa thất bại"
+    }
+  },
+  "userRoleManager": {
+    "adminWarning": "Chỉ Quản trị viên mới có quyền thăng cấp người dùng.",
+    "table": {
+      "headers": {
+        "employee": "Nhân viên",
+        "jobTitle": "Chức danh",
+        "position": "Chức vụ",
+        "systemRole": "Role hệ thống",
+        "actions": "Thao tác"
+      },
+      "tooltips": {
+        "editRole": "Sửa Role"
+      }
+    },
+    "dialog": {
+      "title": "Chỉnh sửa Role: {{name}}",
+      "roleLabel": "Vai trò (Role)",
+      "options": {
+        "user": "Nhân viên (User)",
+        "admin": "Quản trị viên (Admin)"
+      },
+      "cancelBtn": "Hủy",
+      "saveBtn": "Lưu"
+    },
+    "alerts": {
+      "successTitle": "Thành công",
+      "successUpdate": "Cập nhật role thành công.",
+      "errorTitle": "Lỗi",
+      "errorUpdate": "Cập nhật thất bại."
+    }
   }
 }

@@ -493,7 +493,11 @@
       "noReportsInProgress": "No reports are currently in progress.",
       "noReportsPendingReview": "No reports pending evaluation.",
       "noEvaluationHistory": "No evaluation history.",
-      "noFilteredReportsFound": "No reports found matching filter conditions."
+      "noFilteredReportsFound": "No reports found matching filter conditions.",
+      "bulkApproveMaintenance": "Bulk approval function is currently under maintenance for complex scoring processes.",
+      "noticeTitle": "Notice",
+      "errorTitle": "Error",
+      "errorUpdateFailed": "Failed to update evaluation."
     },
     "accordion": {
       "inProgressCount": "{{count}} in progress",
@@ -1017,5 +1021,178 @@
     "completedProfileSubtitle": "Filled in all personal information",
     "incompleteProfile": "Profile Incomplete",
     "incompleteProfileSubtitle": "Needs a reminder to complete profile"
+  },
+  "notificationBell": {
+    "title": "Notifications",
+    "markAllAsRead": "Mark all as read",
+    "filters": {
+      "all": "All",
+      "unread": "Unread"
+    },
+    "emptyStates": {
+      "noUnread": "You have no unread notifications",
+      "noNotifications": "No notifications"
+    },
+    "loadMore": "View older notifications"
+  },
+  "notificationToast": {
+    "title": "New Notification",
+    "otherNotifications": "+{{count}} other notifications"
+  },
+  "adminSettings": {
+    "portalTitle": "Admin Portal",
+    "systemConfig": "System Configuration",
+    "backDashboard": "Back Dashboard",
+    "modules": "Modules",
+    "tabs": {
+      "cycles": "Evaluation Cycles",
+      "whitelist": "Whitelist Domain",
+      "roles": "Role Management",
+      "logs": "System Logs",
+      "factoryReset": "Factory Reset"
+    }
+  },
+  "cycleManagement": {
+    "title": "Cycle Management",
+    "createBtn": "Create new cycle",
+    "searchPlaceholder": "Search cycle name...",
+    "schoolYear": "School Year",
+    "allYears": "All years",
+    "filterType": {
+      "all": "All",
+      "semester": "Semester",
+      "quarter": "Quarter",
+      "other": "Other"
+    },
+    "table": {
+      "headers": {
+        "name": "Cycle Name",
+        "time": "Time",
+        "progress": "Progress",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "empty": "No evaluation cycles found. Please click 'Create new cycle' to start!",
+      "statusOpen": "Open",
+      "statusClosed": "Closed",
+      "actionClose": "Close cycle",
+      "actionOpen": "Open cycle",
+      "actionDelete": "Delete"
+    },
+    "timeStatus": {
+      "upcoming": "Not started",
+      "completed": "Ended",
+      "inProgress": "In progress"
+    },
+    "dialog": {
+      "title": "Create New Evaluation Cycle",
+      "nameLabel": "Cycle Name (e.g. Semester 2 - 2026)",
+      "typeLabel": "Cycle type",
+      "typeOptions": {
+        "semester": "By Semester",
+        "quarter": "By Quarter",
+        "other": "Other (Flexible)"
+      },
+      "bypassValidation": "⚠️ Bypass date check (Test mode)",
+      "startDate": "Start Date",
+      "startDateHelperBypass": "Allowing past date selection",
+      "startDateHelperNormal": "Past dates are not allowed",
+      "endDate": "End Date",
+      "endDateHelper": "Must be after start date",
+      "summaryTitle": "📋 Cycle summary",
+      "summaryDuration": "Duration: {{days}} days",
+      "summaryStatus": "Default status: ",
+      "cancelBtn": "Cancel",
+      "saveBtn": "Save"
+    },
+    "alerts": {
+      "missingInfo": "Missing information",
+      "enterName": "Please enter the evaluation cycle name.",
+      "selectDates": "Please select the start and end dates.",
+      "invalidDate": "Invalid date",
+      "startInPast": "Start date cannot be in the past. Please choose from today onwards.",
+      "endBeforeStart": "End date must be after start date.",
+      "successTitle": "Success!",
+      "createSuccess": "Evaluation cycle created successfully. The new cycle is currently Closed.",
+      "errorTitle": "Error",
+      "createError": "Could not create evaluation cycle. Please try again.",
+      "cycleEndedTitle": "⚠️ Cycle has ended!",
+      "cycleEndedText": "The cycle \"{{name}}\" ended on {{date}}. Reopening this cycle may allow edits to old data. Are you sure you want to continue?",
+      "keepOpen": "Reopen cycle",
+      "cancel": "Cancel",
+      "pastCycleWarning": "This cycle has ended. Data may be affected upon reopening.",
+      "updateStatusError": "Could not update status.",
+      "deleteConfirmTitle": "Confirm deletion?",
+      "deleteConfirmText": "Are you sure you want to delete the evaluation cycle \"{{name}}\"? This action cannot be undone.",
+      "deleteBtn": "Delete cycle",
+      "deleteSuccess": "Successfully deleted evaluation cycle \"{{name}}\".",
+      "deleteError": "Could not delete evaluation cycle. Please try again."
+    }
+  },
+  "whitelistManager": {
+    "title": "Allowed Email Domains",
+    "description": "Add email domains that are authorized to access the system.",
+    "placeholder": "example.com",
+    "helperText": "Only lowercase letters, numbers, hyphens allowed",
+    "addBtn": "ADD",
+    "empty": "No domains configured.",
+    "userCount": "({{count}} users)",
+    "addedAt": "Added: {{date}}",
+    "tooltips": {
+      "cannotDeleteActive": "Cannot delete because there are {{count}} users",
+      "atLeastOne": "System must have at least 1 active domain",
+      "delete": "Delete domain"
+    },
+    "policy": {
+      "title": "Domain Policy",
+      "rule1": "• You can add any valid domain (e.g. gmail.com)",
+      "rule2": "• Users with emails matching these domains will be allowed to log in.",
+      "rule3": "• Removing a domain will immediately revoke access for those users."
+    },
+    "dialog": {
+      "title": "Delete domain?",
+      "content": "This action will remove the domain from the system. Users belonging to this domain will lose access.",
+      "confirmBtn": "Delete now"
+    },
+    "alerts": {
+      "enterDomain": "Please enter a domain",
+      "invalidDomain": "Invalid domain format",
+      "domainExists": "Domain already exists",
+      "addSuccess": "Added @{{domain}}",
+      "addError": "Failed to add",
+      "deleteSuccess": "Domain removed",
+      "deleteError": "Failed to delete"
+    }
+  },
+  "userRoleManager": {
+    "adminWarning": "Only Admin can promote users.",
+    "table": {
+      "headers": {
+        "employee": "Employee",
+        "jobTitle": "Job Title",
+        "position": "Management Position",
+        "systemRole": "System Role",
+        "actions": "Actions"
+      },
+      "tooltips": {
+        "editRole": "Edit Role"
+      }
+    },
+    "dialog": {
+      "title": "Edit Role: {{name}}",
+      "roleLabel": "Role",
+      "options": {
+        "user": "User",
+        "admin": "Admin"
+      },
+      "cancelBtn": "Cancel",
+      "saveBtn": "Save"
+    },
+    "alerts": {
+      "successTitle": "Success",
+      "successUpdate": "Role updated successfully.",
+      "errorTitle": "Error",
+      "errorUpdate": "Failed to update role."
+    }
   }
 }

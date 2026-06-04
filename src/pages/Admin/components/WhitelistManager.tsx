@@ -16,6 +16,7 @@ import {
   Chip,
 } from "@mui/material";
 import { Add, Delete, Info } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
 
 import { api } from "../../../services/api";
 import type { Domain } from "../../../types";
@@ -23,6 +24,7 @@ import { ConfirmDialog } from "../../../components/common/ConfirmDialog";
 import { Tooltip } from "@mui/material";
 
 export default function WhitelistManager() {
+  const { t } = useTranslation();
   const [confirmDelete, setConfirmDelete] = useState<{
     open: boolean;
     id: string | null;
@@ -59,15 +61,15 @@ export default function WhitelistManager() {
 
   const handleAddDomain = async () => {
     const rawDomain = domainInput.trim().toLowerCase();
-    if (!rawDomain) return showMessage("error", "Please enter a domain");
+    if (!rawDomain) return showMessage("error", t("whitelistManager.alerts.enterDomain"));
 
     const domainRegex =
       /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/;
     if (!domainRegex.test(rawDomain))
-      return showMessage("error", "Invalid domain format");
+      return showMessage("error", t("whitelistManager.alerts.invalidDomain"));
 
     if (domains.some((d) => d.domain.toLowerCase() === rawDomain)) {
-      return showMessage("error", "Domain already exists");
+      return showMessage("error", t("whitelistManager.alerts.domainExists"));
     }
 
     setIsSaving(true);
@@ -76,9 +78,9 @@ export default function WhitelistManager() {
       const newDomain = response.data?.domain || response.data;
       setDomains([...domains, newDomain]);
       setDomainInput("");
-      showMessage("success", `Added @${rawDomain}`);
+      showMessage("success", t("whitelistManager.alerts.addSuccess", { domain: rawDomain }));
     } catch (err: any) {
-      showMessage("error", err.response?.data?.message || "Failed to add");
+      showMessage("error", err.response?.data?.message || t("whitelistManager.alerts.addError"));
     } finally {
       setIsSaving(false);
     }
@@ -96,10 +98,10 @@ export default function WhitelistManager() {
     try {
       await api.delete(`/admin/domains/${id}`);
       setDomains(domains.filter((d) => d.id !== id));
-      showMessage("success", "Domain removed");
+      showMessage("success", t("whitelistManager.alerts.deleteSuccess"));
       setConfirmDelete({ open: false, id: null });
     } catch (err: any) {
-      showMessage("error", err.response?.data?.message || "Failed to delete");
+      showMessage("error", err.response?.data?.message || t("whitelistManager.alerts.deleteError"));
     } finally {
       setIsSaving(false);
     }
@@ -127,10 +129,10 @@ export default function WhitelistManager() {
       <Card sx={{ mb: 3, boxShadow: "none", border: "1px solid #e2e8f0" }}>
         <CardContent sx={{ p: 3 }}>
           <Typography variant="h6" fontWeight={600} gutterBottom>
-            Allowed Email Domains
+            {t("whitelistManager.title")}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Add email domains that are authorized to access the system.
+            {t("whitelistManager.description")}
           </Typography>
 
           <Box
@@ -139,10 +141,10 @@ export default function WhitelistManager() {
             <TextField
               fullWidth
               size="small"
-              placeholder="example.com"
+              placeholder={t("whitelistManager.placeholder")}
               value={domainInput}
               onChange={(e) => setDomainInput(e.target.value.toLowerCase())}
-              helperText="Only lowercase letters, numbers, hyphens allowed"
+              helperText={t("whitelistManager.helperText")}
               disabled={isSaving}
               sx={{
                 "& .MuiFormHelperText-root": { marginLeft: 0, marginTop: 1 },
@@ -164,7 +166,7 @@ export default function WhitelistManager() {
               {isSaving ? (
                 <CircularProgress size={20} color="inherit" />
               ) : (
-                "ADD"
+                t("whitelistManager.addBtn")
               )}
             </Button>
           </Box>
@@ -184,16 +186,16 @@ export default function WhitelistManager() {
                       <Chip label={`@${d.domain}`} color="primary" size="small" />
                       {typeof d.userCount === 'number' && (
                         <Typography variant="caption" color={d.userCount > 0 ? "error.main" : "text.secondary"} sx={{ fontWeight: 500 }}>
-                          ({d.userCount} users)
+                          {t("whitelistManager.userCount", { count: d.userCount })}
                         </Typography>
                       )}
                     </Box>
                   }
-                  secondary={`Added: ${new Date(d.addedAt).toLocaleDateString()}`}
+                  secondary={t("whitelistManager.addedAt", { date: new Date(d.addedAt).toLocaleDateString() })}
                 />
                 <ListItemSecondaryAction>
                   {d.userCount && d.userCount > 0 ? (
-                    <Tooltip title={`Không thể xóa vì đang có ${d.userCount} người dùng`}>
+                    <Tooltip title={t("whitelistManager.tooltips.cannotDeleteActive", { count: d.userCount })}>
                       <span>
                         <IconButton disabled color="error">
                           <Delete />
@@ -201,7 +203,7 @@ export default function WhitelistManager() {
                       </span>
                     </Tooltip>
                   ) : domains.length <= 1 ? (
-                    <Tooltip title="Hệ thống phải có ít nhất 1 tên miền hoạt động">
+                    <Tooltip title={t("whitelistManager.tooltips.atLeastOne")}>
                       <span>
                         <IconButton disabled color="error">
                           <Delete />
@@ -209,7 +211,7 @@ export default function WhitelistManager() {
                       </span>
                     </Tooltip>
                   ) : (
-                    <Tooltip title="Xóa tên miền">
+                    <Tooltip title={t("whitelistManager.tooltips.delete")}>
                       <IconButton onClick={() => handleOpenDelete(d.id)} color="error">
                         <Delete />
                       </IconButton>
@@ -222,22 +224,21 @@ export default function WhitelistManager() {
               <Typography
                 sx={{ p: 2, textAlign: "center", color: "text.secondary" }}
               >
-                No domains configured.
+                {t("whitelistManager.empty")}
               </Typography>
             )}
           </List>
 
           <Alert severity="info" icon={<Info />} sx={{ mt: 3 }}>
             <Typography variant="subtitle2" fontWeight={600} gutterBottom>
-              Domain Policy
+              {t("whitelistManager.policy.title")}
             </Typography>
             <Typography variant="body2">
-              • You can add any valid domain (e.g. <strong>gmail.com</strong>)
+              {t("whitelistManager.policy.rule1")}
               <br />
-              • Users with emails matching these domains will be allowed to log
-              in.
-              <br />• Removing a domain will immediately revoke access for those
-              users.
+              {t("whitelistManager.policy.rule2")}
+              <br />
+              {t("whitelistManager.policy.rule3")}
             </Typography>
           </Alert>
         </CardContent>
@@ -247,10 +248,10 @@ export default function WhitelistManager() {
         open={confirmDelete.open}
         onClose={() => setConfirmDelete({ ...confirmDelete, open: false })}
         onConfirm={handleConfirmDelete}
-        title="Xóa tên miền?"
-        content="Hành động này sẽ xóa tên miền khỏi hệ thống. Người dùng thuộc tên miền này sẽ mất quyền truy cập."
+        title={t("whitelistManager.dialog.title")}
+        content={t("whitelistManager.dialog.content")}
         variant="danger"
-        confirmText="Xóa ngay"
+        confirmText={t("whitelistManager.dialog.confirmBtn")}
         isLoading={isSaving}
       />
     </Box>

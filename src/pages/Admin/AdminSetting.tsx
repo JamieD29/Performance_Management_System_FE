@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Box,
   Typography,
@@ -34,6 +35,7 @@ import RoleManagementTab from "./components/RoleManagementTab";
 import SystemResetTab from "./components/SystemResetTab";
 
 export default function AdminSettings() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("cycles");
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
@@ -67,19 +69,19 @@ export default function AdminSettings() {
   const menuItems = [
     {
       id: "cycles",
-      label: "Evaluation Cycles",
+      label: t("adminSettings.tabs.cycles"),
       icon: <CalendarToday />,
       restricted: false,
     },
     {
       id: "whitelist",
-      label: "Whitelist Domain",
+      label: t("adminSettings.tabs.whitelist"),
       icon: <Dns />,
       restricted: false,
     },
-    { id: "roles", label: "Quản lý Roles", icon: <People />, restricted: true },
-    { id: "logs", label: "System Logs", icon: <History />, restricted: true },
-    { id: "system", label: "Factory Reset", icon: <Settings />, restricted: true },
+    { id: "roles", label: t("adminSettings.tabs.roles"), icon: <People />, restricted: true },
+    { id: "logs", label: t("adminSettings.tabs.logs"), icon: <History />, restricted: true },
+    { id: "system", label: t("adminSettings.tabs.factoryReset"), icon: <Settings />, restricted: true },
   ];
 
   const availableMenuItems = menuItems.filter(
@@ -118,11 +120,11 @@ export default function AdminSettings() {
             >
               <AdminPanelSettings color="primary" />
               <Typography variant="subtitle1" fontWeight="bold" color="#1e3a8a">
-                Admin Portal
+                {t("adminSettings.portalTitle")}
               </Typography>
             </Box>
             <Typography variant="caption" color="text.secondary">
-              System Configuration
+              {t("adminSettings.systemConfig")}
             </Typography>
           </Box>
           <Divider />
@@ -136,7 +138,7 @@ export default function AdminSettings() {
                 <ArrowBack fontSize="small" />
               </ListItemIcon>
               <ListItemText
-                primary="Back Dashboard"
+                primary={t("adminSettings.backDashboard")}
                 primaryTypographyProps={{ fontSize: "0.875rem" }}
               />
             </ListItemButton>
@@ -145,7 +147,7 @@ export default function AdminSettings() {
               variant="overline"
               sx={{ px: 1, color: "text.secondary", fontWeight: "bold" }}
             >
-              Modules
+              {t("adminSettings.modules")}
             </Typography>
 
             {availableMenuItems.map((item) => (

@@ -38,6 +38,7 @@ import {
   ArrowRight,
   Trash2,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { api } from "../../../services/api";
 import { showSuccess, showError, showWarning, confirmAction } from "../../../utils/swal";
 
@@ -71,6 +72,7 @@ const dialogContentVariants: Variants = {
 };
 
 export default function CycleManagement() {
+  const { t } = useTranslation();
   const [cycles, setCycles] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
 
@@ -110,19 +112,19 @@ export default function CycleManagement() {
   const handleCreate = async () => {
     // Frontend validation
     if (!formName.trim()) {
-      showWarning("Thiếu thông tin", "Vui lòng nhập tên kỳ đánh giá.");
+      showWarning(t("cycleManagement.alerts.missingInfo"), t("cycleManagement.alerts.enterName"));
       return;
     }
     if (!formStartDate || !formEndDate) {
-      showWarning("Thiếu thông tin", "Vui lòng chọn ngày bắt đầu và ngày kết thúc.");
+      showWarning(t("cycleManagement.alerts.missingInfo"), t("cycleManagement.alerts.selectDates"));
       return;
     }
     if (!bypassValidation && formStartDate.isBefore(dayjs().startOf("day"))) {
-      showWarning("Ngày không hợp lệ", "Ngày bắt đầu không được ở quá khứ. Vui lòng chọn từ hôm nay trở đi.");
+      showWarning(t("cycleManagement.alerts.invalidDate"), t("cycleManagement.alerts.startInPast"));
       return;
     }
     if (formEndDate.isBefore(formStartDate) || formEndDate.isSame(formStartDate)) {
-      showWarning("Ngày không hợp lệ", "Ngày kết thúc phải sau ngày bắt đầu.");
+      showWarning(t("cycleManagement.alerts.invalidDate"), t("cycleManagement.alerts.endBeforeStart"));
       return;
     }
 
@@ -137,10 +139,10 @@ export default function CycleManagement() {
       setOpen(false);
       resetForm();
       fetchCycles();
-      showSuccess("Thành công!", "Tạo kỳ đánh giá thành công. Kỳ mới ở trạng thái Đã đóng.");
+      showSuccess(t("cycleManagement.alerts.successTitle"), t("cycleManagement.alerts.createSuccess"));
     } catch (error: any) {
-      const msg = error?.response?.data?.message || "Không thể tạo kỳ đánh giá. Vui lòng thử lại.";
-      showError("Lỗi", msg);
+      const msg = error?.response?.data?.message || t("cycleManagement.alerts.createError");
+      showError(t("cycleManagement.alerts.errorTitle"), msg);
     }
   };
 
@@ -152,11 +154,11 @@ export default function CycleManagement() {
       const endDate = dayjs(cycle.endDate);
       if (endDate.isBefore(dayjs().startOf("day"))) {
         const confirmed = await confirmAction({
-          title: "⚠️ Kỳ đã kết thúc!",
-          text: `Kỳ "${cycle.name}" đã kết thúc vào ${endDate.format("DD/MM/YYYY")}. Mở lại kỳ này có thể cho phép chỉnh sửa dữ liệu cũ. Bạn có chắc chắn muốn tiếp tục?`,
+          title: t("cycleManagement.alerts.cycleEndedTitle"),
+          text: t("cycleManagement.alerts.cycleEndedText", { name: cycle.name, date: endDate.format("DD/MM/YYYY") }),
           icon: "warning",
-          confirmText: "Vẫn mở kỳ",
-          cancelText: "Hủy bỏ",
+          confirmText: t("cycleManagement.alerts.keepOpen"),
+          cancelText: t("cycleManagement.alerts.cancel"),
           confirmColor: "#f59e0b",
         });
         if (!confirmed) return;
@@ -170,20 +172,20 @@ export default function CycleManagement() {
       fetchCycles();
 
       if (res.data?.isPast && newStatus === "OPEN") {
-        showWarning("Lưu ý", "Kỳ này đã kết thúc. Dữ liệu có thể bị ảnh hưởng khi mở lại.");
+        showWarning(t("cycleManagement.alerts.errorTitle"), t("cycleManagement.alerts.pastCycleWarning"));
       }
     } catch (error) {
-      showError("Lỗi", "Không thể cập nhật trạng thái.");
+      showError(t("cycleManagement.alerts.errorTitle"), t("cycleManagement.alerts.updateStatusError"));
     }
   };
 
   const handleDelete = async (id: string, name: string) => {
     const confirmed = await confirmAction({
-      title: "Xác nhận xóa?",
-      text: `Bạn có chắc chắn muốn xóa kỳ đánh giá "${name}"? Thao tác này không thể hoàn tác.`,
+      title: t("cycleManagement.alerts.deleteConfirmTitle"),
+      text: t("cycleManagement.alerts.deleteConfirmText", { name: name }),
       icon: "warning",
-      confirmText: "Xóa kỳ",
-      cancelText: "Hủy bỏ",
+      confirmText: t("cycleManagement.alerts.deleteBtn"),
+      cancelText: t("cycleManagement.alerts.cancel"),
       confirmColor: "#dc2626",
     });
 
@@ -192,10 +194,10 @@ export default function CycleManagement() {
     try {
       await api.delete(`${RESOURCE_PATH}/admin/cycles/${id}`);
       fetchCycles();
-      showSuccess("Thành công!", `Đã xóa kỳ đánh giá "${name}" thành công.`);
+      showSuccess(t("cycleManagement.alerts.successTitle"), t("cycleManagement.alerts.deleteSuccess", { name: name }));
     } catch (error: any) {
-      const msg = error?.response?.data?.message || "Không thể xóa kỳ đánh giá. Vui lòng thử lại.";
-      showError("Lỗi", msg);
+      const msg = error?.response?.data?.message || t("cycleManagement.alerts.deleteError");
+      showError(t("cycleManagement.alerts.errorTitle"), msg);
     }
   };
 
@@ -236,23 +238,23 @@ export default function CycleManagement() {
     const today = dayjs().startOf("day");
     const start = dayjs(cycle.startDate);
     const end = dayjs(cycle.endDate);
-    if (today.isBefore(start)) return { label: "Chưa bắt đầu", color: "info" as const };
-    if (today.isAfter(end)) return { label: "Đã kết thúc", color: "default" as const };
-    return { label: "Đang diễn ra", color: "warning" as const };
+    if (today.isBefore(start)) return { label: t("cycleManagement.timeStatus.upcoming"), color: "info" as const };
+    if (today.isAfter(end)) return { label: t("cycleManagement.timeStatus.completed"), color: "default" as const };
+    return { label: t("cycleManagement.timeStatus.inProgress"), color: "warning" as const };
   };
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="vi">
       <Box>
         <Box className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-bold text-gray-800">Quản lý Kỳ Đánh Giá</h3>
+          <h3 className="text-lg font-bold text-gray-800">{t("cycleManagement.title")}</h3>
           <Box className="flex gap-2">
             <Button
               variant="contained"
               startIcon={<Plus size={18} />}
               onClick={() => setOpen(true)}
             >
-              Tạo kỳ mới
+              {t("cycleManagement.createBtn")}
             </Button>
           </Box>
         </Box>
@@ -260,16 +262,16 @@ export default function CycleManagement() {
         {/* FILTER SECTION */}
         <Paper variant="outlined" className="p-4 mb-4 flex flex-wrap gap-4 items-center bg-white">
           <TextField
-            label="Tìm kiếm tên kỳ..."
+            label={t("cycleManagement.searchPlaceholder")}
             size="small"
             value={filterName}
             onChange={(e) => setFilterName(e.target.value)}
             className="min-w-[200px]"
           />
           <FormControl size="small" className="min-w-[150px]">
-            <InputLabel>Năm học</InputLabel>
-            <Select value={filterYear} label="Năm học" onChange={(e) => setFilterYear(e.target.value)}>
-              <MenuItem value="ALL">Tất cả các năm</MenuItem>
+            <InputLabel>{t("cycleManagement.schoolYear")}</InputLabel>
+            <Select value={filterYear} label={t("cycleManagement.schoolYear")} onChange={(e) => setFilterYear(e.target.value)}>
+              <MenuItem value="ALL">{t("cycleManagement.allYears")}</MenuItem>
               {availableYears.map((year) => (
                 <MenuItem key={year} value={year}>{year}</MenuItem>
               ))}
@@ -277,10 +279,10 @@ export default function CycleManagement() {
           </FormControl>
           <FormControl component="fieldset" className="ml-4">
             <RadioGroup row value={filterType} onChange={(e) => setFilterType(e.target.value)}>
-              <FormControlLabel value="ALL" control={<Radio size="small" />} label="Tất cả" />
-              <FormControlLabel value="SEMESTER" control={<Radio size="small" />} label="Học kỳ" />
-              <FormControlLabel value="QUARTER" control={<Radio size="small" />} label="Quý" />
-              <FormControlLabel value="OTHER" control={<Radio size="small" />} label="Khác" />
+              <FormControlLabel value="ALL" control={<Radio size="small" />} label={t("cycleManagement.filterType.all")} />
+              <FormControlLabel value="SEMESTER" control={<Radio size="small" />} label={t("cycleManagement.filterType.semester")} />
+              <FormControlLabel value="QUARTER" control={<Radio size="small" />} label={t("cycleManagement.filterType.quarter")} />
+              <FormControlLabel value="OTHER" control={<Radio size="small" />} label={t("cycleManagement.filterType.other")} />
             </RadioGroup>
           </FormControl>
         </Paper>
@@ -294,11 +296,11 @@ export default function CycleManagement() {
             <Table>
               <TableHead className="bg-gray-50">
                 <TableRow>
-                  <TableCell>Tên Kỳ</TableCell>
-                  <TableCell>Thời gian</TableCell>
-                  <TableCell align="center">Tiến trình</TableCell>
-                  <TableCell align="center">Trạng thái</TableCell>
-                  <TableCell align="center">Thao tác</TableCell>
+                  <TableCell>{t("cycleManagement.table.headers.name")}</TableCell>
+                  <TableCell>{t("cycleManagement.table.headers.time")}</TableCell>
+                  <TableCell align="center">{t("cycleManagement.table.headers.progress")}</TableCell>
+                  <TableCell align="center">{t("cycleManagement.table.headers.status")}</TableCell>
+                  <TableCell align="center">{t("cycleManagement.table.headers.actions")}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -336,7 +338,7 @@ export default function CycleManagement() {
                         </TableCell>
                         <TableCell align="center">
                           <Chip
-                            label={cycle.status === "OPEN" ? "Đang mở" : "Đã đóng"}
+                            label={cycle.status === "OPEN" ? t("cycleManagement.table.statusOpen") : t("cycleManagement.table.statusClosed")}
                             color={cycle.status === "OPEN" ? "success" : "default"}
                             size="small"
                           />
@@ -351,7 +353,7 @@ export default function CycleManagement() {
                               }
                               onClick={() => toggleStatus(cycle.id, cycle.status, cycle)}
                             >
-                              {cycle.status === "OPEN" ? "Đóng kỳ" : "Mở kỳ"}
+                              {cycle.status === "OPEN" ? t("cycleManagement.table.actionClose") : t("cycleManagement.table.actionOpen")}
                             </Button>
                             <Button
                               size="small"
@@ -373,7 +375,7 @@ export default function CycleManagement() {
                                 },
                               }}
                             >
-                              Xóa
+                              {t("cycleManagement.table.actionDelete")}
                             </Button>
                           </Box>
                         </TableCell>
@@ -383,8 +385,7 @@ export default function CycleManagement() {
                 ) : (
                   <TableRow>
                     <TableCell colSpan={5} align="center" className="py-8 text-gray-400">
-                      Chưa có kỳ đánh giá nào. Vui lòng bấm nút{" "}
-                      <strong>'Tạo kỳ mới'</strong> để bắt đầu!
+                      {t("cycleManagement.table.empty")}
                     </TableCell>
                   </TableRow>
                 )}
@@ -410,12 +411,12 @@ export default function CycleManagement() {
             gap: 1,
           }}>
             <Calendar size={22} />
-            Tạo Kỳ Đánh Giá Mới
+            {t("cycleManagement.dialog.title")}
           </DialogTitle>
           <DialogContent sx={{ pt: 3, pb: 2, px: 3, display: "flex", flexDirection: "column", gap: 2.5 }}>
             <Box sx={{ mt: 1 }}>
               <TextField
-                label="Tên kỳ (VD: Học kỳ 2 - 2026)"
+                label={t("cycleManagement.dialog.nameLabel")}
                 fullWidth
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
@@ -424,16 +425,16 @@ export default function CycleManagement() {
 
             <FormControl component="fieldset">
               <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5 }}>
-                Loại kỳ đánh giá
+                {t("cycleManagement.dialog.typeLabel")}
               </Typography>
               <RadioGroup
                 row
                 value={formType}
                 onChange={(e) => setFormType(e.target.value)}
               >
-                <FormControlLabel value="SEMESTER" control={<Radio size="small" />} label="Theo Học kỳ" />
-                <FormControlLabel value="QUARTER" control={<Radio size="small" />} label="Theo Quý" />
-                <FormControlLabel value="OTHER" control={<Radio size="small" />} label="Khác (Linh hoạt)" />
+                <FormControlLabel value="SEMESTER" control={<Radio size="small" />} label={t("cycleManagement.dialog.typeOptions.semester")} />
+                <FormControlLabel value="QUARTER" control={<Radio size="small" />} label={t("cycleManagement.dialog.typeOptions.quarter")} />
+                <FormControlLabel value="OTHER" control={<Radio size="small" />} label={t("cycleManagement.dialog.typeOptions.other")} />
               </RadioGroup>
             </FormControl>
 
@@ -450,7 +451,7 @@ export default function CycleManagement() {
               }
               label={
                 <Typography variant="body2" sx={{ fontWeight: 600, color: "#d97706" }}>
-                  ⚠️ Bypass kiểm tra ngày (Chế độ kiểm thử)
+                  {t("cycleManagement.dialog.bypassValidation")}
                 </Typography>
               }
               sx={{ mt: -1 }}
@@ -458,7 +459,7 @@ export default function CycleManagement() {
 
             <Box sx={{ display: "flex", gap: 2 }}>
               <DatePicker
-                label="Ngày bắt đầu"
+                label={t("cycleManagement.dialog.startDate")}
                 value={formStartDate}
                 onChange={(val) => setFormStartDate(val)}
                 minDate={bypassValidation ? undefined : dayjs()}
@@ -466,12 +467,12 @@ export default function CycleManagement() {
                 slotProps={{
                   textField: {
                     fullWidth: true,
-                    helperText: bypassValidation ? "Đang cho phép chọn ngày quá khứ" : "Không được chọn ngày quá khứ",
+                    helperText: bypassValidation ? t("cycleManagement.dialog.startDateHelperBypass") : t("cycleManagement.dialog.startDateHelperNormal"),
                   },
                 }}
               />
               <DatePicker
-                label="Ngày kết thúc"
+                label={t("cycleManagement.dialog.endDate")}
                 value={formEndDate}
                 onChange={(val) => setFormEndDate(val)}
                 minDate={formStartDate ? formStartDate.add(1, "day") : (bypassValidation ? undefined : dayjs().add(1, "day"))}
@@ -479,7 +480,7 @@ export default function CycleManagement() {
                 slotProps={{
                   textField: {
                     fullWidth: true,
-                    helperText: "Phải sau ngày bắt đầu",
+                    helperText: t("cycleManagement.dialog.endDateHelper"),
                   },
                 }}
               />
@@ -504,14 +505,14 @@ export default function CycleManagement() {
                     }}
                   >
                     <Typography variant="body2" color="success.main" fontWeight="bold" sx={{ mb: 0.5 }}>
-                      📋 Tóm tắt kỳ đánh giá
+                      {t("cycleManagement.dialog.summaryTitle")}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      Thời lượng: <strong>{formEndDate.diff(formStartDate, "day")} ngày</strong>
+                      {t("cycleManagement.dialog.summaryDuration", { days: formEndDate.diff(formStartDate, "day") })}
                       {" "}({formStartDate.format("DD/MM/YYYY")} → {formEndDate.format("DD/MM/YYYY")})
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      Trạng thái mặc định: <Chip label="Đã đóng" size="small" sx={{ ml: 0.5 }} />
+                      {t("cycleManagement.dialog.summaryStatus")} <Chip label={t("cycleManagement.table.statusClosed")} size="small" sx={{ ml: 0.5 }} />
                     </Typography>
                   </Paper>
                 </motion.div>
@@ -519,7 +520,7 @@ export default function CycleManagement() {
             </AnimatePresence>
           </DialogContent>
           <DialogActions sx={{ px: 3, pb: 2 }}>
-            <Button onClick={() => { setOpen(false); resetForm(); }} color="inherit">Hủy</Button>
+            <Button onClick={() => { setOpen(false); resetForm(); }} color="inherit">{t("cycleManagement.dialog.cancelBtn")}</Button>
             <Button
               variant="contained"
               onClick={handleCreate}
@@ -529,7 +530,7 @@ export default function CycleManagement() {
                 "&:hover": { background: "linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)" },
               }}
             >
-              Lưu lại
+              {t("cycleManagement.dialog.saveBtn")}
             </Button>
           </DialogActions>
         </Dialog>

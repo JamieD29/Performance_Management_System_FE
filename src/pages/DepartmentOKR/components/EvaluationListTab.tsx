@@ -193,8 +193,8 @@ export default function EvaluationListTab() {
   const handleTickAllSelected = async () => {
     // Để an toàn, bulk review manager có thể lấy data selfReportData để lưu luôn
     showInfo(
-      "Thông báo",
-      "Chức năng Duyệt hàng loạt hiện đang được bảo trì cho quy trình tính điểm phức hợp.",
+      t("evaluationListTab.alerts.noticeTitle"),
+      t("evaluationListTab.alerts.bulkApproveMaintenance"),
     );
   };
 
@@ -206,7 +206,10 @@ export default function EvaluationListTab() {
       fetchEvaluations();
     } catch (e) {
       console.error(e);
-      showError("Lỗi", "Không thể cập nhật đánh giá.");
+      showError(
+        t("evaluationListTab.alerts.errorTitle"),
+        t("evaluationListTab.alerts.errorUpdateFailed"),
+      );
     }
   };
 
@@ -219,14 +222,17 @@ export default function EvaluationListTab() {
       fetchEvaluations();
     } catch (e) {
       console.error(e);
-      showError("Lỗi", "Không thể cập nhật đánh giá.");
+      showError(
+        t("evaluationListTab.alerts.errorTitle"),
+        t("evaluationListTab.alerts.errorUpdateFailed"),
+      );
     }
   };
 
   return (
     <Box>
       <Typography variant="h5" fontWeight="bold" color="#1e3a8a" sx={{ mb: 3 }}>
-        Đánh Giá Hiệu Suất / Báo Cáo NV
+        {t("evaluationListTab.headerTitle")}
       </Typography>
 
       {/* Control Panel: Search & Filters */}
@@ -244,9 +250,9 @@ export default function EvaluationListTab() {
               setSelectedCycle("ALL");
             }}
           >
-            <Tab label={`Đang thực hiện (${acceptedReports.length})`} />
-            <Tab label={`Cần đánh giá (${submittedReports.length})`} />
-            <Tab label={`Lịch sử Đã duyệt (${completedReports.length})`} />
+            <Tab label={t("evaluationListTab.tabs.inProgress", { count: acceptedReports.length })} />
+            <Tab label={t("evaluationListTab.tabs.pendingReview", { count: submittedReports.length })} />
+            <Tab label={t("evaluationListTab.tabs.completedHistory", { count: completedReports.length })} />
           </Tabs>
         </Box>
 
@@ -262,7 +268,7 @@ export default function EvaluationListTab() {
         >
           <TextField
             size="small"
-            placeholder="Tìm theo Tên hoặc Email..."
+            placeholder={t("evaluationListTab.filters.searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             InputProps={{
@@ -276,28 +282,28 @@ export default function EvaluationListTab() {
           />
 
           <FormControl size="small" sx={{ minWidth: 200 }}>
-            <InputLabel>Bộ môn / Phòng ban</InputLabel>
+            <InputLabel>{t("evaluationListTab.filters.departmentLabel")}</InputLabel>
             <Select
               value={selectedDepartment}
-              label="Bộ môn / Phòng ban"
+              label={t("evaluationListTab.filters.departmentLabel")}
               onChange={(e) => setSelectedDepartment(e.target.value)}
             >
               {departmentOptions.map((dept) => (
                 <MenuItem key={dept as string} value={dept as string}>
-                  {dept === "ALL" ? "Tất cả Bộ môn" : (dept as string)}
+                  {dept === "ALL" ? t("evaluationListTab.filters.allDepartments") : (dept as string)}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
 
           <FormControl size="small" sx={{ minWidth: 200 }}>
-            <InputLabel>Kỳ đánh giá</InputLabel>
+            <InputLabel>{t("evaluationListTab.filters.cycleLabel")}</InputLabel>
             <Select
               value={selectedCycle}
-              label="Kỳ đánh giá"
+              label={t("evaluationListTab.filters.cycleLabel")}
               onChange={(e) => setSelectedCycle(e.target.value)}
             >
-              <MenuItem value="ALL">Tất cả các kỳ</MenuItem>
+              <MenuItem value="ALL">{t("evaluationListTab.filters.allCycles")}</MenuItem>
               {allCycles.map((c) => (
                 <MenuItem key={c.id} value={c.name}>
                   {c.name}
@@ -315,7 +321,7 @@ export default function EvaluationListTab() {
               onClick={handleTickAllSelected}
               sx={{ ml: "auto" }}
             >
-              Tick All({selectedRowIds.length})
+              {t("evaluationListTab.buttons.tickAll", { count: selectedRowIds.length })}
             </Button>
           )}
         </Box>
@@ -329,14 +335,14 @@ export default function EvaluationListTab() {
       ) : reports.length === 0 ? (
         <Alert severity="success" sx={{ borderRadius: 2 }}>
           {tabValue === 0
-            ? "Không có báo cáo nào đang thực hiện."
+            ? t("evaluationListTab.alerts.noReportsInProgress")
             : tabValue === 1
-              ? "Không có báo cáo nào cần đánh giá."
-              : "Không có lịch sử đánh giá."}
+              ? t("evaluationListTab.alerts.noReportsPendingReview")
+              : t("evaluationListTab.alerts.noEvaluationHistory")}
         </Alert>
       ) : Object.keys(groupedByCycle).length === 0 ? (
         <Alert severity="info" sx={{ borderRadius: 2 }}>
-          Không tìm thấy báo cáo nào khớp với điều kiện lọc.
+          {t("evaluationListTab.alerts.noFilteredReportsFound")}
         </Alert>
       ) : (
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -369,15 +375,15 @@ export default function EvaluationListTab() {
                 >
                   <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                     <Typography variant="subtitle1" fontWeight="700" color="#1e3a8a">
-                      {cycleName}
+                      {cycleName === "Kỳ mặc định" ? t("evaluationListTab.cycleFallback") : cycleName}
                     </Typography>
                     <Chip
                       label={
                         tabValue === 0
-                          ? `${cycleReports.length} đang thực hiện`
+                          ? t("evaluationListTab.accordion.inProgressCount", { count: cycleReports.length })
                           : tabValue === 1
-                            ? `${cycleReports.length} cần đánh giá`
-                            : `${cycleReports.length} đã duyệt`
+                            ? t("evaluationListTab.accordion.pendingReviewCount", { count: cycleReports.length })
+                            : t("evaluationListTab.accordion.completedCount", { count: cycleReports.length })
                       }
                       size="small"
                       color={tabValue === 1 ? "warning" : tabValue === 2 ? "success" : "info"}
@@ -403,10 +409,10 @@ export default function EvaluationListTab() {
                             </TableCell>
                           )}
                           <TableCell sx={{ fontWeight: "600", color: "#475569", fontSize: "0.85rem", whiteSpace: "nowrap", letterSpacing: "0.01em" }}>
-                            Nhân sự
+                            {t("evaluationListTab.table.headers.employee")}
                           </TableCell>
                           <TableCell sx={{ fontWeight: "600", color: "#475569", fontSize: "0.85rem", whiteSpace: "nowrap", letterSpacing: "0.01em" }}>
-                            Bộ môn
+                            {t("evaluationListTab.table.headers.department")}
                           </TableCell>
                           <TableCell
                             align="center"
@@ -418,7 +424,7 @@ export default function EvaluationListTab() {
                               letterSpacing: "0.01em",
                             }}
                           >
-                            Ngày giao
+                            {t("evaluationListTab.table.headers.assignedDate")}
                           </TableCell>
                           <TableCell
                             align="center"
@@ -430,7 +436,7 @@ export default function EvaluationListTab() {
                               letterSpacing: "0.01em",
                             }}
                           >
-                            % Hoàn thành OKR
+                            {t("evaluationListTab.table.headers.okrProgress")}
                           </TableCell>
                           <TableCell
                             align="center"
@@ -442,7 +448,7 @@ export default function EvaluationListTab() {
                               letterSpacing: "0.01em",
                             }}
                           >
-                            Điểm Tự Khai
+                            {t("evaluationListTab.table.headers.selfScore")}
                           </TableCell>
                           <TableCell
                             align="center"
@@ -454,7 +460,7 @@ export default function EvaluationListTab() {
                               letterSpacing: "0.01em",
                             }}
                           >
-                            Điểm Quản Lý
+                            {t("evaluationListTab.table.headers.managerScore")}
                           </TableCell>
                           <TableCell
                             align="center"
@@ -466,7 +472,7 @@ export default function EvaluationListTab() {
                               letterSpacing: "0.01em",
                             }}
                           >
-                            Trạng thái
+                            {t("evaluationListTab.table.headers.status")}
                           </TableCell>
                         </TableRow>
                       </TableHead>
@@ -612,28 +618,28 @@ export default function EvaluationListTab() {
                                     color="text.secondary"
                                     fontStyle="italic"
                                   >
-                                    Chưa chấm
+                                    {t("evaluationListTab.table.notGradedYet")}
                                   </Typography>
                                 )}
                               </TableCell>
                               <TableCell align="center">
                                 {report.status === "COMPLETED" ? (
                                   <Chip
-                                    label="Đã đánh giá"
+                                    label={t("evaluationListTab.table.status.completed")}
                                     color="success"
                                     size="small"
                                     sx={{ fontWeight: 500 }}
                                   />
                                 ) : report.status === "ACCEPTED" ? (
                                   <Chip
-                                    label="Đang thực hiện"
+                                    label={t("evaluationListTab.table.status.inProgress")}
                                     color="info"
                                     size="small"
                                     sx={{ fontWeight: 500 }}
                                   />
                                 ) : (
                                   <Chip
-                                    label="Chờ đánh giá"
+                                    label={t("evaluationListTab.table.status.pending")}
                                     color="warning"
                                     size="small"
                                     sx={{ fontWeight: 500 }}

@@ -14,6 +14,7 @@ import {
   Chip
 } from "@mui/material";
 import { Notifications, Circle } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
 import { api } from "../../services/api";
 import dayjs from "dayjs";
 
@@ -25,6 +26,7 @@ interface NotificationItem {
 }
 
 export default function NotificationBell() {
+  const { t } = useTranslation();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [filter, setFilter] = useState<"ALL" | "UNREAD">("ALL");
@@ -176,11 +178,11 @@ export default function NotificationBell() {
       >
         <Box sx={{ p: 2, pb: 1.5, display: "flex", justifyContent: "space-between", alignItems: "center", bgcolor: "#ffffff" }}>
           <Typography variant="h6" sx={{ fontSize: "1.1rem", fontWeight: 800, color: "#0f172a" }}>
-            Thông báo
+            {t("notificationBell.title")}
           </Typography>
           {unreadCount > 0 && (
             <Button size="small" sx={{ textTransform: "none", fontWeight: 600, fontSize: "0.8rem", color: "#3b82f6" }} onClick={markAllAsRead}>
-              Đánh dấu tất cả đã đọc
+              {t("notificationBell.markAllAsRead")}
             </Button>
           )}
         </Box>
@@ -188,7 +190,7 @@ export default function NotificationBell() {
         <Box sx={{ px: 2, pb: 1.5, display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #e2e8f0" }}>
           <Box sx={{ display: "flex", gap: 1 }}>
             <Chip 
-              label="Tất cả" 
+              label={t("notificationBell.filters.all")} 
               clickable 
               onClick={() => { setFilter("ALL"); setVisibleCount(20); }}
               sx={{ 
@@ -202,7 +204,7 @@ export default function NotificationBell() {
               }} 
             />
             <Chip 
-              label="Chưa đọc" 
+              label={t("notificationBell.filters.unread")} 
               clickable 
               onClick={() => { setFilter("UNREAD"); setVisibleCount(20); }}
               sx={{ 
@@ -223,7 +225,7 @@ export default function NotificationBell() {
             <Box sx={{ p: 4, textAlign: "center" }}>
               <Notifications sx={{ fontSize: 48, color: "#cbd5e1", mb: 1 }} />
               <Typography color="text.secondary" variant="body2" fontWeight={500}>
-                {filter === "UNREAD" ? "Bạn không có thông báo chưa đọc nào" : "Không có thông báo nào"}
+                {filter === "UNREAD" ? t("notificationBell.emptyStates.noUnread") : t("notificationBell.emptyStates.noNotifications")}
               </Typography>
             </Box>
           ) : (
@@ -279,7 +281,7 @@ export default function NotificationBell() {
                       "&:hover": { bgcolor: "#eff6ff" }
                     }}
                   >
-                    Xem thêm thông báo trước đó
+                    {t("notificationBell.loadMore")}
                   </Button>
                 </Box>
               )}

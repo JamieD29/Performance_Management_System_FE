@@ -27,12 +27,14 @@ import {
 } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material";
 import { Edit } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
 
 import { api } from "../../../services/api";
 import { showSuccess, showError } from "../../../utils/swal";
 import type { User } from "../../../types";
 
 export default function UserRoleManager() {
+  const { t } = useTranslation();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -59,9 +61,9 @@ export default function UserRoleManager() {
         ),
       );
       setRoleDialogOpen(false);
-      showSuccess("Thành công", "Cập nhật role thành công.");
+      showSuccess(t("userRoleManager.alerts.successTitle"), t("userRoleManager.alerts.successUpdate"));
     } catch (err: any) {
-      showError("Lỗi", err.response?.data?.message || "Cập nhật thất bại.");
+      showError(t("userRoleManager.alerts.errorTitle"), err.response?.data?.message || t("userRoleManager.alerts.errorUpdate"));
     }
   };
 
@@ -73,7 +75,7 @@ export default function UserRoleManager() {
   return (
     <Box>
       <Alert severity="warning" sx={{ mb: 2, py: 0.5 }}>
-        Only Admin can promote users.
+        {t("userRoleManager.adminWarning")}
       </Alert>
 
       <TableContainer
@@ -84,11 +86,11 @@ export default function UserRoleManager() {
         <Table size="small">
           <TableHead sx={{ bgcolor: "#f8fafc" }}>
             <TableRow>
-              <TableCell>Nhân viên</TableCell>
-              <TableCell>Chức danh</TableCell>
-              <TableCell>Chức vụ</TableCell>
-              <TableCell>Role hệ thống</TableCell>
-              <TableCell align="right">Thao tác</TableCell>
+              <TableCell>{t("userRoleManager.table.headers.employee")}</TableCell>
+              <TableCell>{t("userRoleManager.table.headers.jobTitle")}</TableCell>
+              <TableCell>{t("userRoleManager.table.headers.position")}</TableCell>
+              <TableCell>{t("userRoleManager.table.headers.systemRole")}</TableCell>
+              <TableCell align="right">{t("userRoleManager.table.headers.actions")}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -160,7 +162,7 @@ export default function UserRoleManager() {
                     })}
                   </TableCell>
                   <TableCell align="right" sx={{ py: 1 }}>
-                    <Tooltip title="Edit Role">
+                    <Tooltip title={t("userRoleManager.table.tooltips.editRole")}>
                       <IconButton
                         size="small"
                         onClick={() => {
@@ -186,26 +188,26 @@ export default function UserRoleManager() {
       </TableContainer>
 
       <Dialog open={roleDialogOpen} onClose={() => setRoleDialogOpen(false)}>
-        <DialogTitle>Edit Role: {selectedUser?.name}</DialogTitle>
+        <DialogTitle>{t("userRoleManager.dialog.title", { name: selectedUser?.name })}</DialogTitle>
         <DialogContent sx={{ minWidth: 300, pt: 2 }}>
           <FormControl fullWidth size="small">
-            <InputLabel>Role</InputLabel>
+            <InputLabel>{t("userRoleManager.dialog.roleLabel")}</InputLabel>
             <Select
               value={newRole}
-              label="Role"
+              label={t("userRoleManager.dialog.roleLabel")}
               onChange={(e: SelectChangeEvent) => setNewRole(e.target.value)}
             >
-              <MenuItem value="USER">User</MenuItem>
+              <MenuItem value="USER">{t("userRoleManager.dialog.options.user")}</MenuItem>
               <MenuItem value="ADMIN" sx={{ color: "red" }}>
-                Admin
+                {t("userRoleManager.dialog.options.admin")}
               </MenuItem>
             </Select>
           </FormControl>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setRoleDialogOpen(false)}>Cancel</Button>
+          <Button onClick={() => setRoleDialogOpen(false)}>{t("userRoleManager.dialog.cancelBtn")}</Button>
           <Button variant="contained" onClick={handleUpdateRole}>
-            Save
+            {t("userRoleManager.dialog.saveBtn")}
           </Button>
         </DialogActions>
       </Dialog>
