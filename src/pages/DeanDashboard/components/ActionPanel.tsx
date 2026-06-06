@@ -35,7 +35,7 @@ export default function ActionPanel({ items, daysRemaining }: Props) {
   const navigate = useNavigate();
 
   if (items.length === 0 && (daysRemaining === null || daysRemaining > 30)) {
-    return null; // Không có gì cần hành động
+    return null;
   }
 
   return (

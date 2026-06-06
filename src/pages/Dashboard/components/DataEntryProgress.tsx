@@ -1,5 +1,5 @@
-import React from "react";
 import { Box, Typography, Paper, LinearProgress, Stack } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 interface ProgressItem {
   id: string;
@@ -14,12 +14,14 @@ interface DataEntryProgressProps {
 }
 
 export default function DataEntryProgress({ progressList }: DataEntryProgressProps) {
+  const { t } = useTranslation();
+
   if (!progressList || progressList.length === 0) return null;
 
   return (
     <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: "1px solid #e2e8f0", bgcolor: "white", height: "100%" }}>
       <Typography variant="subtitle2" fontWeight="700" sx={{ mb: 3, color: "#1e293b" }}>
-        📝 Tiến độ nhập liệu báo cáo
+        {t("dashboard.dataEntryProgress.title")}
       </Typography>
       <Stack spacing={3}>
         {progressList.map((item) => (
@@ -29,7 +31,7 @@ export default function DataEntryProgress({ progressList }: DataEntryProgressPro
                 {item.name}
               </Typography>
               <Typography variant="body2" fontWeight="500" sx={{ color: item.percent === 100 ? "#10b981" : "#64748b" }}>
-                {item.filledItems} / {item.totalItems} mục ({item.percent}%)
+                {t("dashboard.dataEntryProgress.itemsCount", { filled: item.filledItems, total: item.totalItems, percent: item.percent })}
               </Typography>
             </Box>
             <LinearProgress

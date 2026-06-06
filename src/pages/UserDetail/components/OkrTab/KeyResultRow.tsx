@@ -48,7 +48,7 @@ export default function KeyResultRow({ kr, selfEvidence, managerScore }: KeyResu
         </Typography>
       </Box>
 
-      {/* Chi tiết điểm & Minh chứng */}
+      {/* Score Details & Evidence */}
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mt: 1.5, bgcolor: "#f8fafc", p: 1.5, borderRadius: 2 }}>
         <Box sx={{ flex: 1, minWidth: 200 }}>
           <Typography variant="caption" color="text.secondary" display="block">

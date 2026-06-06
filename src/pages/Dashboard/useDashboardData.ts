@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { api } from "../../services/api";
 
 // ============================================================
 // TYPES
 // ============================================================
 
-/** Trạng thái vòng đời OKR */
+/** OKR lifecycle status */
 export type OkrStatus =
   | "PENDING"
   | "NEGOTIATING"
@@ -14,14 +15,14 @@ export type OkrStatus =
   | "COMPLETED"
   | "REJECTED";
 
-/** Bước trong stepper tiến trình */
+/** Step in the progress stepper */
 export interface OkrStep {
   key: OkrStatus | "ASSIGNED";
-  label: string;
-  description: string;
+  labelKey: string;
+  descriptionKey: string;
 }
 
-/** Thông tin OKR của user */
+/** User's OKR information */
 export interface UserOkrData {
   id: string;
   objective: string;
@@ -43,7 +44,7 @@ export interface UserOkrData {
   };
 }
 
-/** Thông tin phiếu đánh giá */
+/** Evaluation form information */
 export interface UserEvaluationData {
   id: string;
   status: string;
@@ -60,15 +61,15 @@ export interface UserEvaluationData {
   }>;
 }
 
-/** Dữ liệu tổng hợp cho dashboard */
+/** Aggregated data for dashboard */
 export interface DashboardData {
-  /** OKR chính (mới nhất / quan trọng nhất) */
+  /** Primary OKR (latest / most important) */
   primaryOkr: UserOkrData | null;
-  /** Tất cả OKR */
+  /** All OKRs */
   allOkrs: UserOkrData[];
-  /** Phiếu đánh giá */
+  /** Evaluation form */
   evaluation: UserEvaluationData | null;
-  /** Tiến độ nhập điểm theo từng Objective */
+  /** Data entry progress per Objective */
   dataEntryProgress: Array<{
     id: string;
     name: string;
@@ -76,32 +77,32 @@ export interface DashboardData {
     filledItems: number;
     percent: number;
   }>;
-  /** Thông tin kỳ đánh giá hiện tại */
+  /** Current evaluation cycle info */
   currentCycle: {
     name: string;
     status: string;
     startDate: string;
     endDate: string;
   } | null;
-  /** Tính toán sẵn */
+  /** Pre-computed values */
   computed: {
-    /** Bước hiện tại trong stepper (0-indexed) */
+    /** Current step in stepper (0-indexed) */
     currentStepIndex: number;
-    /** Số ngày còn lại đến deadline */
+    /** Days remaining until deadline */
     daysUntilDeadline: number | null;
-    /** Trạng thái của deadline countdown */
+    /** Deadline countdown state */
     deadlineState: "DEFAULT" | "SUBMITTED_EARLY" | "SUBMITTED_LATE";
-    /** % thời gian đã qua trong kỳ */
+    /** % of time elapsed in the cycle */
     cycleProgressPercent: number;
-    /** Có action cần thực hiện không */
+    /** Whether there is an action required */
     hasActionRequired: boolean;
-    /** Mô tả action cần thực hiện */
+    /** Description of the required action */
     actionMessage: string;
-    /** Route điều hướng cho CTA */
+    /** Navigation route for CTA */
     actionRoute: string;
-    /** Label cho CTA button */
+    /** Label for CTA button */
     actionLabel: string;
-    /** Tên của hạn chót */
+    /** Deadline label name */
     deadlineLabel: string | null;
   };
 }
@@ -110,42 +111,42 @@ export interface DashboardData {
 // CONSTANTS
 // ============================================================
 
-/** Các bước trong quy trình OKR */
+/** Steps in the OKR process */
 export const OKR_STEPS: OkrStep[] = [
   {
     key: "ASSIGNED",
-    label: "Được giao",
-    description: "OKR đã được Trưởng khoa gán cho bạn",
+    labelKey: "dashboard.stepper.steps.ASSIGNED.label",
+    descriptionKey: "dashboard.stepper.steps.ASSIGNED.description",
   },
   {
     key: "PENDING",
-    label: "Chờ phản hồi",
-    description: "Xem xét và phản hồi OKR được giao",
+    labelKey: "dashboard.stepper.steps.PENDING.label",
+    descriptionKey: "dashboard.stepper.steps.PENDING.description",
   },
   {
     key: "NEGOTIATING",
-    label: "Đàm phán",
-    description: "Đang trao đổi với Trưởng khoa",
+    labelKey: "dashboard.stepper.steps.NEGOTIATING.label",
+    descriptionKey: "dashboard.stepper.steps.NEGOTIATING.description",
   },
   {
     key: "ACCEPTED",
-    label: "Đã duyệt",
-    description: "OKR đã được thống nhất",
+    labelKey: "dashboard.stepper.steps.ACCEPTED.label",
+    descriptionKey: "dashboard.stepper.steps.ACCEPTED.description",
   },
   {
     key: "INPUTTING" as any,
-    label: "Bắt đầu nhập điểm",
-    description: "Sẵn sàng hoặc đang tiến hành tự khai",
+    labelKey: "dashboard.stepper.steps.INPUTTING.label",
+    descriptionKey: "dashboard.stepper.steps.INPUTTING.description",
   },
   {
     key: "SUBMITTED",
-    label: "Đã nộp",
-    description: "Đã nộp self-report, chờ TK chấm điểm",
+    labelKey: "dashboard.stepper.steps.SUBMITTED.label",
+    descriptionKey: "dashboard.stepper.steps.SUBMITTED.description",
   },
   {
     key: "COMPLETED",
-    label: "Hoàn thành",
-    description: "Trưởng khoa đã chấm điểm xong",
+    labelKey: "dashboard.stepper.steps.COMPLETED.label",
+    descriptionKey: "dashboard.stepper.steps.COMPLETED.description",
   },
 ];
 
@@ -153,17 +154,17 @@ export const OKR_STEPS: OkrStep[] = [
 const STATUS_TO_STEP: Record<string, number> = {
   PENDING: 1,
   NEGOTIATING: 2,
-  ACCEPTED: 4, // Khi ACCEPTED, user đang ở giai đoạn Bắt đầu nhập điểm
+  ACCEPTED: 4, // When ACCEPTED, user is at the "Start entering scores" phase
   SUBMITTED: 5,
   COMPLETED: 6,
-  REJECTED: 1, // Rejected quay về bước phản hồi
+  REJECTED: 1, // Rejected returns to the feedback step
 };
 
 // ============================================================
 // HELPER FUNCTIONS
 // ============================================================
 
-/** Tính số ngày còn lại từ hôm nay đến deadline */
+/** Calculate remaining days from today to deadline */
 function calcDaysUntilDeadline(deadline: string | null): number | null {
   if (!deadline) return null;
   const now = new Date();
@@ -172,7 +173,7 @@ function calcDaysUntilDeadline(deadline: string | null): number | null {
   return Math.ceil(diff / (1000 * 60 * 60 * 24));
 }
 
-/** Tính % thời gian đã qua trong kỳ */
+/** Calculate % of time elapsed in the cycle */
 function calcCycleProgress(startDate: string, endDate: string): number {
   const now = new Date().getTime();
   const start = new Date(startDate).getTime();
@@ -184,7 +185,7 @@ function calcCycleProgress(startDate: string, endDate: string): number {
 
 
 
-/** Tính tiến độ nhập liệu số lượng mục theo từng Nhiệm vụ/Objective */
+/** Calculate data entry progress (item count per Objective) */
 function computeDataEntryProgress(keyResults: any[], selfReportData: any) {
   if (!keyResults || !Array.isArray(keyResults)) return [];
   const progressList: any[] = [];
@@ -198,11 +199,11 @@ function computeDataEntryProgress(keyResults: any[], selfReportData: any) {
       for (const item of items) {
         const currentKey = `${prefixKey}-${item.id}`;
         
-        // Nếu là node lá (không có items con) -> tính là 1 mục cần điền
+        // If it's a leaf node (no child items) -> count as 1 item to fill
         if (!item.items || item.items.length === 0) {
           totalItems++;
           const data = selfReportData?.[currentKey];
-          // Có khai số lượng > 0 HOẶC có điền minh chứng thì coi như đã nhập
+          // Has entered quantity > 0 OR has filled evidence -> considered as entered
           if (
             data &&
             ((data.quantity !== undefined && Number(data.quantity) > 0) ||
@@ -234,11 +235,11 @@ function computeDataEntryProgress(keyResults: any[], selfReportData: any) {
   return progressList;
 }
 
-/** Chọn OKR quan trọng nhất (ưu tiên theo status) */
+/** Select the most important OKR (prioritized by status) */
 function selectPrimaryOkr(okrs: UserOkrData[]): UserOkrData | null {
   if (!okrs || okrs.length === 0) return null;
 
-  // Ưu tiên: ACCEPTED (cần tự khai) > SUBMITTED (đang chờ) > PENDING > NEGOTIATING > COMPLETED
+  // Priority: ACCEPTED (needs self-report) > SUBMITTED (waiting) > PENDING > NEGOTIATING > COMPLETED
   const priority: Record<string, number> = {
     ACCEPTED: 1,
     PENDING: 2,
@@ -252,17 +253,18 @@ function selectPrimaryOkr(okrs: UserOkrData[]): UserOkrData | null {
     const pa = priority[a.status] ?? 99;
     const pb = priority[b.status] ?? 99;
     if (pa !== pb) return pa - pb;
-    // Nếu cùng priority, lấy mới nhất
+    // If same priority, pick the newest
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
   return sorted[0];
 }
 
-/** Tạo action message dựa trên trạng thái OKR + Evaluation */
+/** Generate action message based on OKR + Evaluation status */
 function computeAction(
   okr: UserOkrData | null,
   evaluation: UserEvaluationData | null,
+  t: any,
 ): {
   hasAction: boolean;
   message: string;
@@ -272,9 +274,9 @@ function computeAction(
   if (!okr) {
     return {
       hasAction: false,
-      message: "Bạn chưa được giao OKR nào. Hãy đợi Trưởng khoa giao OKR.",
+      message: t("dashboard.actions.noOkr"),
       route: "/my-okr",
-      label: "Xem OKR",
+      label: t("dashboard.actions.viewOkr"),
     };
   }
 
@@ -282,85 +284,78 @@ function computeAction(
     case "PENDING":
       return {
         hasAction: true,
-        message:
-          "Bạn có OKR mới được giao. Hãy xem xét và chấp nhận hoặc đề xuất điều chỉnh.",
+        message: t("dashboard.actions.pending.message"),
         route: "/my-okr",
-        label: "Phản hồi OKR ngay",
+        label: t("dashboard.actions.pending.label"),
       };
     case "NEGOTIATING":
       return {
         hasAction: true,
-        message:
-          "OKR đang trong quá trình đàm phán với Trưởng khoa. Kiểm tra phản hồi mới.",
+        message: t("dashboard.actions.negotiating.message"),
         route: "/my-okr",
-        label: "Xem trao đổi",
+        label: t("dashboard.actions.negotiating.label"),
       };
     case "ACCEPTED":
       return {
         hasAction: true,
-        message:
-          "OKR đã được chấp nhận! Hãy nhập số liệu và minh chứng để nộp bài tự khai.",
+        message: t("dashboard.actions.accepted.message"),
         route: "/my-okr",
-        label: "Tự khai điểm ngay",
+        label: t("dashboard.actions.accepted.label"),
       };
     case "SUBMITTED":
       return {
         hasAction: false,
-        message:
-          "Bạn đã nộp báo cáo tự khai. Đang chờ Trưởng khoa chấm điểm.",
+        message: t("dashboard.actions.submitted.message"),
         route: "/my-okr",
-        label: "Xem lại báo cáo",
+        label: t("dashboard.actions.submitted.label"),
       };
     case "COMPLETED": {
-      // Kiểm tra phiếu đánh giá
+      // Check evaluation form
       if (evaluation) {
         if (evaluation.status === "EVALUATED") {
           return {
             hasAction: false,
-            message:
-              "Quy trình đánh giá đã hoàn tất! Xem kết quả xếp loại của bạn.",
+            message: t("dashboard.actions.completed.evaluated.message"),
             route: "/my-evaluation",
-            label: "Xem kết quả",
+            label: t("dashboard.actions.completed.evaluated.label"),
           };
         }
         if (evaluation.status === "SUBMITTED") {
           return {
             hasAction: false,
-            message:
-              "Phiếu đánh giá đã nộp. Đang chờ Trưởng khoa xếp loại cuối cùng.",
+            message: t("dashboard.actions.completed.submitted.message"),
             route: "/my-evaluation",
-            label: "Xem phiếu đánh giá",
+            label: t("dashboard.actions.completed.submitted.label"),
           };
         }
         // PENDING_EVALUATION
         return {
           hasAction: true,
-          message:
-            "OKR đã hoàn tất! Hãy tự nhận xét và nộp Phiếu Đánh Giá Xếp Loại.",
+          message: t("dashboard.actions.completed.pendingEvaluation.message"),
           route: "/my-evaluation",
-          label: "Nộp phiếu đánh giá",
+          label: t("dashboard.actions.completed.pendingEvaluation.label"),
         };
       }
       return {
         hasAction: false,
-        message: "OKR đã được Trưởng khoa chấm điểm xong.",
+        message: t("dashboard.actions.completed.noEvaluation.message"),
         route: "/my-okr",
-        label: "Xem kết quả",
+        label: t("dashboard.actions.completed.noEvaluation.label"),
       };
     }
     case "REJECTED":
       return {
         hasAction: true,
-        message: "OKR của bạn đã bị từ chối. Hãy xem lý do và gửi đề xuất mới.",
+        message: t("dashboard.actions.rejected.message"),
         route: "/my-okr",
-        label: "Xem chi tiết",
+        label: t("dashboard.actions.rejected.label"),
       };
     default:
       return {
         hasAction: false,
         message: "",
         route: "/my-okr",
-        label: "Xem OKR",
+        label: t("dashboard.actions.viewOkr"),
       };
   }
 }
@@ -370,6 +365,7 @@ function computeAction(
 // ============================================================
 
 export function useDashboardData(skip?: boolean) {
+  const { t } = useTranslation();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(skip ? false : true);
   const [error, setError] = useState<string | null>(null);
@@ -383,7 +379,7 @@ export function useDashboardData(skip?: boolean) {
     setError(null);
 
     try {
-      // Gọi song song 3 API
+      // Call 3 APIs in parallel
       const [okrRes, evalRes, cycleRes] = await Promise.allSettled([
         api.get("/okrs/my"),
         api.get("/okrs/evaluations/my"),
@@ -398,7 +394,7 @@ export function useDashboardData(skip?: boolean) {
       const evaluation: UserEvaluationData | null =
         evalRes.status === "fulfilled" ? evalRes.value.data || null : null;
 
-      // Parse Cycles — tìm kỳ OPEN
+      // Parse Cycles — find the OPEN cycle
       let currentCycle: DashboardData["currentCycle"] = null;
       if (cycleRes.status === "fulfilled") {
         const cycles = cycleRes.value.data || [];
@@ -414,10 +410,10 @@ export function useDashboardData(skip?: boolean) {
         }
       }
 
-      // Chọn OKR chính
+      // Select primary OKR
       const primaryOkr = selectPrimaryOkr(allOkrs);
 
-      // Tính toán
+      // Compute values
       const currentStepIndex = primaryOkr
         ? STATUS_TO_STEP[primaryOkr.status] ?? 0
         : 0;
@@ -455,7 +451,7 @@ export function useDashboardData(skip?: boolean) {
           ? calcCycleProgress(currentCycle.startDate, currentCycle.endDate)
           : 0;
 
-      const action = computeAction(primaryOkr, evaluation);
+      const action = computeAction(primaryOkr, evaluation, t);
 
       const dataEntryProgress = primaryOkr
         ? computeDataEntryProgress(primaryOkr.keyResults, primaryOkr.selfReportData)
@@ -463,12 +459,12 @@ export function useDashboardData(skip?: boolean) {
 
       const getDeadlineLabel = (status: string) => {
         if (status === "PENDING" || status === "NEGOTIATING" || status === "REJECTED") {
-          return "Hạn chót đàm phán OKR";
+          return t("dashboard.deadlineLabels.negotiating");
         }
         if (status === "ACCEPTED") {
-          return "Hạn chót nộp báo cáo";
+          return t("dashboard.deadlineLabels.submitting");
         }
-        return "Hạn chót";
+        return t("dashboard.deadlineLabels.default");
       };
 
       setData({
@@ -491,11 +487,11 @@ export function useDashboardData(skip?: boolean) {
       });
     } catch (err: any) {
       console.error("Dashboard data fetch error:", err);
-      setError("Không thể tải dữ liệu dashboard. Vui lòng thử lại.");
+      setError(t("dashboard.defaultError"));
     } finally {
       setLoading(false);
     }
-  }, [skip]);
+  }, [skip, t]);
 
   useEffect(() => {
     if (!skip) {

@@ -33,7 +33,6 @@ import {
   HelpOutline,
 } from "@mui/icons-material";
 import { api } from "../../../services/api";
-import { performanceService } from "../../../services/performanceService";
 import { showSuccess, showError } from "../../../utils/swal";
 import { useTemplateStructure } from "../hooks/useTemplateStructure";
 import { ObjectiveRow, KeyResultRow, SubKRRow, SubSubKRRow } from "./RowComponents";
@@ -82,7 +81,6 @@ export const validateStructureScores = (items: any[], t?: (key: string, opts?: a
             : `Điểm/Đơn vị của "${child.title || child.id}" không được là số âm.`;
         }
 
-        // Điểm đơn vị của các key result không được quá điểm tối đa của object
         if (childUnitScore > objMaxScore) {
           return t
             ? t("departmentOkr.templateEditor.validation.unitExceedsObjMax", { childTitle: child.title || child.id, childScore: childUnitScore, objTitle: obj.title || obj.id, objScore: objMaxScore })
@@ -140,7 +138,6 @@ export default function TemplateEditorDialog({
   const [title, setTitle] = useState("");
   const [positionId, setPositionId] = useState("");
   const [jobTitle, setJobTitle] = useState("");
-  const [positions, setPositions] = useState<any[]>([]);
   const [jobTitles, setJobTitles] = useState<any[]>([]);
 
   const {
@@ -181,11 +178,7 @@ export default function TemplateEditorDialog({
 
   const loadMetadata = async () => {
     try {
-      const [posRes, jtRes] = await Promise.all([
-        api.get("/management-positions"),
-        api.get("/okr-templates/job-titles"),
-      ]);
-      setPositions(posRes.data || []);
+      const jtRes = await api.get("/okr-templates/job-titles");
       setJobTitles(jtRes.data || []);
     } catch (error) {
       console.error("Error loading metadata", error);

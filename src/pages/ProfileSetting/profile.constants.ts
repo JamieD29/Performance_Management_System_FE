@@ -1,5 +1,5 @@
-// ⚠️ FALLBACK VALUES — Chỉ sử dụng khi API /users/profile-options không khả dụng.
-// 📌 Nguồn chính thức (Single Source of Truth): Backend → user.entity.ts
+// ⚠️ FALLBACK VALUES — Only used when /users/profile-options API is unavailable.
+// 📌 Official Source (Single Source of Truth): Backend → user.entity.ts
 
 export const FALLBACK_JOB_TITLES = [
   "Giảng viên",
@@ -18,10 +18,10 @@ export const FALLBACK_DEGREES = ["Cử nhân", "Thạc sĩ", "Tiến sĩ", "Khô
 
 export const FALLBACK_GENDERS = ["Nam", "Nữ", "Khác"];
 
-// --- MÀU SẮC THEME DÙNG CHUNG (UI) ---
+// --- SHARED THEME COLORS (UI) ---
 
 export const THEME_COLORS = {
-  IDENTITY: "#0ea5e9", // Xanh dương - Dùng cho Thông tin cá nhân
-  WORK: "#f59e0b", // Vàng cam - Dùng cho Công việc & Học vấn
-  ACHIEVEMENT: "#8b5cf6", // Tím - Dùng cho Thành tích & Nghiên cứu
+  IDENTITY: "#0ea5e9", // Light Blue - Used for Personal Information
+  WORK: "#f59e0b", // Amber Orange - Used for Work & Education
+  ACHIEVEMENT: "#8b5cf6", // Purple - Used for Achievements & Research
 };

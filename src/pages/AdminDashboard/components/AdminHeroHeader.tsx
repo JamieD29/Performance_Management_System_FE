@@ -92,7 +92,6 @@ export default function AdminHeroHeader({ cycle, adminName }: Props) {
       >
         {/* LEFT: Title */}
         <Box>
-          {/* Icon + Tên khoa */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1.5 }}>
             <Box
               sx={{

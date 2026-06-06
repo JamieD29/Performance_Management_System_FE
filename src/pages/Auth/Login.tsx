@@ -23,7 +23,6 @@ import { useTranslation, Trans } from "react-i18next";
 import { api } from "../../services/api";
 import loginBg from "../../assets/images/login-bg2.jpg";
 
-// --- CUSTOM ICONS (Giữ nguyên như cũ) ---
 const GoogleLogo = () => (
   <svg width="20" height="20" viewBox="0 0 24 24">
     <path
@@ -65,9 +64,7 @@ export default function Login() {
 
   const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 
-  // State phục vụ việc bypass đăng nhập cho tester và tự động hóa
   const [showMock, setShowMock] = useState(() => {
-    // Luôn luôn ẩn nếu chạy ở môi trường Production hoặc không phải local
     if (import.meta.env.PROD || !isLocal) return false;
     return true;
   });
@@ -75,22 +72,16 @@ export default function Login() {
   const [mockRole, setMockRole] = useState("USER");
   const [mockPosition, setMockPosition] = useState("");
 
-  // URL Backend
   const BACKEND_URL =
     import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
 
-  // --- LOGIC BẮT TOKEN & XỬ LÝ LỖI ---
   useEffect(() => {
-    // 1. Kiểm tra Token đăng nhập thành công
     const accessToken = searchParams.get("accessToken");
     const refreshToken = searchParams.get("refreshToken");
     const userParam = searchParams.get("user");
 
     if (accessToken) {
       setIsLoading(true);
-
-      // 🧹 Xóa dữ liệu cũ trước khi lưu tài khoản mới.
-      // Quan trọng: ngăn lỗi khi user chọn đổi tài khoản Google khi đang ở profile-setup.
       localStorage.removeItem('authToken');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
@@ -108,7 +99,6 @@ export default function Login() {
         }
       }
 
-      // Kiểm tra profile đã hoàn tất chưa
       const profileCompleted =
         parsedUser?.jobTitle || parsedUser?.profileCompleted;
       const destination = profileCompleted ? "/dashboard" : "/profile-setup";
@@ -118,18 +108,13 @@ export default function Login() {
       return;
     }
 
-    // 2. 🔥 XỬ LÝ LỖI TỪ BACKEND TRẢ VỀ
     const errorParam = searchParams.get("error");
 
     if (errorParam) {
-      // ✅ LOGIC MỚI: Nếu lỗi là "domain_not_allowed" -> Chuyển ngay sang trang 404
       if (errorParam === "domain_not_allowed") {
-        // replace: true để user không back lại được trang login có lỗi này
         navigate("/404", { replace: true });
         return;
       }
-
-      // Các lỗi khác (huỷ login, lỗi server...) thì hiện thông báo đỏ tại trang Login
       let errorMessage = t("login.errorAuthFailed");
       switch (errorParam) {
         case "auth_failed":
@@ -145,12 +130,9 @@ export default function Login() {
       setError(errorMessage);
       setIsLoading(false);
       setIsMsLoading(false);
-
-      // Xóa query param lỗi trên URL để nhìn cho sạch
       window.history.replaceState({}, document.title, "/login");
     }
 
-    // 3. Chỉ fetch whitelist khi không có token và chưa có lỗi
     if (!accessToken && !errorParam) {
       fetchAllowedDomains();
     }
@@ -158,21 +140,17 @@ export default function Login() {
 
   const fetchAllowedDomains = async () => {
     try {
-      // Gọi API whitelist (Nhớ là Backend đã mở CORS main.ts chưa nhé)
       const response = await api.get("/auth/allowed-domains");
       setAllowedDomains(response.data.domains || ["itec.hcmus.edu.vn"]);
     } catch (err) {
       console.error("Allowed domains fetch error:", err);
-      // Fallback nếu lỗi mạng
       setAllowedDomains(["itec.hcmus.edu.vn"]);
     }
   };
 
-  // --- HÀM LOGIN: CHUYỂN HƯỚNG SANG BACKEND ---
   const handleGoogleSignIn = () => {
     setError("");
     setIsLoading(true);
-    // Chuyển hướng trình duyệt sang Backend để bắt đầu quy trình OAuth
     window.location.href = `${BACKEND_URL}/auth/google`;
   };
 
@@ -201,7 +179,6 @@ export default function Login() {
       localStorage.setItem("authToken", access_token);
       localStorage.setItem("user", JSON.stringify(user));
 
-      // Kiểm tra xem profile đã hoàn tất chưa
       const profileCompleted = user.jobTitle || user.profileCompleted;
       const destination = profileCompleted ? "/dashboard" : "/profile-setup";
 

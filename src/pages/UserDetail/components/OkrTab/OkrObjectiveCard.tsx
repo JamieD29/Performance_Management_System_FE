@@ -14,7 +14,7 @@ export default function OkrObjectiveCard({ okr, defaultExpanded = true }: OkrObj
   const { t } = useTranslation();
   const statusConfig = OKR_STATUS_MAP[okr.status] || OKR_STATUS_MAP.PENDING;
 
-  // Tính tổng điểm thực tế từ các KR (nếu chưa có totalScore)
+  // Calculate actual total score from KRs (if totalScore is not available yet)
   const calculatedScore = okr.keyResults.reduce((sum, kr) => sum + (kr.score || 0), 0);
   const displayScore = okr.totalScore > 0 ? okr.totalScore : calculatedScore;
 
@@ -62,7 +62,7 @@ export default function OkrObjectiveCard({ okr, defaultExpanded = true }: OkrObj
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
             {okr.keyResults.map((kr) => {
               const selfEvidence = okr.selfReportData?.[kr.id]?.evidence;
-              // Nếu bạn lưu điểm quản lý từng KR trong managerReportData
+              // If manager score for each KR is stored in managerReportData
               // const managerScore = okr.managerReportData?.[kr.id]?.score; 
               
               return (

@@ -44,7 +44,7 @@ import { showSuccess, showError, showWarning, confirmAction } from "../../../uti
 
 const RESOURCE_PATH = "/performance";
 
-// Hàm chuẩn hóa chuỗi tiếng Việt (loại bỏ dấu)
+// Normalize Vietnamese strings (remove diacritics)
 const removeVietnameseTones = (str: string) => {
   str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
   str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
@@ -63,7 +63,7 @@ const removeVietnameseTones = (str: string) => {
   return str.toLowerCase();
 };
 
-// Bỏ rowVariants cho từng hàng vì animate trực tiếp thẻ <tr> sẽ làm hỏng cấu trúc bảng và gây ra hiện tượng scrollbar/expand.
+// Removed rowVariants for individual rows because animating <tr> elements directly breaks table structure and causes scrollbar/expand issues.
 
 const dialogContentVariants: Variants = {
   hidden: { opacity: 0, y: 20, scale: 0.97 },
@@ -81,7 +81,7 @@ export default function CycleManagement() {
   const [filterYear, setFilterYear] = useState("ALL");
   const [filterType, setFilterType] = useState("ALL");
 
-  // Form state — dùng Dayjs cho DatePicker
+  // Form state — using Dayjs for DatePicker
   const [formName, setFormName] = useState("");
   const [formType, setFormType] = useState("SEMESTER");
   const [formStartDate, setFormStartDate] = useState<Dayjs | null>(null);
@@ -149,7 +149,7 @@ export default function CycleManagement() {
   const toggleStatus = async (id: string, currentStatus: string, cycle: any) => {
     const newStatus = currentStatus === "OPEN" ? "CLOSED" : "OPEN";
 
-    // Nếu đang mở kỳ đã kết thúc (quá khứ) → cảnh báo
+    // If reopening an ended (past) cycle → show warning
     if (newStatus === "OPEN" && cycle.endDate) {
       const endDate = dayjs(cycle.endDate);
       if (endDate.isBefore(dayjs().startOf("day"))) {
@@ -201,7 +201,7 @@ export default function CycleManagement() {
     }
   };
 
-  // Trích xuất danh sách năm học từ dữ liệu
+  // Extract list of academic years from data
   const availableYears = Array.from(
     new Set(
       cycles.map((c) => {
@@ -213,7 +213,7 @@ export default function CycleManagement() {
     )
   ).sort().reverse();
 
-  // Logic lọc dữ liệu
+  // Data filtering logic
   const filteredCycles = cycles.filter((c) => {
     const normalizedName = removeVietnameseTones(c.name);
     if (filterName) {
@@ -232,7 +232,7 @@ export default function CycleManagement() {
     return true;
   });
 
-  // Xác định trạng thái thời gian cho Chip
+  // Determine time status for Chip display
   const getTimeStatus = (cycle: any) => {
     if (!cycle.startDate || !cycle.endDate) return null;
     const today = dayjs().startOf("day");
@@ -394,7 +394,7 @@ export default function CycleManagement() {
           </TableContainer>
         </motion.div>
 
-        {/* MODAL TẠO MỚI — MUI DatePicker + Framer Motion */}
+        {/* CREATE NEW MODAL — MUI DatePicker + Framer Motion */}
         <Dialog
           open={open}
           onClose={() => { setOpen(false); resetForm(); }}
@@ -486,7 +486,7 @@ export default function CycleManagement() {
               />
             </Box>
 
-            {/* Preview thông tin — giữ animation mượt khi hiện */}
+            {/* Info preview — smooth animation on reveal */}
             <AnimatePresence>
               {formStartDate && formEndDate && formEndDate.isAfter(formStartDate) && (
                 <motion.div

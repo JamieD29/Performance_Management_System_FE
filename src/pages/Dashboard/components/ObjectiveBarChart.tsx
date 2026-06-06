@@ -1,5 +1,6 @@
 import React from "react";
 import { Box, Typography, Paper } from "@mui/material";
+import { useTranslation } from "react-i18next";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Legend,
@@ -18,12 +19,14 @@ interface Props {
 }
 
 export default function ObjectiveBarChart({ evaluationData }: Props) {
+  const { t } = useTranslation();
+
   const chartData = evaluationData.map((item) => ({
     name: item.id,
     fullName: item.name,
-    "Tự khai": item.selfScore,
-    "TK chấm": item.principalScore,
-    "Điểm tối đa": item.maxScore,
+    [t("dashboard.barChart.selfReport")]: item.selfScore,
+    [t("dashboard.barChart.managerScore")]: item.principalScore,
+    [t("dashboard.barChart.maxScore")]: item.maxScore,
   }));
 
   const hasManagerScore = evaluationData.some((d) => d.principalScore > 0);
@@ -34,7 +37,7 @@ export default function ObjectiveBarChart({ evaluationData }: Props) {
       sx={{ p: 3, borderRadius: 3, border: "1px solid #e2e8f0", bgcolor: "white" }}
     >
       <Typography variant="subtitle2" fontWeight="700" sx={{ mb: 2, color: "#1e293b" }}>
-        📈 Điểm theo Nhiệm vụ
+        {t("dashboard.barChart.title")}
       </Typography>
 
       <Box sx={{ width: "100%", height: 260 }}>
@@ -45,10 +48,10 @@ export default function ObjectiveBarChart({ evaluationData }: Props) {
             <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
             <Tooltip />
             <Legend wrapperStyle={{ fontSize: 12, paddingTop: 8 }} iconType="circle" />
-            <Bar dataKey="Điểm tối đa" fill="#f1f5f9" radius={[4, 4, 0, 0]} barSize={24} />
-            <Bar dataKey="Tự khai" fill="#94a3b8" radius={[4, 4, 0, 0]} barSize={24} />
+            <Bar dataKey={t("dashboard.barChart.maxScore")} fill="#f1f5f9" radius={[4, 4, 0, 0]} barSize={24} />
+            <Bar dataKey={t("dashboard.barChart.selfReport")} fill="#94a3b8" radius={[4, 4, 0, 0]} barSize={24} />
             {hasManagerScore && (
-              <Bar dataKey="TK chấm" fill="#1e3a8a" radius={[4, 4, 0, 0]} barSize={24} />
+              <Bar dataKey={t("dashboard.barChart.managerScore")} fill="#1e3a8a" radius={[4, 4, 0, 0]} barSize={24} />
             )}
           </BarChart>
         </ResponsiveContainer>
@@ -56,7 +59,7 @@ export default function ObjectiveBarChart({ evaluationData }: Props) {
 
       {!hasManagerScore && (
         <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block", textAlign: "center" }}>
-          * Điểm Trưởng khoa chấm sẽ hiện khi OKR được duyệt hoàn tất.
+          {t("dashboard.chart.note")}
         </Typography>
       )}
     </Paper>

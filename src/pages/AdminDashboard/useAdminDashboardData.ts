@@ -80,8 +80,8 @@ export interface AdminDashboardData {
   currentCycle: EvaluationCycle | null;
 }
 
-const HEALTH_POLL_INTERVAL = 30_000; // 30 giây
-const LOGS_POLL_INTERVAL  = 15_000; // 15 giây — logs cần realtime hơn
+const HEALTH_POLL_INTERVAL = 30_000; 
+const LOGS_POLL_INTERVAL  = 15_000; 
 
 export function useAdminDashboardData() {
   const [data, setData] = useState<AdminDashboardData>({
@@ -93,8 +93,6 @@ export function useAdminDashboardData() {
   const [loading, setLoading] = useState(true);
   const [healthLoading, setHealthLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // --- Lấy dữ liệu chính (một lần khi mount) ---
   const fetchMainData = useCallback(async () => {
     try {
       setLoading(true);
@@ -106,11 +104,9 @@ export function useAdminDashboardData() {
         api.get("/performance/cycles"),
       ]);
 
-      // Stats
       const stats =
         statsRes.status === "fulfilled" ? statsRes.value.data : null;
 
-      // Logs — lấy 10 hành động gần nhất
       let recentLogs: SystemLog[] = [];
       if (logsRes.status === "fulfilled") {
         const raw = Array.isArray(logsRes.value.data)
@@ -119,7 +115,6 @@ export function useAdminDashboardData() {
         recentLogs = raw.slice(0, 10);
       }
 
-      // Chu kỳ hiện tại
       let currentCycle: EvaluationCycle | null = null;
       if (cyclesRes.status === "fulfilled") {
         const cycles: EvaluationCycle[] = Array.isArray(cyclesRes.value.data)
@@ -128,7 +123,6 @@ export function useAdminDashboardData() {
         const openCycle = cycles.find((c) => c.status === "OPEN");
         const candidate = openCycle || cycles[0] || null;
         if (candidate) {
-          // Tính daysRemaining nếu chưa có
           const daysRemaining = candidate.endDate
             ? Math.ceil(
                 (new Date(candidate.endDate).getTime() - Date.now()) /
@@ -161,20 +155,20 @@ export function useAdminDashboardData() {
     }
   }, []);
 
-  // --- Lấy system health (polling) ---
+
   const fetchSystemHealth = useCallback(async () => {
     try {
       setHealthLoading(true);
       const res = await api.get("/admin/system-health");
       setData((prev) => ({ ...prev, systemHealth: res.data }));
     } catch {
-      // Không crash UI nếu system health lỗi
+
     } finally {
       setHealthLoading(false);
     }
   }, []);
 
-  // --- Lấy chỉ logs (dùng riêng để polling độc lập với data chính) ---
+
   const fetchLogs = useCallback(async () => {
     try {
       const logsRes = await api.get("/system-logs");
@@ -184,17 +178,15 @@ export function useAdminDashboardData() {
       const recentLogs: SystemLog[] = raw.slice(0, 20);
       setData((prev) => ({ ...prev, recentLogs }));
     } catch {
-      // Không crash UI nếu logs lỗi
     }
   }, []);
 
   useEffect(() => {
     fetchMainData();
-    fetchSystemHealth(); // Tải nhanh lần đầu tiên qua HTTP
+    fetchSystemHealth();
 
     const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
-    // 1. Kết nối Real-time qua Server-Sent Events (SSE) cho System Health
     const sseHealthUrl = `${baseUrl}/admin/system-health/stream`;
     const healthEventSource = new EventSource(sseHealthUrl);
 
@@ -213,7 +205,6 @@ export function useAdminDashboardData() {
       console.error("Lỗi kết nối SSE System Health:", err);
     };
 
-    // 2. Kết nối Real-time qua Server-Sent Events (SSE) cho Logs
     const sseLogsUrl = `${baseUrl}/admin/system-logs/stream`;
     const logsEventSource = new EventSource(sseLogsUrl);
 

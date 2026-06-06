@@ -39,7 +39,7 @@ export interface TaskGroupData {
   groupName: string;
   weight: number;
   maxScore: number;
-  items: any[]; // Chi tiết items nếu cần
+  items: any[];
   selfScoreTotal: number;
   principalScoreTotal: number;
 }

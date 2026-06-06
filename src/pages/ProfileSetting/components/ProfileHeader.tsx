@@ -29,7 +29,7 @@ import type { UserProfileForm } from "../profile.types";
 import { THEME_COLORS } from "../profile.constants";
 import { useTranslation } from "react-i18next";
 
-// --- ĐỊNH NGHĨA PROPS ---
+// --- PROPS INTERFACE ---
 interface ProfileHeaderProps {
   formData: UserProfileForm;
   isEditing: boolean;
@@ -61,11 +61,11 @@ export default function ProfileHeader({
     }
   };
 
-  // --- HÀM HELPER HIỂN THỊ QUYỀN (ROLE) ---
+  // --- HELPER TO GET DISPLAY ROLE ---
   const getDisplayRole = (data: UserProfileForm) => {
     const { roles, managementPosition, jobTitle } = data;
 
-    // 1. Ưu tiên quyền ADMIN (Chuẩn hóa Object/String và Case-insensitive)
+    // 1. Prioritize ADMIN role (Flexible normalization and case-insensitive check)
     const rawRoles = Array.isArray(roles) ? roles : [];
     const isAdmin = rawRoles.some((r: any) => {
       const val = typeof r === "string" ? r : r.slug || r.name || "";
@@ -74,27 +74,27 @@ export default function ProfileHeader({
 
     if (isAdmin) return "Admin";
 
-    // 2. Ưu tiên tiếp theo: Chức vụ quản lý (nếu có)
+    // 2. Second priority: Management Position (if exists)
     if (managementPosition?.name) {
       return t(`profile.enums.managementPosition.${managementPosition.name}`, {
         defaultValue: managementPosition.name,
       });
     }
 
-    // 3. Tiếp theo: Chức danh công việc (jobTitle)
+    // 3. Third priority: Professional Job Title (jobTitle)
     if (jobTitle) {
       return t(`profile.enums.jobTitle.${jobTitle}`, { defaultValue: jobTitle });
     }
 
-    // 4. Mặc định
+    // 4. Default
     return t("profile.enums.jobTitle.Giảng viên");
   };
 
   const userRoleStr = getDisplayRole(formData);
   const departmentName = getDepartmentName(formData.departmentID);
-  const mainColor = THEME_COLORS.IDENTITY; // Màu chủ đạo cho header
+  const mainColor = THEME_COLORS.IDENTITY; // Main theme color for header
 
-  // Component nhỏ để hiển thị các thông tin phụ (Role, Dept)
+  // Mini component to display auxiliary information (Role, Dept)
   const InfoBadge = ({ icon, text, colorBg }: any) => (
     <Box
       sx={{
@@ -133,7 +133,7 @@ export default function ProfileHeader({
         overflow: "visible",
       }}
     >
-      {/* --- KHU VỰC AVATAR --- */}
+      {/* --- AVATAR SECTION --- */}
       <Box
         sx={{
           position: "relative",
@@ -169,7 +169,7 @@ export default function ProfileHeader({
           </Avatar>
         </Box>
 
-        {/* Nút upload ảnh (Nổi bật hơn) */}
+        {/* Upload avatar button */}
         {isEditing && (
           <Tooltip title={t("profile.changeAvatar")}>
             <IconButton
@@ -204,7 +204,7 @@ export default function ProfileHeader({
         />
       </Box>
 
-      {/* --- KHU VỰC THÔNG TIN CHÍNH --- */}
+      {/* --- MAIN INFO SECTION --- */}
       <Box
         sx={{
           flexGrow: 1,
@@ -241,7 +241,7 @@ export default function ProfileHeader({
             mt: 2,
           }}
         >
-          {/* Badge hiển thị Quyền */}
+          {/* Role display badge */}
           {userRoleStr === "Admin" ? (
             <Chip
               icon={<AdminPanelSettings sx={{ color: "white !important" }} />}
@@ -261,7 +261,7 @@ export default function ProfileHeader({
             />
           )}
 
-          {/* Badge hiển thị Phòng ban */}
+          {/* Department display badge */}
           <InfoBadge
             icon={
               <Business fontSize="small" sx={{ color: THEME_COLORS.WORK }} />
@@ -272,7 +272,7 @@ export default function ProfileHeader({
         </Box>
       </Box>
 
-      {/* --- KHU VỰC NÚT HÀNH ĐỘNG --- */}
+      {/* --- ACTION BUTTONS SECTION --- */}
       <Box sx={{ mt: { xs: 4, md: 0 }, ml: { md: 3 }, flexShrink: 0 }}>
         {!isEditing ? (
           <Button

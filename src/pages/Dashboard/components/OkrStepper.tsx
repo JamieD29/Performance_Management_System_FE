@@ -1,7 +1,7 @@
-import React from "react";
 import { Box, Typography, Paper } from "@mui/material";
 import { motion } from "framer-motion";
 import { Check, Circle, AlertTriangle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { OKR_STEPS } from "../useDashboardData";
 
 interface OkrStepperProps {
@@ -13,6 +13,8 @@ export default function OkrStepper({
   currentStep,
   isRejected = false,
 }: OkrStepperProps) {
+  const { t } = useTranslation();
+
   return (
     <Paper
       elevation={0}
@@ -28,7 +30,7 @@ export default function OkrStepper({
         fontWeight="700"
         sx={{ mb: 3, color: "#1e293b" }}
       >
-        🚦 Tiến trình OKR của bạn
+        {t("dashboard.stepper.title")}
       </Typography>
 
       <Box
@@ -77,7 +79,6 @@ export default function OkrStepper({
         {OKR_STEPS.map((step, index) => {
           const isActive = index === currentStep;
           const isComplete = index < currentStep;
-          const isFuture = index > currentStep;
           const isRejectedStep = isRejected && isActive;
 
           return (
@@ -160,7 +161,7 @@ export default function OkrStepper({
                   maxWidth: 90,
                 }}
               >
-                {step.label}
+                {t(step.labelKey)}
               </Typography>
 
               {/* Active description */}
@@ -180,7 +181,9 @@ export default function OkrStepper({
                       display: { xs: "none", sm: "block" },
                     }}
                   >
-                    {isRejectedStep ? "OKR bị từ chối" : step.description}
+                    {isRejectedStep
+                      ? t("dashboard.stepper.rejectedStepDesc")
+                      : t(step.descriptionKey)}
                   </Typography>
                 </motion.div>
               )}

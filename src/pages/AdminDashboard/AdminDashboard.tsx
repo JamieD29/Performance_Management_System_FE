@@ -14,7 +14,6 @@ export default function AdminDashboard() {
   const { data, loading, healthLoading, error, refetch, refetchHealth, refetchLogs } =
     useAdminDashboardData();
 
-  // Lấy tên admin từ session
   let adminName = "";
   try {
     const userStr = localStorage.getItem("user");
@@ -57,10 +56,8 @@ export default function AdminDashboard() {
 
   return (
     <Container maxWidth="xl" sx={{ py: 2 }}>
-      {/* === ZONE 1: Hero Header === */}
       <AdminHeroHeader cycle={data.currentCycle} adminName={adminName} />
 
-      {/* === Quick nav to Admin Settings === */}
       <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2.5, mt: -1 }}>
         <Button
           variant="outlined"
@@ -86,10 +83,7 @@ export default function AdminDashboard() {
         </Button>
       </Box>
 
-      {/* === ZONE 2: Metric Cards === */}
       <AdminMetricCards stats={data.stats} loading={loading} />
-
-      {/* === ZONE 3+4: System Health + Activity Feed (2 cột) === */}
       <Box
         sx={{
           display: "grid",
@@ -102,14 +96,12 @@ export default function AdminDashboard() {
           alignItems: "stretch",
         }}
       >
-        {/* System Health Panel */}
         <SystemHealthPanel
           health={data.systemHealth}
           loading={healthLoading}
           onRefresh={refetchHealth}
         />
 
-        {/* Activity Feed */}
         <ActivityFeed
           logs={data.recentLogs}
           loading={loading}

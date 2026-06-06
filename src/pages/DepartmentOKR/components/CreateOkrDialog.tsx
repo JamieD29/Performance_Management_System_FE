@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { api } from "../../../services/api";
 import { performanceService } from "../../../services/performanceService";
 import {
@@ -34,7 +34,7 @@ export default function CreateOkrDialog({
 }: CreateOkrDialogProps) {
   const { t, i18n } = useTranslation();
 
-  // 1. State lưu dữ liệu Form
+  // 1. Form data state
   const [title, setTitle] = useState("");
   const [cycleId, setCycleId] = useState("");
   const [departmentId, setDepartmentId] = useState("");
@@ -42,11 +42,11 @@ export default function CreateOkrDialog({
     { id: Date.now().toString(), title: "", target: 0, unit: "" },
   ]);
 
-  // 2. State lưu dữ liệu Động từ Backend (Data thật)
+  // 2. Dynamic data state from Backend (real data)
   const [departments, setDepartments] = useState<any[]>([]);
   const [cycles, setCycles] = useState<any[]>([]);
 
-  // 3. Chạy hàm lấy dữ liệu mỗi khi mở form
+  // 3. Load data each time the form is opened
   useEffect(() => {
     if (open) {
       loadRealData();
@@ -55,27 +55,27 @@ export default function CreateOkrDialog({
 
   const loadRealData = async () => {
     try {
-      // Gọi API lấy Học kỳ
+      // Fetch cycles from API
       const cycleData = await performanceService.getCycles();
       setCycles(cycleData);
       if (cycleData.length > 0) {
-        setCycleId(cycleData[0].id); // Tự động chọn Học kỳ đầu tiên
+        setCycleId(cycleData[0].id); // Auto-select the first cycle
       }
 
-      // Gọi API lấy danh sách Bộ môn
+      // Fetch department list from API
       const deptRes = await api.get("/departments");
-      // Xử lý tùy theo format API của mày (thường là .data hoặc .data.data)
+      // Handle depending on API response format (usually .data or .data.data)
       const deptList = deptRes.data?.data || deptRes.data || [];
       setDepartments(deptList);
       if (deptList.length > 0) {
-        setDepartmentId(deptList[0].id); // Tự động chọn Bộ môn đầu tiên
+        setDepartmentId(deptList[0].id); // Auto-select the first department
       }
     } catch (error) {
       console.error(t("departmentOkr.createDialog.errorLoad"), error);
     }
   };
 
-  // Các hàm xử lý giao diện
+  // UI handler functions
   const handleAddKR = () =>
     setKeyResults([
       ...keyResults,
@@ -89,7 +89,7 @@ export default function CreateOkrDialog({
     );
   };
 
-  // Nút Submit
+  // Submit button handler
   const handleSubmit = () => {
     const payload = {
       title,
@@ -97,20 +97,20 @@ export default function CreateOkrDialog({
       departmentId,
       type: "DEPARTMENT",
 
-      // 👇 ĐOẠN SỬA LÀ Ở ĐÂY: Lọc bỏ dòng trống, sau đó vứt luôn cái ID ảo đi, chỉ gửi ruột lên thôi
+      // 👇 Filter out empty rows, then strip the temporary ID — only send the content fields
       keyResults: keyResults
         .filter((kr) => kr.title.trim() !== "")
         .map((kr) => ({
           title: kr.title,
           target: kr.target,
           unit: kr.unit,
-          // Tuyệt đối không có trường "id" ở đây nữa!
+          // Must NOT include the "id" field here!
         })),
     };
 
     onSave(payload);
 
-    // Reset form sau khi gửi
+    // Reset form after submission
     setTitle("");
     setKeyResults([
       { id: Date.now().toString(), title: "", target: 0, unit: "" },
@@ -133,7 +133,7 @@ export default function CreateOkrDialog({
       <Divider />
 
       <DialogContent sx={{ mt: 2 }}>
-        {/* --- PHẦN 1: THÔNG TIN OBJECTIVE (Đã được đưa ra ngoài vòng lặp KRs) --- */}
+        {/* --- SECTION 1: OBJECTIVE INFO (placed outside the KR loop) --- */}
         <Grid container spacing={3} sx={{ mb: 4 }}>
           <Grid size={{ xs: 12, md: 12 }}>
             <TextField
@@ -153,7 +153,7 @@ export default function CreateOkrDialog({
                 label={t("departmentOkr.createDialog.assignDeptLabel")}
                 onChange={(e) => setDepartmentId(e.target.value)}
               >
-                {/* 🔄 Lặp data Bộ môn thật từ DB */}
+                {/* 🔄 Loop real department data from DB */}
                 {departments.map((dept) => (
                   <MenuItem key={dept.id} value={dept.id}>
                     {dept.name}
@@ -171,7 +171,7 @@ export default function CreateOkrDialog({
                 label={t("departmentOkr.createDialog.semesterLabel")}
                 onChange={(e) => setCycleId(e.target.value)}
               >
-                {/* 🔄 Lặp data Học kỳ thật từ DB */}
+                {/* 🔄 Loop real cycle data from DB */}
                 {cycles.map((cycle) => {
                   const start = cycle.startDate
                     ? new Date(cycle.startDate).toLocaleDateString(i18n.language === "vi" ? "vi-VN" : "en-US")
@@ -190,7 +190,7 @@ export default function CreateOkrDialog({
           </Grid>
         </Grid>
 
-        {/* --- PHẦN 2: DANH SÁCH KEY RESULTS --- */}
+        {/* --- SECTION 2: KEY RESULTS LIST --- */}
         <Box
           sx={{
             mb: 2,
@@ -294,7 +294,7 @@ export default function CreateOkrDialog({
         <Button onClick={onClose} color="inherit">
           {t("departmentOkr.createDialog.cancelBtn")}
         </Button>
-        {/* Nút lưu sẽ bị mờ nếu chưa chọn đủ Bộ môn, Học kỳ, Tên */}
+        {/* Save button is disabled if department, cycle, or title is not selected */}
         <Button
           variant="contained"
           onClick={handleSubmit}

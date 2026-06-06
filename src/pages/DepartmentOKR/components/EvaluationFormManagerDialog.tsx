@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -48,10 +48,9 @@ export default function EvaluationFormManagerDialog({ open, reportData, onClose,
 
   const handleSave = () => {
     if (!managerRating) {
-      const isEn = localStorage.getItem("i18nextLng") === "en";
       showWarning(
-        isEn ? "Missing Information" : "Thiếu thông tin",
-        isEn ? "Please rate the employee before saving!" : "Vui lòng xếp loại viên chức trước khi lưu!"
+        t("evaluationFormManagerDialog.warnings.missingInfoTitle"),
+        t("evaluationFormManagerDialog.warnings.rateEmployee")
       );
       return;
     }

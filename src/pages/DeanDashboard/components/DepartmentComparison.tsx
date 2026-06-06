@@ -68,7 +68,6 @@ export default function DepartmentComparison({ stats }: Props) {
           </Box>
         </Box>
 
-        {/* Bảng so sánh */}
         <TableContainer>
           <Table size="small">
             <TableHead>
@@ -160,7 +159,6 @@ export default function DepartmentComparison({ stats }: Props) {
           </Table>
         </TableContainer>
 
-        {/* Bar Chart — ĐTB Điểm (luôn hiển thị) */}
         <Box sx={{ 
           p: 3, 
           pt: 2,

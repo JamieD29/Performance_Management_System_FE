@@ -1,19 +1,21 @@
 import { useState } from "react";
-import { 
-  Box, 
-  Typography, 
-  Button, 
-  Dialog, 
-  DialogTitle, 
-  DialogContent, 
-  DialogContentText, 
+import {
+  Box,
+  Typography,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
   DialogActions,
   Alert
 } from "@mui/material";
 import { Warning as WarningIcon, DeleteForever } from "@mui/icons-material";
+import { useTranslation, Trans } from "react-i18next";
 import { api } from "../../../services/api";
 
 export default function SystemResetTab() {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
@@ -25,15 +27,13 @@ export default function SystemResetTab() {
     setErrorMsg("");
     try {
       const response = await api.post("/admin/system/reset");
-      setSuccessMsg(response.data.message || "Đã khôi phục cài đặt gốc thành công!");
+      setSuccessMsg(response.data.message || t("systemReset.alerts.success"));
       setOpen(false);
-      
-      // Tải lại trang sau 2 giây để clear state
       setTimeout(() => {
         window.location.reload();
       }, 2000);
     } catch (err: any) {
-      setErrorMsg(err.response?.data?.message || "Đã xảy ra lỗi khi reset hệ thống");
+      setErrorMsg(err.response?.data?.message || t("systemReset.alerts.error"));
     } finally {
       setLoading(false);
     }
@@ -43,10 +43,10 @@ export default function SystemResetTab() {
     <Box>
       <Box sx={{ mb: 4 }}>
         <Typography variant="h6" color="error" fontWeight="bold" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <WarningIcon /> Danger Zone
+          <WarningIcon /> {t("systemReset.dangerZone")}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 1, mb: 3 }}>
-          Khu vực chứa các chức năng nhạy cảm có thể ảnh hưởng lớn đến hệ thống. Hãy cân nhắc kỹ trước khi sử dụng.
+          {t("systemReset.description")}
         </Typography>
 
         {successMsg && <Alert severity="success" sx={{ mb: 3 }}>{successMsg}</Alert>}
@@ -54,46 +54,50 @@ export default function SystemResetTab() {
 
         <Box sx={{ border: '1px solid #fecdd3', borderRadius: 2, p: 3, bgcolor: '#fff1f2' }}>
           <Typography variant="subtitle1" fontWeight="bold" color="#be123c">
-            Khôi phục Cài đặt Gốc (Factory Reset)
+            {t("systemReset.title")}
           </Typography>
           <Typography variant="body2" color="#9f1239" sx={{ mt: 1, mb: 2 }}>
-            Hành động này sẽ <b>XÓA TOÀN BỘ</b> dữ liệu hệ thống bao gồm: Người dùng, OKR, Kỳ đánh giá, Logs... 
-            Hệ thống sẽ được đưa về trạng thái trống giống như lúc mới cài đặt (nhưng vẫn giữ lại các Bộ môn mặc định).
+            <Trans i18nKey="systemReset.confirmResetText">
+              This action will <b>DELETE ALL</b> system data including: Users, OKRs, Evaluation Cycles, Logs...
+              The system will be reset to an empty state like the initial installation (but keeping default Departments).
+            </Trans>
           </Typography>
-          <Button 
-            variant="contained" 
-            color="error" 
+          <Button
+            variant="contained"
+            color="error"
             startIcon={<DeleteForever />}
             onClick={() => setOpen(true)}
           >
-            Factory Reset
+            {t("systemReset.buttonLabel")}
           </Button>
         </Box>
       </Box>
 
       <Dialog open={open} onClose={() => !loading && setOpen(false)}>
         <DialogTitle sx={{ color: 'error.main', fontWeight: 'bold' }}>
-          CẢNH BÁO NGUY HIỂM!
+          {t("systemReset.dialog.warningTitle")}
         </DialogTitle>
         <DialogContent>
           <DialogContentText sx={{ color: '#000', fontWeight: 500 }}>
-            Bạn đang yêu cầu <b>XÓA SẠCH</b> dữ liệu toàn bộ hệ thống. Hành động này là <b>không thể hoàn tác</b>!
+            <Trans i18nKey="systemReset.dialog.warningBody1">
+              You are requesting to <b>WIPE OUT</b> all system data. This action is <b>irreversible</b>!
+            </Trans>
           </DialogContentText>
           <DialogContentText sx={{ mt: 2 }}>
-            Bạn có thực sự chắc chắn muốn tiếp tục không?
+            {t("systemReset.dialog.warningBody2")}
           </DialogContentText>
         </DialogContent>
         <DialogActions sx={{ p: 2, pt: 0 }}>
           <Button onClick={() => setOpen(false)} disabled={loading} color="inherit">
-            Hủy bỏ
+            {t("systemReset.dialog.cancelBtn")}
           </Button>
-          <Button 
-            onClick={handleReset} 
-            color="error" 
-            variant="contained" 
+          <Button
+            onClick={handleReset}
+            color="error"
+            variant="contained"
             disabled={loading}
           >
-            {loading ? "Đang xử lý..." : "VẪN TIẾP TỤC XÓA"}
+            {loading ? t("systemReset.dialog.processing") : t("systemReset.dialog.confirmBtn")}
           </Button>
         </DialogActions>
       </Dialog>

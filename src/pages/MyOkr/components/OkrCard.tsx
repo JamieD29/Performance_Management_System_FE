@@ -49,7 +49,7 @@ interface OkrCardProps {
 }
 
 const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [chatMessage, setChatMessage] = useState("");
@@ -106,7 +106,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
   ) => {
     if (!originalStructure) return null;
 
-    // Tìm Objective
+    // Find Objective
     const obj = originalStructure.find(
       (o: any) => String(o.id) === String(objId),
     );
@@ -116,7 +116,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
       return obj;
     }
 
-    // Tìm KR
+    // Find KR
     const kr = obj.items?.find((k: any) => String(k.id) === String(krId));
     if (!kr) return null;
 
@@ -124,13 +124,13 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
       return kr;
     }
 
-    // Tìm Sub-KR
+    // Find Sub-KR
     const sub = kr.items?.find((s: any) => String(s.id) === String(subId));
     if (!sub || subsubId === undefined) {
       return sub || null;
     }
 
-    // Tìm Sub-Sub-KR
+    // Find Sub-Sub-KR
     const subsub = sub.items?.find(
       (ss: any) => String(ss.id) === String(subsubId),
     );
@@ -160,7 +160,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
       );
       if (!newObj) {
         deletedItems.push({ ...oldObj, type: "OBJ", objId: oldObj.id });
-        // Liệt kê tất cả con của OBJ bị xóa
+        // List all children of the deleted OBJ
         oldObj.items?.forEach((childKr: any) => {
           deletedItems.push({ ...childKr, type: "KR", objId: oldObj.id, krId: childKr.id });
           childKr.items?.forEach((childSub: any) => {
@@ -184,7 +184,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
             objId: oldObj.id,
             krId: oldKr.id,
           });
-          // Liệt kê tất cả con của KR bị xóa
+          // List all children of the deleted KR
           oldKr.items?.forEach((childSub: any) => {
             deletedItems.push({ ...childSub, type: "SUBKR", objId: oldObj.id, krId: oldKr.id, subId: childSub.id });
             childSub.items?.forEach((childSubSub: any) => {
@@ -206,7 +206,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
               krId: oldKr.id,
               subId: oldSub.id,
             });
-            // Liệt kê tất cả con của SubKR bị xóa
+            // List all children of the deleted SubKR
             oldSub.items?.forEach((childSubSub: any) => {
               deletedItems.push({ ...childSubSub, type: "SUBSUBKR", objId: oldObj.id, krId: oldKr.id, subId: oldSub.id, subsubId: childSubSub.id });
             });
@@ -252,7 +252,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
     setLocalStructure(Array.isArray(okr.keyResults) ? okr.keyResults : []);
     setHasChanges(false);
 
-    // Kiểm tra bản nháp lưu tạm ở localStorage của trình duyệt
+    // Check for locally saved draft in browser localStorage
     const localDraftStr = localStorage.getItem(`okr_draft_${okr.id}`);
     if (localDraftStr) {
       try {
@@ -261,7 +261,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
         setHasDraftChanges(true);
         return;
       } catch (e) {
-        console.error("Lỗi khi đọc bản nháp từ localStorage", e);
+        console.error("Error reading draft from localStorage", e);
       }
     }
 
@@ -300,10 +300,9 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
 
   const handleSaveNewCriteria = () => {
     if (!newCriteriaTitle.trim()) {
-      const isEn = localStorage.getItem("i18nextLng") === "en";
       showError(
-        isEn ? "Error" : "Lỗi",
-        isEn ? "Please enter content." : "Vui lòng nhập nội dung."
+        t("okrCard.errors.errorTitle"),
+        t("okrCard.errors.enterContent")
       );
       return;
     }
@@ -591,10 +590,9 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
 
   const handleSaveEditCriteria = () => {
     if (!editCriteriaTitle.trim()) {
-      const isEn = localStorage.getItem("i18nextLng") === "en";
       showError(
-        isEn ? "Error" : "Lỗi",
-        isEn ? "Please enter content." : "Vui lòng nhập nội dung."
+        t("okrCard.errors.errorTitle"),
+        t("okrCard.errors.enterContent")
       );
       return;
     }
@@ -631,11 +629,10 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
   };
 
   const handleSubmitChanges = async () => {
-    const isEn = localStorage.getItem("i18nextLng") === "en";
     const validationError = validateStructureScores(localStructure);
     if (validationError) {
       showError(
-        isEn ? "OKR Score Structure Error" : "Lỗi cấu trúc điểm OKR",
+        t("okrCard.errors.scoreStructure"),
         validationError
       );
       return;
@@ -650,24 +647,23 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
       setLocalComments({});
       onRefresh();
       showSuccess(
-        isEn ? "Success" : "Thành công",
-        isEn ? "New structure has been sent." : "Đã gửi cấu trúc mới."
+        t("okrCard.alerts.success"),
+        t("okrCard.alerts.structureUpdated")
       );
     } catch (error) {
       showError(
-        isEn ? "Error" : "Lỗi",
-        isEn ? "Unable to update structure." : "Không thể cập nhật cấu trúc."
+        t("okrCard.errors.errorTitle"),
+        t("okrCard.alerts.structureUpdateFailed")
       );
     }
   };
 
   const handleAccept = async () => {
-    const isEn = localStorage.getItem("i18nextLng") === "en";
     const ok = await confirmAction({
-      title: isEn ? "Accept OKR?" : "Chấp nhận OKR?",
-      text: isEn ? "After accepting, you will start reporting scores." : "Sau khi chấp nhận, bạn sẽ bắt đầu tự khai điểm.",
+      title: t("okrCard.alerts.acceptTitle"),
+      text: t("okrCard.alerts.acceptText"),
       icon: "question",
-      confirmText: isEn ? "Agree to accept" : "Đồng ý chấp nhận",
+      confirmText: t("okrCard.alerts.acceptConfirm"),
       confirmColor: "#16a34a",
     });
     if (!ok) return;
@@ -677,19 +673,18 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
     } catch (error) {
       console.error(error);
       showError(
-        isEn ? "Error" : "Lỗi",
-        isEn ? "An error occurred while accepting the OKR." : "Có lỗi xảy ra khi chấp nhận OKR."
+        t("okrCard.errors.errorTitle"),
+        t("okrCard.alerts.acceptError")
       );
     }
   };
 
   const handleSendForApproval = async () => {
-    const isEn = localStorage.getItem("i18nextLng") === "en";
     const ok = await confirmAction({
-      title: isEn ? "Send for approval?" : "Gửi yêu cầu duyệt?",
-      text: isEn ? "Confirm sending this OKR approval request to Dean/Manager." : "Xác nhận gửi yêu cầu duyệt OKR này lên Trưởng khoa/Quản lý.",
+      title: t("okrCard.alerts.sendApprovalTitle"),
+      text: t("okrCard.alerts.sendApprovalText"),
       icon: "question",
-      confirmText: isEn ? "Send request" : "Gửi yêu cầu",
+      confirmText: t("okrCard.alerts.sendApprovalConfirm"),
       confirmColor: "#3b82f6",
     });
     if (!ok) return;
@@ -697,14 +692,14 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
       await api.put(`/okrs/${okr.id}/send-for-approval`);
       onRefresh();
       showSuccess(
-        isEn ? "Success" : "Thành công",
-        isEn ? "OKR approval request sent." : "Đã gửi yêu cầu duyệt OKR."
+        t("okrCard.alerts.success"),
+        t("okrCard.alerts.sendApprovalSuccess")
       );
     } catch (error) {
       console.error(error);
       showError(
-        isEn ? "Error" : "Lỗi",
-        isEn ? "An error occurred while sending approval request." : "Có lỗi xảy ra khi gửi yêu cầu duyệt OKR."
+        t("okrCard.errors.errorTitle"),
+        t("okrCard.alerts.sendApprovalError")
       );
     }
   };
@@ -712,14 +707,13 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
   const handleSendChat = async (itemId: string) => {
     if (!chatMessage.trim()) return;
     setChatLoading(true);
-    const isEn = localStorage.getItem("i18nextLng") === "en";
     try {
       await api.post(`/okrs/${okr.id}/chat`, {
         itemId,
         sender: "USER",
         message: chatMessage,
       });
-      // Cập nhật local state để hiển thị tin nhắn ngay
+      // Update local state to display the message immediately
       const newMessage = {
         message: chatMessage,
         sender: "USER",
@@ -731,10 +725,10 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
       }));
       setChatMessage("");
     } catch (error: any) {
-      console.error("Lỗi gửi tin nhắn đàm phán", error);
+      console.error("Error sending negotiation message", error);
       showError(
-        isEn ? "Error" : "Lỗi",
-        error?.response?.data?.message || (isEn ? "Unable to send message." : "Không thể gửi tin nhắn.")
+        t("okrCard.errors.errorTitle"),
+        error?.response?.data?.message || t("okrCard.alerts.sendMessageError")
       );
     } finally {
       setChatLoading(false);
@@ -782,7 +776,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
           [field]: cleanValue,
         },
       };
-      // Lưu tạm bản nháp vào localStorage để tránh mất dữ liệu khi F5/reload
+      // Save draft to localStorage to prevent data loss on F5/reload
       localStorage.setItem(`okr_draft_${okr.id}`, JSON.stringify(next));
       return next;
     });
@@ -837,7 +831,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
     return enrichedReport;
   };
 
-  // Reset trạng thái "Đã lưu" khi user thay đổi dữ liệu
+  // Reset "Saved" status when user modifies data
   useEffect(() => {
     if (hasDraftChanges && draftSaveStatus === "saved") {
       setDraftSaveStatus("idle");
@@ -846,7 +840,6 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
 
   const handleSaveDraftManual = async () => {
     setDraftSaveStatus("saving");
-    const isEn = localStorage.getItem("i18nextLng") === "en";
     try {
       const enrichedReport = buildEnrichedReport();
       await api.put(`/okrs/${okr.id}/draft-report`, {
@@ -857,27 +850,24 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
       setDraftSavedAt(timeStr);
       setDraftSaveStatus("saved");
       setHasDraftChanges(false);
-      // Xóa bản nháp lưu tạm ở localStorage sau khi đã lưu thành công vào cơ sở dữ liệu
+      // Remove locally saved draft from localStorage after successful save to database
       localStorage.removeItem(`okr_draft_${okr.id}`);
     } catch (error) {
-      console.error("Lỗi khi lưu nháp", error);
+      console.error("Error saving draft", error);
       setDraftSaveStatus("idle");
       showError(
-        isEn ? "Error" : "Lỗi",
-        isEn ? "Unable to save draft to the database." : "Không thể lưu nháp vào cơ sở dữ liệu."
+        t("okrCard.errors.errorTitle"),
+        t("okrCard.alerts.saveDraftError")
       );
     }
   };
 
   const handleSubmitReport = async () => {
-    const isEn = localStorage.getItem("i18nextLng") === "en";
     const ok = await confirmAction({
-      title: isEn ? "Submit self-report?" : "Nộp bài tự khai?",
-      text: isEn
-        ? "After submitting, your report will be sent to the Dean for review. Are you sure?"
-        : "Sau khi nộp, bài sẽ được gửi cho Trưởng khoa duyệt. Bạn chắc chắn chứ?",
+      title: t("okrCard.alerts.submitReportTitle"),
+      text: t("okrCard.alerts.submitReportText"),
       icon: "question",
-      confirmText: isEn ? "Submit" : "Nộp bài",
+      confirmText: t("okrCard.alerts.submitReportConfirm"),
       confirmColor: "#1976d2",
     });
     if (!ok) return;
@@ -889,18 +879,18 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
       await api.put(`/okrs/${okr.id}/self-report`, {
         selfReportData: enrichedReport,
       });
-      // Xóa bản nháp lưu tạm ở localStorage sau khi đã nộp thành công
+      // Remove locally saved draft from localStorage after successful submission
       localStorage.removeItem(`okr_draft_${okr.id}`);
       showSuccess(
-        isEn ? "Success!" : "Thành công!",
-        isEn ? "Self-report submitted successfully." : "Đã nộp bài tự khai thành công."
+        t("okrCard.alerts.success") + "!",
+        t("okrCard.alerts.submitReportSuccess")
       );
       onRefresh();
     } catch (error) {
       console.error(error);
       showError(
-        isEn ? "Error" : "Lỗi",
-        isEn ? "An error occurred while submitting." : "Có lỗi xảy ra khi nộp bài."
+        t("okrCard.errors.errorTitle"),
+        t("okrCard.alerts.submitReportError")
       );
     } finally {
       setSaving(false);
@@ -955,8 +945,8 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
             <Chip
               label={
                 isAccepted && !isCycleStarted
-                  ? "Chờ kỳ bắt đầu"
-                  : statusConfig[okr.status]?.label || okr.status
+                  ? t("okrCard.awaitingCycleStart")
+                  : t(statusConfig[okr.status]?.labelKey) || okr.status
               }
               color={
                 isAccepted && !isCycleStarted
@@ -1020,14 +1010,14 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
             {isCompleted ? (
               <>
                 <Chip
-                  label={`Tự chấm: ${totalSelfScore.toFixed(1)}/${maxScore}đ`}
+                  label={t("okrCard.chips.selfScore", { score: totalSelfScore.toFixed(1), max: maxScore })}
                   size="small"
                   color="info"
                   variant="outlined"
                   sx={{ fontWeight: "bold" }}
                 />
                 <Chip
-                  label={`QL chấm: ${okr.managerScore?.toFixed(1) || 0}/${maxScore}đ`}
+                  label={t("okrCard.chips.managerScore", { score: okr.managerScore?.toFixed(1) || 0, max: maxScore })}
                   size="small"
                   color="success"
                   variant="filled"
@@ -1037,14 +1027,14 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
             ) : isSubmitted ? (
               <>
                 <Chip
-                  label={`Tự chấm: ${totalSelfScore.toFixed(1)}/${maxScore}đ`}
+                  label={t("okrCard.chips.selfScore", { score: totalSelfScore.toFixed(1), max: maxScore })}
                   size="small"
                   color="info"
                   variant="outlined"
                   sx={{ fontWeight: "bold" }}
                 />
                 <Chip
-                  label="Chờ chấm điểm"
+                  label={t("okrCard.chips.waitingGrading")}
                   size="small"
                   color="warning"
                   variant="outlined"
@@ -1053,7 +1043,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
               </>
             ) : isAccepted ? (
               <Chip
-                label={`Điểm dự kiến: ${totalSelfScore.toFixed(1)}/${maxScore}đ`}
+                label={t("okrCard.chips.expectedScoreChip", { score: totalSelfScore.toFixed(1), max: maxScore })}
                 size="small"
                 color="primary"
                 variant="outlined"
@@ -1112,10 +1102,10 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
         <Box sx={{ px: 2, py: 1.5, borderTop: "1px solid #f1f5f9" }}>
           <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 0.5 }}>
             <Typography variant="caption" color="text.secondary" fontWeight="500">
-              Tiến độ hoàn thành:
+              {t("okrCard.completionProgress")}
             </Typography>
             <Typography variant="caption" fontWeight="bold" color="primary.main">
-              {progressPercent.toFixed(0)}% ({displayScore.toFixed(1)}/{maxScore} điểm)
+              {progressPercent.toFixed(0)}% ({displayScore.toFixed(1)}/{maxScore} {t("okrCard.points")})
             </Typography>
           </Box>
           <LinearProgress
@@ -1162,7 +1152,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                   {objCommentsCount > 0 && (
                     <Chip
                       icon={<Forum sx={{ fontSize: "0.8rem !important" }} />}
-                      label={`${objCommentsCount} phản hồi`}
+                      label={t("okrCard.commentsCount", { count: objCommentsCount })}
                       size="small"
                       color="warning"
                       sx={{ height: 20, fontSize: "0.65rem", fontWeight: "bold" }}
@@ -1173,14 +1163,14 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                   {isCompleted ? (
                     <>
                       <Chip
-                        label={`Tự khai: ${calcObjectiveScore(obj).toFixed(1)}đ`}
+                        label={t("okrCard.chips.selfReported", { score: calcObjectiveScore(obj).toFixed(1) })}
                         size="small"
                         color="info"
                         variant="outlined"
                         sx={{ height: 24, fontSize: "0.75rem", fontWeight: "bold" }}
                       />
                       <Chip
-                        label={`QL chốt: ${calcObjectiveManagerScore(obj).toFixed(1)}đ`}
+                        label={t("okrCard.chips.managerFinal", { score: calcObjectiveManagerScore(obj).toFixed(1) })}
                         size="small"
                         color="success"
                         sx={{ height: 24, fontSize: "0.75rem", fontWeight: "bold", bgcolor: "#2e7d32", color: "white" }}
@@ -1188,7 +1178,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                     </>
                   ) : isSubmitted ? (
                     <Chip
-                      label={`Tự khai: ${calcObjectiveScore(obj).toFixed(1)}đ`}
+                      label={t("okrCard.chips.selfReported", { score: calcObjectiveScore(obj).toFixed(1) })}
                       size="small"
                       color="info"
                       variant="outlined"
@@ -1196,7 +1186,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                     />
                   ) : canReport ? (
                     <Chip
-                      label={`Tự khai: ${calcObjectiveReportScore(obj).toFixed(1)}đ`}
+                      label={t("okrCard.chips.selfReported", { score: calcObjectiveReportScore(obj).toFixed(1) })}
                       size="small"
                       color="primary"
                       variant="outlined"
@@ -1204,7 +1194,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                     />
                   ) : null}
                   <Chip
-                    label={`Tối đa: ${obj.maxScore} điểm`}
+                    label={t("okrCard.chips.maxScore", { score: obj.maxScore })}
                     size="small"
                     color="primary"
                     sx={{ height: 24, fontSize: "0.75rem", fontWeight: "bold", bgcolor: "#1e3a8a" }}
@@ -1253,7 +1243,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                 onClick={handleSubmitChanges}
                 startIcon={<Save />}
               >
-                {localStorage.getItem("i18nextLng") === "en" ? "Submit Changes & Request Approval" : "Gửi thay đổi & Yêu cầu duyệt"}
+                {t("okrCard.submitChangesBtn")}
               </Button>
             )}
             <IconButton
@@ -1268,23 +1258,11 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
           {isAccepted && !isCycleStarted && (
             <Box sx={{ p: 2, bgcolor: "#fffbeb" }}>
               <Alert severity="warning">
-                {localStorage.getItem("i18nextLng") === "en" ? (
-                  <>
-                    Evaluation cycle has not started yet (Expected start:{" "}
-                    <strong>
-                      {new Date(okr.cycle.startDate).toLocaleDateString("en-US")}
-                    </strong>
-                    ). You cannot report scores at this moment.
-                  </>
-                ) : (
-                  <>
-                    Kỳ đánh giá chưa bắt đầu (Dự kiến bắt đầu từ{" "}
-                    <strong>
-                      {new Date(okr.cycle.startDate).toLocaleDateString("vi-VN")}
-                    </strong>
-                    ). Bạn chưa thể tự khai điểm lúc này.
-                  </>
-                )}
+                <span dangerouslySetInnerHTML={{
+                  __html: t("okrCard.cycleNotStartedYet", {
+                    date: `<strong>${new Date(okr.cycle.startDate).toLocaleDateString(i18n.language === "en" ? "en-US" : "vi-VN")}</strong>`
+                  })
+                }} />
               </Alert>
             </Box>
           )}
@@ -1498,7 +1476,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                           color: "#b91c1c",
                         }}
                       >
-                        Các tiêu chí đã bị xóa
+                        {t("okrCard.deletedCriteria")}
                       </TableCell>
                     </TableRow>
                     {deletedItems.map((delItem, idx) => (
@@ -1540,7 +1518,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                           }}
                         >
                           {delItem.unitScore
-                            ? `+${delItem.unitScore}/${delItem.unit || "đv"}`
+                            ? `+${delItem.unitScore}/${delItem.unit || t("okrCard.unit")}`
                             : "—"}
                         </TableCell>
                         {canReport && (
@@ -1564,7 +1542,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                             <IconButton
                               size="small"
                               onClick={() => handleRestoreDeletedItem(delItem)}
-                              title="Khôi phục"
+                              title={t("okrCard.tooltips.restore")}
                             >
                               <Undo fontSize="small" color="primary" />
                             </IconButton>
@@ -1599,7 +1577,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                     startIcon={<Send />}
                     onClick={handleSendForApproval}
                   >
-                    {localStorage.getItem("i18nextLng") === "en" ? "Send request for proposal approval" : "Gửi yêu cầu duyệt đề xuất"}
+                    {t("okrCard.sendProposalApproval")}
                   </Button>
                 )}
                 <Button
@@ -1608,7 +1586,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                   startIcon={<Check />}
                   onClick={handleAccept}
                 >
-                  {localStorage.getItem("i18nextLng") === "en" ? "I agree to accept this OKR" : "Tôi đồng ý Chấp nhận OKR này"}
+                  {t("okrCard.agreeToAccept")}
                 </Button>
               </Box>
             )}
@@ -1626,7 +1604,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
               >
                 <Typography variant="body1" sx={{ flexGrow: 1 }}>
                   <strong>{t("okrCard.totalSelfScore")} {totalSelfScore.toFixed(1)}</strong>{" "}
-                  / {maxScore} {localStorage.getItem("i18nextLng") === "en" ? "points" : "điểm"}
+                  / {maxScore} {t("okrCard.points")}
                 </Typography>
                 {draftSaveStatus === "saving" && (
                   <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
@@ -1658,9 +1636,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                   onClick={handleSubmitReport}
                   disabled={saving}
                 >
-                  {saving
-                    ? (localStorage.getItem("i18nextLng") === "en" ? "Submitting..." : "Đang nộp...")
-                    : t("okrCard.submit")}
+                  {saving ? t("okrCard.submitting") : t("okrCard.submit")}
                 </Button>
               </Box>
             )}
@@ -1668,15 +1644,9 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
             {isCompleted && (
               <Box sx={{ p: 2, bgcolor: "#f0fdf4" }}>
                 <Alert severity="success">
-                  {localStorage.getItem("i18nextLng") === "en" ? (
-                    <>
-                      <strong>Final Score: {okr.totalScore} points</strong> — Approved by Dean.
-                    </>
-                  ) : (
-                    <>
-                      <strong>Điểm cuối cùng: {okr.totalScore} điểm</strong> — Đã được Trưởng khoa duyệt.
-                    </>
-                  )}
+                  <span dangerouslySetInnerHTML={{
+                    __html: t("okrCard.finalScoreApproved", { score: okr.totalScore })
+                  }} />
                 </Alert>
               </Box>
             )}
@@ -1697,24 +1667,24 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
         setUnit={setNewCriteriaUnit}
       />
 
-      {/* Dialog Sửa Tiêu chí */}
+      {/* Edit Criteria Dialog */}
       <Dialog
         open={openEditDialog}
         onClose={() => setOpenEditDialog(false)}
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle>{localStorage.getItem("i18nextLng") === "en" ? "Edit Criteria" : "Chỉnh sửa Tiêu chí"}</DialogTitle>
+        <DialogTitle>{t("okrCard.dialogs.editCriteria.title")}</DialogTitle>
         <DialogContent dividers>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
             <TextField
-              label="Nội dung tiêu chí"
+              label={t("okrCard.dialogs.editCriteria.contentLabel")}
               fullWidth
               value={editCriteriaTitle}
               onChange={(e) => setEditCriteriaTitle(e.target.value)}
             />
             <TextField
-              label="Điểm tối đa"
+              label={t("okrCard.dialogs.editCriteria.maxScoreLabel")}
               type="number"
               fullWidth
               value={editCriteriaMaxScore}
@@ -1728,7 +1698,7 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
             />
             <Box sx={{ display: "flex", gap: 2 }}>
               <TextField
-                label="Điểm / Đơn vị"
+                label={t("okrCard.dialogs.editCriteria.unitScoreLabel")}
                 type="number"
                 fullWidth
                 value={editCriteriaUnitScore}
@@ -1740,19 +1710,19 @@ const OkrCard: React.FC<OkrCardProps> = ({ okr, onRefresh }) => {
                 }}
               />
               <TextField
-                label="Đơn vị tính"
+                label={t("okrCard.dialogs.editCriteria.unitLabel")}
                 fullWidth
                 value={editCriteriaUnit}
                 onChange={(e) => setEditCriteriaUnit(e.target.value)}
-                placeholder="VD: bài, đv, giờ..."
+                placeholder={t("okrCard.dialogs.editCriteria.unitPlaceholder")}
               />
             </Box>
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenEditDialog(false)}>Hủy</Button>
+          <Button onClick={() => setOpenEditDialog(false)}>{t("okrCard.dialogs.editCriteria.cancel")}</Button>
           <Button variant="contained" onClick={handleSaveEditCriteria}>
-            Lưu thay đổi
+            {t("okrCard.dialogs.editCriteria.save")}
           </Button>
         </DialogActions>
       </Dialog>

@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { TableRow, TableCell, Chip, TextField, IconButton, Box } from "@mui/material";
 import { Add, Undo, Edit, Comment, Delete } from "@mui/icons-material";
 import { OkrOldRow } from "./OkrOldRow";
@@ -66,6 +67,7 @@ export const OkrObjectiveRow: React.FC<ObjectiveRowProps> = ({
   calcObjectiveManagerQty,
   calcObjectiveManagerScore,
 }) => {
+  const { t } = useTranslation();
   const oldObj = findOriginalItem(obj.id);
   const isObjChanged = hasChanged(obj, oldObj);
 
@@ -84,7 +86,7 @@ export const OkrObjectiveRow: React.FC<ObjectiveRowProps> = ({
           {obj.id}
         </TableCell>
         <TableCell sx={{ fontWeight: "bold" }}>
-          {isObjChanged ? "[Mới] " : ""}
+          {isObjChanged ? `[${t("okrCard.new")}] ` : ""}
           {obj.title}
         </TableCell>
         <TableCell sx={{ fontWeight: "bold" }}>
@@ -174,7 +176,7 @@ export const OkrObjectiveRow: React.FC<ObjectiveRowProps> = ({
               <IconButton
                 size="small"
                 onClick={() => handleOpenAddDialog("KR", obj.id)}
-                title="Thêm tiêu chí"
+                title={t("okrCard.tooltips.addCriteria")}
               >
                 <Add fontSize="small" color="success" />
               </IconButton>
@@ -182,7 +184,7 @@ export const OkrObjectiveRow: React.FC<ObjectiveRowProps> = ({
                 <IconButton
                   size="small"
                   onClick={() => handleUndoItem("OBJ", obj.id)}
-                  title="Hoàn tác thay đổi"
+                  title={t("okrCard.tooltips.undoChanges")}
                 >
                   <Undo fontSize="small" color="primary" />
                 </IconButton>
@@ -190,7 +192,7 @@ export const OkrObjectiveRow: React.FC<ObjectiveRowProps> = ({
               <IconButton
                 size="small"
                 onClick={() => handleOpenEditDialog("OBJ", obj.id)}
-                title="Chỉnh sửa"
+                title={t("okrCard.tooltips.edit")}
               >
                 <Edit fontSize="small" color="info" />
               </IconButton>
@@ -265,6 +267,7 @@ export const OkrKeyResultRow: React.FC<KeyResultRowProps> = ({
   hasChanged,
   getManagerData,
 }) => {
+  const { t } = useTranslation();
   const krKey = `${obj.id}-${kr.id}`;
   const krQty = reportData[krKey]?.quantity || 0;
   const krUnitScore = Number(kr.unitScore) || 0;
@@ -302,7 +305,7 @@ export const OkrKeyResultRow: React.FC<KeyResultRowProps> = ({
             fontWeight: isKrNew || isKrChanged || kr.isEdited ? "bold" : "normal",
           }}
         >
-          {isKrChanged ? "[Mới] " : ""}
+          {isKrChanged ? `[${t("okrCard.new")}] ` : ""}
           {kr.title}
         </TableCell>
         <TableCell
@@ -315,7 +318,7 @@ export const OkrKeyResultRow: React.FC<KeyResultRowProps> = ({
         <TableCell>
           {kr.unitScore ? (
             <Chip
-              label={`+${kr.unitScore}/${kr.unit || "đv"}`}
+              label={`+${kr.unitScore}/${kr.unit || t("okrCard.unit")}`}
               size="small"
               color="primary"
               variant="outlined"
@@ -374,7 +377,7 @@ export const OkrKeyResultRow: React.FC<KeyResultRowProps> = ({
                 <TextField
                   size="small"
                   fullWidth
-                  placeholder="Link minh chứng..."
+                  placeholder={t("okrCard.placeholders.evidenceLink")}
                   value={reportData[krKey]?.evidence || ""}
                   onChange={(e) => updateReport(krKey, "evidence", e.target.value)}
                 />
@@ -432,7 +435,7 @@ export const OkrKeyResultRow: React.FC<KeyResultRowProps> = ({
               <IconButton
                 size="small"
                 onClick={() => handleOpenAddDialog("SUBKR", obj.id, kr.id)}
-                title="Thêm tiêu chí con"
+                title={t("okrCard.tooltips.addSubCriteria")}
               >
                 <Add fontSize="small" color="success" />
               </IconButton>
@@ -440,7 +443,7 @@ export const OkrKeyResultRow: React.FC<KeyResultRowProps> = ({
                 <IconButton
                   size="small"
                   onClick={() => handleUndoItem("KR", obj.id, kr.id)}
-                  title="Hoàn tác thay đổi"
+                  title={t("okrCard.tooltips.undoChanges")}
                 >
                   <Undo fontSize="small" color="primary" />
                 </IconButton>
@@ -448,7 +451,7 @@ export const OkrKeyResultRow: React.FC<KeyResultRowProps> = ({
               <IconButton
                 size="small"
                 onClick={() => handleOpenEditDialog("KR", obj.id, kr.id)}
-                title="Chỉnh sửa"
+                title={t("okrCard.tooltips.edit")}
               >
                 <Edit fontSize="small" color="info" />
               </IconButton>
@@ -471,7 +474,7 @@ export const OkrKeyResultRow: React.FC<KeyResultRowProps> = ({
               <IconButton
                 size="small"
                 onClick={() => handleDeleteItem(obj.id, kr.id)}
-                title="Xóa tiêu chí"
+                title={t("okrCard.tooltips.deleteCriteria")}
               >
                 <Delete fontSize="small" color="error" />
               </IconButton>
@@ -531,6 +534,7 @@ export const OkrSubKeyResultRow: React.FC<SubKeyResultRowProps> = ({
   hasChanged,
   getManagerData,
 }) => {
+  const { t } = useTranslation();
   const subKey = `${obj.id}-${kr.id}-${sub.id}`;
   const subQty = reportData[subKey]?.quantity || 0;
   const subUnitScore = Number(sub.unitScore) || 0;
@@ -570,7 +574,7 @@ export const OkrSubKeyResultRow: React.FC<SubKeyResultRowProps> = ({
             fontWeight: isSubNew || isSubChanged || sub.isEdited ? "bold" : "normal",
           }}
         >
-          {isSubChanged ? "[Mới] " : ""}
+          {isSubChanged ? `[${t("okrCard.new")}] ` : ""}
           {sub.title}
         </TableCell>
         <TableCell
@@ -583,7 +587,7 @@ export const OkrSubKeyResultRow: React.FC<SubKeyResultRowProps> = ({
         <TableCell>
           {sub.unitScore ? (
             <Chip
-              label={`+${sub.unitScore}/${sub.unit || "đv"}`}
+              label={`+${sub.unitScore}/${sub.unit || t("okrCard.unit")}`}
               size="small"
               variant="outlined"
             />
@@ -641,7 +645,7 @@ export const OkrSubKeyResultRow: React.FC<SubKeyResultRowProps> = ({
                 <TextField
                   size="small"
                   fullWidth
-                  placeholder="Link..."
+                  placeholder={t("okrCard.placeholders.link")}
                   value={reportData[subKey]?.evidence || ""}
                   onChange={(e) => updateReport(subKey, "evidence", e.target.value)}
                 />
@@ -699,7 +703,7 @@ export const OkrSubKeyResultRow: React.FC<SubKeyResultRowProps> = ({
               <IconButton
                 size="small"
                 onClick={() => handleOpenEditDialog("SUBKR", obj.id, kr.id, sub.id)}
-                title="Chỉnh sửa"
+                title={t("okrCard.tooltips.edit")}
               >
                 <Edit fontSize="small" color="info" />
               </IconButton>
@@ -707,7 +711,7 @@ export const OkrSubKeyResultRow: React.FC<SubKeyResultRowProps> = ({
                 <IconButton
                   size="small"
                   onClick={() => handleUndoItem("SUBKR", obj.id, kr.id, sub.id)}
-                  title="Hoàn tác thay đổi"
+                  title={t("okrCard.tooltips.undoChanges")}
                 >
                   <Undo fontSize="small" color="primary" />
                 </IconButton>
@@ -731,7 +735,7 @@ export const OkrSubKeyResultRow: React.FC<SubKeyResultRowProps> = ({
               <IconButton
                 size="small"
                 onClick={() => handleDeleteItem(obj.id, kr.id, sub.id)}
-                title="Xóa tiêu chí con"
+                title={t("okrCard.tooltips.deleteSubCriteria")}
               >
                 <Delete fontSize="small" color="error" />
               </IconButton>
@@ -793,6 +797,7 @@ export const OkrSubSubKeyResultRow: React.FC<SubSubKeyResultRowProps> = ({
   hasChanged,
   getManagerData,
 }) => {
+  const { t } = useTranslation();
   const subsubKey = `${obj.id}-${kr.id}-${sub.id}-${subsub.id}`;
   const subsubQty = reportData[subsubKey]?.quantity || 0;
   const subsubUnitScore = Number(subsub.unitScore) || 0;
@@ -835,7 +840,7 @@ export const OkrSubSubKeyResultRow: React.FC<SubSubKeyResultRowProps> = ({
             fontWeight: isSubSubNew || isSubSubChanged || subsub.isEdited ? "bold" : "normal",
           }}
         >
-          {isSubSubChanged ? "[Mới] " : ""}
+          {isSubSubChanged ? `[${t("okrCard.new")}] ` : ""}
           {subsub.title}
         </TableCell>
         <TableCell
@@ -848,7 +853,7 @@ export const OkrSubSubKeyResultRow: React.FC<SubSubKeyResultRowProps> = ({
         <TableCell>
           {subsub.unitScore ? (
             <Chip
-              label={`+${subsub.unitScore}/${subsub.unit || "đv"}`}
+              label={`+${subsub.unitScore}/${subsub.unit || t("okrCard.unit")}`}
               size="small"
               variant="outlined"
               sx={{ fontSize: "0.75rem" }}
@@ -904,7 +909,7 @@ export const OkrSubSubKeyResultRow: React.FC<SubSubKeyResultRowProps> = ({
                 <TextField
                   size="small"
                   fullWidth
-                  placeholder="Link..."
+                  placeholder={t("okrCard.placeholders.link")}
                   value={reportData[subsubKey]?.evidence || ""}
                   onChange={(e) => updateReport(subsubKey, "evidence", e.target.value)}
                 />
@@ -970,7 +975,7 @@ export const OkrSubSubKeyResultRow: React.FC<SubSubKeyResultRowProps> = ({
                     subsub.id
                   )
                 }
-                title="Chỉnh sửa"
+                title={t("okrCard.tooltips.edit")}
               >
                 <Edit fontSize="small" color="info" />
               </IconButton>
@@ -980,7 +985,7 @@ export const OkrSubSubKeyResultRow: React.FC<SubSubKeyResultRowProps> = ({
                   onClick={() =>
                     handleUndoItem("SUBSUBKR", obj.id, kr.id, sub.id, subsub.id)
                   }
-                  title="Hoàn tác thay đổi"
+                  title={t("okrCard.tooltips.undoChanges")}
                 >
                   <Undo fontSize="small" color="primary" />
                 </IconButton>
@@ -1004,7 +1009,7 @@ export const OkrSubSubKeyResultRow: React.FC<SubSubKeyResultRowProps> = ({
               <IconButton
                 size="small"
                 onClick={() => handleDeleteItem(obj.id, kr.id, sub.id, subsub.id)}
-                title="Xóa tiêu chí con"
+                title={t("okrCard.tooltips.deleteSubCriteria")}
               >
                 <Delete fontSize="small" color="error" />
               </IconButton>

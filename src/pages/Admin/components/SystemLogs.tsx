@@ -51,15 +51,12 @@ export default function SystemLogs() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterAction, setFilterAction] = useState("ALL");
 
-  // Pagination state
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(20);
 
-  // Delete confirmation dialog
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  // Hàm gọi API lấy log từ Backend
   const fetchLogs = async () => {
     setLoading(true);
     try {
@@ -73,7 +70,7 @@ export default function SystemLogs() {
     }
   };
 
-  // Xóa toàn bộ logs
+
   const handleClearAll = async () => {
     setDeleting(true);
     try {
@@ -92,7 +89,6 @@ export default function SystemLogs() {
     fetchLogs();
   }, []);
 
-  // Format màu sắc
   const getActionColor = (action: string) => {
     switch (action) {
       case "CREATE":
@@ -111,7 +107,7 @@ export default function SystemLogs() {
   const getStatusColor = (status: string) =>
     status === "SUCCESS" ? "success" : "error";
 
-  // Logic lọc dữ liệu
+
   const filteredLogs = logs.filter((log) => {
     const matchSearch =
       log.message?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -122,12 +118,9 @@ export default function SystemLogs() {
     return matchSearch && matchAction;
   });
 
-  // Reset về trang 1 khi filter thay đổi
   useEffect(() => {
     setPage(0);
   }, [searchTerm, filterAction]);
-
-  // Pagination: cắt dữ liệu cho trang hiện tại
   const paginatedLogs = filteredLogs.slice(
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage,
@@ -146,7 +139,7 @@ export default function SystemLogs() {
 
   return (
     <Box>
-      {/* HEADER TÌM KIẾM & LỌC */}
+
       <Paper
         elevation={3}
         sx={{
@@ -256,7 +249,6 @@ export default function SystemLogs() {
         </Grid>
       </Paper>
 
-      {/* BẢNG DỮ LIỆU */}
       <TableContainer
         component={Paper}
         elevation={0}
@@ -352,8 +344,6 @@ export default function SystemLogs() {
           </TableBody>
         </Table>
       </TableContainer>
-
-      {/* PAGINATION */}
       <TablePagination
         component="div"
         count={filteredLogs.length}
@@ -373,7 +363,6 @@ export default function SystemLogs() {
         }}
       />
 
-      {/* DIALOG XÁC NHẬN XÓA */}
       <Dialog
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}

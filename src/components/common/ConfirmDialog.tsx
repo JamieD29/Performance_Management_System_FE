@@ -18,7 +18,6 @@ import {
   Close,
 } from "@mui/icons-material";
 
-// Định nghĩa các loại Modal (màu sắc & icon)
 const VARIANTS = {
   danger: {
     color: "error" as const,
@@ -69,10 +68,10 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       maxWidth="xs"
       fullWidth
       PaperProps={{
-        sx: { borderRadius: 2, padding: 1 }, // Bo tròn và padding cho đẹp
+        sx: { borderRadius: 2, padding: 1 },
       }}
     >
-      {/* Nút tắt nhanh góc phải */}
+
       <IconButton
         aria-label="close"
         onClick={onClose}
@@ -87,7 +86,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         <Close />
       </IconButton>
 
-      {/* Phần Icon & Title */}
+
       <DialogTitle sx={{ textAlign: "center", pb: 0, pt: 3 }}>
         <Box display="flex" flexDirection="column" alignItems="center" gap={1}>
           <Box
@@ -95,7 +94,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
               bgcolor: `${config.color}.light`,
               p: 2,
               borderRadius: "50%",
-              background: (theme) => theme.palette[config.color].light + "20", // Màu nền nhạt (opacity 20%)
+              background: (theme) => theme.palette[config.color].light + "20",
             }}
           >
             {config.icon}
@@ -106,12 +105,12 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         </Box>
       </DialogTitle>
 
-      {/* Nội dung thông báo */}
+
       <DialogContent sx={{ textAlign: "center", py: 2 }}>
         <DialogContentText>{content}</DialogContentText>
       </DialogContent>
 
-      {/* Nút hành động */}
+
       <DialogActions sx={{ justifyContent: "center", pb: 3, px: 3, gap: 1 }}>
         <Button
           variant="outlined"

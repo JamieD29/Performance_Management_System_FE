@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import { Person, School, Star } from "@mui/icons-material";
 
-// Import Logic và Components con
+// Import logic and child components
 import { useProfileLogic } from "./useProfileLogic";
 import { THEME_COLORS } from "./profile.constants";
 import { useProfileOptions } from "../../hooks/useProfileOptions";
@@ -31,7 +31,7 @@ export default function ProfileSetting() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  // 1. GỌI HOOK LẤY DATA VÀ LOGIC
+  // 1. CALL HOOK FOR DATA AND LOGIC
   const {
     activeTab,
     setActiveTab,
@@ -57,14 +57,14 @@ export default function ProfileSetting() {
     ageWarning,
   } = useProfileLogic();
 
-  // 📌 Single Source of Truth: Fetch enum options từ BE
+  // 📌 Single Source of Truth: Fetch enum options from BE
   const { options: profileOptions } = useProfileOptions();
   const beJobTitles = profileOptions.jobTitles.map((o) => o.value);
   const beAcademicRanks = profileOptions.academicRanks.map((o) => o.value);
   const beDegrees = profileOptions.degrees.map((o) => o.value);
   const beGenders = profileOptions.genders.map((o) => o.value);
 
-  // 2. HIỂN THỊ LOADING LÚC MỚI VÀO
+  // 2. DISPLAY LOADING ON MOUNT
   if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", p: 5 }}>
@@ -73,10 +73,10 @@ export default function ProfileSetting() {
     );
   }
 
-  // 3. RENDER GIAO DIỆN CHÍNH
+  // 3. RENDER MAIN INTERFACE
   return (
     <Box sx={{ bgcolor: "#f8fafc", minHeight: "100vh", pb: 8 }}>
-      {/* BANNER XANH PHÍA TRÊN */}
+      {/* BLUE TOP BANNER */}
       <Box
         sx={{
           height: 220,
@@ -88,7 +88,7 @@ export default function ProfileSetting() {
       />
 
       <Box sx={{ maxWidth: 1200, mx: "auto", px: 2 }}>
-        {/* --- KHU VỰC HEADER (Đã truyền getDepartmentName) --- */}
+        {/* --- HEADER SECTION (Passed getDepartmentName) --- */}
         <ProfileHeader
           formData={formData}
           isEditing={isEditing}
@@ -108,7 +108,7 @@ export default function ProfileSetting() {
             gap: 3,
           }}
         >
-          {/* MỤC TAB DỌC (DANH MỤC) */}
+          {/* VERTICAL TABS (CATEGORIES) */}
           <Paper
             elevation={0}
             sx={{
@@ -191,7 +191,7 @@ export default function ProfileSetting() {
             <Box sx={{ mb: 2 }} />
           </Paper>
 
-          {/* CỘT PHẢI: NỘI DUNG TỪNG TAB */}
+          {/* RIGHT COLUMN: CONTENT OF EACH TAB */}
           <Paper
             elevation={0}
             sx={{
@@ -224,7 +224,7 @@ export default function ProfileSetting() {
             <Box sx={{ p: 4 }}>
               <Fade in={true} key={activeTab}>
                 <Box>
-                  {/* TAB 0: THÔNG TIN CÁ NHÂN */}
+                  {/* TAB 0: PERSONAL INFORMATION */}
                   {activeTab === 0 && (
                     <PersonalInfoTab
                       formData={formData}
@@ -238,7 +238,7 @@ export default function ProfileSetting() {
                     />
                   )}
 
-                  {/* TAB 1: CÔNG VIỆC VÀ HỌC VẤN (Đã truyền departments) */}
+                  {/* TAB 1: WORK AND EDUCATION (Passed departments) */}
                   {activeTab === 1 && (
                     <WorkEducationTab
                       formData={formData}
@@ -255,7 +255,7 @@ export default function ProfileSetting() {
                     />
                   )}
 
-                  {/* TAB 2: THÀNH TÍCH VÀ NGHIÊN CỨU */}
+                  {/* TAB 2: ACHIEVEMENTS AND RESEARCH */}
                   {activeTab === 2 && (
                     <AchievementsTab
                       formData={formData}
@@ -270,7 +270,7 @@ export default function ProfileSetting() {
         </Box>
       </Box>
 
-      {/* THÔNG BÁO SNACKBAR */}
+      {/* SNACKBAR NOTIFICATION */}
       <Snackbar
         open={!!notification}
         autoHideDuration={3000}

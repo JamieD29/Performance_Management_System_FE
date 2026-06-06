@@ -9,7 +9,7 @@ import type { UserProfileForm } from "../profile.types";
 import { THEME_COLORS } from "../profile.constants";
 import { useTranslation } from "react-i18next";
 
-// --- HÀM STYLE DÙNG CHUNG CHO TAB NÀY ---
+// --- SHARED STYLE HELPERS FOR THIS TAB ---
 const getColorfulInputStyle = (color: string) => ({
   "& .MuiOutlinedInput-root": {
     borderRadius: "12px",
@@ -26,7 +26,7 @@ const getColorfulInputStyle = (color: string) => ({
   "& .MuiInputAdornment-root": { color: color },
 });
 
-// --- ĐỊNH NGHĨA PROPS CHO COMPONENT ---
+// --- COMPONENT PROPS DEFINITION ---
 interface AchievementsTabProps {
   formData: UserProfileForm;
   isEditing: boolean;
@@ -39,7 +39,7 @@ export default function AchievementsTab({
   handleChange,
 }: AchievementsTabProps) {
   const { t } = useTranslation();
-  // Các props mặc định cho TextField khi ở chế độ Edit
+  // Default props for TextField in Edit mode
   const commonProps = {
     fullWidth: true,
     variant: "outlined" as const,
@@ -47,13 +47,13 @@ export default function AchievementsTab({
   };
 
   // --------------------------------------------------------
-  // 1. CHẾ ĐỘ XEM (VIEW MODE)
+  // 1. VIEW MODE
   // --------------------------------------------------------
   if (!isEditing) {
     return (
       <Grid container spacing={3}>
         <Grid size={{ xs: 12 }}>
-          {/* KHEN THƯỞNG & DANH HIỆU */}
+          {/* AWARDS & HONORS */}
           <Box
             sx={{
               p: 3,
@@ -84,7 +84,7 @@ export default function AchievementsTab({
             </Typography>
           </Box>
 
-          {/* SỞ HỮU TRÍ TUỆ / CÔNG TRÌNH */}
+          {/* INTELLECTUAL PROPERTY / PUBLICATIONS */}
           <Box
             sx={{
               p: 3,
@@ -119,7 +119,7 @@ export default function AchievementsTab({
   }
 
   // --------------------------------------------------------
-  // 2. CHẾ ĐỘ CHỈNH SỬA (EDIT MODE)
+  // 2. EDIT MODE
   // --------------------------------------------------------
   return (
     <Grid container spacing={3} sx={{ mt: 1 }}>

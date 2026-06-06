@@ -5,7 +5,7 @@ import { showInfo } from "../../../utils/swal";
 import { useTranslation } from "react-i18next";
 
 interface MemberTableProps {
-  members: User[]; // Đổi từ Member[] thành User[]
+  members: User[]; // Changed from Member[] to User[]
   departmentName: string;
   onSelectMember: (user: User) => void;
 }
@@ -57,7 +57,7 @@ export const MemberTable: React.FC<MemberTableProps> = ({
                   onClick={() => onSelectMember(user)}
                   className="hover:bg-blue-50 cursor-pointer transition-colors group"
                 >
-                  {/* Cột 1: Tên & Email */}
+                  {/* Column 1: Name & Email */}
                   <td className="px-6 py-4 whitespace-nowrap">
                      <div className="flex items-center">
                        <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold mr-3">
@@ -82,14 +82,14 @@ export const MemberTable: React.FC<MemberTableProps> = ({
                      </div>
                   </td>
 
-                  {/* Cột 2: Chức danh (Job Title) */}
+                  {/* Column 2: Job Title */}
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded-md text-sm font-medium border border-blue-100">
                       {user.jobTitle ? t("profile.enums.jobTitle." + user.jobTitle, { defaultValue: user.jobTitle }) : "N/A"}
                     </span>
                   </td>
 
-                  {/* Cột 3: Học hàm / Học vị */}
+                  {/* Column 3: Academic Rank / Degree */}
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center text-sm text-gray-700">
                       <GraduationCap size={16} className="mr-2 text-gray-400" />
@@ -100,12 +100,12 @@ export const MemberTable: React.FC<MemberTableProps> = ({
                     </div>
                   </td>
 
-                  {/* Cột 4: Giờ dạy */}
+                  {/* Column 4: Teaching Hours */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                     {user.teachingHours ? t("departmentDetail.memberTable.teachingHours", { count: user.teachingHours }) : "-"}
                   </td>
 
-                  {/* Cột 5: Hành động */}
+                  {/* Column 5: Actions */}
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button
                       className="text-indigo-600 hover:text-indigo-900 mx-1 p-2 hover:bg-indigo-50 rounded-full transition-colors"

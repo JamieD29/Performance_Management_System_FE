@@ -40,7 +40,7 @@ export default function NotificationBell() {
       if (!token) return;
       const res = await api.get("/notifications/all");
       const data: NotificationItem[] = Array.isArray(res.data) ? res.data : [];
-      // Sắp xếp mới nhất lên đầu
+      // Sort newest first
       setNotifications(data.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
     } catch (error) {
       // Silently fail
@@ -65,39 +65,83 @@ export default function NotificationBell() {
   const getNotificationLink = (message: string): string => {
     const msg = message.toLowerCase();
 
-    // 0. Phản hồi đàm phán từ quản lý gửi ngược về cho nhân viên thường
-    if (msg.includes("người giao okr") && (msg.includes("đã phản hồi") || msg.includes("phản hồi yêu cầu"))) {
+    // 0. Negotiation response from manager back to staff
+    if (
+      (msg.includes("người giao okr") || msg.includes("assigner")) &&
+      (msg.includes("đã phản hồi") || msg.includes("phản hồi yêu cầu") || msg.includes("responded") || msg.includes("response"))
+    ) {
       return "/my-okr";
     }
 
-    // 1. Phân hệ duyệt dành cho Quản lý / Trưởng khoa / Admin
+    // 1. Approval flows for Manager / Dean / Admin
     if (
-      msg.includes("yêu cầu xét duyệt") || 
+      msg.includes("yêu cầu xét duyệt") ||
       msg.includes("đề xuất điều chỉnh") ||
       msg.includes("đã gửi đề xuất") ||
       msg.includes("gửi đề xuất okr") ||
       msg.includes("đã phản hồi đề xuất") ||
       msg.includes("phản hồi đề xuất") ||
       msg.includes("đồng ý chấp nhận") ||
-      msg.includes("chấp nhận okr")
+      msg.includes("chấp nhận okr") ||
+      msg.includes("request approval") ||
+      msg.includes("proposal") ||
+      msg.includes("proposed") ||
+      msg.includes("accept")
     ) {
-      localStorage.setItem("department_okr_tab", "2"); // Chuyển thẳng tới Tab "Duyệt đề xuất"
+      localStorage.setItem("department_okr_tab", "2"); // Redirect directly to "Approve proposals" tab
       return "/departments/okr";
     }
-    if (msg.includes("tự khai điểm okr") || msg.includes("tự khai điểm")) {
-      localStorage.setItem("department_okr_tab", "3"); // Chuyển thẳng tới Tab "Tự khai điểm"
+    if (
+      msg.includes("tự khai điểm okr") ||
+      msg.includes("tự khai điểm") ||
+      msg.includes("self-reported") ||
+      msg.includes("self-report") ||
+      msg.includes("self-graded")
+    ) {
+      localStorage.setItem("department_okr_tab", "3"); // Redirect directly to "Self-reporting" tab
       return "/departments/okr";
     }
-    if (msg.includes("tự đánh giá") || msg.includes("nộp phiếu tự đánh giá")) {
-      localStorage.setItem("department_okr_tab", "4"); // Chuyển thẳng tới Tab "Duyệt phiếu đánh giá"
+    if (
+      msg.includes("tự đánh giá") ||
+      msg.includes("nộp phiếu tự đánh giá") ||
+      msg.includes("self-evaluation") ||
+      msg.includes("self evaluation")
+    ) {
+      localStorage.setItem("department_okr_tab", "4"); // Redirect directly to "Approve evaluations" tab
       return "/departments/okr";
     }
 
-    // 2. Phân hệ cá nhân dành cho nhân sự thường
-    if (msg.includes("giao") && msg.includes("okr")) return "/my-okr";
-    if (msg.includes("phê duyệt") || msg.includes("đề xuất")) return "/my-okr";
-    if (msg.includes("chức vụ") || msg.includes("role")) return "/profile";
-    if (msg.includes("đánh giá") || msg.includes("kỳ")) return "/my-evaluation";
+    // 2. Personal flows for normal staff
+    if (
+      (msg.includes("giao") && msg.includes("okr")) ||
+      (msg.includes("assign") && msg.includes("okr"))
+    ) {
+      return "/my-okr";
+    }
+    if (
+      msg.includes("phê duyệt") ||
+      msg.includes("đề xuất") ||
+      msg.includes("approve") ||
+      msg.includes("proposal")
+    ) {
+      return "/my-okr";
+    }
+    if (
+      msg.includes("chức vụ") ||
+      msg.includes("role") ||
+      msg.includes("position")
+    ) {
+      return "/profile";
+    }
+    if (
+      msg.includes("đánh giá") ||
+      msg.includes("kỳ") ||
+      msg.includes("evaluate") ||
+      msg.includes("evaluation") ||
+      msg.includes("cycle")
+    ) {
+      return "/my-evaluation";
+    }
     return "/dashboard";
   };
 

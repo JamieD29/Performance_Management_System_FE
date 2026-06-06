@@ -1,6 +1,6 @@
-import React from "react";
 import { Box, Typography, Paper, LinearProgress } from "@mui/material";
 import { CalendarDays } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface CycleProgressProps {
   cycleName: string;
@@ -9,18 +9,19 @@ interface CycleProgressProps {
   endDate: string;
 }
 
-export default function CycleProgress({ cycleName, progressPercent, startDate, endDate }: CycleProgressProps) {
+export default function CycleProgress({ cycleName: _cycleName, progressPercent, startDate, endDate }: CycleProgressProps) {
+  const { t, i18n } = useTranslation();
   const start = new Date(startDate);
   const end = new Date(endDate);
   const today = new Date();
   
-  const formattedStart = start.toLocaleDateString("vi-VN", {
+  const formattedStart = start.toLocaleDateString(i18n.language === "vi" ? "vi-VN" : "en-US", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
   });
   
-  const formattedEnd = end.toLocaleDateString("vi-VN", {
+  const formattedEnd = end.toLocaleDateString(i18n.language === "vi" ? "vi-VN" : "en-US", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -48,11 +49,11 @@ export default function CycleProgress({ cycleName, progressPercent, startDate, e
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <CalendarDays size={16} color="#64748b" />
           <Typography variant="caption" fontWeight="600" color="text.secondary">
-            Tiến độ kỳ đánh giá
+            {t("dashboard.cycleProgress.title")}
           </Typography>
         </Box>
         <Typography variant="caption" color="text.secondary">
-          {progressPercent.toFixed(0)}% đã qua
+          {t("dashboard.cycleProgress.elapsed", { percent: progressPercent.toFixed(0) })}
         </Typography>
       </Box>
 
@@ -75,10 +76,10 @@ export default function CycleProgress({ cycleName, progressPercent, startDate, e
 
       <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
         <Typography variant="caption" fontWeight="600" color="text.secondary">
-          Bắt đầu: {formattedStart}
+          {t("dashboard.cycleProgress.start", { date: formattedStart })}
         </Typography>
         <Typography variant="caption" fontWeight="600" color="text.secondary">
-          Kết thúc: {formattedEnd}
+          {t("dashboard.cycleProgress.end", { date: formattedEnd })}
         </Typography>
       </Box>
 
@@ -96,7 +97,7 @@ export default function CycleProgress({ cycleName, progressPercent, startDate, e
             {totalDays}
           </Typography>
           <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.65rem" }}>
-            Tổng ngày
+            {t("dashboard.cycleProgress.totalDays")}
           </Typography>
         </Box>
         <Box sx={{ textAlign: "center", borderLeft: "1px solid #e2e8f0", borderRight: "1px solid #e2e8f0" }}>
@@ -104,7 +105,7 @@ export default function CycleProgress({ cycleName, progressPercent, startDate, e
             {elapsedDays}
           </Typography>
           <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.65rem" }}>
-            Đã qua
+            {t("dashboard.cycleProgress.elapsedDays")}
           </Typography>
         </Box>
         <Box sx={{ textAlign: "center" }}>
@@ -112,7 +113,7 @@ export default function CycleProgress({ cycleName, progressPercent, startDate, e
             {remainingDays}
           </Typography>
           <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.65rem" }}>
-            Còn lại
+            {t("dashboard.cycleProgress.remainingDays")}
           </Typography>
         </Box>
       </Box>

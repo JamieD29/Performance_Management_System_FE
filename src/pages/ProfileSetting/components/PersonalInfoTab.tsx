@@ -25,7 +25,7 @@ import type { UserProfileForm, FormErrors } from "../profile.types";
 import { THEME_COLORS, FALLBACK_GENDERS } from "../profile.constants";
 import { useTranslation } from "react-i18next";
 
-// --- HÀM STYLE & COMPONENT PHỤ DÙNG CHUNG CHO TAB NÀY ---
+// --- SHARED STYLE HELPERS & SUB-COMPONENTS FOR THIS TAB ---
 const getColorfulInputStyle = (color: string) => ({
   "& .MuiOutlinedInput-root": {
     borderRadius: "12px",
@@ -48,7 +48,7 @@ const RequiredLabel = ({ label }: { label: string }) => (
   </span>
 );
 
-// Component hiển thị thông tin dạng thẻ (View Mode)
+// Card-style field display component (View Mode)
 const ProfileField = ({ icon, label, value, color, disabled }: any) => {
   const { t } = useTranslation();
   return (
@@ -113,7 +113,7 @@ const ProfileField = ({ icon, label, value, color, disabled }: any) => {
   );
 };
 
-// --- ĐỊNH NGHĨA PROPS CHO COMPONENT ---
+// --- COMPONENT PROPS DEFINITION ---
 interface PersonalInfoTabProps {
   formData: UserProfileForm;
   isEditing: boolean;
@@ -121,9 +121,9 @@ interface PersonalInfoTabProps {
   handleChange: (field: keyof UserProfileForm, value: any) => void;
   handleDobChange: (value: string) => void;
   handleJoinDateChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  // 📌 Enum options từ BE (Single Source of Truth)
+  // 📌 Enum options from BE (Single Source of Truth)
   genders?: string[];
-  // Cảnh báo tuổi < 20
+  // Age warning if < 20
   ageWarning?: string;
 }
 
@@ -139,11 +139,11 @@ export default function PersonalInfoTab({
 }: PersonalInfoTabProps) {
   const { t, i18n } = useTranslation();
   const _genders = genders && genders.length > 0 ? genders : FALLBACK_GENDERS;
-  // Biến giới hạn ngày tháng
+  // Date boundary variables
   const todayStr = new Date().toISOString().split("T")[0];
   const minJoinDateStr = "1995-01-01";
 
-  // Định dạng ngày theo locale
+  // Format date according to locale
   const formatDateLocale = (dateStr?: string) => {
     if (!dateStr) return "";
     const date = new Date(dateStr);
@@ -151,7 +151,7 @@ export default function PersonalInfoTab({
     return date.toLocaleDateString(i18n.language === "vi" ? "vi-VN" : "en-US");
   };
 
-  // Các props mặc định cho TextField
+  // Default props for TextField
   const commonProps = {
     fullWidth: true,
     variant: "outlined" as const,
@@ -159,7 +159,7 @@ export default function PersonalInfoTab({
   };
 
   // --------------------------------------------------------
-  // 1. CHẾ ĐỘ XEM (VIEW MODE)
+  // 1. VIEW MODE
   // --------------------------------------------------------
   if (!isEditing) {
     return (
@@ -209,7 +209,7 @@ export default function PersonalInfoTab({
   }
 
   // --------------------------------------------------------
-  // 2. CHẾ ĐỘ CHỈNH SỬA (EDIT MODE)
+  // 2. EDIT MODE
   // --------------------------------------------------------
   return (
     <Grid container spacing={3} sx={{ mt: 1 }}>
@@ -334,7 +334,7 @@ export default function PersonalInfoTab({
         />
       </Grid>
 
-      {/* Cảnh báo tuổi nếu < 20 */}
+      {/* Age warning if < 20 */}
       {ageWarning && (
         <Grid size={{ xs: 12 }}>
           <Alert severity="warning" sx={{ borderRadius: "12px" }}>

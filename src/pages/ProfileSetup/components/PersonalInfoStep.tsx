@@ -13,7 +13,7 @@ import type { ProfileFormData } from "../types";
 interface PersonalInfoStepProps {
   formData: ProfileFormData;
   onChange: (field: keyof ProfileFormData, value: string) => void;
-  /** Thông báo lỗi/cảnh báo từ parent (hiển thị khi bấm Tiếp tục) */
+  /** Error/warning message from parent (displayed when clicking Continue) */
   validationError?: string;
 }
 
@@ -29,7 +29,7 @@ export function PersonalInfoStep({
 
   return (
     <Stack spacing={2.5}>
-      {/* Mã cán bộ */}
+      {/* Staff code */}
       <AnimatedField delay={100}>
         <Stack direction="row" spacing={1.5} alignItems="center" mb={1.5}>
           <Box
@@ -67,7 +67,7 @@ export function PersonalInfoStep({
         />
       </AnimatedField>
 
-      {/* 1. Họ và tên */}
+      {/* 1. Full name */}
       <AnimatedField delay={200}>
         <Stack direction="row" spacing={1.5} alignItems="center" mb={1.5}>
           <Box
@@ -105,7 +105,7 @@ export function PersonalInfoStep({
         />
       </AnimatedField>
 
-      {/* 2. Ngày tháng năm sinh */}
+      {/* 2. Date of birth */}
       <AnimatedField delay={400}>
         <Stack direction="row" spacing={1.5} alignItems="center" mb={1.5}>
           <Box
@@ -178,7 +178,7 @@ export function PersonalInfoStep({
         />
       </AnimatedField>
 
-      {/* 4. Ngày vào trường */}
+      {/* 4. Join date */}
       <AnimatedField delay={800}>
         <Stack direction="row" spacing={1.5} alignItems="center" mb={1.5}>
           <Box
@@ -211,7 +211,7 @@ export function PersonalInfoStep({
             },
           }}
         />
-        {/* Cảnh báo tuổi — hiển thị ngay dưới ngày vào trường */}
+        {/* Age warning — displayed right below the join date */}
         {validationError && (
           <Alert severity="warning" sx={{ mt: 1.5, borderRadius: "10px" }}>
             <strong>{t("profileSetup.personalInfoStep.warningPrefix")}</strong> {validationError}

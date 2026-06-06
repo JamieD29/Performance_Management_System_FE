@@ -30,7 +30,6 @@ import {
   BadgeOutlined,
   ArrowBack,
   FilterList,
-  Visibility,
 } from "@mui/icons-material";
 import { Users, Building2 } from "lucide-react";
 import { api } from "../../../services/api";

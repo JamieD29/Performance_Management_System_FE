@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Paper,
@@ -26,12 +26,14 @@ import {
 import { Send, FactCheck, PictureAsPdf } from "@mui/icons-material";
 import { api } from "../../services/api";
 import { confirmAction, showSuccess, showError, showWarning } from "../../utils/swal";
+import { useTranslation } from "react-i18next";
 
 // @ts-ignore
 import html2pdf from "html2pdf.js";
 import EvaluationPdfTemplate from "./components/EvaluationPdfTemplate";
 
 export default function MyEvaluationPage() {
+  const { t } = useTranslation();
   const [form, setForm] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -51,7 +53,7 @@ export default function MyEvaluationPage() {
       const res = await api.get("/okrs/my");
       const okrs = res.data || [];
 
-      // Lọc các kỳ đánh giá duy nhất từ danh sách OKR của user
+      // Filter unique evaluation cycles from the user's OKR list
       const cycleMap: Record<string, any> = {};
       okrs.forEach((okr: any) => {
         if (okr.cycle) {
@@ -102,14 +104,17 @@ export default function MyEvaluationPage() {
 
   const handleSubmit = async () => {
     if (!selfRating) {
-      showWarning("Thiếu thông tin", "Vui lòng chọn mức Tự xếp loại chất lượng trước khi nộp!");
+      showWarning(
+        t("myEvaluationPage.alerts.missingRatingTitle"),
+        t("myEvaluationPage.alerts.missingRating")
+      );
       return;
     }
     const ok = await confirmAction({
-      title: "Nộp Phiếu Đánh Giá?",
-      text: "Bạn có chắc chắn muốn nộp Phiếu Đánh Giá không?",
+      title: t("myEvaluationPage.alerts.submitConfirmTitle"),
+      text: t("myEvaluationPage.alerts.submitConfirmText"),
       icon: "question",
-      confirmText: "Nộp phiếu",
+      confirmText: t("myEvaluationPage.alerts.submitConfirmBtn"),
       confirmColor: "#1976d2",
     });
     if (!ok) return;
@@ -121,11 +126,17 @@ export default function MyEvaluationPage() {
         selfRating,
         cycleId: selectedCycleId,
       });
-      showSuccess("Thành công!", "Nộp Phiếu Đánh Giá thành công.");
+      showSuccess(
+        t("myEvaluationPage.alerts.submitSuccessTitle"),
+        t("myEvaluationPage.alerts.submitSuccessText")
+      );
       fetchForm(selectedCycleId);
     } catch (e) {
       console.error(e);
-      showError("Lỗi", "Lỗi khi nộp phiếu. Vui lòng thử lại.");
+      showError(
+        t("myEvaluationPage.alerts.submitErrorTitle"),
+        t("myEvaluationPage.alerts.submitErrorText")
+      );
     } finally {
       setSaving(false);
     }
@@ -135,7 +146,7 @@ export default function MyEvaluationPage() {
     const element = document.getElementById("evaluation-form-pdf");
     if (!element) return;
 
-    // Chuẩn hóa chuỗi tiếng Việt thành không dấu
+    // Normalize Vietnamese characters to tone-free English counterparts
     const removeVietnameseTones = (str: string) => {
       str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
       str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
@@ -151,7 +162,7 @@ export default function MyEvaluationPage() {
       str = str.replace(/Ù|Ú|Ụ|Ủ|Ũ|Ư|Ừ|Ứ|Ự|Ử|Ữ/g, "U");
       str = str.replace(/Ỳ|Ý|Ỵ|Ỷ|Ỹ/g, "Y");
       str = str.replace(/Đ/g, "D");
-      // Loại bỏ một số ký tự đặc biệt
+      // Remove special characters
       str = str.replace(/[^a-zA-Z0-9\s]/g, "");
       return str;
     };
@@ -180,7 +191,10 @@ export default function MyEvaluationPage() {
       exporter().from(element).set(opt).save();
     } catch (err) {
       console.error(err);
-      showError("Lỗi", "Không thể xuất PDF. Vui lòng thử lại sau.");
+      showError(
+        t("myEvaluationPage.alerts.pdfErrorTitle"),
+        t("myEvaluationPage.alerts.pdfErrorText")
+      );
     }
   };
 
@@ -208,10 +222,10 @@ export default function MyEvaluationPage() {
             color="#1e3a8a"
             sx={{ display: "flex", alignItems: "center", gap: 1 }}
           >
-            <FactCheck /> Hồ Sơ Tự Đánh Giá
+            <FactCheck /> {t("myEvaluationPage.headerTitle")}
           </Typography>
           <Typography color="text.secondary">
-            Kiểm tra kết quả tự động từ OKR và nộp Phiếu Đánh Giá Xếp Loại cuối kỳ.
+            {t("myEvaluationPage.headerSubtitle")}
           </Typography>
         </Box>
 
@@ -224,21 +238,21 @@ export default function MyEvaluationPage() {
               onClick={handleExportPDF}
               sx={{ fontWeight: "bold" }}
             >
-              Xuất PDF
+              {t("myEvaluationPage.exportPdfBtn")}
             </Button>
           )}
 
           {cycles.length > 0 && (
             <FormControl size="small" sx={{ minWidth: 240, bgcolor: "#fff" }}>
-              <InputLabel>Chọn kỳ đánh giá</InputLabel>
+              <InputLabel>{t("myEvaluationPage.selectCycleLabel")}</InputLabel>
               <Select
                 value={selectedCycleId}
-                label="Chọn kỳ đánh giá"
+                label={t("myEvaluationPage.selectCycleLabel")}
                 onChange={(e) => setSelectedCycleId(e.target.value)}
               >
                 {cycles.map((c) => (
                   <MenuItem key={c.id} value={c.id}>
-                    {c.name} {c.status === "OPEN" ? "(Đang mở)" : "(Đã đóng)"}
+                    {c.name} {c.status === "OPEN" ? t("myEvaluationPage.cycleStatus.open") : t("myEvaluationPage.cycleStatus.closed")}
                   </MenuItem>
                 ))}
               </Select>
@@ -249,74 +263,74 @@ export default function MyEvaluationPage() {
 
       {loading ? (
         <Paper sx={{ p: 4, borderRadius: 2, border: "1px solid #e2e8f0", textAlign: "center" }}>
-          <Typography>Đang tải Phiếu Đánh Giá...</Typography>
+          <Typography>{t("myEvaluationPage.states.loading")}</Typography>
         </Paper>
       ) : !form ? (
         <Paper sx={{ p: 4, borderRadius: 2, border: "1px solid #e2e8f0", textAlign: "center", py: 6 }}>
           <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
-            Không có dữ liệu Phiếu Đánh Giá
+            {t("myEvaluationPage.states.noDataTitle")}
           </Typography>
           <Typography color="text.secondary">
-            Bạn không có OKR được giao hoặc thực hiện trong kỳ đánh giá này.
+            {t("myEvaluationPage.states.noDataDesc")}
           </Typography>
         </Paper>
       ) : (
         <>
           {isEvaluated && (
             <Alert severity="success" sx={{ mb: 3 }}>
-              Phiếu Đánh Giá của bạn đã được Quản lý cấp báo duyệt và xếp loại kết quả cuối cùng.
+              {t("myEvaluationPage.alerts.evaluatedAlert")}
             </Alert>
           )}
           {form.status === "SUBMITTED" && (
             <Alert severity="warning" sx={{ mb: 3 }}>
-              Phiếu Đánh Giá đã được nộp và đang chờ Quản lý duyệt.
+              {t("myEvaluationPage.alerts.submittedAlert")}
             </Alert>
           )}
 
           <Paper sx={{ p: 4, borderRadius: 2, border: "1px solid #e2e8f0" }}>
             <Typography variant="h5" align="center" fontWeight="bold" sx={{ mb: 1, textTransform: "uppercase" }}>
-              Phiếu Đánh Giá, Xếp Loại Chất Lượng Viên Chức
+              {t("myEvaluationPage.form.title")}
             </Typography>
             <Typography variant="subtitle1" align="center" fontWeight="bold" sx={{ mb: 4, color: "text.secondary" }}>
-              Kỳ đánh giá: {form.cycle?.name || "Kỳ mặc định"}
+              {t("myEvaluationPage.form.cycleLabel", { cycle: form.cycle?.name || t("myEvaluationPage.form.defaultCycle") })}
             </Typography>
 
-            {/* PHẦN I */}
+            {/* SECTION I */}
             <Typography variant="h6" fontWeight="bold" color="#1e3a8a" sx={{ mb: 2 }}>
-              I. THÔNG TIN CÁ NHÂN
+              {t("myEvaluationPage.form.personalInfo.title")}
             </Typography>
             <Grid container spacing={2} sx={{ mb: 4, px: 2 }}>
               <Grid size={{ xs: 12, md: 6 }}>
-                <Typography><strong>Họ và tên:</strong> {user.name}</Typography>
+                <Typography><strong>{t("myEvaluationPage.form.personalInfo.fullName")}</strong> {user.name}</Typography>
               </Grid>
               <Grid size={{ xs: 12, md: 6 }}>
-                <Typography><strong>MSCB:</strong> {user.staffCode || "N/A"}</Typography>
+                <Typography><strong>{t("myEvaluationPage.form.personalInfo.staffCode")}</strong> {user.staffCode || "N/A"}</Typography>
               </Grid>
               <Grid size={{ xs: 12, md: 6 }}>
-                <Typography><strong>Email:</strong> {user.email}</Typography>
+                <Typography><strong>{t("myEvaluationPage.form.personalInfo.email")}</strong> {user.email}</Typography>
               </Grid>
               <Grid size={{ xs: 12, md: 6 }}>
-                <Typography><strong>Đơn vị công tác:</strong> {user.department?.name || "N/A"}</Typography>
+                <Typography><strong>{t("myEvaluationPage.form.personalInfo.department")}</strong> {user.department?.name || "N/A"}</Typography>
               </Grid>
               <Grid size={{ xs: 12, md: 6 }}>
-                <Typography><strong>Chức vụ:</strong> {user.managementPosition?.name || "Giảng viên"}</Typography>
+                <Typography><strong>{t("myEvaluationPage.form.personalInfo.position")}</strong> {user.managementPosition?.name || t("myEvaluationPage.form.personalInfo.defaultPosition")}</Typography>
               </Grid>
             </Grid>
 
             <Divider sx={{ my: 3 }} />
 
-            {/* PHẦN II */}
+            {/* SECTION II */}
             <Typography variant="h6" fontWeight="bold" color="#1e3a8a" sx={{ mb: 1 }}>
-              II. KẾT QUẢ TỰ ĐÁNH GIÁ LUỒNG OKR
+              {t("myEvaluationPage.form.okrResults.title")}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-              Kết quả thực hiện chức trách, nhiệm vụ được giao (Đồng bộ tự động từ Bài Tự Khai OKR).
+              {t("myEvaluationPage.form.okrResults.desc")}
             </Typography>
             {form.okrObjectiveName && (
               <Typography variant="body2" fontWeight={600} color="#2563eb" sx={{ mb: 2 }}>
-                📋 OKR Template: {form.okrObjectiveName}
+                {t("myEvaluationPage.form.okrResults.templateLabel", { name: form.okrObjectiveName })}
                 {form.okrStatus === "COMPLETED" && (
-                  <Box component="span" sx={{ ml: 1, color: "#16a34a", fontWeight: 700 }}>✓ Đã chốt điểm</Box>
+                  <Box component="span" sx={{ ml: 1, color: "#16a34a", fontWeight: 700 }}>{t("myEvaluationPage.form.okrResults.locked")}</Box>
                 )}
               </Typography>
             )}
@@ -325,11 +339,11 @@ export default function MyEvaluationPage() {
               <Table size="small">
                 <TableHead sx={{ bgcolor: "#f1f5f9" }}>
                   <TableRow>
-                    <TableCell sx={{ fontWeight: "bold", width: "8%", textAlign: "center" }}>STT</TableCell>
-                    <TableCell sx={{ fontWeight: "bold", width: "40%" }}>Tiêu chí / Nhiệm vụ</TableCell>
-                    <TableCell sx={{ fontWeight: "bold", textAlign: "center" }}>Điểm Tối Đa</TableCell>
-                    <TableCell sx={{ fontWeight: "bold", textAlign: "center", color: "#64748b" }}>Điểm Tự Khai</TableCell>
-                    <TableCell sx={{ fontWeight: "bold", textAlign: "center", color: "#1C4D8D" }}>Điểm QL Duyệt</TableCell>
+                    <TableCell sx={{ fontWeight: "bold", width: "8%", textAlign: "center" }}>{t("myEvaluationPage.form.okrResults.headers.no")}</TableCell>
+                    <TableCell sx={{ fontWeight: "bold", width: "40%" }}>{t("myEvaluationPage.form.okrResults.headers.criteria")}</TableCell>
+                    <TableCell sx={{ fontWeight: "bold", textAlign: "center" }}>{t("myEvaluationPage.form.okrResults.headers.maxScore")}</TableCell>
+                    <TableCell sx={{ fontWeight: "bold", textAlign: "center", color: "#64748b" }}>{t("myEvaluationPage.form.okrResults.headers.selfScore")}</TableCell>
+                    <TableCell sx={{ fontWeight: "bold", textAlign: "center", color: "#1C4D8D" }}>{t("myEvaluationPage.form.okrResults.headers.managerScore")}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -351,7 +365,7 @@ export default function MyEvaluationPage() {
                     </TableRow>
                   ))}
                   <TableRow sx={{ bgcolor: "#f0fdf4" }}>
-                    <TableCell colSpan={2} align="center" sx={{ fontWeight: "bold", color: "#166534" }}>TỔNG ĐIỂM</TableCell>
+                    <TableCell colSpan={2} align="center" sx={{ fontWeight: "bold", color: "#166534" }}>{t("myEvaluationPage.form.okrResults.totalScore")}</TableCell>
                     <TableCell align="center" sx={{ fontWeight: "bold", color: "#166534" }}>100</TableCell>
                     <TableCell align="center" sx={{ fontWeight: "bold", color: "#64748b", fontSize: "1.1rem" }}>
                       {form.selfScoreTotal?.toFixed(1) || 0}
@@ -366,61 +380,61 @@ export default function MyEvaluationPage() {
 
             <Divider sx={{ my: 3 }} />
 
-            {/* PHẦN III */}
+            {/* SECTION III */}
             <Typography variant="h6" fontWeight="bold" color="#1e3a8a" sx={{ mb: 2 }}>
-              III. TỰ NHẬN XÉT, XẾP LOẠI CHẤT LƯỢNG
+              {t("myEvaluationPage.form.selfComment.title")}
             </Typography>
             <Box sx={{ px: 2, mb: 4 }}>
-              <Typography fontWeight="bold" sx={{ mb: 1 }}>1. Tự nhận xét ưu/khuyết điểm:</Typography>
+              <Typography fontWeight="bold" sx={{ mb: 1 }}>{t("myEvaluationPage.form.selfComment.commentLabel")}</Typography>
               <TextField
                 fullWidth
                 multiline
                 rows={3}
-                placeholder="Viết nhận xét của bạn..."
+                placeholder={t("myEvaluationPage.form.selfComment.commentPlaceholder")}
                 value={selfComment}
                 onChange={(e) => setSelfComment(e.target.value)}
                 disabled={isSubmitted}
                 sx={{ mb: 3 }}
               />
 
-              <Typography fontWeight="bold" sx={{ mb: 1 }}>2. Tự xếp loại chất lượng:</Typography>
+              <Typography fontWeight="bold" sx={{ mb: 1 }}>{t("myEvaluationPage.form.selfComment.ratingLabel")}</Typography>
               <FormControl disabled={isSubmitted} sx={{ ml: 2 }}>
                 <RadioGroup row value={selfRating} onChange={(e) => setSelfRating(e.target.value)}>
-                  <FormControlLabel value="EXCELLENT" control={<Radio color="primary" />} label="Hoàn thành tốt nhiệm vụ (86 - 100 điểm)" />
-                  <FormControlLabel value="GOOD" control={<Radio color="primary" />} label="Hoàn thành nhiệm vụ (60 - 86 điểm)" />
-                  <FormControlLabel value="POOR" control={<Radio color="primary" />} label="Không hoàn thành nhiệm vụ (dưới 60 điểm)" />
+                  <FormControlLabel value="EXCELLENT" control={<Radio color="primary" />} label={t("myEvaluationPage.form.selfComment.ratings.excellent")} />
+                  <FormControlLabel value="GOOD" control={<Radio color="primary" />} label={t("myEvaluationPage.form.selfComment.ratings.good")} />
+                  <FormControlLabel value="POOR" control={<Radio color="primary" />} label={t("myEvaluationPage.form.selfComment.ratings.poor")} />
                 </RadioGroup>
               </FormControl>
             </Box>
 
-            {/* PHẦN IV */}
+            {/* SECTION IV */}
             {isEvaluated && (
               <>
                 <Divider sx={{ my: 3 }} />
                 <Typography variant="h6" fontWeight="bold" color="#b45309" sx={{ mb: 2 }}>
-                  IV. KẾT QUẢ ĐÁNH GIÁ, XẾP LOẠI (DÀNH CHO CẤP QUẢN LÝ)
+                  {t("myEvaluationPage.form.managerComment.title")}
                 </Typography>
                 <Box sx={{ px: 2, p: 3, bgcolor: "#fffbeb", borderRadius: 2, border: "1px solid #fde68a" }}>
-                  <Typography fontWeight="bold" sx={{ mb: 1 }}>1. Nhận xét của cấp trên:</Typography>
+                  <Typography fontWeight="bold" sx={{ mb: 1 }}>{t("myEvaluationPage.form.managerComment.commentLabel")}</Typography>
                   <Typography sx={{ mb: 3, whiteSpace: "pre-wrap", color: "#1e293b" }}>
-                    {form.managerComment || "Không có nhận xét."}
+                    {form.managerComment || t("myEvaluationPage.form.managerComment.noComment")}
                   </Typography>
 
-                  <Typography fontWeight="bold" sx={{ mb: 1 }}>2. Kết quả xếp loại:</Typography>
+                  <Typography fontWeight="bold" sx={{ mb: 1 }}>{t("myEvaluationPage.form.managerComment.ratingLabel")}</Typography>
                   <Box sx={{ ml: 2 }}>
                     <FormControlLabel
                       control={<Radio checked={form.managerRating === "EXCELLENT"} color="success" readOnly />}
-                      label="Hoàn thành tốt nhiệm vụ"
+                      label={t("myEvaluationPage.form.managerComment.ratings.excellent")}
                     />
                     <br />
                     <FormControlLabel
                       control={<Radio checked={form.managerRating === "GOOD"} color="success" readOnly />}
-                      label="Hoàn thành nhiệm vụ"
+                      label={t("myEvaluationPage.form.managerComment.ratings.good")}
                     />
                     <br />
                     <FormControlLabel
                       control={<Radio checked={form.managerRating === "POOR"} color="success" readOnly />}
-                      label="Không hoàn thành nhiệm vụ"
+                      label={t("myEvaluationPage.form.managerComment.ratings.poor")}
                     />
                   </Box>
                 </Box>
@@ -437,7 +451,7 @@ export default function MyEvaluationPage() {
                   onClick={handleSubmit}
                   disabled={saving}
                 >
-                  Nộp Phiếu Đánh Giá
+                  {t("myEvaluationPage.form.buttons.submit")}
                 </Button>
               </Box>
             )}
@@ -452,7 +466,7 @@ export default function MyEvaluationPage() {
                   onClick={handleExportPDF}
                   sx={{ fontWeight: "bold" }}
                 >
-                  Xuất file PDF
+                  {t("myEvaluationPage.form.buttons.exportPdf")}
                 </Button>
               </Box>
             )}

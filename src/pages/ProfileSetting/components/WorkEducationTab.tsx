@@ -22,7 +22,7 @@ import {
 } from "../profile.constants";
 import { useTranslation } from "react-i18next";
 
-// --- HÀM STYLE & COMPONENT PHỤ DÙNG CHUNG ---
+// --- SHARED STYLES & SUBCOMPONENTS ---
 const getColorfulInputStyle = (color: string) => ({
   "& .MuiOutlinedInput-root": {
     borderRadius: "12px",
@@ -39,7 +39,7 @@ const getColorfulInputStyle = (color: string) => ({
   "& .MuiInputAdornment-root": { color: color },
 });
 
-// Component hiển thị thông tin dạng thẻ (View Mode)
+// Card component to display fields (View Mode)
 const ProfileField = ({ icon, label, value, color }: any) => {
   const { t } = useTranslation();
   return (
@@ -104,7 +104,7 @@ const ProfileField = ({ icon, label, value, color }: any) => {
   );
 };
 
-// --- ĐỊNH NGHĨA PROPS CHO COMPONENT ---
+// --- COMPONENT PROPS INTERFACE ---
 interface WorkEducationTabProps {
   formData: UserProfileForm;
   isEditing: boolean;
@@ -137,12 +137,12 @@ export default function WorkEducationTab({
   degrees,
 }: WorkEducationTabProps) {
   const { t } = useTranslation();
-  // Dùng dữ liệu từ BE nếu có, nếu không fallback
+  // Use BE data if available, otherwise fall back to constants
   const _jobTitles = jobTitles && jobTitles.length > 0 ? jobTitles : FALLBACK_JOB_TITLES;
   const _academicRanks = academicRanks && academicRanks.length > 0 ? academicRanks : FALLBACK_ACADEMIC_RANKS;
   const _degrees = degrees && degrees.length > 0 ? degrees : FALLBACK_DEGREES;
   
-  // Các props mặc định cho Form Control / TextField
+  // Default props for FormControl / TextField
   const commonProps = {
     fullWidth: true,
     variant: "outlined" as const,
@@ -150,7 +150,7 @@ export default function WorkEducationTab({
   };
 
   // --------------------------------------------------------
-  // 1. CHẾ ĐỘ XEM (VIEW MODE)
+  // 1. VIEW MODE
   // --------------------------------------------------------
   if (!isEditing) {
     return (
@@ -199,11 +199,11 @@ export default function WorkEducationTab({
   }
 
   // --------------------------------------------------------
-  // 2. CHẾ ĐỘ CHỈNH SỬA (EDIT MODE)
+  // 2. EDIT MODE
   // --------------------------------------------------------
   return (
     <Grid container spacing={3} sx={{ mt: 1 }}>
-      {/* ĐƠN VỊ CÔNG TÁC (Chỉ được chọn ở ProfileSetup) */}
+      {/* WORK DEPARTMENT (Only selectable in ProfileSetup) */}
       <Grid size={{ xs: 12, md: 6 }}>
         <FormControl
           fullWidth
@@ -235,7 +235,7 @@ export default function WorkEducationTab({
         </FormControl>
       </Grid>
 
-      {/* HỌC VỊ */}
+      {/* ACADEMIC DEGREE */}
       <Grid size={{ xs: 12, md: 6 }}>
         <FormControl fullWidth sx={getColorfulInputStyle(THEME_COLORS.WORK)}>
           <InputLabel>{t("profile.fields.degree")}</InputLabel>
@@ -263,7 +263,7 @@ export default function WorkEducationTab({
         </FormControl>
       </Grid>
 
-      {/* HỌC HÀM */}
+      {/* ACADEMIC RANK */}
       <Grid size={{ xs: 12, md: 4 }}>
         <FormControl fullWidth sx={getColorfulInputStyle(THEME_COLORS.WORK)}>
           <InputLabel>{t("profile.fields.academicRank")}</InputLabel>
@@ -287,7 +287,7 @@ export default function WorkEducationTab({
         </FormControl>
       </Grid>
 
-      {/* CHỨC DANH NGHỀ NGHIỆP */}
+      {/* PROFESSIONAL JOB TITLE */}
       <Grid size={{ xs: 12, md: 4 }}>
         <FormControl fullWidth sx={getColorfulInputStyle(THEME_COLORS.WORK)}>
           <InputLabel>{t("profile.fields.jobTitle")}</InputLabel>
@@ -310,7 +310,7 @@ export default function WorkEducationTab({
         </FormControl>
       </Grid>
 
-      {/* GIỜ GIẢNG/NĂM (TÍCH HỢP LOGIC CHẶN) */}
+      {/* TEACHING HOURS PER YEAR (WITH PREVENT SPAM LOGIC) */}
       <Grid size={{ xs: 12, md: 4 }}>
         <TextField
           {...commonProps}

@@ -32,19 +32,19 @@ const UserDetailPage = React.lazy(() => import('../pages/UserDetail/UserDetailPa
 // Non-lazy (always needed for layout)
 import MainLayout from '../layouts/MainLayout';
 
-// 1. Hook check đăng nhập
+// 1. Authentication check hook
 function useAuth() {
   const authToken = localStorage.getItem('authToken');
   return !!authToken;
 }
 
-// 2. Component bảo vệ Admin
+// 2. Route guard component for Admin
 function AdminRoute({ children }: { children: React.ReactNode }) {
   const userStr = localStorage.getItem('user');
   const user = userStr ? JSON.parse(userStr) : {};
   const rawRoles = user.roles || [];
 
-  // Chuẩn hóa role linh hoạt (Object/String) và không phân biệt hoa thường
+  // Normalize role flexibly (Object/String) and make it case-insensitive
   const isAdmin =
     Array.isArray(rawRoles) &&
     rawRoles.some((r: any) => {
@@ -60,7 +60,7 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-// 2b. Component bảo vệ route quản lý (Admin HOẶC có chức vụ quản lý)
+// 2b. Route guard component for managers (Admin OR has a management position)
 function ManagerRoute({ children }: { children: React.ReactNode }) {
   const userStr = localStorage.getItem('user');
   const user = userStr ? JSON.parse(userStr) : {};
@@ -84,24 +84,24 @@ function ManagerRoute({ children }: { children: React.ReactNode }) {
 }
 
 
-// 3. Component bảo vệ Route thường
+// 3. Route guard component for regular protected routes
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuth();
   const location = useLocation();
   if (!isAuthenticated)
     return <Navigate to="/login" state={{ from: location }} replace />;
 
-  // Kiểm tra profile đã hoàn tất chưa
+  // Check if profile is completed
   const userStr = localStorage.getItem('user');
   const user = userStr ? JSON.parse(userStr) : null;
 
-  // Logic kiểm tra hoàn tất: hồ sơ đã đánh dấu xong HOẶC có đủ các thông tin cốt lõi
+  // Completion check logic: profile marked completed OR has enough core information
   const isProfileComplete = !!(
     user?.profileCompleted ||
     (user?.jobTitle && (user?.department?.id || user?.departmentID))
   );
 
-  // Chỉ redirect nếu user chưa xong profile và ĐANG KHÔNG ở trang profile-setup
+  // Only redirect if user profile is incomplete and NOT currently on profile-setup page
   if (user && !isProfileComplete && location.pathname !== '/profile-setup') {
     console.log('📋 Profile Incomplete -> Redirecting to Setup');
     return <Navigate to="/profile-setup" replace />;
@@ -110,14 +110,14 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-// 4. Component Route công khai
+// 4. Public Route guard component
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuth();
   const [searchParams] = useSearchParams();
 
-  // 🔑 Nếu URL chứa accessToken mới (từ OAuth callback), KHÔNG redirect.
-  // Cho phép Login.tsx xử lý và ghi đè token/user cũ trong localStorage.
-  // Điều này xảy ra khi user back lại trang chọn tài khoản và chọn tài khoản khác.
+  // 🔑 If URL contains a new accessToken (from OAuth callback), DO NOT redirect.
+  // Allow Login.tsx to handle it and overwrite the old token/user in localStorage.
+  // This happens when the user goes back to the account selection page and selects a different account.
   const hasNewToken = !!searchParams.get('accessToken');
 
   if (isAuthenticated && !hasNewToken) return <Navigate to="/dashboard" replace />;
@@ -144,7 +144,7 @@ export default function AppRoutes() {
   return (
     <Suspense fallback={<PageLoader />}>
     <Routes>
-      {/* --- CÁC ROUTE PHỤ --- */}
+      {/* --- AUXILIARY ROUTES --- */}
       <Route path="/auth/microsoft/callback" element={<AuthCallback />} />
       {/* --- ROOT REDIRECT --- */}
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
@@ -166,7 +166,7 @@ export default function AppRoutes() {
           </ProtectedRoute>
         }
       />
-      {/* --- MAIN LAYOUT GROUP (Đã đăng nhập) --- */}
+      {/* --- MAIN LAYOUT GROUP (Authenticated) --- */}
       <Route
         element={
           <ProtectedRoute>
@@ -174,26 +174,26 @@ export default function AppRoutes() {
           </ProtectedRoute>
         }
       >
-        {/* 1. Dashboard Chính */}
+        {/* 1. Main Dashboard */}
         <Route path="/dashboard" element={<Dashboard />} />
 
-        {/* 2. Hồ sơ cá nhân */}
+        {/* 2. Personal Profile */}
         <Route path="/profile" element={<ProfileSetting />} />
         <Route path="/my-okr" element={<MyOkrPage />} />
         <Route path="/my-evaluation" element={<MyEvaluationPage />} />
 
-        {/* 3. GROUP BỘ MÔN (Chỉ cho Admin hoặc User có chức vụ quản lý) */}
-        {/* Tổng quan */}
+        {/* 3. DEPARTMENT GROUP (Only for Admin or Manager) */}
+        {/* Overview */}
         <Route path="/dean-dashboard" element={<ManagerRoute><DeanDashboard /></ManagerRoute>} />
         <Route path="/departments/overview" element={<ManagerRoute><DepartmentOverview /></ManagerRoute>} />
-        {/* OKR Bộ môn */}
+        {/* Department OKR */}
         <Route path="/departments/okr" element={<ManagerRoute><DepartmentOKR /></ManagerRoute>} />
 
-        {/* 🔥 "NHÂN SỰ" - KẾT NỐI VÀO COMPONENT DEPARTMENT CŨ TẠI ĐÂY */}
+        {/* 🔥 "PERSONNEL" - INTEGRATED WITH OLD DEPARTMENT COMPONENT HERE */}
         <Route path="/departments/users" element={<ManagerRoute><Department /></ManagerRoute>} />
         <Route path="/departments/users/:userId" element={<ManagerRoute><UserDetailPage /></ManagerRoute>} />
 
-        {/* 4. TRANG ADMIN (Bảo vệ 2 lớp) */}
+        {/* 4. ADMIN PAGE (Dual layer protection) */}
         <Route
           path="/admin/settings"
           element={
@@ -213,11 +213,11 @@ export default function AppRoutes() {
           }
         />
 
-        {/* Route cũ (Giữ lại để tương thích nếu cần, hoặc xóa đi) */}
+        {/* Legacy Route (Retained for compatibility if needed, or delete) */}
         <Route path="/admin/department" element={<Department />} />
       </Route>
       {/* --- CATCH ALL --- */}
-      {/* ✅ Route dành cho trường hợp navigate('/404') */}
+      {/* ✅ Route for navigate('/404') case */}
       <Route path="/404" element={<NotFoundPage />} />
       <Route path="*" element={<NotFoundPage />} />{' '}
     </Routes>

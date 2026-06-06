@@ -141,7 +141,6 @@ export default function ActivityFeed({ logs, loading, onRefresh }: Props) {
         </Box>
       </Box>
 
-      {/* Feed list — tối đa 10 bản ghi, scroll để xem thêm */}
       <Box sx={{
         flex: 1, overflowY: "auto", maxHeight: 380, px: 3,
         "&::-webkit-scrollbar": { width: 4 },

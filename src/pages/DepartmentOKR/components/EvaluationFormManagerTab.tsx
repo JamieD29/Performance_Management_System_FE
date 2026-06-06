@@ -10,7 +10,6 @@ import {
   TableRow,
   Paper,
   Chip,
-  IconButton,
   Tooltip,
   TextField,
   MenuItem,
@@ -19,7 +18,7 @@ import {
   AccordionSummary,
   AccordionDetails,
 } from "@mui/material";
-import { CheckCircle, ExpandMore } from "@mui/icons-material";
+import { ExpandMore } from "@mui/icons-material";
 import { api } from "../../../services/api";
 import { showError } from "../../../utils/swal";
 import EvaluationFormManagerDialog from "./EvaluationFormManagerDialog";
@@ -109,10 +108,9 @@ export default function EvaluationFormManagerTab() {
       fetchEvaluations();
     } catch (e) {
       console.error(e);
-      const isEn = localStorage.getItem("i18nextLng") === "en";
       showError(
-        isEn ? "Error" : "Lỗi",
-        isEn ? "Failed to update Evaluation Sheet." : "Không thể cập nhật Phiếu Đánh Giá."
+        t("evaluationFormManagerTab.alerts.errorTitle"),
+        t("evaluationFormManagerTab.alerts.errorText")
       );
     }
   };

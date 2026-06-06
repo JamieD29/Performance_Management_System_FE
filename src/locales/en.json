@@ -331,7 +331,9 @@
     "trySearchOther": "Try searching with other keywords",
     "noDataInSystem": "No department data in the system",
     "edit": "Edit",
-    "delete": "Delete"
+    "delete": "Delete",
+    "deleteErrorTitle": "Delete failed",
+    "deleteErrorText": "Failed to delete this department."
   },
   "deanApprovalTab": {
     "title": "Approve OKR Adjustment Proposal",
@@ -375,6 +377,20 @@
       "rejectReasonPlaceholder": "e.g. Criteria cannot be modified...",
       "cancel": "Cancel",
       "confirmReject": "Confirm Rejection"
+    },
+    "alerts": {
+      "approveConfirmTitle": "Approve proposal?",
+      "approveConfirmText": "Are you sure you want to approve this adjustment proposal?",
+      "approveBtn": "Approve",
+      "successTitle": "Success!",
+      "approveSuccessText": "Proposal approved.",
+      "trackProgressTitle": "Track Progress",
+      "trackProgressText": "OKR finalized. You can track staff progress under the 'Evaluation / OKR Reports' tab.",
+      "errorTitle": "Error",
+      "approveErrorText": "An error occurred while approving.",
+      "rejectSuccessTitle": "Rejected",
+      "rejectSuccessText": "Proposal has been rejected.",
+      "rejectErrorText": "An error occurred while rejecting."
     }
   },
   "assignTemplateDialog": {
@@ -410,7 +426,30 @@
     "noStaffFound": "No personnel found matching the template criteria.",
     "alreadyAssigned": "Already Assigned",
     "cancel": "Cancel",
-    "assignButton": "Assign OKR to {{count}} Staff"
+    "assignButton": "Assign OKR to {{count}} Staff",
+    "baseVersionTitle": "Base Version (Default)",
+    "warnings": {
+      "missingInfoTitle": "Missing Information",
+      "selectCycle": "Please select at least 1 User and an Evaluation Cycle!",
+      "selectDeadline": "Please select the Negotiation & OKR Finalization Deadline!",
+      "invalidDeadlineTitle": "Invalid Deadline",
+      "deadlineInPast": "The OKR finalization deadline cannot be in the past!",
+      "deadlineTooLate": "The deadline must be at least 3 days before the OKR cycle start date (maximum is {{max}})!"
+    },
+    "alerts": {
+      "successTitle": "Success!",
+      "successMessage": "OKR Template assigned to {{count}} personnel.",
+      "errorTitle": "Error",
+      "errorMessage": "An error occurred while assigning the template."
+    },
+    "deadlineMaxFallback": "start date - 3 days",
+    "doNotAssign": "Do not assign",
+    "rowsPerPage": "Rows per page:",
+    "displayedRows": "{{from}}–{{to}} of {{count}}",
+    "displayedRowsMore": "{{from}}–{{to}} of more than {{to}}",
+    "selectedStaffCount": "Selected {{count}} staff:",
+    "othersCount": "+{{count}} others",
+    "assigning": "Assigning..."
   },
   "okrCard": {
     "detailsTitle": "OKR Details",
@@ -430,8 +469,7 @@
     "expectedScore": "Expected score",
     "selfScore": "Self score",
     "managerScore": "Manager score",
-    "finalScore": "Final score",
-    "approvedByManager": "Approved by Dean.",
+    "finalScoreApproved": "<strong>Final Score: {{score}} points</strong> — Approved by Dean.",
     "tableHeaders": {
       "no": "No.",
       "content": "Content",
@@ -445,6 +483,95 @@
       "selfScoreSubmitted": "Self Score",
       "managerQtyApproved": "Manager Qty",
       "managerScoreApproved": "Manager Score"
+    },
+    "points": "points",
+    "pointsShort": "pts",
+    "status": {
+      "pending": "Pending response",
+      "negotiating": "Negotiating",
+      "accepted": "Accepted — Ready to self-report",
+      "submitted": "Submitted — Awaiting approval",
+      "completed": "Completed",
+      "rejected": "Rejected"
+    },
+    "submitting": "Submitting...",
+    "submitChanges": "Submit Changes & Request Approval",
+    "submitChangesBtn": "Submit changes & request approval",
+    "sendProposalApproval": "Send request for proposal approval",
+    "agreeToAccept": "I agree to accept this OKR",
+    "cycleNotStartedYet": "Evaluation cycle has not started yet (Expected start: {{date}}). You cannot report scores at this moment.",
+    "new": "New",
+    "old": "Old",
+    "unit": "unit",
+    "commentsCount": "{{count}} comments",
+    "deletedCriteria": "Deleted criteria",
+    "errors": {
+      "errorTitle": "Error",
+      "enterContent": "Please enter content.",
+      "scoreStructure": "OKR Score Structure Error"
+    },
+    "placeholders": {
+      "evidenceLink": "Evidence link...",
+      "link": "Link..."
+    },
+    "tooltips": {
+      "addCriteria": "Add criteria",
+      "addSubCriteria": "Add sub-criteria",
+      "undoChanges": "Undo changes",
+      "edit": "Edit",
+      "deleteCriteria": "Delete criteria",
+      "deleteSubCriteria": "Delete sub-criteria",
+      "restore": "Restore"
+    },
+    "alerts": {
+      "success": "Success",
+      "structureUpdated": "New structure has been sent.",
+      "structureUpdateFailed": "Unable to update structure.",
+      "acceptTitle": "Accept OKR?",
+      "acceptText": "After accepting, you will start reporting scores.",
+      "acceptConfirm": "Agree to accept",
+      "acceptError": "An error occurred while accepting the OKR.",
+      "sendApprovalTitle": "Send for approval?",
+      "sendApprovalText": "Confirm sending this OKR approval request to Dean/Manager.",
+      "sendApprovalConfirm": "Send request",
+      "sendApprovalSuccess": "OKR approval request sent.",
+      "sendApprovalError": "An error occurred while sending approval request.",
+      "sendMessageError": "Unable to send message.",
+      "saveDraftError": "Unable to save draft to the database.",
+      "submitReportTitle": "Submit self-report?",
+      "submitReportText": "After submitting, your report will be sent to the Dean for review. Are you sure?",
+      "submitReportConfirm": "Submit",
+      "submitReportSuccess": "Self-report submitted successfully.",
+      "submitReportError": "An error occurred while submitting."
+    },
+    "chips": {
+      "selfScore": "Self: {{score}}/{{max}}pts",
+      "managerScore": "Mgr: {{score}}/{{max}}pts",
+      "waitingGrading": "Awaiting grading",
+      "expectedScoreChip": "Expected: {{score}}/{{max}}pts",
+      "selfReported": "Self: {{score}}pts",
+      "managerFinal": "Mgr: {{score}}pts",
+      "maxScore": "Max: {{score}} points"
+    },
+    "chat": {
+      "exchangeTitle": "Discussion content:",
+      "senderUser": "You",
+      "senderManager": "Dean",
+      "noExchangeDesc": "No exchange yet. You can propose changes to criteria/scores here.",
+      "inputPlaceholder": "Enter adjustment proposal...",
+      "sendBtn": "Send"
+    },
+    "dialogs": {
+      "editCriteria": {
+        "title": "Edit Criteria",
+        "contentLabel": "Criteria Content",
+        "maxScoreLabel": "Max Score",
+        "unitScoreLabel": "Score/Unit",
+        "unitLabel": "Unit",
+        "unitPlaceholder": "e.g., paper, unit, hour...",
+        "cancel": "Cancel",
+        "save": "Save Changes"
+      }
     }
   },
   "evaluationDetailsDialog": {
@@ -510,7 +637,11 @@
     "managerCommentPlaceholder": "Write an evaluation comment for the employee...",
     "managerRatingLabel": "2. Approve employee performance classification results:",
     "cancelBtn": "Cancel / Close",
-    "saveBtn": "Save Classification Conclusion"
+    "saveBtn": "Save Classification Conclusion",
+    "warnings": {
+      "missingInfoTitle": "Missing Information",
+      "rateEmployee": "Please rate the employee before saving!"
+    }
   },
   "evaluationFormManagerTab": {
     "ratings": {
@@ -551,6 +682,153 @@
     },
     "tooltip": {
       "viewAndEvaluate": "View & Evaluate"
+    },
+    "alerts": {
+      "errorTitle": "Error",
+      "errorText": "Failed to update Evaluation Sheet."
+    }
+  },
+  "evaluationPdfTemplate": {
+    "countryHeader": {
+      "republic": "SOCIALIST REPUBLIC OF VIETNAM",
+      "slogan": "Independence - Freedom - Happiness"
+    },
+    "title": "STAFF SELF-EVALUATION & PERFORMANCE CLASSIFICATION SHEET",
+    "cycleLabel": "Evaluation cycle: {{cycle}}",
+    "defaultCycle": "Default Cycle",
+    "personalInfo": {
+      "title": "I. PERSONAL INFORMATION",
+      "fullName": "1. Full name:",
+      "staffCode": "2. Staff Code:",
+      "email": "3. Email:",
+      "department": "4. Working department:",
+      "position": "5. Position / Job Title:",
+      "defaultPosition": "Lecturer"
+    },
+    "okrResults": {
+      "title": "II. PERFORMANCE EVALUATION RESULTS BY OKR",
+      "appliedModel": "* Evaluation criteria model applied: {{name}}",
+      "headers": {
+        "no": "No.",
+        "criteria": "Criteria / Tasks",
+        "maxScore": "Max Score",
+        "selfScore": "Self Score",
+        "managerScore": "Manager Score"
+      },
+      "totalScore": "TOTAL SCORE"
+    },
+    "selfComment": {
+      "title": "III. SELF-REPORTED PERFORMANCE CLASSIFICATION",
+      "commentLabel": "1. Self-comment on strengths/weaknesses:",
+      "noComment": "No self-comment provided.",
+      "ratingLabel": "2. Self-reported quality classification:",
+      "ratings": {
+        "excellent": "Excellent performance",
+        "good": "Good performance / Satisfactory performance",
+        "poor": "Unsatisfactory performance",
+        "unrated": "Unrated"
+      }
+    },
+    "managerComment": {
+      "title": "IV. PERFORMANCE EVALUATION & CLASSIFICATION RESULTS BY MANAGEMENT",
+      "commentLabel": "1. Comments/evaluation by direct supervisor:",
+      "noComment": "No comments from management.",
+      "ratingLabel": "2. Quality classification results:",
+      "ratings": {
+        "excellent": "Excellent performance",
+        "good": "Good performance / Satisfactory performance",
+        "poor": "Unsatisfactory performance",
+        "unrated": "No classification result approved by management yet"
+      }
+    },
+    "signatures": {
+      "employee": "EMPLOYEE",
+      "supervisor": "DIRECT SUPERVISOR",
+      "instruction": "(Signature and full name)"
+    }
+  },
+  "myEvaluationPage": {
+    "headerTitle": "Self-Evaluation Record",
+    "headerSubtitle": "Check automatic results from OKR and submit final quality classification sheets.",
+    "exportPdfBtn": "Export PDF",
+    "selectCycleLabel": "Select evaluation cycle",
+    "cycleStatus": {
+      "open": "(Open)",
+      "closed": "(Closed)"
+    },
+    "states": {
+      "loading": "Loading Evaluation Sheet...",
+      "noDataTitle": "No Evaluation Sheet Data",
+      "noDataDesc": "You do not have any OKR assigned or executed during this evaluation cycle."
+    },
+    "alerts": {
+      "evaluatedAlert": "Your evaluation sheet has been approved and finalized by the direct manager.",
+      "submittedAlert": "Your evaluation sheet has been submitted and is pending manager review.",
+      "missingRating": "Please choose a self-evaluation classification before submitting!",
+      "missingRatingTitle": "Missing Information",
+      "submitConfirmTitle": "Submit Evaluation Sheet?",
+      "submitConfirmText": "Are you sure you want to submit your evaluation sheet?",
+      "submitConfirmBtn": "Submit",
+      "submitSuccessTitle": "Success!",
+      "submitSuccessText": "Submitted evaluation sheet successfully.",
+      "submitErrorTitle": "Error",
+      "submitErrorText": "Failed to submit evaluation sheet. Please try again.",
+      "pdfErrorTitle": "Error",
+      "pdfErrorText": "Failed to export PDF. Please try again later."
+    },
+    "form": {
+      "title": "Staff Performance Evaluation & Classification Sheet",
+      "cycleLabel": "Evaluation cycle: {{cycle}}",
+      "defaultCycle": "Default Cycle",
+      "personalInfo": {
+        "title": "I. PERSONAL INFORMATION",
+        "fullName": "Full name:",
+        "staffCode": "Staff Code:",
+        "email": "Email:",
+        "department": "Working department:",
+        "position": "Position:",
+        "defaultPosition": "Lecturer"
+      },
+      "okrResults": {
+        "title": "II. OKR SELF-EVALUATION RESULTS",
+        "desc": "Results of duties and responsibilities execution (Synchronized automatically from OKR Self-report).",
+        "templateLabel": "📋 OKR Template: {{name}}",
+        "locked": "✓ Score locked",
+        "headers": {
+          "no": "No.",
+          "criteria": "Criteria / Tasks",
+          "maxScore": "Max Score",
+          "selfScore": "Self Score",
+          "managerScore": "Manager Score"
+        },
+        "totalScore": "TOTAL SCORE"
+      },
+      "selfComment": {
+        "title": "III. SELF-REPORTED PERFORMANCE CLASSIFICATION",
+        "commentLabel": "1. Self-comment on strengths/weaknesses:",
+        "commentPlaceholder": "Write your comments here...",
+        "ratingLabel": "2. Self-reported performance classification:",
+        "ratings": {
+          "excellent": "Excellent performance (86 - 100 pts)",
+          "good": "Good/Satisfactory performance (60 - 86 pts)",
+          "poor": "Unsatisfactory performance (< 60 pts)"
+        }
+      },
+      "managerComment": {
+        "title": "IV. PERFORMANCE EVALUATION & CLASSIFICATION (FOR MANAGEMENT)",
+        "commentLabel": "1. Comments from supervisor:",
+        "noComment": "No comments.",
+        "ratingLabel": "2. Evaluation results:",
+        "ratings": {
+          "excellent": "Excellent performance",
+          "good": "Good/Satisfactory performance",
+          "poor": "Unsatisfactory performance"
+        }
+      },
+      "buttons": {
+        "submit": "Submit Evaluation Sheet",
+        "exportPdf": "Export PDF File"
+      }
     }
   },
   "evaluationListTab": {
@@ -1454,5 +1732,197 @@
   "roleManagementTab": {
     "systemRoles": "System Roles",
     "managementPositions": "Management Positions"
+  },
+  "systemReset": {
+    "dangerZone": "Danger Zone",
+    "description": "Area containing sensitive functions that can significantly affect the system. Please consider carefully before using.",
+    "title": "Factory Reset",
+    "confirmResetText": "This action will <1>DELETE ALL</1> system data including: Users, OKRs, Evaluation Cycles, Logs... The system will be reset to an empty state like the initial installation (but keeping default Departments).",
+    "buttonLabel": "Factory Reset",
+    "dialog": {
+      "warningTitle": "DANGER WARNING!",
+      "warningBody1": "You are requesting to <1>WIPE OUT</1> all system data. This action is <3>irreversible</3>!",
+      "warningBody2": "Are you sure you want to continue?",
+      "cancelBtn": "Cancel",
+      "confirmBtn": "PROCEED WITH DELETION",
+      "processing": "Processing..."
+    },
+    "alerts": {
+      "success": "Factory reset successful!",
+      "error": "An error occurred while resetting the system"
+    }
+  },
+  "dashboard": {
+    "loading": "Loading Dashboard...",
+    "errorTitle": "Error",
+    "defaultError": "Failed to load dashboard data. Please try again.",
+    "welcome": {
+      "morning": "Good morning",
+      "afternoon": "Good afternoon",
+      "evening": "Good evening",
+      "defaultName": "Lecturer",
+      "cycleLabel": "Evaluation Cycle:",
+      "noCycle": "No evaluation cycle",
+      "status": {
+        "OPEN": "Open",
+        "CLOSED": "Closed",
+        "ARCHIVED": "Archived"
+      }
+    },
+    "actions": {
+      "noOkr": "No OKR assigned. Please wait for the Dean to assign OKRs.",
+      "viewOkr": "View OKR",
+      "pending": {
+        "message": "You have a newly assigned OKR. Please review and accept or propose adjustments.",
+        "label": "Respond to OKR now"
+      },
+      "negotiating": {
+        "message": "OKR is currently being negotiated with the Dean. Check for new feedback.",
+        "label": "View discussion"
+      },
+      "accepted": {
+        "message": "OKR has been accepted! Please fill in data and evidence to submit self-report.",
+        "label": "Self-report now"
+      },
+      "submitted": {
+        "message": "You have submitted your self-report. Waiting for the Dean to grade.",
+        "label": "Review report"
+      },
+      "completed": {
+        "evaluated": {
+          "message": "Evaluation process completed! View your rating results.",
+          "label": "View results"
+        },
+        "submitted": {
+          "message": "Evaluation form submitted. Waiting for the Dean's final rating.",
+          "label": "View evaluation form"
+        },
+        "pendingEvaluation": {
+          "message": "OKR completed! Please self-assess and submit the Performance Evaluation Form.",
+          "label": "Submit evaluation form"
+        },
+        "noEvaluation": {
+          "message": "OKR has been graded by the Dean.",
+          "label": "View results"
+        }
+      },
+      "rejected": {
+        "message": "Your OKR was rejected. Please review the reason and submit a new proposal.",
+        "label": "View details"
+      }
+    },
+    "actionCard": {
+      "nextAction": "✅ Next Action",
+      "currentState": "📋 Current State"
+    },
+    "cycleProgress": {
+      "title": "Evaluation Cycle Progress",
+      "elapsed": "{{percent}}% elapsed",
+      "start": "Start: {{date}}",
+      "end": "End: {{date}}",
+      "totalDays": "Total Days",
+      "elapsedDays": "Elapsed",
+      "remainingDays": "Remaining"
+    },
+    "deadlineCountdown": {
+      "noDeadline": "No deadline set",
+      "submittedEarly": "Excellent! You submitted early",
+      "submittedLate": "Late submission",
+      "daysBefore": "days before deadline",
+      "lateText": "Submitted past the deadline",
+      "overdue": "{{days}} days overdue",
+      "daysOverdueText": "days past due",
+      "today": "today!",
+      "daysLeft": "days remaining",
+      "defaultLabel": "Deadline"
+    },
+    "deadlineLabels": {
+      "negotiating": "OKR Negotiation Deadline",
+      "submitting": "Submission Deadline",
+      "default": "Deadline"
+    },
+    "dataEntryProgress": {
+      "title": "📝 Report Data Entry Progress",
+      "itemsCount": "{{filled}} / {{total}} items ({{percent}}%)"
+    },
+    "chart": {
+      "title": "🕸️ Objective Competency Analysis",
+      "selfReport": "Self-Report",
+      "managerScore": "Dean Score",
+      "maxScoreLabel": "Max: {{score}} pts",
+      "selfReportLabel": "Self-report: {{score}} pts ({{percent}}%)",
+      "managerScoreLabel": "Dean graded: {{score}} pts ({{percent}}%)",
+      "note": "* Dean's grade will be displayed once OKR is fully approved."
+    },
+    "barChart": {
+      "title": "📈 Score by Task",
+      "selfReport": "Self-reported",
+      "managerScore": "Dean's score",
+      "maxScore": "Max score"
+    },
+    "evaluation": {
+      "title": "Performance Evaluation Form",
+      "selfScore": "Self score",
+      "managerScore": "Dean score",
+      "ratingResult": "Rating result",
+      "viewDetails": "View details",
+      "ratings": {
+        "EXCELLENT": "Excellent performance",
+        "GOOD": "Good performance",
+        "POOR": "Unsatisfactory performance"
+      },
+      "status": {
+        "PENDING_EVALUATION": "Not submitted",
+        "SUBMITTED": "Submitted — Awaiting rating",
+        "EVALUATED": "Rated"
+      }
+    },
+    "stepper": {
+      "title": "🚦 Your OKR Progress",
+      "rejectedStepDesc": "OKR rejected",
+      "steps": {
+        "ASSIGNED": {
+          "label": "Assigned",
+          "description": "OKR assigned by the Dean"
+        },
+        "PENDING": {
+          "label": "Pending",
+          "description": "Review and respond to the assigned OKR"
+        },
+        "NEGOTIATING": {
+          "label": "Negotiating",
+          "description": "Currently discussing with the Dean"
+        },
+        "ACCEPTED": {
+          "label": "Approved",
+          "description": "OKR has been approved"
+        },
+        "INPUTTING": {
+          "label": "Inputting",
+          "description": "Ready or inputting self-report"
+        },
+        "SUBMITTED": {
+          "label": "Submitted",
+          "description": "Self-report submitted, waiting for Dean's grade"
+        },
+        "COMPLETED": {
+          "label": "Completed",
+          "description": "Dean has completed grading"
+        }
+      }
+    },
+    "scoreGauge": {
+      "selfScoreTitle": "Self Score",
+      "managerScoreTitle": "Dean Score",
+      "pointsDenominator": "/ {{maxScore}} pts",
+      "difference": "Difference",
+      "selfReportShort": "Self",
+      "managerReportShort": "Dean",
+      "labels": {
+        "excellent": "Excellent",
+        "good": "Good",
+        "needsImprovement": "Needs improvement"
+      }
+    }
   }
 }

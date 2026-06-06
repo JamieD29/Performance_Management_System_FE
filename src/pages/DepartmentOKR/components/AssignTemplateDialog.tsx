@@ -23,7 +23,6 @@ import {
   Chip,
   Avatar,
   Checkbox,
-  Alert,
   TablePagination,
   InputAdornment,
   IconButton,
@@ -84,12 +83,12 @@ export default function AssignTemplateDialog({
 
       setSearchName("");
       loadData();
-      setVariants([{ id: "base", title: "Phiên bản Gốc (Mặc định)", structure: template.structure }]);
+      setVariants([{ id: "base", title: t("assignTemplateDialog.baseVersionTitle"), structure: template.structure }]);
       setUserAssignments({});
     }
   }, [open, template]);
 
-  // Tự động gán và giới hạn hạn chót chốt OKR
+  // Auto-assign and limit the OKR finalization deadline
   useEffect(() => {
     if (selectedCycleId) {
       const cycle = cycles.find((c: any) => c.id === selectedCycleId);
@@ -172,14 +171,14 @@ export default function AssignTemplateDialog({
     const assignedSelectableCount = selectableUsers.filter((u) => !!userAssignments[u.id]).length;
     
     if (assignedSelectableCount === selectableUsers.length && selectableUsers.length > 0) {
-      // Bỏ chọn tất cả các user khả dụng
+      // Deselect all selectable users
       setUserAssignments((prev) => {
         const next = { ...prev };
         selectableUsers.forEach((u) => delete next[u.id]);
         return next;
       });
     } else {
-      // Chọn tất cả các user khả dụng
+      // Select all selectable users
       setUserAssignments((prev) => {
         const next = { ...prev };
         selectableUsers.forEach((u) => {
@@ -191,20 +190,19 @@ export default function AssignTemplateDialog({
   };
 
   const handleAssign = async () => {
-    const isEn = localStorage.getItem("i18nextLng") === "en";
     const assignedCount = Object.keys(userAssignments).length;
     if (assignedCount === 0 || !selectedCycleId) {
       showWarning(
-        isEn ? "Missing Information" : "Thiếu thông tin",
-        isEn ? "Please select at least 1 User and an Evaluation Cycle!" : "Vui lòng chọn ít nhất 1 User và Kỳ đánh giá!"
+        t("assignTemplateDialog.warnings.missingInfoTitle"),
+        t("assignTemplateDialog.warnings.selectCycle")
       );
       return;
     }
 
     if (!deadline) {
       showWarning(
-        isEn ? "Missing Information" : "Thiếu thông tin",
-        isEn ? "Please select the Negotiation & OKR Finalization Deadline!" : "Vui lòng chọn Hạn chót thương lượng & chốt OKR!"
+        t("assignTemplateDialog.warnings.missingInfoTitle"),
+        t("assignTemplateDialog.warnings.selectDeadline")
       );
       return;
     }
@@ -215,8 +213,8 @@ export default function AssignTemplateDialog({
 
     if (dlDate.isBefore(today)) {
       showWarning(
-        isEn ? "Invalid Deadline" : "Hạn chót không hợp lệ",
-        isEn ? "The OKR finalization deadline cannot be in the past!" : "Hạn chót chốt OKR không thể nằm trong quá khứ!"
+        t("assignTemplateDialog.warnings.invalidDeadlineTitle"),
+        t("assignTemplateDialog.warnings.deadlineInPast")
       );
       return;
     }
@@ -225,10 +223,8 @@ export default function AssignTemplateDialog({
       const maxDate = dayjs(cycle.startDate).subtract(3, "day").startOf("day");
       if (dlDate.isAfter(maxDate)) {
         showWarning(
-          isEn ? "Invalid Deadline" : "Hạn chót không hợp lệ",
-          isEn
-            ? `The deadline must be at least 3 days before the OKR cycle start date (maximum is ${maxDate.format("DD/MM/YYYY")})!`
-            : `Hạn chót phải diễn ra trước ngày bắt đầu kỳ OKR ít nhất 3 ngày (tối đa là ngày ${maxDate.format("DD/MM/YYYY")})!`
+          t("assignTemplateDialog.warnings.invalidDeadlineTitle"),
+          t("assignTemplateDialog.warnings.deadlineTooLate", { max: maxDate.format("DD/MM/YYYY") })
         );
         return;
       }
@@ -268,17 +264,15 @@ export default function AssignTemplateDialog({
       }
 
       showSuccess(
-        isEn ? "Success!" : "Thành công!",
-        isEn
-          ? `OKR Template assigned to ${assignedCount} personnel.`
-          : `Đã giao OKR Template cho ${assignedCount} nhân sự.`
+        t("assignTemplateDialog.alerts.successTitle"),
+        t("assignTemplateDialog.alerts.successMessage", { count: assignedCount })
       );
       onClose();
     } catch (error) {
       console.error("Error assigning template", error);
       showError(
-        isEn ? "Error" : "Lỗi",
-        isEn ? "An error occurred while assigning the template." : "Có lỗi xảy ra khi giao template."
+        t("assignTemplateDialog.alerts.errorTitle"),
+        t("assignTemplateDialog.alerts.errorMessage")
       );
     } finally {
       setLoading(false);
@@ -306,7 +300,6 @@ export default function AssignTemplateDialog({
 
   // Unique options for filters
   const departments = Array.from(new Set(users.map((u) => u.department?.id))).filter(Boolean).map((id) => users.find((u) => u.department?.id === id)?.department);
-  const positions = Array.from(new Set(users.map((u) => u.managementPosition?.id))).filter(Boolean).map((id) => users.find((u) => u.managementPosition?.id === id)?.managementPosition);
   const jobTitles = Array.from(new Set(users.map((u) => u.jobTitle))).filter(Boolean);
 
   const minDeadline = dayjs().format("YYYY-MM-DD");
@@ -343,7 +336,7 @@ export default function AssignTemplateDialog({
       <Divider />
 
       <DialogContent sx={{ mt: 0, p: 0 }}>
-        {/* Template Info — Sticky khi scroll */}
+        {/* Template Info — Sticky on scroll */}
         <Box
           sx={{
             position: "sticky",
@@ -384,7 +377,7 @@ export default function AssignTemplateDialog({
               {t("assignTemplateDialog.createCustomVersion")}
             </Button>
           </Box>
-          {/* ═══ PHẦN 1: THÔNG TIN BẮT BUỘC ═══ */}
+          {/* ═══ SECTION 1: REQUIRED INFORMATION ═══ */}
           <Paper
             variant="outlined"
             sx={{
@@ -431,7 +424,7 @@ export default function AssignTemplateDialog({
                 value={deadline}
                 onChange={(e) => setDeadline(e.target.value)}
                 InputLabelProps={{ shrink: true }}
-                helperText={t("assignTemplateDialog.deadlineHelperText", { min: dayjs().format("DD/MM/YYYY"), max: maxDeadline ? dayjs(maxDeadline).format("DD/MM/YYYY") : (localStorage.getItem("i18nextLng") === "en" ? "start date - 3 days" : "ngày bắt đầu - 3 ngày") })}
+                helperText={t("assignTemplateDialog.deadlineHelperText", { min: dayjs().format("DD/MM/YYYY"), max: maxDeadline ? dayjs(maxDeadline).format("DD/MM/YYYY") : t("assignTemplateDialog.deadlineMaxFallback") })}
                 inputProps={{
                   min: minDeadline,
                   max: maxDeadline || undefined,
@@ -442,7 +435,7 @@ export default function AssignTemplateDialog({
 
           <Divider sx={{ mb: 3 }} />
 
-          {/* ═══ PHẦN 2: BỘ LỌC NHÂN SỰ (Tùy chọn) ═══ */}
+          {/* ═══ SECTION 2: STAFF FILTER (Optional) ═══ */}
           <Box sx={{ mb: 3 }}>
             <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: "bold", color: "text.secondary", display: "flex", alignItems: "center", gap: 1 }}>
               {t("assignTemplateDialog.filterStaff")}
@@ -513,7 +506,7 @@ export default function AssignTemplateDialog({
             </Box>
           </Box>
 
-          {/* ═══ PHẦN 3: BẢNG CHỌN NHÂN SỰ ═══ */}
+          {/* ═══ SECTION 3: STAFF SELECTION TABLE ═══ */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
             <PersonSearch color="primary" />
             <Typography variant="h6" fontWeight="bold">
@@ -636,7 +629,7 @@ export default function AssignTemplateDialog({
                             >
                               {(user.name || user.email)?.[0]?.toUpperCase()}
                             </Avatar>
-                            {user.name || "(Chưa đặt tên)"}
+                            {user.name || "(No name set)"}
                           </Box>
                         </TableCell>
                         <TableCell sx={{ fontSize: "0.85rem" }}>
@@ -699,7 +692,7 @@ export default function AssignTemplateDialog({
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 <MenuItem value="">
-                                  <em style={{ color: "gray" }}>-- {localStorage.getItem("i18nextLng") === "en" ? "Do not assign" : "Không giao"} --</em>
+                                  <em style={{ color: "gray" }}>-- {t("assignTemplateDialog.doNotAssign")} --</em>
                                 </MenuItem>
                                 {variants.map((v) => (
                                   <MenuItem key={v.id} value={v.id} sx={{ fontWeight: v.id === "base" ? "bold" : "normal" }}>
@@ -724,16 +717,14 @@ export default function AssignTemplateDialog({
             count={filteredUsers.length}
             rowsPerPage={rowsPerPage}
             page={page}
-            onPageChange={(e, newPage) => setPage(newPage)}
+            onPageChange={(_, newPage) => setPage(newPage)}
             onRowsPerPageChange={(e) => {
               setRowsPerPage(parseInt(e.target.value, 10));
               setPage(0);
             }}
-            labelRowsPerPage={localStorage.getItem("i18nextLng") === "en" ? "Rows per page:" : "Số dòng mỗi trang:"}
+            labelRowsPerPage={t("assignTemplateDialog.rowsPerPage")}
             labelDisplayedRows={({ from, to, count }) =>
-              localStorage.getItem("i18nextLng") === "en"
-                ? `${from}–${to} of ${count !== -1 ? count : `more than ${to}`}`
-                : `${from}–${to} trong ${count !== -1 ? count : `hơn ${to}`}`
+              t(count !== -1 ? "assignTemplateDialog.displayedRows" : "assignTemplateDialog.displayedRowsMore", { from, to, count })
             }
           />
 
@@ -752,11 +743,7 @@ export default function AssignTemplateDialog({
             }}
           >
             <Typography variant="body2" color="success.main" sx={{ mb: 1 }}>
-              {localStorage.getItem("i18nextLng") === "en" ? (
-                <>Selected <strong>{Object.keys(userAssignments).length}</strong> staff:</>
-              ) : (
-                <>✅ Đã chọn <strong>{Object.keys(userAssignments).length}</strong> nhân sự:</>
-              )}
+              {t("assignTemplateDialog.selectedStaffCount", { count: Object.keys(userAssignments).length })}
             </Typography>
             <Box
               sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}
@@ -777,7 +764,7 @@ export default function AssignTemplateDialog({
               })}
               {Object.keys(userAssignments).length > 10 && (
                 <Chip
-                  label={localStorage.getItem("i18nextLng") === "en" ? `+${Object.keys(userAssignments).length - 10} others` : `+${Object.keys(userAssignments).length - 10} người khác`}
+                  label={t("assignTemplateDialog.othersCount", { count: Object.keys(userAssignments).length - 10 })}
                   size="small"
                   color="default"
                 />
@@ -797,7 +784,7 @@ export default function AssignTemplateDialog({
             startIcon={<Send />}
           >
             {loading
-              ? (localStorage.getItem("i18nextLng") === "en" ? "Assigning..." : "Đang giao...")
+              ? t("assignTemplateDialog.assigning")
               : t("assignTemplateDialog.assignButton", { count: Object.keys(userAssignments).length })}
           </Button>
         </Box>

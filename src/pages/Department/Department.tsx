@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { api } from "../../services/api";
 import { confirmDelete, showError } from "../../utils/swal";
 import DepartmentMasterView from "./components/DepartmentMasterView";
@@ -7,6 +8,7 @@ import DepartmentDetailView from "./components/DepartmentDetailView";
 import type { Department } from "./department.types";
 
 export default function DepartmentPage() {
+  const { t } = useTranslation();
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(false);
   
@@ -81,7 +83,7 @@ export default function DepartmentPage() {
         await api.delete(`/departments/${id}`);
         fetchDepartments();
       } catch (error) {
-        showError("Xóa thất bại", "Không thể xóa bộ môn này.");
+        showError(t("departmentMaster.deleteErrorTitle"), t("departmentMaster.deleteErrorText"));
       }
     }
   };

@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Box,
   Typography,
@@ -11,7 +12,6 @@ import {
 import { useDashboardData } from "./useDashboardData";
 import WelcomeHeader from "./components/WelcomeHeader";
 import OkrStepper from "./components/OkrStepper";
-import ScoreGauge from "./components/ScoreGauge";
 import ObjectiveRadarChart from "./components/ObjectiveRadarChart";
 import DataEntryProgress from "./components/DataEntryProgress";
 import ActionCard from "./components/ActionCard";
@@ -20,6 +20,7 @@ import CycleProgress from "./components/CycleProgress";
 import EvaluationStatus from "./components/EvaluationStatus";
 
 export default function Dashboard() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   // Retrieve user and roles to check for redirection
@@ -61,7 +62,7 @@ export default function Dashboard() {
       >
         <CircularProgress size={48} sx={{ color: "#3b82f6" }} />
         <Typography color="text.secondary" variant="body2">
-          Đang tải Dashboard...
+          {t("dashboard.loading")}
         </Typography>
       </Box>
     );
@@ -71,7 +72,7 @@ export default function Dashboard() {
     return (
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <Alert severity="error">
-          <AlertTitle>Lỗi</AlertTitle>
+          <AlertTitle>{t("dashboard.errorTitle")}</AlertTitle>
           {error}
         </Alert>
       </Container>
@@ -90,7 +91,7 @@ export default function Dashboard() {
     <Container maxWidth="xl" sx={{ py: 2 }}>
       {/* === SECTION 1: Welcome Header === */}
       <WelcomeHeader
-        cycleName={currentCycle?.name || "Chưa có kỳ đánh giá"}
+        cycleName={currentCycle?.name || t("dashboard.welcome.noCycle")}
         cycleStatus={currentCycle?.status || "CLOSED"}
       />
 

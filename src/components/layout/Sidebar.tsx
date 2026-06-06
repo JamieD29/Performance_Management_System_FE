@@ -86,7 +86,7 @@ export default function Sidebar({
     : [];
 
   const isAdmin = userRoles.includes("ADMIN");
-  // User có chức vụ quản lý mới thấy được nhóm bộ môn (Overview, OKR, Nhân sự)
+  // Only users with management positions can see the department group (Overview, OKR, Personnel)
   const hasManagementPosition = !!user?.managementPosition;
   const canManage = isAdmin || hasManagementPosition;
   
@@ -98,7 +98,7 @@ export default function Sidebar({
   const dashboardLabel = hasManagementPosition ? t("sidebar.deanDashboard") : t("sidebar.dashboard");
   const dashboardActive = isActive(dashboardPath);
 
-  // Admin, hoặc bất kỳ user nào có chức vụ quản lý đều thấy tab Nhân sự
+  // Admin, or any user with a management position, can see the Personnel tab
   const canViewUsers = canManage;
 
   const departmentName = user.department?.name || t("sidebar.departmentGroup");
@@ -433,7 +433,7 @@ export default function Sidebar({
             </Tooltip>
           </Box>
 
-          {/* ── OKR Của tôi ── */}
+          {/* ── OKR ── */}
           <Box sx={{ px: collapsed ? 0.5 : 1, mb: 3 }}>
             <Tooltip
               title={collapsed ? t("sidebar.myOkr") : ""}
@@ -498,7 +498,7 @@ export default function Sidebar({
             </Tooltip>
           </Box>
 
-          {/* ── Phiếu Đánh Giá ── */}
+          {/* ── Evaluation Form ── */}
           <Box sx={{ px: collapsed ? 0.5 : 1, mb: 3 }}>
             <Tooltip
               title={collapsed ? t("sidebar.evaluationForm") : ""}
@@ -565,7 +565,7 @@ export default function Sidebar({
           </>
           )}
 
-          {/* ── NHÓM BỘ MÔN (Chỉ hiển thị cho Admin hoặc User có chức vụ quản lý) ── */}
+          {/* ── DEPARTMENT GROUP (Only visible to Admin or users with management positions) ── */}
           {!canManage ? null : isAdmin ? (
             <>
               {/* Admin Dashboard */}
@@ -619,7 +619,7 @@ export default function Sidebar({
                 </Tooltip>
               </Box>
 
-              {/* Dashboard Quản lý */}
+              {/* Manager Dashboard */}
               {canViewDeanDashboard && (
                 <Box sx={{ px: collapsed ? 0.5 : 1, mb: 1.5 }}>
                   <Tooltip title={collapsed ? t("sidebar.deanDashboard") : ""} placement="right" arrow>
@@ -704,7 +704,7 @@ export default function Sidebar({
                 </Tooltip>
               </Box>
 
-              {/* Quản lý OKR */}
+              {/* OKR Management */}
               <Box sx={{ px: collapsed ? 0.5 : 1, mb: 1.5 }}>
                 <Tooltip title={collapsed ? t("sidebar.okrManagement") : ""} placement="right" arrow>
                   <ListItemButton
@@ -732,7 +732,7 @@ export default function Sidebar({
                 </Tooltip>
               </Box>
 
-              {/* Nhân sự */}
+              {/* Personnel */}
               {canViewUsers && (
                 <Box sx={{ px: collapsed ? 0.5 : 1, mb: 1.5 }}>
                   <Tooltip title={collapsed ? t("sidebar.personnel") : ""} placement="right" arrow>

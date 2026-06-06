@@ -30,7 +30,7 @@ import {
   InputAdornment,
   Tooltip,
 } from "@mui/material";
-import { Check, Close, Visibility, ExpandMore, Search } from "@mui/icons-material";
+import { Check, Close, ExpandMore, Search } from "@mui/icons-material";
 import { api } from "../../../services/api";
 import { confirmAction, showSuccess, showError, showInfo } from "../../../utils/swal";
 import OkrManagerTree from "./OkrManagerTree";
@@ -107,34 +107,31 @@ export default function DeanApprovalTab() {
   };
 
   const handleApprove = async (okrId: string) => {
-    const isEn = localStorage.getItem("i18nextLng") === "en";
     const ok = await confirmAction({
-      title: isEn ? "Approve proposal?" : "Duyệt đề xuất?",
-      text: isEn ? "Are you sure you want to approve this adjustment proposal?" : "Bạn xác nhận duyệt đề xuất điều chỉnh này?",
+      title: t("deanApprovalTab.alerts.approveConfirmTitle"),
+      text: t("deanApprovalTab.alerts.approveConfirmText"),
       icon: "question",
-      confirmText: isEn ? "Approve" : "Duyệt",
+      confirmText: t("deanApprovalTab.alerts.approveBtn"),
       confirmColor: "#16a34a",
     });
     if (!ok) return;
     try {
       await api.put(`/okrs/${okrId}/dean-approve`);
       await showSuccess(
-        isEn ? "Success!" : "Thành công!",
-        isEn ? "Proposal approved." : "Đã duyệt đề xuất."
+        t("deanApprovalTab.alerts.successTitle"),
+        t("deanApprovalTab.alerts.approveSuccessText")
       );
       await showInfo(
-        isEn ? "Track Progress" : "Theo dõi tiến độ",
-        isEn
-          ? "OKR finalized. You can track staff progress under the 'Evaluation / OKR Reports' tab."
-          : "OKR đã được chốt. Bạn có thể theo dõi tiến độ thực hiện của nhân sự tại tab \"Đánh giá / Báo cáo OKR\"."
+        t("deanApprovalTab.alerts.trackProgressTitle"),
+        t("deanApprovalTab.alerts.trackProgressText")
       );
       fetchPending();
     } catch (error: any) {
       console.error("Error approving", error);
       const apiMsg = error.response?.data?.message;
       showError(
-        isEn ? "Error" : "Lỗi",
-        apiMsg || (isEn ? "An error occurred while approving." : "Có lỗi xảy ra khi duyệt.")
+        t("deanApprovalTab.alerts.errorTitle"),
+        apiMsg || t("deanApprovalTab.alerts.approveErrorText")
       );
     }
   };
@@ -147,14 +144,13 @@ export default function DeanApprovalTab() {
 
   const handleReject = async () => {
     if (!selectedOkr) return;
-    const isEn = localStorage.getItem("i18nextLng") === "en";
     try {
       await api.put(`/okrs/${selectedOkr.id}/dean-reject`, {
         reason: rejectReason,
       });
       showSuccess(
-        isEn ? "Rejected" : "Đã từ chối",
-        isEn ? "Proposal has been rejected." : "Đề xuất đã bị từ chối."
+        t("deanApprovalTab.alerts.rejectSuccessTitle"),
+        t("deanApprovalTab.alerts.rejectSuccessText")
       );
       setRejectDialog(false);
       fetchPending();
@@ -162,8 +158,8 @@ export default function DeanApprovalTab() {
       console.error("Error rejecting", error);
       const apiMsg = error.response?.data?.message;
       showError(
-        isEn ? "Error" : "Lỗi",
-        apiMsg || (isEn ? "An error occurred while rejecting." : "Có lỗi xảy ra khi từ chối.")
+        t("deanApprovalTab.alerts.errorTitle"),
+        apiMsg || t("deanApprovalTab.alerts.rejectErrorText")
       );
     }
   };

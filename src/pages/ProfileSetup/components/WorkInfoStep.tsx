@@ -25,7 +25,7 @@ interface WorkInfoStepProps {
   onChange: (field: keyof ProfileFormData, value: string) => void;
   departments: DepartmentOption[];
   loadingDepts: boolean;
-  // 📌 Enum options từ BE (Single Source of Truth)
+  // 📌 Enum options from BE (Single Source of Truth)
   academicRanks: EnumOption[];
   degrees: EnumOption[];
   jobTitles: EnumOption[];
@@ -57,7 +57,7 @@ export function WorkInfoStep({
 
   return (
     <Stack spacing={2.5}>
-      {/* 1. Đơn vị công tác */}
+      {/* 1. Work Department */}
       <AnimatedField delay={200}>
         <Stack direction="row" spacing={1.5} alignItems="center" mb={1.5}>
           <Box
@@ -101,7 +101,7 @@ export function WorkInfoStep({
         </FormControl>
       </AnimatedField>
 
-      {/* 2. Học vị */}
+      {/* 2. Academic Degree */}
       <AnimatedField delay={400}>
         <Stack direction="row" spacing={1.5} alignItems="center" mb={1.5}>
           <Box
@@ -141,7 +141,7 @@ export function WorkInfoStep({
         </FormControl>
       </AnimatedField>
 
-      {/* 3. Học hàm */}
+      {/* 3. Academic Rank */}
       <AnimatedField delay={600}>
         <Stack direction="row" spacing={1.5} alignItems="center" mb={1.5}>
           <Box
@@ -179,7 +179,7 @@ export function WorkInfoStep({
         </FormControl>
       </AnimatedField>
 
-      {/* 4. Chức danh nghề nghiệp */}
+      {/* 4. Professional Job Title */}
       <AnimatedField delay={800}>
         <Stack direction="row" spacing={1.5} alignItems="center" mb={1.5}>
           <Box

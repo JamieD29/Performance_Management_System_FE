@@ -1,6 +1,6 @@
-import React from "react";
 import { Box, Typography, Paper } from "@mui/material";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 interface ScoreGaugeProps {
   selfScore: number;
@@ -15,6 +15,7 @@ export default function ScoreGauge({
   maxScore,
   transparent = false,
 }: ScoreGaugeProps) {
+  const { t } = useTranslation();
   const primaryScore = managerScore ?? selfScore;
   const percentage = Math.min(100, (primaryScore / maxScore) * 100);
   const isPrimary = managerScore !== null;
@@ -27,9 +28,9 @@ export default function ScoreGauge({
   };
 
   const getScoreLabel = (pct: number) => {
-    if (pct >= 86) return "Xuất sắc";
-    if (pct >= 60) return "Tốt";
-    return "Cần cải thiện";
+    if (pct >= 86) return t("dashboard.scoreGauge.labels.excellent");
+    if (pct >= 60) return t("dashboard.scoreGauge.labels.good");
+    return t("dashboard.scoreGauge.labels.needsImprovement");
   };
 
   const colors = getScoreColor(percentage);
@@ -64,7 +65,7 @@ export default function ScoreGauge({
         fontWeight="700"
         sx={{ mb: 2, color: "#1e293b" }}
       >
-        📊 {isPrimary ? "Điểm TK chấm" : "Điểm tự khai"}
+        📊 {isPrimary ? t("dashboard.scoreGauge.managerScoreTitle") : t("dashboard.scoreGauge.selfScoreTitle")}
       </Typography>
 
       {/* SVG Gauge */}
@@ -128,7 +129,7 @@ export default function ScoreGauge({
               variant="caption"
               sx={{ color: "#64748b", fontSize: "0.7rem" }}
             >
-              / {maxScore} điểm
+              {t("dashboard.scoreGauge.pointsDenominator", { maxScore })}
             </Typography>
           </motion.div>
         </Box>
@@ -143,7 +144,6 @@ export default function ScoreGauge({
         {getScoreLabel(percentage)}
       </Typography>
 
-      {/* Nếu có cả 2 điểm, show so sánh nhanh */}
       {managerScore !== null && (
         <Box
           sx={{
@@ -159,7 +159,7 @@ export default function ScoreGauge({
         >
           <Box sx={{ textAlign: "center" }}>
             <Typography variant="caption" color="text.secondary">
-              Tự khai
+              {t("dashboard.scoreGauge.selfReportShort")}
             </Typography>
             <Typography variant="body2" fontWeight="700" color="#64748b">
               {selfScore.toFixed(1)}
@@ -167,7 +167,7 @@ export default function ScoreGauge({
           </Box>
           <Box sx={{ textAlign: "center" }}>
             <Typography variant="caption" color="text.secondary">
-              TK chấm
+              {t("dashboard.scoreGauge.managerReportShort")}
             </Typography>
             <Typography variant="body2" fontWeight="700" color={colors.main}>
               {managerScore.toFixed(1)}
@@ -175,7 +175,7 @@ export default function ScoreGauge({
           </Box>
           <Box sx={{ textAlign: "center" }}>
             <Typography variant="caption" color="text.secondary">
-              Chênh lệch
+              {t("dashboard.scoreGauge.difference")}
             </Typography>
             <Typography
               variant="body2"

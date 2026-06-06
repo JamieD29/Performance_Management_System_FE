@@ -30,7 +30,7 @@ export default function DepartmentOKR() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { t } = useTranslation();
 
-  // Ưu tiên đọc tab từ URL query param (?tab=N), fallback về localStorage
+  // Prioritize reading tab from URL query param (?tab=N), fallback to localStorage
   const getInitialTab = () => {
     const urlTab = searchParams.get("tab");
     if (urlTab !== null) {
@@ -44,7 +44,7 @@ export default function DepartmentOKR() {
 
   const [tabValue, setTabValue] = useState(getInitialTab);
 
-  // Đồng bộ tab khi URL thay đổi (ví dụ: navigate từ dashboard)
+  // Sync tab when URL changes (e.g., navigating from dashboard)
   useEffect(() => {
     const urlTab = searchParams.get("tab");
     if (urlTab !== null) {
@@ -108,12 +108,12 @@ export default function DepartmentOKR() {
           onChange={(_, v) => {
             setTabValue(v);
             localStorage.setItem("department_okr_tab", v.toString());
-            // Cập nhật URL param để giữ đồng bộ
+            // Update URL param to keep in sync
             setSearchParams({ tab: v.toString() }, { replace: true });
           }}
           variant="fullWidth"
           TabIndicatorProps={{
-            style: { display: "none" } // Ẩn đường kẻ gạch chân mặc định
+            style: { display: "none" } // Hide default underline indicator
           }}
           sx={{
             minHeight: 48,

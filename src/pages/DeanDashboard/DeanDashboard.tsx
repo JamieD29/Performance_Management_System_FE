@@ -18,17 +18,17 @@ import { useTranslation } from "react-i18next";
 export default function DeanDashboard() {
   const { t } = useTranslation();
   const [selectedCycleId, setSelectedCycleId] = useState<string>("");
-  // Truyền selectedCycleId vào hook (nếu empty thì backend sẽ tự lấy kỳ mặc định)
+  // Pass selectedCycleId to hook (if empty, backend will use the default cycle)
   const { data, loading, error } = useDeanDashboardData(selectedCycleId || undefined);
 
-  // Sync selectedCycleId khi data lần đầu được load (để hiện đúng ở Select)
+  // Sync selectedCycleId when data is loaded for the first time (to display correctly in Select)
   useEffect(() => {
     if (data?.cycle?.id && !selectedCycleId) {
       setSelectedCycleId(data.cycle.id);
     }
   }, [data?.cycle?.id, selectedCycleId]);
 
-  // Lấy user từ session
+  // Get user from session
   let userName = t("deanDashboard.welcome.defaultName", { defaultValue: "Trưởng khoa" });
   try {
     const userStr = localStorage.getItem("user");
@@ -84,7 +84,7 @@ export default function DeanDashboard() {
 
   return (
     <Container maxWidth="xl" sx={{ py: 2 }}>
-      {/* Tất cả section dùng chung gap: 3 để khoảng cách đồng đều */}
+      {/* All sections use gap: 3 for consistent spacing */}
       <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
 
         {/* === SECTION 1: Welcome Header + Cycle Info === */}
@@ -111,10 +111,10 @@ export default function DeanDashboard() {
             gap: 3,
           }}
         >
-          {/* Bảng xếp hạng cá nhân */}
+          {/* Staff ranking table */}
           <StaffRankingTable ranking={staffRanking} />
 
-          {/* Phân bổ xếp loại (luôn hiển thị, truyền thêm ratingDetails) */}
+          {/* Rating distribution (always visible, with ratingDetails) */}
           <Box sx={{ height: "100%" }}>
             <RatingDistribution 
               distribution={ratingDistribution} 
@@ -123,7 +123,7 @@ export default function DeanDashboard() {
           </Box>
         </Box>
 
-        {/* === SECTION 4: So sánh bộ môn === */}
+        {/* === SECTION 4: Department comparison === */}
         <DepartmentComparison stats={departmentStats} />
 
       </Box>

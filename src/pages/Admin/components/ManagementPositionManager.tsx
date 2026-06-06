@@ -189,13 +189,13 @@ export default function ManagementPositionManager() {
   const getPermissionColor = (level?: string) => {
     switch (level) {
       case "SYSTEM":
-        return "#9f1239"; // Cấp cao nhất
+        return "#9f1239";
       case "KHOA":
-        return "#1d4ed8"; // Cấp Khoa
+        return "#1d4ed8"; 
       case "DON_VI":
-        return "#047857"; // Cấp Bộ môn
+        return "#047857"; 
       default:
-        return "#64748b"; // Không quyền
+        return "#64748b"; 
     }
   };
 

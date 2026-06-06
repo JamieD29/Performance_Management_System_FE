@@ -26,8 +26,6 @@ export default function AssignOkrTab() {
   const [templates, setTemplates] = useState<any[]>([]);
   const [openAssign, setOpenAssign] = useState(false);
   const [assignTemplate, setAssignTemplate] = useState<any>(null);
-
-  // Kiểm tra vai trò Admin từ localStorage
   const isAdmin = useMemo(() => {
     const userString = localStorage.getItem("user");
     if (!userString) return false;

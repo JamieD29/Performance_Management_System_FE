@@ -21,14 +21,8 @@ import {
   CalendarToday,
   Settings,
 } from "@mui/icons-material";
-
-// 1. SỬA ĐƯỜNG DẪN: Lùi 2 cấp (Admin -> pages -> src/types)
 import type { User } from "../../types";
-
-// 2. SỬA ĐƯỜNG DẪN: Lùi 1 cấp ra pages, rồi vào Performance
 import CycleManagement from "../Performance/components/CycleManagement";
-
-// 3. SỬA ĐƯỜNG DẪN: Vì AdminSetting giờ đang ở CÙNG THƯ MỤC CHA với components
 import WhitelistManager from "./components/WhitelistManager";
 import SystemLogs from "./components/SystemLogs";
 import RoleManagementTab from "./components/RoleManagementTab";
@@ -179,7 +173,6 @@ export default function AdminSettings() {
         </Paper>
       )}
 
-      {/* CONTENT AREA */}
       <Box sx={{ flexGrow: 1, p: 4, bgcolor: "#fff", overflow: "auto" }}>
         <Container maxWidth="xl">
           <Box sx={{ mb: 3, pb: 2, borderBottom: "1px solid #f1f5f9" }}>
@@ -188,7 +181,6 @@ export default function AdminSettings() {
             </Typography>
           </Box>
 
-          {/* RENDER COMPONENT TƯƠNG ỨNG TỪ CÁC FILE ĐÃ TÁCH */}
           {activeTab === "cycles" && <CycleManagement />}
           {activeTab === "whitelist" && <WhitelistManager />}
           {activeTab === "roles" && <RoleManagementTab />}

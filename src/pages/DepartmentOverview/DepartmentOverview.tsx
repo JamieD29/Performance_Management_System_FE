@@ -44,7 +44,7 @@ import { api } from "../../services/api";
 import { useTranslation } from "react-i18next";
 import { useDepartmentOverviewData } from "./useDepartmentOverviewData";
 
-// Interface khớp với DB
+// Interface matching DB schema
 interface Department {
   id: string;
   name: string;
@@ -209,7 +209,7 @@ export default function DepartmentOverview() {
         aVal = a.name;
         bVal = b.name;
       } else {
-        // Lấy điểm lớn nhất trong các OKR của user để sort
+        // Get the highest score among user's OKRs for sorting
         aVal = a.okrs.length > 0 ? Math.max(...a.okrs.map(o => Number(o[okrOrderBy as keyof typeof o]) || 0)) : 0;
         bVal = b.okrs.length > 0 ? Math.max(...b.okrs.map(o => Number(o[okrOrderBy as keyof typeof o]) || 0)) : 0;
       }
@@ -279,7 +279,7 @@ export default function DepartmentOverview() {
     </Breadcrumbs>
   );
 
-  // --- VIEW 1: DANH SÁCH BỘ MÔN ---
+  // --- VIEW 1: DEPARTMENT LIST ---
   if (!selectedDept) {
     return (
       <Box sx={{ p: 3 }}>
@@ -402,7 +402,7 @@ export default function DepartmentOverview() {
     );
   }
 
-  // --- VIEW 2: DASHBOARD CHI TIẾT ---
+  // --- VIEW 2: DETAILED DASHBOARD ---
   return (
     <Box sx={{ p: 3 }}>
       {renderBreadcrumbs()}
@@ -461,9 +461,9 @@ export default function DepartmentOverview() {
         </Box>
       </Box>
 
-      {/* 4 Widgets Thống kê */}
+      {/* 4 Statistics Widgets */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        {/* Card 1: Nhân sự */}
+        {/* Card 1: Staff */}
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Paper
             elevation={0}
@@ -496,7 +496,7 @@ export default function DepartmentOverview() {
           </Paper>
         </Grid>
 
-        {/* Card 2: Tổng OKR đã giao */}
+        {/* Card 2: Total OKRs Assigned */}
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Paper
             elevation={0}
@@ -529,7 +529,7 @@ export default function DepartmentOverview() {
           </Paper>
         </Grid>
 
-        {/* Card 3: Tỉ lệ hoàn thành */}
+        {/* Card 3: Completion Rate */}
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Paper
             elevation={0}
@@ -562,7 +562,7 @@ export default function DepartmentOverview() {
           </Paper>
         </Grid>
 
-        {/* Card 4: Cần chú ý */}
+        {/* Card 4: Attention Required */}
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Paper
             elevation={0}
@@ -609,7 +609,7 @@ export default function DepartmentOverview() {
         </Paper>
       ) : overviewData ? (
         <Grid container spacing={3}>
-          {/* Trạng thái OKR theo Nhân sự */}
+          {/* OKR Status by Staff */}
           <Grid size={{ xs: 12 }}>
             <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: "1px solid #e2e8f0" }}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 3 }}>
@@ -748,7 +748,7 @@ export default function DepartmentOverview() {
             </Paper>
           </Grid>
 
-          {/* Phiếu Đánh Giá theo nhân sự */}
+          {/* Evaluation Forms by Staff */}
           <Grid size={{ xs: 12 }}>
             <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: "1px solid #e2e8f0" }}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 3 }}>

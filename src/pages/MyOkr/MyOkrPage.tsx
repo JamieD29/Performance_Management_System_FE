@@ -94,7 +94,7 @@ export default function MyOkrPage() {
   const pendingCount = filteredOkrs.filter((o) => o.status === "PENDING").length;
   const acceptedCount = filteredOkrs.filter((o) => o.status === "ACCEPTED").length;
 
-  // Đàm phán hoàn tất nếu tất cả OKR trong kỳ đã được duyệt (không còn PENDING/NEGOTIATING)
+  // Negotiation is complete if all OKRs in the cycle have been approved (no more PENDING/NEGOTIATING)
   const isNegotiationComplete =
     filteredOkrs.length > 0 &&
     filteredOkrs.every((o) =>

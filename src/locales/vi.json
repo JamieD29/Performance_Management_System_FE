@@ -331,7 +331,9 @@
     "trySearchOther": "Thử tìm kiếm với từ khóa khác",
     "noDataInSystem": "Chưa có dữ liệu bộ môn trong hệ thống",
     "edit": "Chỉnh sửa",
-    "delete": "Xóa"
+    "delete": "Xóa",
+    "deleteErrorTitle": "Xóa thất bại",
+    "deleteErrorText": "Không thể xóa bộ môn này."
   },
   "deanApprovalTab": {
     "title": "Duyệt Đề Xuất Điều Chỉnh OKR",
@@ -375,6 +377,20 @@
       "rejectReasonPlaceholder": "VD: Tiêu chuẩn đánh giá không thể thay đổi...",
       "cancel": "Hủy",
       "confirmReject": "Xác nhận từ chối"
+    },
+    "alerts": {
+      "approveConfirmTitle": "Duyệt đề xuất?",
+      "approveConfirmText": "Bạn xác nhận duyệt đề xuất điều chỉnh này?",
+      "approveBtn": "Duyệt",
+      "successTitle": "Thành công!",
+      "approveSuccessText": "Đã duyệt đề xuất.",
+      "trackProgressTitle": "Theo dõi tiến độ",
+      "trackProgressText": "OKR đã được chốt. Bạn có thể theo dõi tiến độ thực hiện của nhân sự tại tab \"Đánh giá / Báo cáo OKR\".",
+      "errorTitle": "Lỗi",
+      "approveErrorText": "Có lỗi xảy ra khi duyệt.",
+      "rejectSuccessTitle": "Đã từ chối",
+      "rejectSuccessText": "Đề xuất đã bị từ chối.",
+      "rejectErrorText": "Có lỗi xảy ra khi từ chối."
     }
   },
   "assignTemplateDialog": {
@@ -410,7 +426,30 @@
     "noStaffFound": "Không tìm thấy nhân sự nào phù hợp với tiêu chí của template.",
     "alreadyAssigned": "Đã giao OKR",
     "cancel": "Hủy",
-    "assignButton": "Giao OKR cho {{count}} Nhân sự"
+    "assignButton": "Giao OKR cho {{count}} Nhân sự",
+    "baseVersionTitle": "Phiên bản Gốc (Mặc định)",
+    "warnings": {
+      "missingInfoTitle": "Thiếu thông tin",
+      "selectCycle": "Vui lòng chọn ít nhất 1 User và Kỳ đánh giá!",
+      "selectDeadline": "Vui lòng chọn Hạn chót thương lượng & chốt OKR!",
+      "invalidDeadlineTitle": "Hạn chót không hợp lệ",
+      "deadlineInPast": "Hạn chót chốt OKR không thể nằm trong quá khứ!",
+      "deadlineTooLate": "Hạn chót phải diễn ra trước ngày bắt đầu kỳ OKR ít nhất 3 ngày (tối đa là ngày {{max}})!"
+    },
+    "alerts": {
+      "successTitle": "Thành công!",
+      "successMessage": "Đã giao OKR Template cho {{count}} nhân sự.",
+      "errorTitle": "Lỗi",
+      "errorMessage": "Có lỗi xảy ra khi giao template."
+    },
+    "deadlineMaxFallback": "ngày bắt đầu - 3 ngày",
+    "doNotAssign": "Không giao",
+    "rowsPerPage": "Số dòng mỗi trang:",
+    "displayedRows": "{{from}}–{{to}} trong {{count}}",
+    "displayedRowsMore": "{{from}}–{{to}} hơn {{to}}",
+    "selectedStaffCount": "✅ Đã chọn {{count}} nhân sự:",
+    "othersCount": "+{{count}} người khác",
+    "assigning": "Đang giao..."
   },
   "okrCard": {
     "detailsTitle": "Chi tiết OKR",
@@ -445,6 +484,96 @@
       "selfScoreSubmitted": "Điểm Tự Khai",
       "managerQtyApproved": "S.Lượng QL Chốt",
       "managerScoreApproved": "Điểm QL Chốt"
+    },
+    "points": "điểm",
+    "pointsShort": "đ",
+    "status": {
+      "pending": "Chờ phản hồi",
+      "negotiating": "Đang đàm phán",
+      "accepted": "Đã chấp nhận — Sẵn sàng tự khai",
+      "submitted": "Đã nộp bài — Chờ duyệt",
+      "completed": "Hoàn tất",
+      "rejected": "Bị từ chối"
+    },
+    "submitting": "Đang nộp...",
+    "submitChanges": "Gửi thay đổi & Yêu cầu duyệt",
+    "submitChangesBtn": "Gửi thay đổi & Yêu cầu duyệt",
+    "sendProposalApproval": "Gửi yêu cầu duyệt đề xuất",
+    "agreeToAccept": "Tôi đồng ý Chấp nhận OKR này",
+    "finalScoreApproved": "Điểm cuối cùng: {{score}} điểm — Đã được Trưởng khoa duyệt.",
+    "cycleNotStartedYet": "Kỳ đánh giá chưa bắt đầu (Dự kiến bắt đầu từ {{date}}). Bạn chưa thể tự khai điểm lúc này.",
+    "new": "Mới",
+    "old": "Cũ",
+    "unit": "đv",
+    "commentsCount": "{{count}} phản hồi",
+    "deletedCriteria": "Các tiêu chí đã bị xóa",
+    "errors": {
+      "errorTitle": "Lỗi",
+      "enterContent": "Vui lòng nhập nội dung.",
+      "scoreStructure": "Lỗi cấu trúc điểm OKR"
+    },
+    "placeholders": {
+      "evidenceLink": "Link minh chứng...",
+      "link": "Link..."
+    },
+    "tooltips": {
+      "addCriteria": "Thêm tiêu chí",
+      "addSubCriteria": "Thêm tiêu chí con",
+      "undoChanges": "Hoàn tác thay đổi",
+      "edit": "Chỉnh sửa",
+      "deleteCriteria": "Xóa tiêu chí",
+      "deleteSubCriteria": "Xóa tiêu chí con",
+      "restore": "Khôi phục"
+    },
+    "alerts": {
+      "success": "Thành công",
+      "structureUpdated": "Đã gửi cấu trúc mới.",
+      "structureUpdateFailed": "Không thể cập nhật cấu trúc.",
+      "acceptTitle": "Chấp nhận OKR?",
+      "acceptText": "Sau khi chấp nhận, bạn sẽ bắt đầu tự khai điểm.",
+      "acceptConfirm": "Đồng ý chấp nhận",
+      "acceptError": "Có lỗi xảy ra khi chấp nhận OKR.",
+      "sendApprovalTitle": "Gửi yêu cầu duyệt?",
+      "sendApprovalText": "Xác nhận gửi yêu cầu duyệt OKR này lên Trưởng khoa/Quản lý.",
+      "sendApprovalConfirm": "Gửi yêu cầu",
+      "sendApprovalSuccess": "Đã gửi yêu cầu duyệt OKR.",
+      "sendApprovalError": "Có lỗi xảy ra khi gửi yêu cầu duyệt OKR.",
+      "sendMessageError": "Không thể gửi tin nhắn.",
+      "saveDraftError": "Không thể lưu nháp vào cơ sở dữ liệu.",
+      "submitReportTitle": "Nộp bài tự khai?",
+      "submitReportText": "Sau khi nộp, bài sẽ được gửi cho Trưởng khoa duyệt. Bạn chắc chắn chứ?",
+      "submitReportConfirm": "Nộp bài",
+      "submitReportSuccess": "Đã nộp bài tự khai thành công.",
+      "submitReportError": "Có lỗi xảy ra khi nộp bài."
+    },
+    "chips": {
+      "selfScore": "Tự chấm: {{score}}/{{max}}đ",
+      "managerScore": "QL chấm: {{score}}/{{max}}đ",
+      "waitingGrading": "Chờ chấm điểm",
+      "expectedScoreChip": "Điểm dự kiến: {{score}}/{{max}}đ",
+      "selfReported": "Tự khai: {{score}}đ",
+      "managerFinal": "QL chốt: {{score}}đ",
+      "maxScore": "Tối đa: {{score}} điểm"
+    },
+    "chat": {
+      "exchangeTitle": "Nội dung trao đổi:",
+      "senderUser": "Bạn",
+      "senderManager": "Trưởng khoa",
+      "noExchangeDesc": "Chưa có trao đổi nào. Bạn có thể đề xuất chỉnh sửa chỉ tiêu/điểm tại đây.",
+      "inputPlaceholder": "Nhập đề xuất điều chỉnh...",
+      "sendBtn": "Gửi"
+    },
+    "dialogs": {
+      "editCriteria": {
+        "title": "Chỉnh sửa Tiêu chí",
+        "contentLabel": "Nội dung tiêu chí",
+        "maxScoreLabel": "Điểm tối đa",
+        "unitScoreLabel": "Điểm / Đơn vị",
+        "unitLabel": "Đơn vị tính",
+        "unitPlaceholder": "VD: bài, đv, giờ...",
+        "cancel": "Hủy",
+        "save": "Lưu thay đổi"
+      }
     }
   },
   "evaluationDetailsDialog": {
@@ -510,7 +639,11 @@
     "managerCommentPlaceholder": "Ghi nhận xét đánh giá dành cho viên chức...",
     "managerRatingLabel": "2. Phê duyệt kết quả Xếp loại chất lượng viên chức:",
     "cancelBtn": "Hủy / Đóng",
-    "saveBtn": "Lưu Kết Luận Xếp Loại"
+    "saveBtn": "Lưu Kết Luận Xếp Loại",
+    "warnings": {
+      "missingInfoTitle": "Thiếu thông tin",
+      "rateEmployee": "Vui lòng xếp loại viên chức trước khi lưu!"
+    }
   },
   "evaluationFormManagerTab": {
     "ratings": {
@@ -551,6 +684,153 @@
     },
     "tooltip": {
       "viewAndEvaluate": "Xem & Đánh giá"
+    },
+    "alerts": {
+      "errorTitle": "Lỗi",
+      "errorText": "Không thể cập nhật Phiếu Đánh Giá."
+    }
+  },
+  "evaluationPdfTemplate": {
+    "countryHeader": {
+      "republic": "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM",
+      "slogan": "Độc lập - Tự do - Hạnh phúc"
+    },
+    "title": "BẢN TỰ ĐÁNH GIÁ, XẾP LOẠI CHẤT LƯỢNG VIÊN CHỨC",
+    "cycleLabel": "Kỳ đánh giá: {{cycle}}",
+    "defaultCycle": "Kỳ mặc định",
+    "personalInfo": {
+      "title": "I. THÔNG TIN CÁ NHÂN",
+      "fullName": "1. Họ và tên:",
+      "staffCode": "2. Mã số cán bộ (MSCB):",
+      "email": "3. Email:",
+      "department": "4. Đơn vị công tác:",
+      "position": "5. Chức vụ / Chức danh nghề nghiệp:",
+      "defaultPosition": "Giảng viên"
+    },
+    "okrResults": {
+      "title": "II. KẾT QUẢ ĐÁNH GIÁ NHIỆM VỤ THEO OKR",
+      "appliedModel": "* Quy chế đánh giá áp dụng mẫu: {{name}}",
+      "headers": {
+        "no": "STT",
+        "criteria": "Tiêu chí / Nhiệm vụ",
+        "maxScore": "Điểm Tối Đa",
+        "selfScore": "Điểm Tự Khai",
+        "managerScore": "Điểm QL Duyệt"
+      },
+      "totalScore": "TỔNG ĐIỂM"
+    },
+    "selfComment": {
+      "title": "III. TỰ NHẬN XẾP LOẠI CHẤT LƯỢNG",
+      "commentLabel": "1. Tự nhận xét ưu/khuyết điểm:",
+      "noComment": "Chưa có nhận xét tự khai.",
+      "ratingLabel": "2. Tự xếp loại chất lượng:",
+      "ratings": {
+        "excellent": "Hoàn thành xuất sắc nhiệm vụ",
+        "good": "Hoàn thành tốt nhiệm vụ / Hoàn thành nhiệm vụ",
+        "poor": "Không hoàn thành nhiệm vụ",
+        "unrated": "Chưa xếp loại"
+      }
+    },
+    "managerComment": {
+      "title": "IV. KẾT QUẢ ĐÁNH GIÁ, XẾP LOẠI CỦA CẤP QUẢN LÝ",
+      "commentLabel": "1. Nhận xét, đánh giá của cấp trên trực tiếp:",
+      "noComment": "Không có nhận xét từ Quản lý.",
+      "ratingLabel": "2. Kết quả xếp loại chất lượng viên chức:",
+      "ratings": {
+        "excellent": "Hoàn thành xuất sắc nhiệm vụ",
+        "good": "Hoàn thành tốt nhiệm vụ / Hoàn thành nhiệm vụ",
+        "poor": "Không hoàn thành nhiệm vụ",
+        "unrated": "Chưa có kết quả duyệt từ quản lý"
+      }
+    },
+    "signatures": {
+      "employee": "VIÊN CHỨC TỰ ĐÁNH GIÁ",
+      "supervisor": "CẤP TRÊN TRỰC TIẾP ĐÁNH GIÁ",
+      "instruction": "(Ký và ghi rõ họ tên)"
+    }
+  },
+  "myEvaluationPage": {
+    "headerTitle": "Hồ Sơ Tự Đánh Giá",
+    "headerSubtitle": "Kiểm tra kết quả tự động từ OKR và nộp Phiếu Đánh Giá Xếp Loại cuối kỳ.",
+    "exportPdfBtn": "Xuất PDF",
+    "selectCycleLabel": "Chọn kỳ đánh giá",
+    "cycleStatus": {
+      "open": "(Đang mở)",
+      "closed": "(Đã đóng)"
+    },
+    "states": {
+      "loading": "Đang tải Phiếu Đánh Giá...",
+      "noDataTitle": "Không có dữ liệu Phiếu Đánh Giá",
+      "noDataDesc": "Bạn không có OKR được giao hoặc thực hiện trong kỳ đánh giá này."
+    },
+    "alerts": {
+      "evaluatedAlert": "Phiếu Đánh Giá của bạn đã được Quản lý cấp trên duyệt và xếp loại kết quả cuối cùng.",
+      "submittedAlert": "Phiếu Đánh Giá đã được nộp và đang chờ Quản lý duyệt.",
+      "missingRating": "Vui lòng chọn mức Tự xếp loại chất lượng trước khi nộp!",
+      "missingRatingTitle": "Thiếu thông tin",
+      "submitConfirmTitle": "Nộp Phiếu Đánh Giá?",
+      "submitConfirmText": "Bạn có chắc chắn muốn nộp Phiếu Đánh Giá không?",
+      "submitConfirmBtn": "Nộp phiếu",
+      "submitSuccessTitle": "Thành công!",
+      "submitSuccessText": "Nộp Phiếu Đánh Giá thành công.",
+      "submitErrorTitle": "Lỗi",
+      "submitErrorText": "Lỗi khi nộp phiếu. Vui lòng thử lại.",
+      "pdfErrorTitle": "Lỗi",
+      "pdfErrorText": "Không thể xuất PDF. Vui lòng thử lại sau."
+    },
+    "form": {
+      "title": "Phiếu Đánh Giá, Xếp Loại Chất Lượng Viên Chức",
+      "cycleLabel": "Kỳ đánh giá: {{cycle}}",
+      "defaultCycle": "Kỳ mặc định",
+      "personalInfo": {
+        "title": "I. THÔNG TIN CÁ NHÂN",
+        "fullName": "Họ và tên:",
+        "staffCode": "MSCB:",
+        "email": "Email:",
+        "department": "Đơn vị công tác:",
+        "position": "Chức vụ:",
+        "defaultPosition": "Giảng viên"
+      },
+      "okrResults": {
+        "title": "II. KẾT QUẢ TỰ ĐÁNH GIÁ LUỒNG OKR",
+        "desc": "Kết quả thực hiện chức trách, nhiệm vụ được giao (Đồng bộ tự động từ Bài Tự Khai OKR).",
+        "templateLabel": "📋 OKR Template: {{name}}",
+        "locked": "✓ Đã chốt điểm",
+        "headers": {
+          "no": "STT",
+          "criteria": "Tiêu chí / Nhiệm vụ",
+          "maxScore": "Điểm Tối Đa",
+          "selfScore": "Điểm Tự Khai",
+          "managerScore": "Điểm QL Duyệt"
+        },
+        "totalScore": "TỔNG ĐIỂM"
+      },
+      "selfComment": {
+        "title": "III. TỰ NHẬN XẾP LOẠI CHẤT LƯỢNG",
+        "commentLabel": "1. Tự nhận xét ưu/khuyết điểm:",
+        "commentPlaceholder": "Viết nhận xét của bạn...",
+        "ratingLabel": "2. Tự xếp loại chất lượng:",
+        "ratings": {
+          "excellent": "Hoàn thành tốt nhiệm vụ (86 - 100 điểm)",
+          "good": "Hoàn thành nhiệm vụ (60 - 86 điểm)",
+          "poor": "Không hoàn thành nhiệm vụ (dưới 60 điểm)"
+        }
+      },
+      "managerComment": {
+        "title": "IV. KẾT QUẢ ĐÁNH GIÁ, XẾP LOẠI (DÀNH CHO CẤP QUẢN LÝ)",
+        "commentLabel": "1. Nhận xét của cấp trên:",
+        "noComment": "Không có nhận xét.",
+        "ratingLabel": "2. Kết quả xếp loại:",
+        "ratings": {
+          "excellent": "Hoàn thành tốt nhiệm vụ",
+          "good": "Hoàn thành nhiệm vụ",
+          "poor": "Không hoàn thành nhiệm vụ"
+        }
+      },
+      "buttons": {
+        "submit": "Nộp Phiếu Đánh Giá",
+        "exportPdf": "Xuất file PDF"
+      }
     }
   },
   "evaluationListTab": {
@@ -1454,5 +1734,197 @@
   "roleManagementTab": {
     "systemRoles": "Roles Hệ thống",
     "managementPositions": "Chức vụ quản lý"
+  },
+  "systemReset": {
+    "dangerZone": "Danger Zone",
+    "description": "Khu vực chứa các chức năng nhạy cảm có thể ảnh hưởng lớn đến hệ thống. Hãy cân nhắc kỹ trước khi sử dụng.",
+    "title": "Khôi phục Cài đặt Gốc (Factory Reset)",
+    "confirmResetText": "Hành động này sẽ <1>XÓA TOÀN BỘ</1> dữ liệu hệ thống bao gồm: Người dùng, OKR, Kỳ đánh giá, Logs... Hệ thống sẽ được đưa về trạng thái trống giống như lúc mới cài đặt (nhưng vẫn giữ lại các Bộ môn mặc định).",
+    "buttonLabel": "Factory Reset",
+    "dialog": {
+      "warningTitle": "CẢNH BÁO NGUY HIỂM!",
+      "warningBody1": "Bạn đang yêu cầu <1>XÓA SẠCH</1> dữ liệu toàn bộ hệ thống. Hành động này là <3>không thể hoàn tác</3>!",
+      "warningBody2": "Bạn có thực sự chắc chắn muốn tiếp tục không?",
+      "cancelBtn": "Hủy bỏ",
+      "confirmBtn": "VẪN TIẾP TỤC XÓA",
+      "processing": "Đang xử lý..."
+    },
+    "alerts": {
+      "success": "Đã khôi phục cài đặt gốc thành công!",
+      "error": "Đã xảy ra lỗi khi reset hệ thống"
+    }
+  },
+  "dashboard": {
+    "loading": "Đang tải Dashboard...",
+    "errorTitle": "Lỗi",
+    "defaultError": "Không thể tải dữ liệu dashboard. Vui lòng thử lại.",
+    "welcome": {
+      "morning": "Chào buổi sáng",
+      "afternoon": "Chào buổi chiều",
+      "evening": "Chào buổi tối",
+      "defaultName": "Thầy/Cô",
+      "cycleLabel": "Kỳ đánh giá:",
+      "noCycle": "Chưa có kỳ đánh giá",
+      "status": {
+        "OPEN": "Đang mở",
+        "CLOSED": "Đã đóng",
+        "ARCHIVED": "Lưu trữ"
+      }
+    },
+    "actions": {
+      "noOkr": "Bạn chưa được giao OKR nào. Hãy đợi Trưởng khoa giao OKR.",
+      "viewOkr": "Xem OKR",
+      "pending": {
+        "message": "Bạn có OKR mới được giao. Hãy xem xét và chấp nhận hoặc đề xuất điều chỉnh.",
+        "label": "Phản hồi OKR ngay"
+      },
+      "negotiating": {
+        "message": "OKR đang trong quá trình đàm phán với Trưởng khoa. Kiểm tra phản hồi mới.",
+        "label": "Xem trao đổi"
+      },
+      "accepted": {
+        "message": "OKR đã được chấp nhận! Hãy nhập số liệu và minh chứng để nộp bài tự khai.",
+        "label": "Tự khai điểm ngay"
+      },
+      "submitted": {
+        "message": "Bạn đã nộp báo cáo tự khai. Đang chờ Trưởng khoa chấm điểm.",
+        "label": "Xem lại báo cáo"
+      },
+      "completed": {
+        "evaluated": {
+          "message": "Quy trình đánh giá đã hoàn tất! Xem kết quả xếp loại của bạn.",
+          "label": "Xem kết quả"
+        },
+        "submitted": {
+          "message": "Phiếu đánh giá đã nộp. Đang chờ Trưởng khoa xếp loại cuối cùng.",
+          "label": "Xem phiếu đánh giá"
+        },
+        "pendingEvaluation": {
+          "message": "OKR đã hoàn tất! Hãy tự nhận xét và nộp Phiếu Đánh Giá Xếp Loại.",
+          "label": "Nộp phiếu đánh giá"
+        },
+        "noEvaluation": {
+          "message": "OKR đã được Trưởng khoa chấm điểm xong.",
+          "label": "Xem kết quả"
+        }
+      },
+      "rejected": {
+        "message": "OKR của bạn đã bị từ chối. Hãy xem lý do và gửi đề xuất mới.",
+        "label": "Xem chi tiết"
+      }
+    },
+    "actionCard": {
+      "nextAction": "✅ Hành động tiếp theo",
+      "currentState": "📋 Trạng thái hiện tại"
+    },
+    "cycleProgress": {
+      "title": "Tiến độ kỳ đánh giá",
+      "elapsed": "{{percent}}% đã qua",
+      "start": "Bắt đầu: {{date}}",
+      "end": "Kết thúc: {{date}}",
+      "totalDays": "Tổng ngày",
+      "elapsedDays": "Đã qua",
+      "remainingDays": "Còn lại"
+    },
+    "deadlineCountdown": {
+      "noDeadline": "Chưa có deadline",
+      "submittedEarly": "Tuyệt vời! Bạn đã nộp sớm",
+      "submittedLate": "Báo cáo nộp trễ",
+      "daysBefore": "ngày trước hạn",
+      "lateText": "Đã nộp trễ so với quy định",
+      "overdue": "Quá {{days}}",
+      "daysOverdueText": "ngày quá hạn",
+      "today": "hôm nay!",
+      "daysLeft": "ngày còn lại",
+      "defaultLabel": "Hạn chót"
+    },
+    "deadlineLabels": {
+      "negotiating": "Hạn chót đàm phán OKR",
+      "submitting": "Hạn chót nộp báo cáo",
+      "default": "Hạn chót"
+    },
+    "dataEntryProgress": {
+      "title": "📝 Tiến độ nhập liệu báo cáo",
+      "itemsCount": "{{filled}} / {{total}} mục ({{percent}}%)"
+    },
+    "chart": {
+      "title": "🕸️ Phân tích Năng lực theo Nhiệm vụ",
+      "selfReport": "Tự khai",
+      "managerScore": "TK chấm",
+      "maxScoreLabel": "Tối đa: {{score}} điểm",
+      "selfReportLabel": "Tự khai: {{score}} điểm ({{percent}}%)",
+      "managerScoreLabel": "TK chấm: {{score}} điểm ({{percent}}%)",
+      "note": "* Điểm Trưởng khoa chấm sẽ hiện khi OKR được duyệt hoàn tất."
+    },
+    "barChart": {
+      "title": "📈 Điểm theo Nhiệm vụ",
+      "selfReport": "Tự khai",
+      "managerScore": "TK chấm",
+      "maxScore": "Điểm tối đa"
+    },
+    "evaluation": {
+      "title": "Phiếu Đánh Giá Xếp Loại",
+      "selfScore": "Điểm tự khai",
+      "managerScore": "Điểm TK chấm",
+      "ratingResult": "Kết quả xếp loại",
+      "viewDetails": "Xem chi tiết",
+      "ratings": {
+        "EXCELLENT": "Hoàn thành tốt nhiệm vụ",
+        "GOOD": "Hoàn thành nhiệm vụ",
+        "POOR": "Không hoàn thành nhiệm vụ"
+      },
+      "status": {
+        "PENDING_EVALUATION": "Chưa nộp phiếu",
+        "SUBMITTED": "Đã nộp — Chờ xếp loại",
+        "EVALUATED": "Đã xếp loại"
+      }
+    },
+    "stepper": {
+      "title": "🚦 Tiến trình OKR của bạn",
+      "rejectedStepDesc": "OKR bị từ chối",
+      "steps": {
+        "ASSIGNED": {
+          "label": "Được giao",
+          "description": "OKR đã được Trưởng khoa gán cho bạn"
+        },
+        "PENDING": {
+          "label": "Chờ phản hồi",
+          "description": "Xem xét và phản hồi OKR được giao"
+        },
+        "NEGOTIATING": {
+          "label": "Đàm phán",
+          "description": "Đang trao đổi với Trưởng khoa"
+        },
+        "ACCEPTED": {
+          "label": "Đã duyệt",
+          "description": "OKR đã được thống nhất"
+        },
+        "INPUTTING": {
+          "label": "Nhập điểm",
+          "description": "Sẵn sàng hoặc đang tiến hành tự khai"
+        },
+        "SUBMITTED": {
+          "label": "Đã nộp",
+          "description": "Đã nộp self-report, chờ TK chấm điểm"
+        },
+        "COMPLETED": {
+          "label": "Hoàn thành",
+          "description": "Trưởng khoa đã chấm điểm xong"
+        }
+      }
+    },
+    "scoreGauge": {
+      "selfScoreTitle": "Điểm tự khai",
+      "managerScoreTitle": "Điểm TK chấm",
+      "pointsDenominator": "/ {{maxScore}} điểm",
+      "difference": "Chênh lệch",
+      "selfReportShort": "Tự khai",
+      "managerReportShort": "TK chấm",
+      "labels": {
+        "excellent": "Xuất sắc",
+        "good": "Tốt",
+        "needsImprovement": "Cần cải thiện"
+      }
+    }
   }
 }

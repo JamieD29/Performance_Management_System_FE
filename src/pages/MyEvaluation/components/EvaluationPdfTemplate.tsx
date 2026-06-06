@@ -1,4 +1,4 @@
-import React from "react";
+import { useTranslation } from "react-i18next";
 
 interface EvaluationPdfTemplateProps {
   user: any;
@@ -13,6 +13,8 @@ export default function EvaluationPdfTemplate({
   selfComment,
   selfRating,
 }: EvaluationPdfTemplateProps) {
+  const { t } = useTranslation();
+
   return (
     <div style={{ position: "absolute", left: "-9999px", top: "-9999px" }}>
       <div
@@ -31,22 +33,13 @@ export default function EvaluationPdfTemplate({
         <table style={{ width: "100%", borderCollapse: "collapse", border: "none", marginBottom: "30px" }}>
           <tbody>
             <tr style={{ border: "none" }}>
-              {/* <td style={{ width: "45%", textAlign: "center", border: "none", verticalAlign: "top", padding: 0 }}>
-                <span style={{ textTransform: "uppercase", fontSize: "12px", fontWeight: "bold" }}>
-                  {user.department?.name || "ĐƠN VỊ CÔNG TÁC"}
-                </span>
-                <br />
-                <span style={{ fontSize: "12px", fontWeight: "bold", textDecoration: "underline" }}>
-                  BỘ PHẬN TỰ ĐÁNH GIÁ
-                </span>
-              </td> */}
               <td style={{ width: "55%", textAlign: "center", border: "none", verticalAlign: "top", padding: 0 }}>
                 <span style={{ textTransform: "uppercase", fontSize: "13px", fontWeight: "bold" }}>
-                  CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM
+                  {t("evaluationPdfTemplate.countryHeader.republic")}
                 </span>
                 <br />
                 <span style={{ fontSize: "14px", fontWeight: "bold" }}>
-                  Độc lập - Tự do - Hạnh phúc
+                  {t("evaluationPdfTemplate.countryHeader.slogan")}
                 </span>
                 <div style={{ margin: "5px auto 0 auto", width: "150px", borderTop: "1px solid #000" }}></div>
               </td>
@@ -57,39 +50,39 @@ export default function EvaluationPdfTemplate({
         {/* Tiêu đề */}
         <div style={{ textAlign: "center", marginBottom: "35px" }}>
           <h2 style={{ textTransform: "uppercase", fontSize: "16px", fontWeight: "bold", margin: "0 0 5px 0" }}>
-            BẢN TỰ ĐÁNH GIÁ, XẾP LOẠI CHẤT LƯỢNG VIÊN CHỨC
+            {t("evaluationPdfTemplate.title")}
           </h2>
           <em style={{ fontSize: "14px" }}>
-            Kỳ đánh giá: {form?.cycle?.name || "Kỳ mặc định"}
+            {t("evaluationPdfTemplate.cycleLabel", { cycle: form?.cycle?.name || t("evaluationPdfTemplate.defaultCycle") })}
           </em>
         </div>
 
         {/* PHẦN I: THÔNG TIN CÁ NHÂN */}
         <div style={{ marginBottom: "25px" }}>
           <h3 style={{ textTransform: "uppercase", fontSize: "14px", fontWeight: "bold", margin: "0 0 10px 0" }}>
-            I. THÔNG TIN CÁ NHÂN
+            {t("evaluationPdfTemplate.personalInfo.title")}
           </h3>
           <table style={{ width: "100%", borderCollapse: "collapse", border: "none" }}>
             <tbody>
               <tr style={{ border: "none" }}>
                 <td style={{ border: "none", padding: "4px 0", width: "50%" }}>
-                  <strong>1. Họ và tên:</strong> {user.name}
+                  <strong>{t("evaluationPdfTemplate.personalInfo.fullName")}</strong> {user.name}
                 </td>
                 <td style={{ border: "none", padding: "4px 0", width: "50%" }}>
-                  <strong>2. Mã số cán bộ (MSCB):</strong> {user.staffCode || "N/A"}
+                  <strong>{t("evaluationPdfTemplate.personalInfo.staffCode")}</strong> {user.staffCode || "N/A"}
                 </td>
               </tr>
               <tr style={{ border: "none" }}>
                 <td style={{ border: "none", padding: "4px 0" }}>
-                  <strong>3. Email:</strong> {user.email}
+                  <strong>{t("evaluationPdfTemplate.personalInfo.email")}</strong> {user.email}
                 </td>
                 <td style={{ border: "none", padding: "4px 0" }}>
-                  <strong>4. Đơn vị công tác:</strong> {user.department?.name || "N/A"}
+                  <strong>{t("evaluationPdfTemplate.personalInfo.department")}</strong> {user.department?.name || "N/A"}
                 </td>
               </tr>
               <tr style={{ border: "none" }}>
                 <td colSpan={2} style={{ border: "none", padding: "4px 0" }}>
-                  <strong>5. Chức vụ / Chức danh nghề nghiệp:</strong> {user.managementPosition?.name || "Giảng viên"}
+                  <strong>{t("evaluationPdfTemplate.personalInfo.position")}</strong> {user.managementPosition?.name || t("evaluationPdfTemplate.personalInfo.defaultPosition")}
                 </td>
               </tr>
             </tbody>
@@ -99,21 +92,21 @@ export default function EvaluationPdfTemplate({
         {/* PHẦN II: KẾT QUẢ ĐÁNH GIÁ NHIỆM VỤ (OKR) */}
         <div style={{ marginBottom: "25px" }}>
           <h3 style={{ textTransform: "uppercase", fontSize: "14px", fontWeight: "bold", margin: "0 0 10px 0" }}>
-            II. KẾT QUẢ ĐÁNH GIÁ NHIỆM VỤ THEO OKR
+            {t("evaluationPdfTemplate.okrResults.title")}
           </h3>
           {form?.okrObjectiveName && (
             <div style={{ fontStyle: "italic", marginBottom: "8px" }}>
-              * Quy chế đánh giá áp dụng mẫu: {form.okrObjectiveName}
+              {t("evaluationPdfTemplate.okrResults.appliedModel", { name: form.okrObjectiveName })}
             </div>
           )}
           <table style={{ width: "100%", borderCollapse: "collapse", border: "1px solid #000", fontSize: "13px" }}>
             <thead>
               <tr style={{ backgroundColor: "#f2f2f2" }}>
-                <th style={{ border: "1px solid #000", padding: "6px", textAlign: "center", width: "8%" }}>STT</th>
-                <th style={{ border: "1px solid #000", padding: "6px", textAlign: "left", width: "52%" }}>Tiêu chí / Nhiệm vụ</th>
-                <th style={{ border: "1px solid #000", padding: "6px", textAlign: "center", width: "12%" }}>Điểm Tối Đa</th>
-                <th style={{ border: "1px solid #000", padding: "6px", textAlign: "center", width: "14%" }}>Điểm Tự Khai</th>
-                <th style={{ border: "1px solid #000", padding: "6px", textAlign: "center", width: "14%" }}>Điểm QL Duyệt</th>
+                <th style={{ border: "1px solid #000", padding: "6px", textAlign: "center", width: "8%" }}>{t("evaluationPdfTemplate.okrResults.headers.no")}</th>
+                <th style={{ border: "1px solid #000", padding: "6px", textAlign: "left", width: "52%" }}>{t("evaluationPdfTemplate.okrResults.headers.criteria")}</th>
+                <th style={{ border: "1px solid #000", padding: "6px", textAlign: "center", width: "12%" }}>{t("evaluationPdfTemplate.okrResults.headers.maxScore")}</th>
+                <th style={{ border: "1px solid #000", padding: "6px", textAlign: "center", width: "14%" }}>{t("evaluationPdfTemplate.okrResults.headers.selfScore")}</th>
+                <th style={{ border: "1px solid #000", padding: "6px", textAlign: "center", width: "14%" }}>{t("evaluationPdfTemplate.okrResults.headers.managerScore")}</th>
               </tr>
             </thead>
             <tbody>
@@ -129,7 +122,7 @@ export default function EvaluationPdfTemplate({
                 </tr>
               ))}
               <tr style={{ fontWeight: "bold", backgroundColor: "#fafafa" }}>
-                <td colSpan={2} style={{ border: "1px solid #000", padding: "8px", textAlign: "center", textTransform: "uppercase" }}>TỔNG ĐIỂM</td>
+                <td colSpan={2} style={{ border: "1px solid #000", padding: "8px", textAlign: "center", textTransform: "uppercase" }}>{t("evaluationPdfTemplate.okrResults.totalScore")}</td>
                 <td style={{ border: "1px solid #000", padding: "8px", textAlign: "center" }}>100</td>
                 <td style={{ border: "1px solid #000", padding: "8px", textAlign: "center" }}>{form?.selfScoreTotal?.toFixed(1) || 0}</td>
                 <td style={{ border: "1px solid #000", padding: "8px", textAlign: "center" }}>
@@ -143,21 +136,21 @@ export default function EvaluationPdfTemplate({
         {/* PHẦN III: TỰ NHẬN XẾP LOẠI CHẤT LƯỢNG */}
         <div style={{ marginBottom: "25px", pageBreakBefore: "always", paddingTop: "30px" }}>
           <h3 style={{ textTransform: "uppercase", fontSize: "14px", fontWeight: "bold", margin: "0 0 10px 0" }}>
-            III. TỰ NHẬN XẾP LOẠI CHẤT LƯỢNG
+            {t("evaluationPdfTemplate.selfComment.title")}
           </h3>
           <div style={{ marginBottom: "10px" }}>
-            <strong>1. Tự nhận xét ưu/khuyết điểm:</strong>
+            <strong>{t("evaluationPdfTemplate.selfComment.commentLabel")}</strong>
             <p style={{ margin: "5px 0 15px 15px", whiteSpace: "pre-wrap", textAlign: "justify" }}>
-              {selfComment || "Chưa có nhận xét tự khai."}
+              {selfComment || t("evaluationPdfTemplate.selfComment.noComment")}
             </p>
           </div>
           <div>
-            <strong>2. Tự xếp loại chất lượng:</strong>
+            <strong>{t("evaluationPdfTemplate.selfComment.ratingLabel")}</strong>
             <span style={{ marginLeft: "10px", fontWeight: "bold" }}>
-              {selfRating === "EXCELLENT" && "Hoàn thành xuất sắc nhiệm vụ"}
-              {selfRating === "GOOD" && "Hoàn thành tốt nhiệm vụ / Hoàn thành nhiệm vụ"}
-              {selfRating === "POOR" && "Không hoàn thành nhiệm vụ"}
-              {!selfRating && "Chưa xếp loại"}
+              {selfRating === "EXCELLENT" && t("evaluationPdfTemplate.selfComment.ratings.excellent")}
+              {selfRating === "GOOD" && t("evaluationPdfTemplate.selfComment.ratings.good")}
+              {selfRating === "POOR" && t("evaluationPdfTemplate.selfComment.ratings.poor")}
+              {!selfRating && t("evaluationPdfTemplate.selfComment.ratings.unrated")}
             </span>
           </div>
         </div>
@@ -165,21 +158,21 @@ export default function EvaluationPdfTemplate({
         {/* PHẦN IV: ĐÁNH GIÁ, XẾP LOẠI (QUẢN LÝ) */}
         <div style={{ marginBottom: "40px" }}>
           <h3 style={{ textTransform: "uppercase", fontSize: "14px", fontWeight: "bold", margin: "0 0 10px 0" }}>
-            IV. KẾT QUẢ ĐÁNH GIÁ, XẾP LOẠI CỦA CẤP QUẢN LÝ
+            {t("evaluationPdfTemplate.managerComment.title")}
           </h3>
           <div style={{ marginBottom: "10px" }}>
-            <strong>1. Nhận xét, đánh giá của cấp trên trực tiếp:</strong>
+            <strong>{t("evaluationPdfTemplate.managerComment.commentLabel")}</strong>
             <p style={{ margin: "5px 0 15px 15px", whiteSpace: "pre-wrap", textAlign: "justify" }}>
-              {form?.managerComment || "Không có nhận xét từ Quản lý."}
+              {form?.managerComment || t("evaluationPdfTemplate.managerComment.noComment")}
             </p>
           </div>
           <div>
-            <strong>2. Kết quả xếp loại chất lượng viên chức:</strong>
+            <strong>{t("evaluationPdfTemplate.managerComment.ratingLabel")}</strong>
             <span style={{ marginLeft: "10px", fontWeight: "bold" }}>
-              {form?.managerRating === "EXCELLENT" && "Hoàn thành xuất sắc nhiệm vụ"}
-              {form?.managerRating === "GOOD" && "Hoàn thành tốt nhiệm vụ / Hoàn thành nhiệm vụ"}
-              {form?.managerRating === "POOR" && "Không hoàn thành nhiệm vụ"}
-              {!form?.managerRating && "Chưa có kết quả duyệt từ quản lý"}
+              {form?.managerRating === "EXCELLENT" && t("evaluationPdfTemplate.managerComment.ratings.excellent")}
+              {form?.managerRating === "GOOD" && t("evaluationPdfTemplate.managerComment.ratings.good")}
+              {form?.managerRating === "POOR" && t("evaluationPdfTemplate.managerComment.ratings.poor")}
+              {!form?.managerRating && t("evaluationPdfTemplate.managerComment.ratings.unrated")}
             </span>
           </div>
         </div>
@@ -189,9 +182,9 @@ export default function EvaluationPdfTemplate({
           <tbody>
             <tr style={{ border: "none" }}>
               <td style={{ width: "50%", textAlign: "center", border: "none", padding: 0, verticalAlign: "top" }}>
-                <span style={{ fontWeight: "bold", textTransform: "uppercase" }}>VIÊN CHỨC TỰ ĐÁNH GIÁ</span>
+                <span style={{ fontWeight: "bold", textTransform: "uppercase" }}>{t("evaluationPdfTemplate.signatures.employee")}</span>
                 <br />
-                <em style={{ fontSize: "12px" }}>(Ký và ghi rõ họ tên)</em>
+                <em style={{ fontSize: "12px" }}>{t("evaluationPdfTemplate.signatures.instruction")}</em>
                 <br />
                 <br />
                 <br />
@@ -199,9 +192,9 @@ export default function EvaluationPdfTemplate({
                 <span style={{ fontWeight: "bold" }}>{user.name}</span>
               </td>
               <td style={{ width: "50%", textAlign: "center", border: "none", padding: 0, verticalAlign: "top" }}>
-                <span style={{ fontWeight: "bold", textTransform: "uppercase" }}>CẤP TRÊN TRỰC TIẾP ĐÁNH GIÁ</span>
+                <span style={{ fontWeight: "bold", textTransform: "uppercase" }}>{t("evaluationPdfTemplate.signatures.supervisor")}</span>
                 <br />
-                <em style={{ fontSize: "12px" }}>(Ký và ghi rõ họ tên)</em>
+                <em style={{ fontSize: "12px" }}>{t("evaluationPdfTemplate.signatures.instruction")}</em>
                 <br />
                 <br />
                 <br />

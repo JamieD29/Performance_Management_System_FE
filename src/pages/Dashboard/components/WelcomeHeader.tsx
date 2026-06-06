@@ -1,6 +1,6 @@
-import React from "react";
 import { Box, Typography, Chip } from "@mui/material";
 import { Sparkles } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface WelcomeHeaderProps {
   cycleName: string;
@@ -11,21 +11,28 @@ export default function WelcomeHeader({
   cycleName,
   cycleStatus,
 }: WelcomeHeaderProps) {
+  const { t, i18n } = useTranslation();
+  
   // Lấy user từ session
   const userStr = localStorage.getItem("user");
   const user = userStr ? JSON.parse(userStr) : {};
 
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return "Chào buổi sáng";
-    if (hour < 18) return "Chào buổi chiều";
-    return "Chào buổi tối";
+    if (hour < 12) return t("dashboard.welcome.morning");
+    if (hour < 18) return t("dashboard.welcome.afternoon");
+    return t("dashboard.welcome.evening");
   };
 
   const statusColor =
     cycleStatus === "OPEN" ? "success" : cycleStatus === "CLOSED" ? "default" : "info";
+  
   const statusLabel =
-    cycleStatus === "OPEN" ? "Đang mở" : cycleStatus === "CLOSED" ? "Đã đóng" : "Lưu trữ";
+    cycleStatus === "OPEN"
+      ? t("dashboard.welcome.status.OPEN")
+      : cycleStatus === "CLOSED"
+        ? t("dashboard.welcome.status.CLOSED")
+        : t("dashboard.welcome.status.ARCHIVED");
 
   return (
     <Box
@@ -76,7 +83,7 @@ export default function WelcomeHeader({
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
             <Sparkles size={20} style={{ opacity: 0.8 }} />
             <Typography variant="body2" sx={{ opacity: 0.85, fontWeight: 500 }}>
-              {new Date().toLocaleDateString("vi-VN", {
+              {new Date().toLocaleDateString(i18n.language === "vi" ? "vi-VN" : "en-US", {
                 weekday: "long",
                 year: "numeric",
                 month: "long",
@@ -93,12 +100,12 @@ export default function WelcomeHeader({
               letterSpacing: "-0.02em",
             }}
           >
-            {getGreeting()}, {user.name || "Thầy/Cô"}! 👋
+            {getGreeting()}, {user.name || t("dashboard.welcome.defaultName")}! 👋
           </Typography>
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap" }}>
             <Typography variant="body1" sx={{ opacity: 0.9 }}>
-              Kỳ đánh giá:
+              {t("dashboard.welcome.cycleLabel")}
             </Typography>
             <Typography variant="body1" fontWeight="700">
               {cycleName}

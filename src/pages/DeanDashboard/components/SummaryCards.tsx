@@ -18,7 +18,7 @@ const cards = [
     borderColor: "#fecaca",
     iconColor: "#dc2626",
     textColor: "#991b1b",
-    actionType: "PENDING_APPROVAL", // to match actionItems
+    actionType: "PENDING_APPROVAL",
   },
   {
     key: "awaitingReview",
@@ -62,9 +62,7 @@ export default function SummaryCards({ summary, actionItems }: Props) {
       {cards.map((card, i) => {
         const Icon = card.icon;
         const value = summary[card.key as keyof DashboardSummary];
-        
-        // Tìm xem có action tương ứng với card này không
-        const actionItem = (card as any).actionType 
+        const actionItem = (card as any).actionType
           ? actionItems.find(a => a.type === (card as any).actionType)
           : null;
 
@@ -115,12 +113,12 @@ export default function SummaryCards({ summary, actionItems }: Props) {
                   {displayLabel}
                 </Typography>
               </Box>
-              
+
               <Box sx={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", mt: "auto", pt: 1 }}>
                 <Typography variant="h3" fontWeight={800} sx={{ color: card.textColor, lineHeight: 1 }}>
                   {value}
                 </Typography>
-                
+
                 {actionItem && (
                   <Button
                     variant="contained"

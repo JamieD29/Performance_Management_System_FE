@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   Box,
   Typography,
@@ -32,6 +33,7 @@ const NegotiationChat: React.FC<NegotiationChatProps> = ({
   colSpan,
   status,
 }) => {
+  const { t, i18n } = useTranslation();
   if (activeChatId !== itemId) return null;
 
   return (
@@ -39,15 +41,14 @@ const NegotiationChat: React.FC<NegotiationChatProps> = ({
       <TableCell colSpan={colSpan} sx={{ p: 0, bgcolor: "#f1f5f9" }}>
         <Box sx={{ p: 2, borderLeft: "3px solid #3b82f6", ml: 2, bgcolor: "#fff", mb: 2, mt: 1, borderRadius: 1, boxShadow: 1 }}>
           <Typography variant="subtitle2" sx={{ mb: 1, color: "#1e3a8a" }}>
-            Nội dung trao đổi:
-
+            {t("okrCard.chat.exchangeTitle")}
           </Typography>
           {history.length > 0 ? (
             <Box sx={{ mb: 2, maxHeight: 150, overflowY: "auto" }}>
               {history.map((msg: any, idx: number) => (
                 <Box key={idx} sx={{ mb: 1, p: 1, bgcolor: msg.sender === 'USER' ? '#eff6ff' : '#fff7ed', borderRadius: 1, maxWidth: "80%" }}>
                   <Typography variant="caption" fontWeight="bold" color={msg.sender === 'USER' ? 'primary' : 'warning.main'}>
-                    {msg.sender === 'USER' ? 'Bạn' : 'Trưởng khoa'} - {new Date(msg.createdAt).toLocaleString('vi-VN')}
+                    {msg.sender === 'USER' ? t("okrCard.chat.senderUser") : t("okrCard.chat.senderManager")} - {new Date(msg.createdAt).toLocaleString(i18n.language === 'en' ? 'en-US' : 'vi-VN')}
                   </Typography>
                   <Typography variant="body2">{msg.message}</Typography>
                 </Box>
@@ -55,7 +56,7 @@ const NegotiationChat: React.FC<NegotiationChatProps> = ({
             </Box>
           ) : (
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-              Chưa có trao đổi nào. Bạn có thể đề xuất chỉnh sửa chỉ tiêu/điểm tại đây.
+              {t("okrCard.chat.noExchangeDesc")}
             </Typography>
           )}
 
@@ -64,7 +65,7 @@ const NegotiationChat: React.FC<NegotiationChatProps> = ({
               <TextField
                 size="small"
                 fullWidth
-                placeholder="Nhập đề xuất điều chỉnh..."
+                placeholder={t("okrCard.chat.inputPlaceholder")}
                 value={chatMessage}
                 onChange={(e) => setChatMessage(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') onSend(itemId); }}
@@ -75,7 +76,7 @@ const NegotiationChat: React.FC<NegotiationChatProps> = ({
                 onClick={() => onSend(itemId)}
                 startIcon={<Send />}
               >
-                Gửi
+                {t("okrCard.chat.sendBtn")}
               </Button>
             </Box>
           )}

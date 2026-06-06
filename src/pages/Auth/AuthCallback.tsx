@@ -37,20 +37,14 @@ export default function AuthCallback() {
     if (token && userParam) {
       try {
         const user = JSON.parse(decodeURIComponent(userParam));
-
-        // 🧹 Xóa dữ liệu phiên cũ trước khi lưu tài khoản mới.
-        // Ngăn lỗi lẫn lộn khi user đổi tài khoản Microsoft.
         localStorage.removeItem("authToken");
         localStorage.removeItem("refreshToken");
         localStorage.removeItem("user");
 
-        // Store authentication data
         localStorage.setItem("authToken", token);
         localStorage.setItem("user", JSON.stringify(user));
 
-        // Redirect based on first user status & profile completeness
         if (isFirstUser) {
-          console.log("🎉 First user! Redirecting to Admin Settings...");
           navigate("/admin/settings", { replace: true });
         } else if (
           !user.profileCompleted &&

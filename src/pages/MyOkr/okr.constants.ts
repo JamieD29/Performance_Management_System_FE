@@ -1,11 +1,11 @@
 export const statusConfig: Record<
   string,
-  { label: string; color: "warning" | "info" | "success" | "error" | "default" }
+  { labelKey: string; color: "warning" | "info" | "success" | "error" | "default" }
 > = {
-  PENDING: { label: "Chờ phản hồi", color: "warning" },
-  NEGOTIATING: { label: "Đang đàm phán", color: "info" },
-  ACCEPTED: { label: "Đã chấp nhận — Sẵn sàng tự khai", color: "success" },
-  SUBMITTED: { label: "Đã nộp bài — Chờ duyệt", color: "info" },
-  COMPLETED: { label: "Hoàn tất", color: "success" },
-  REJECTED: { label: "Bị từ chối", color: "error" },
+  PENDING: { labelKey: "okrCard.status.pending", color: "warning" },
+  NEGOTIATING: { labelKey: "okrCard.status.negotiating", color: "info" },
+  ACCEPTED: { labelKey: "okrCard.status.accepted", color: "success" },
+  SUBMITTED: { labelKey: "okrCard.status.submitted", color: "info" },
+  COMPLETED: { labelKey: "okrCard.status.completed", color: "success" },
+  REJECTED: { labelKey: "okrCard.status.rejected", color: "error" },
 };

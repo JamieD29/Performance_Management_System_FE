@@ -12,7 +12,7 @@ export default function UserProfileCard({ user }: UserProfileCardProps) {
   const { t, i18n } = useTranslation();
   const mainColor = THEME_COLORS.IDENTITY;
 
-  // Component nhỏ để hiển thị các thông tin phụ
+  // Mini component to display auxiliary information
   const InfoBadge = ({ icon, text, colorBg }: any) => (
     <Box
       sx={{
@@ -50,7 +50,7 @@ export default function UserProfileCard({ user }: UserProfileCardProps) {
         overflow: "visible",
       }}
     >
-      {/* --- KHU VỰC AVATAR --- */}
+      {/* --- AVATAR SECTION --- */}
       <Box
         sx={{
           position: "relative",
@@ -84,7 +84,7 @@ export default function UserProfileCard({ user }: UserProfileCardProps) {
         </Box>
       </Box>
 
-      {/* --- KHU VỰC THÔNG TIN CHÍNH --- */}
+      {/* --- MAIN INFO SECTION --- */}
       <Box
         sx={{
           flexGrow: 1,
@@ -138,7 +138,7 @@ export default function UserProfileCard({ user }: UserProfileCardProps) {
           />
         </Box>
 
-        {/* Các thông tin phụ */}
+        {/* Auxiliary details */}
         <Box
           sx={{
             display: "flex",

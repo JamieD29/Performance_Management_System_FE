@@ -20,8 +20,7 @@ interface Props {
   ranking: StaffRankItem[];
 }
 
-const rankColors = ["#FFD700", "#C0C0C0", "#CD7F32"]; // gold, silver, bronze
-
+const rankColors = ["#FFD700", "#C0C0C0", "#CD7F32"];
 export default function StaffRankingTable({ ranking }: Props) {
   const { t } = useTranslation();
 

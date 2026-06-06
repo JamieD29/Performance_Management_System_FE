@@ -1,7 +1,7 @@
 // src/pages/ProfileSetting/useProfileLogic.ts
 
 import { useState, useEffect } from "react";
-// Lưu ý: Đảm bảo đường dẫn import api đúng với project của bạn
+// Note: Ensure the API import path is correct for your project
 import { api } from "../../services/api";
 import type {
   UserProfileForm,
@@ -14,7 +14,7 @@ import { useTranslation } from "react-i18next";
 export const useProfileLogic = () => {
   const { t } = useTranslation();
   // --------------------------------------------------------
-  // 1. KHAI BÁO STATE
+  // 1. STATE DECLARATIONS
   // --------------------------------------------------------
   const [activeTab, setActiveTab] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
@@ -38,14 +38,14 @@ export const useProfileLogic = () => {
   const { validateJoinDateStr, validateAgeAtJoinDate } = useProfileValidation();
 
   // --------------------------------------------------------
-  // 2. FETCH DATA (Gọi API lấy dữ liệu lúc mới vào trang)
+  // 2. FETCH DATA (Call API to load profile data on mount)
   // --------------------------------------------------------
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         setLoading(true);
 
-        // Gọi song song 2 API: Lấy danh sách phòng ban và Lấy thông tin user
+        // Call 2 APIs in parallel: Fetch departments and user profile data
         const [deptRes, profileRes] = await Promise.all([
           api.get("/departments"),
           api.get("/users/profile"),
@@ -53,7 +53,7 @@ export const useProfileLogic = () => {
 
         setDepartments(deptRes.data);
 
-        // Xử lý map dữ liệu department vào formData cho chuẩn
+        // Map department and date of birth correctly into formData
         const u = profileRes.data;
         const mappedData = {
           ...u,
@@ -63,7 +63,7 @@ export const useProfileLogic = () => {
 
         setFormData(mappedData);
         setOriginalData(mappedData);
-        syncToSession(mappedData); // Đồng bộ lúc mới fetch xong
+        syncToSession(mappedData); // Synchronize when fetch completes
       } catch (error) {
         setNotification({
           type: "error",
@@ -77,12 +77,12 @@ export const useProfileLogic = () => {
     fetchProfile();
   }, [t]);
 
-  // --- Hàm lấy tên phòng ban từ ID ---
+  // --- Helper to get department name from ID ---
   const getDepartmentName = (id: string) => {
     return departments.find((d) => d.id === id)?.name || id || t("profile.notUpdated");
   };
 
-  // --- Hàm đồng bộ dữ liệu vào localStorage (Để Header/Sidebar cập nhật theo) ---
+  // --- Sync data to localStorage (to update Header/Sidebar accordingly) ---
   const syncToSession = (data: any) => {
     try {
       const storedUser = localStorage.getItem("user");
@@ -95,8 +95,8 @@ export const useProfileLogic = () => {
           avatar: data.avatarUrl || data.avatar || user.avatar,
           name: data.name || user.name,
           jobTitle: data.jobTitle || user.jobTitle,
-          profileCompleted: true, // Nếu đã vào đây lưu là đã xong profile
-          // Đồng bộ roles về dạng mảng string cho Sidebar/Header dễ check
+          profileCompleted: true, // Mark profile setup as completed
+          // Sync roles to a string array for easier checking in Sidebar/Header
           roles: data.roles
             ? data.roles.map((r: any) =>
                 typeof r === "string" ? r : r.slug || r.name,
@@ -111,17 +111,17 @@ export const useProfileLogic = () => {
   };
 
   // --------------------------------------------------------
-  // 3. CÁC HÀM CẬP NHẬT DỮ LIỆU & VALIDATE CHUNG
+  // 3. DATA UPDATE HANDLERS & GENERAL VALIDATION
   // --------------------------------------------------------
   const handleChange = (field: keyof UserProfileForm, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    // Xóa lỗi nếu user đang gõ lại trường đó
+    // Clear error when the user is retyping in that field
     if (errors[field as keyof FormErrors]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
   };
 
-  // --- LOGIC NGÀY VÀO TRƯỜNG & NGÀY SINH ---
+  // --- JOIN DATE & DATE OF BIRTH LOGIC ---
   const validateDates = (
     dob: string,
     joinDate: string,
@@ -132,8 +132,8 @@ export const useProfileLogic = () => {
 
     setErrors((prev) => ({
       ...prev,
-      // Nếu focus vào DOB, chỉ hiện lỗi DOB, và xóa lỗi age trên JoinDate.
-      // Nếu không có focusField (khi Save), hiện lỗi cả 2 nếu có.
+      // If focused on DOB, only display DOB error, and clear age error on JoinDate.
+      // If no focusField (on Save), display both errors if they exist.
       dob:
         focusField === "dob"
           ? dobError || undefined
@@ -162,11 +162,11 @@ export const useProfileLogic = () => {
     validateDates(formData.dob, value, "joinDate");
   };
 
-  // --- LOGIC GIỜ GIẢNG/NĂM (Chống spam, số âm, ký tự lạ) ---
+  // --- TEACHING HOURS LOGIC (Prevent spam, negative values, mathematical symbols) ---
   const handleTeachingHoursChange = (
     e: React.ChangeEvent<HTMLInputElement>,
   ) => {
-    const val = e.target.value.replace(/[^0-9]/g, ""); // Chỉ giữ lại số
+    const val = e.target.value.replace(/[^0-9]/g, ""); // Keep digits only
     handleChange("teachingHours", val ? Number(val) : "");
   };
 
@@ -174,14 +174,14 @@ export const useProfileLogic = () => {
     e: React.KeyboardEvent<HTMLInputElement>,
   ) => {
     if (["e", "E", "+", "-", ".", ","].includes(e.key)) {
-      e.preventDefault(); // Chặn gõ ký tự toán học
+      e.preventDefault(); // Block mathematical characters
     }
   };
 
   const handleSmartPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
     const pastedData = e.clipboardData.getData("text");
     if (/[^0-9]/.test(pastedData)) {
-      e.preventDefault(); // Chặn dán nếu chứa chữ/ký tự lạ
+      e.preventDefault(); // Block paste if it contains non-numeric characters
       setNotification({
         type: "warning",
         message: t("profile.warnings.onlyNumbers"),
@@ -189,36 +189,36 @@ export const useProfileLogic = () => {
     }
   };
 
-  // --- LOGIC ĐỔI AVATAR ---
+  // --- AVATAR CHANGE LOGIC ---
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Gán tạm ảnh preview để user xem trước
+    // Temporarily assign preview URL for user to preview
     const previewUrl = URL.createObjectURL(file);
     handleChange("avatarUrl", previewUrl);
   };
 
   // --------------------------------------------------------
-  // 4. CÁC HÀM HÀNH ĐỘNG (LƯU & HỦY)
+  // 4. ACTION HANDLERS (SAVE & CANCEL)
   // --------------------------------------------------------
   const handleCancel = () => {
-    setFormData(originalData); // Phục hồi lại dữ liệu cũ
+    setFormData(originalData); // Restore original data copy
     setIsEditing(false);
     setErrors({});
   };
 
   const handleSave = async () => {
-    // 1. Kiểm tra lỗi validate trước khi cho lưu
+    // 1. Check validation errors before saving
     const dateError = validateDates(formData.dob, formData.joinDate);
 
-    // Kiểm tra trường bắt buộc (Cập nhật thêm bắt buộc bộ môn nếu cần)
+    // Check required fields (Add required department checks if needed)
     if (!formData.name || !formData.staffCode || !formData.departmentID) {
       setNotification({
         type: "error",
         message: t("profile.warnings.requiredFields"),
       });
-      setActiveTab(0); // Nhảy về tab đầu tiên (hoặc tab chứa lỗi)
+      setActiveTab(0); // Navigate to the first tab (or tab containing errors)
       return;
     }
 
@@ -231,7 +231,7 @@ export const useProfileLogic = () => {
       return;
     }
 
-    // 2. Tiến hành gọi API lưu dữ liệu
+    // 2. Call API to save data
     setSaving(true);
     try {
       const { dob, ...restData } = formData;
@@ -240,9 +240,9 @@ export const useProfileLogic = () => {
         dateOfBirth: dob,
       });
 
-      setOriginalData(formData); // Cập nhật lại bản gốc bằng data mới
+      setOriginalData(formData); // Update original data copy with new values
       setIsEditing(false);
-      syncToSession(formData); // Đồng bộ sau khi lưu thành công
+      syncToSession(formData); // Synchronize to session after successful save
       setNotification({
         type: "success",
         message: t("profile.messages.saveSuccess"),
@@ -263,7 +263,7 @@ export const useProfileLogic = () => {
   const ageWarning = dobError || "";
 
   // --------------------------------------------------------
-  // 5. EXPORT NHỮNG GÌ UI CẦN DÙNG
+  // 5. EXPORT VARIABLES & ACTIONS FOR UI
   // --------------------------------------------------------
   return {
     // States
@@ -277,9 +277,9 @@ export const useProfileLogic = () => {
     setNotification,
     formData,
     errors,
-    departments, // Xuất danh sách phòng ban
-    getDepartmentName, // Xuất hàm lấy tên phòng ban
-    ageWarning, // Xuất cảnh báo độ tuổi
+    departments, // Export departments list
+    getDepartmentName, // Export helper to get department name
+    ageWarning, // Export age warning
 
     // Handlers
     handleChange,

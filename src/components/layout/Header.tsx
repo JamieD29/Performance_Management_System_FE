@@ -40,39 +40,39 @@ export default function Header({
 
   const rawRoles = Array.isArray(user.roles) ? user.roles : [];
 
-  // 2. Chuẩn hóa Role mảng (Hỗ trợ cả String và Object)
+  // 2. Normalize Role array (Supports both String and Object)
   const normalizedRoles = rawRoles.map((r: any) =>
     (typeof r === "string" ? r : r?.slug || r?.name || "")
       .toString()
       .toUpperCase(),
   );
 
-  // 3. Check quyền Admin
+  // 3. Check Admin privileges
   const isAdmin = normalizedRoles.includes("ADMIN");
 
-  // Hiển thị chức vụ: Ưu tiên ADMIN, sau đó mới đến chức vụ quản lý hoặc chức danh
+  // Display role: Prioritize ADMIN, followed by management position or job title
   const displayRole = isAdmin
     ? "Admin"
     : user?.managementPosition?.name || user?.jobTitle || "User";
 
-  // Fix Avatar: Hỗ trợ cả 2 key 'avatar' (từ session cũ) và 'avatarUrl' (từ API mới)
+  // Fix Avatar: Supports both 'avatar' (from old session) and 'avatarUrl' (from new API)
   const avatarSrc = user?.avatarUrl || user?.avatar || undefined;
 
   const handleLogout = async () => {
     try {
       await api.post("/auth/logout");
     } catch (error) {
-      console.log("Lỗi báo Backend (bỏ qua)");
+      console.log("Backend error (ignored)");
     } finally {
-      // 1. Dọn sạch ổ cứng và bộ nhớ phiên
+      // 1. Clear local storage and session storage
       localStorage.clear();
       sessionStorage.clear();
       if (typeof setAnchorEl === "function") setAnchorEl(null);
 
-      // 2. DÙNG SETTIMEOUT ĐỂ ÉP CHUYỂN TRANG BẤT CHẤP LỖI REACT
+      // 2. USE SETTIMEOUT TO FORCE REDIRECT DESPITE REACT ERRORS
       setTimeout(() => {
         window.location.href = "/login";
-      }, 100); // Trễ 0.1s để văng khỏi call stack bị lỗi
+      }, 100); // 0.1s delay to escape the erroring call stack
     }
   };
 
@@ -96,7 +96,7 @@ export default function Header({
           color="inherit"
           edge="start"
           onClick={onToggleSidebar}
-          sx={{ mr: 2, display: { sm: "none" } }} // 🔥 Chỉ hiện nút Menu trên Mobile. Desktop thì ẩn đi (vì Sidebar luôn hiện rồi)
+          sx={{ mr: 2, display: { sm: "none" } }} // 🔥 Show Menu button on mobile only. Hidden on desktop as the Sidebar is permanently visible
         >
           <MenuIcon />
         </IconButton>

@@ -2,6 +2,7 @@ import React from "react";
 import { Box, Typography, Paper, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import {
   ArrowRight, MessageCircle, FileText, Clock,
   CheckCircle, AlertTriangle, Target,
@@ -42,6 +43,7 @@ const statusStyleMap: Record<string, { bg: string; border: string; accent: strin
 const defaultStyle = { bg: "#f8fafc", border: "#e2e8f0", accent: "#64748b", btnColor: "#64748b" };
 
 export default function ActionCard({ hasAction, message, route, label, status, scoreProps }: ActionCardProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const style = status ? (statusStyleMap[status] || defaultStyle) : defaultStyle;
   const icon = status ? (statusIconMap[status] || <Target size={22} />) : <Target size={22} />;
@@ -99,7 +101,7 @@ export default function ActionCard({ hasAction, message, route, label, status, s
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
             <Box sx={{ color: style.accent }}>{icon}</Box>
             <Typography variant="subtitle1" fontWeight="700" sx={{ color: style.accent }}>
-              {hasAction ? "✅ Hành động tiếp theo" : "📋 Trạng thái hiện tại"}
+              {hasAction ? t("dashboard.actionCard.nextAction") : t("dashboard.actionCard.currentState")}
             </Typography>
           </Box>
 

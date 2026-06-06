@@ -9,14 +9,14 @@ import {
   Stack,
   Alert,
 } from "@mui/material";
-import { api } from "../../../services/api"; // ⚠️ Check đường dẫn api
+import { api } from "../../../services/api";
 import { showSuccess, showError } from "../../../utils/swal";
 import { useTranslation } from "react-i18next";
 
 interface AddDepartmentModalProps {
   open: boolean;
   onClose: () => void;
-  onSuccess: () => void; // Hàm gọi lại khi thêm thành công để reload list
+  onSuccess: () => void;
   initialData?: any;
 }
 
@@ -52,7 +52,6 @@ export default function AddDepartmentModal({
   };
 
   const handleSubmit = async () => {
-    // Validate cơ bản
     if (!formData.name || !formData.code) {
       setError(t("departmentDetail.addModal.nameRequired"));
       return;
@@ -69,17 +68,15 @@ export default function AddDepartmentModal({
         showSuccess(t("departmentDetail.addModal.successTitle"), t("departmentDetail.addModal.successCreate"));
       }
       if (!initialData) {
-        setFormData({ name: "", code: "", description: "" }); // Reset form only when adding
+        setFormData({ name: "", code: "", description: "" }); 
       }
-      onSuccess(); // Báo cho cha biết là xong rồi
-      onClose(); // Đóng modal
+      onSuccess();
+      onClose(); 
     } catch (err: any) {
-      // NestJS thường trả về message dạng mảng string, hoặc string đơn
       const errorMsg = err.response?.data?.message;
       let finalMsg = t("departmentDetail.addModal.errorDefault");
 
       if (Array.isArray(errorMsg)) {
-        // Nếu là mảng nhiều lỗi -> Ghép lại bằng dấu phẩy
         finalMsg = errorMsg.join(", ");
       } else if (typeof errorMsg === "string") {
         finalMsg = errorMsg;
@@ -101,7 +98,6 @@ export default function AddDepartmentModal({
         <Stack spacing={2} sx={{ mt: 1 }}>
           {error && (
             <Alert severity="error" sx={{ mb: 2 }}>
-              {/* Nếu error là mảng thì map ra, không thì hiện text */}
               {Array.isArray(error) ? (
                 <ul style={{ margin: 0, paddingLeft: 20 }}>
                   {error.map((e: string, i: number) => (

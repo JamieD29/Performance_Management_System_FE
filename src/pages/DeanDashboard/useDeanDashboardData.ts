@@ -1,10 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
 import { api } from "../../services/api";
-
-// ============================================================
-// TYPES
-// ============================================================
-
 export interface CycleInfo {
   id: string;
   name: string;
@@ -82,10 +77,6 @@ export interface DeanDashboardData {
 
   actionItems: ActionItem[];
 }
-
-// ============================================================
-// HOOK
-// ============================================================
 
 export function useDeanDashboardData(cycleId?: string) {
   const [data, setData] = useState<DeanDashboardData | null>(null);

@@ -1,5 +1,5 @@
-import React from "react";
 import { Box, Typography, Paper } from "@mui/material";
+import { useTranslation } from "react-i18next";
 import {
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   ResponsiveContainer, Tooltip, Legend
@@ -18,16 +18,18 @@ interface Props {
 }
 
 export default function ObjectiveRadarChart({ evaluationData }: Props) {
+  const { t } = useTranslation();
+
   const chartData = evaluationData.map((item) => {
     return {
       name: item.id,
       fullName: item.name,
-      "Tự khai (%)": item.maxScore > 0 ? Math.round((item.selfScore / item.maxScore) * 100) : 0,
-      "TK chấm (%)": item.maxScore > 0 ? Math.round((item.principalScore / item.maxScore) * 100) : 0,
+      selfPercent: item.maxScore > 0 ? Math.round((item.selfScore / item.maxScore) * 100) : 0,
+      managerPercent: item.maxScore > 0 ? Math.round((item.principalScore / item.maxScore) * 100) : 0,
       fullMark: 100,
-      "Tự khai (Điểm)": item.selfScore,
-      "TK chấm (Điểm)": item.principalScore,
-      "Tối đa (Điểm)": item.maxScore,
+      selfScore: item.selfScore,
+      managerScore: item.principalScore,
+      maxScore: item.maxScore,
     };
   });
 
@@ -40,14 +42,14 @@ export default function ObjectiveRadarChart({ evaluationData }: Props) {
         <Paper sx={{ p: 1.5, opacity: 0.9 }}>
           <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 0.5 }}>{data.fullName}</Typography>
           <Typography variant="body2" color="#64748b">
-            Tối đa: {data["Tối đa (Điểm)"]} điểm
+            {t("dashboard.chart.maxScoreLabel", { score: data.maxScore })}
           </Typography>
           <Typography variant="body2" color="#10b981">
-            Tự khai: {data["Tự khai (Điểm)"]} điểm ({data["Tự khai (%)"]}%)
+            {t("dashboard.chart.selfReportLabel", { score: data.selfScore, percent: data.selfPercent })}
           </Typography>
           {hasManagerScore && (
             <Typography variant="body2" color="#3b82f6">
-              TK chấm: {data["TK chấm (Điểm)"]} điểm ({data["TK chấm (%)"]}%)
+              {t("dashboard.chart.managerScoreLabel", { score: data.managerScore, percent: data.managerPercent })}
             </Typography>
           )}
         </Paper>
@@ -62,7 +64,7 @@ export default function ObjectiveRadarChart({ evaluationData }: Props) {
       sx={{ p: 3, borderRadius: 3, border: "1px solid #e2e8f0", bgcolor: "white", height: "100%" }}
     >
       <Typography variant="subtitle2" fontWeight="700" sx={{ mb: 2, color: "#1e293b" }}>
-        🕸️ Phân tích Năng lực theo Nhiệm vụ
+        {t("dashboard.chart.title")}
       </Typography>
 
       <Box sx={{ width: "100%", height: 260 }}>
@@ -73,9 +75,9 @@ export default function ObjectiveRadarChart({ evaluationData }: Props) {
             <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
             <Tooltip content={<CustomTooltip />} />
             <Legend wrapperStyle={{ fontSize: 12, paddingTop: 10 }} />
-            <Radar name="Tự khai" dataKey="Tự khai (%)" stroke="#10b981" fill="#10b981" fillOpacity={0.3} />
+            <Radar name={t("dashboard.chart.selfReport")} dataKey="selfPercent" stroke="#10b981" fill="#10b981" fillOpacity={0.3} />
             {hasManagerScore && (
-              <Radar name="TK chấm" dataKey="TK chấm (%)" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.4} />
+              <Radar name={t("dashboard.chart.managerScore")} dataKey="managerPercent" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.4} />
             )}
           </RadarChart>
         </ResponsiveContainer>
@@ -83,7 +85,7 @@ export default function ObjectiveRadarChart({ evaluationData }: Props) {
 
       {!hasManagerScore && (
         <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block", textAlign: "center" }}>
-          * Điểm Trưởng khoa chấm sẽ hiện khi OKR được duyệt hoàn tất.
+          {t("dashboard.chart.note")}
         </Typography>
       )}
     </Paper>

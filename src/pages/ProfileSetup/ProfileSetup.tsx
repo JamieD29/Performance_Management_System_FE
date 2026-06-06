@@ -39,7 +39,7 @@ export default function ProfileSetup() {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  // Hàm đăng xuất / đổi tài khoản: xóa session và về trang login, đồng thời xóa bản nháp của tài khoản này
+  // Logout / switch account: clear session, redirect to login, and delete this account's draft
   const handleSwitchAccount = () => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
@@ -82,7 +82,7 @@ export default function ProfileSetup() {
   const [error, setError] = useState("");
   const [validationError, setValidationError] = useState("");
 
-  // 📌 Single Source of Truth: Fetch enum options từ BE
+  // 📌 Single Source of Truth: Fetch enum options from BE
   const { options: profileOptions, loading: loadingOptions } = useProfileOptions();
   const { validateAgeAtJoinDate, validateJoinDateStr } = useProfileValidation();
   const academicRanks = profileOptions.academicRanks.length > 0 ? profileOptions.academicRanks : FALLBACK_ACADEMIC_RANKS;
@@ -132,7 +132,7 @@ export default function ProfileSetup() {
     })();
   }, []);
 
-  // Tự động lưu bản nháp thông tin đã nhập vào localStorage khi có thay đổi
+  // Automatically save draft form data to localStorage on change
   useEffect(() => {
     if (!isDraftLoaded) return;
 
@@ -156,7 +156,7 @@ export default function ProfileSetup() {
 
   const handleFieldChange = (field: keyof ProfileFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    // Xóa lỗi validation khi user thay đổi dữ liệu
+    // Clear validation error when user changes data
     if (validationError && (field === "dob" || field === "joinDate")) {
       setValidationError("");
     }
@@ -177,7 +177,7 @@ export default function ProfileSetup() {
 
   const handleNext = () => {
     if (activeStep === 0 && isStep1Complete) {
-      // Validate ngày vào trường và độ tuổi trước khi cho qua step 2
+      // Validate join date and age before moving to step 2
       const joinDateError = validateJoinDateStr(formData.joinDate);
       if (joinDateError) {
         setValidationError(joinDateError);
@@ -190,7 +190,7 @@ export default function ProfileSetup() {
         return;
       }
 
-      // Hợp lệ — cho qua
+      // Valid — proceed
       setValidationError("");
       setActiveStep((prev) => prev + 1);
     } else if (activeStep === 1 && isStep2Complete) {
@@ -202,20 +202,31 @@ export default function ProfileSetup() {
     setActiveStep((prev) => prev - 1);
   };
 
-  // Labels cho hiển thị
+  // Labels for display (translated to current language)
   const selectedDeptName =
     departments.find((d) => d.id === formData.departmentId)?.name || "";
-  const selectedRankLabel =
-    academicRanks.find((r) => r.value === formData.academicRank)?.label || "";
-  const selectedDegreeLabel =
-    degrees.find((d) => d.value === formData.degree)?.label || "";
+  const selectedRankLabel = formData.academicRank
+    ? t(`profile.enums.academicRank.${formData.academicRank}`, {
+        defaultValue: academicRanks.find((r) => r.value === formData.academicRank)?.label || "",
+      })
+    : "";
+  const selectedDegreeLabel = formData.degree
+    ? t(`profile.enums.degree.${formData.degree}`, {
+        defaultValue: degrees.find((d) => d.value === formData.degree)?.label || "",
+      })
+    : "";
+  const selectedJobTitleLabel = formData.jobTitle
+    ? t(`profile.enums.jobTitle.${formData.jobTitle}`, {
+        defaultValue: jobTitles.find((j) => j.value === formData.jobTitle)?.label || formData.jobTitle,
+      })
+    : "";
 
   const handleSubmit = async () => {
     setSubmitting(true);
     setError("");
     try {
-      // PATCH user profile (JWT token xác định user, không cần userId trong URL)
-      // Gửi toàn bộ formData lên API (nếu có các trường API chưa hỗ trợ, chúng có thể bị bỏ qua bởi BE, nhưng cứ gửi đầy đủ)
+      // PATCH user profile (JWT token identifies user, no userId needed in URL)
+      // Send complete formData to API (unsupported fields may be ignored by BE, but send anyway)
       await api.patch("/users/profile", {
         ...formData,
         dateOfBirth: formData.dob,
@@ -237,7 +248,7 @@ export default function ProfileSetup() {
         user.department = { id: formData.departmentId, name: selectedDeptName };
         localStorage.setItem("user", JSON.stringify(user));
 
-        // Xóa bản nháp sau khi đã thiết lập hồ sơ thành công
+        // Clear draft after successful profile setup
         const draftKey = `profile_setup_draft_${user.email}`;
         localStorage.removeItem(draftKey);
       }
@@ -356,7 +367,7 @@ export default function ProfileSetup() {
                 position: "relative",
               }}
             >
-              {/* Nút đổi tài khoản nằm trong card - chỉ hiện icon */}
+              {/* Switch account button inside the card - icon only */}
               <Box sx={{ position: "absolute", top: 16, right: 16, zIndex: 10 }}>
                 <Tooltip title={t("profileSetup.switchAccountTooltip")} placement="left">
                   <IconButton
@@ -511,7 +522,7 @@ export default function ProfileSetup() {
         selectedDeptName={selectedDeptName}
         selectedRankLabel={selectedRankLabel}
         selectedDegreeLabel={selectedDegreeLabel}
-        jobTitle={formData.jobTitle}
+        jobTitle={selectedJobTitleLabel}
       />
     </Box>
   );

@@ -1,7 +1,7 @@
-import React from "react";
 import { Box, Typography, Paper } from "@mui/material";
 import { motion } from "framer-motion";
 import { Clock, AlertTriangle, CheckCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export type DeadlineState = "DEFAULT" | "SUBMITTED_EARLY" | "SUBMITTED_LATE";
 
@@ -12,6 +12,8 @@ interface DeadlineCountdownProps {
 }
 
 export default function DeadlineCountdown({ daysLeft, label, state = "DEFAULT" }: DeadlineCountdownProps) {
+  const { t } = useTranslation();
+
   if (state === "DEFAULT" && daysLeft === null) {
     return (
       <Paper
@@ -26,7 +28,7 @@ export default function DeadlineCountdown({ daysLeft, label, state = "DEFAULT" }
       >
         <Clock size={20} color="#94a3b8" />
         <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
-          Chưa có deadline
+          {t("dashboard.deadlineCountdown.noDeadline")}
         </Typography>
       </Paper>
     );
@@ -45,14 +47,14 @@ export default function DeadlineCountdown({ daysLeft, label, state = "DEFAULT" }
     color = "#16a34a";
     icon = <CheckCircle size={22} color="#16a34a" />;
     mainValue = `${daysLeft}`;
-    subText = "ngày trước hạn";
+    subText = t("dashboard.deadlineCountdown.daysBefore");
   } else if (state === "SUBMITTED_LATE") {
     bg = "#fef2f2";
     border = "#fecaca";
     color = "#dc2626";
     icon = <AlertTriangle size={22} color="#dc2626" />;
-    mainValue = "Trễ hạn";
-    subText = "Đã nộp trễ so với quy định";
+    mainValue = t("dashboard.deadlineCountdown.submittedLate");
+    subText = t("dashboard.deadlineCountdown.lateText");
   } else {
     // DEFAULT
     const isOverdue = daysLeft !== null && daysLeft < 0;
@@ -63,22 +65,22 @@ export default function DeadlineCountdown({ daysLeft, label, state = "DEFAULT" }
       border = "#fecaca";
       color = "#dc2626";
       icon = <AlertTriangle size={22} color="#dc2626" />;
-      mainValue = `Quá ${Math.abs(daysLeft as number)}`;
-      subText = "ngày quá hạn";
+      mainValue = t("dashboard.deadlineCountdown.overdue", { days: Math.abs(daysLeft as number) });
+      subText = t("dashboard.deadlineCountdown.daysOverdueText");
     } else if (isUrgent) {
       bg = "#fff7ed";
       border = "#ffedd5";
       color = "#ea580c";
       icon = <AlertTriangle size={22} color="#ea580c" />;
       mainValue = `${daysLeft}`;
-      subText = daysLeft === 0 ? "hôm nay!" : "ngày còn lại";
+      subText = daysLeft === 0 ? t("dashboard.deadlineCountdown.today") : t("dashboard.deadlineCountdown.daysLeft");
     } else {
       bg = "#f0fdf4";
       border = "#dcfce7";
       color = "#16a34a";
       icon = <Clock size={22} color="#16a34a" />;
       mainValue = `${daysLeft}`;
-      subText = "ngày còn lại";
+      subText = t("dashboard.deadlineCountdown.daysLeft");
     }
   }
 
@@ -101,10 +103,10 @@ export default function DeadlineCountdown({ daysLeft, label, state = "DEFAULT" }
         <Box sx={{ mb: 0.5 }}>{icon}</Box>
         <Typography variant="subtitle2" sx={{ color: color, mb: 0.5, fontWeight: "bold" }}>
           {state === "SUBMITTED_EARLY" 
-            ? "Tuyệt vời! Bạn đã nộp sớm" 
+            ? t("dashboard.deadlineCountdown.submittedEarly") 
             : state === "SUBMITTED_LATE" 
-              ? "Báo cáo nộp trễ" 
-              : (label || "Hạn chót")}
+              ? t("dashboard.deadlineCountdown.submittedLate") 
+              : (label || t("dashboard.deadlineCountdown.defaultLabel"))}
         </Typography>
         <Typography variant="h4" fontWeight="800" sx={{ color: color, lineHeight: 1.2 }}>
           {mainValue}

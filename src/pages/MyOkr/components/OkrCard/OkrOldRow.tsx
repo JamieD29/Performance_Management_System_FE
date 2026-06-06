@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { TableRow, TableCell } from "@mui/material";
 
 interface OkrOldRowProps {
@@ -14,6 +15,7 @@ export const OkrOldRow: React.FC<OkrOldRowProps> = ({
   status,
   canReport,
 }) => {
+  const { t } = useTranslation();
   if (!oldItem || !(status === "PENDING" || status === "NEGOTIATING")) {
     return null;
   }
@@ -33,7 +35,7 @@ export const OkrOldRow: React.FC<OkrOldRowProps> = ({
       <TableCell
         sx={{ textDecoration: "line-through", color: "text.secondary" }}
       >
-        [Cũ] {oldItem.title}
+        [${t("okrCard.old")}] {oldItem.title}
       </TableCell>
       <TableCell
         sx={{ textDecoration: "line-through", color: "text.secondary" }}
@@ -44,7 +46,7 @@ export const OkrOldRow: React.FC<OkrOldRowProps> = ({
         sx={{ textDecoration: "line-through", color: "text.secondary" }}
       >
         {oldItem.unitScore
-          ? `+${oldItem.unitScore}/${oldItem.unit || "đv"}`
+          ? `+${oldItem.unitScore}/${oldItem.unit || t("okrCard.unit")}`
           : "—"}
       </TableCell>
       {canReport && (
