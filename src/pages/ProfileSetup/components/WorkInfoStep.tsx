@@ -15,6 +15,7 @@ import {
   MenuBook as MenuBookIcon,
   Badge as BadgeIcon,
 } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
 import { AnimatedField } from "./AnimatedField";
 import type { DepartmentOption, ProfileFormData } from "../types";
 import type { EnumOption } from "../../../hooks/useProfileOptions";
@@ -39,6 +40,7 @@ export function WorkInfoStep({
   degrees,
   jobTitles,
 }: WorkInfoStepProps) {
+  const { t } = useTranslation();
   const selectSx = {
     borderRadius: "10px",
     bgcolor: "#fff",
@@ -70,14 +72,14 @@ export function WorkInfoStep({
             <BusinessIcon fontSize="small" />
           </Box>
           <Typography variant="subtitle2" fontWeight={600} color="#37474f">
-            Đơn vị công tác
+            {t("profileSetup.workInfoStep.departmentLabel")}
           </Typography>
         </Stack>
         <FormControl fullWidth size="small">
-          <InputLabel>Chọn đơn vị công tác</InputLabel>
+          <InputLabel>{t("profileSetup.workInfoStep.departmentPlaceholder")}</InputLabel>
           <Select
             value={formData.departmentId}
-            label="Chọn đơn vị công tác"
+            label={t("profileSetup.workInfoStep.departmentPlaceholder")}
             onChange={(e: SelectChangeEvent) =>
               onChange("departmentId", e.target.value)
             }
@@ -86,7 +88,7 @@ export function WorkInfoStep({
           >
             {loadingDepts ? (
               <MenuItem disabled>
-                <CircularProgress size={18} sx={{ mr: 1 }} /> Đang tải...
+                <CircularProgress size={18} sx={{ mr: 1 }} /> {t("profileSetup.workInfoStep.loadingDepts")}
               </MenuItem>
             ) : (
               departments.map((dept) => (
@@ -114,14 +116,14 @@ export function WorkInfoStep({
             <MenuBookIcon fontSize="small" />
           </Box>
           <Typography variant="subtitle2" fontWeight={600} color="#37474f">
-            Học vị
+            {t("profileSetup.workInfoStep.degreeLabel")}
           </Typography>
         </Stack>
         <FormControl fullWidth size="small">
-          <InputLabel>Chọn học vị</InputLabel>
+          <InputLabel>{t("profileSetup.workInfoStep.degreePlaceholder")}</InputLabel>
           <Select
             value={formData.degree}
-            label="Chọn học vị"
+            label={t("profileSetup.workInfoStep.degreePlaceholder")}
             onChange={(e: SelectChangeEvent) => {
               onChange("degree", e.target.value);
               if (e.target.value !== "Tiến sĩ") {
@@ -132,7 +134,7 @@ export function WorkInfoStep({
           >
             {degrees.map((d) => (
               <MenuItem key={d.value} value={d.value}>
-                {d.label}
+                {t(`profile.enums.degree.${d.value}`, { defaultValue: d.label })}
               </MenuItem>
             ))}
           </Select>
@@ -154,14 +156,14 @@ export function WorkInfoStep({
             <WorkspacePremiumIcon fontSize="small" />
           </Box>
           <Typography variant="subtitle2" fontWeight={600} color="#37474f">
-            Học hàm
+            {t("profileSetup.workInfoStep.academicRankLabel")}
           </Typography>
         </Stack>
         <FormControl fullWidth size="small">
-          <InputLabel>Chọn học hàm</InputLabel>
+          <InputLabel>{t("profileSetup.workInfoStep.academicRankPlaceholder")}</InputLabel>
           <Select
             value={formData.academicRank}
-            label="Chọn học hàm"
+            label={t("profileSetup.workInfoStep.academicRankPlaceholder")}
             onChange={(e: SelectChangeEvent) =>
               onChange("academicRank", e.target.value)
             }
@@ -170,7 +172,7 @@ export function WorkInfoStep({
           >
             {academicRanks.map((r) => (
               <MenuItem key={r.value} value={r.value}>
-                {r.label}
+                {t(`profile.enums.academicRank.${r.value}`, { defaultValue: r.label })}
               </MenuItem>
             ))}
           </Select>
@@ -192,14 +194,14 @@ export function WorkInfoStep({
             <BadgeIcon fontSize="small" />
           </Box>
           <Typography variant="subtitle2" fontWeight={600} color="#37474f">
-            Chức danh nghề nghiệp
+            {t("profileSetup.workInfoStep.jobTitleLabel")}
           </Typography>
         </Stack>
         <FormControl fullWidth size="small">
-          <InputLabel>Chọn chức danh nghề nghiệp</InputLabel>
+          <InputLabel>{t("profileSetup.workInfoStep.jobTitlePlaceholder")}</InputLabel>
           <Select
             value={formData.jobTitle}
-            label="Chọn chức danh nghề nghiệp"
+            label={t("profileSetup.workInfoStep.jobTitlePlaceholder")}
             onChange={(e: SelectChangeEvent) =>
               onChange("jobTitle", e.target.value)
             }
@@ -207,7 +209,7 @@ export function WorkInfoStep({
           >
             {jobTitles.map((j) => (
               <MenuItem key={j.value} value={j.value}>
-                {j.label}
+                {t(`profile.enums.jobTitle.${j.value}`, { defaultValue: j.label })}
               </MenuItem>
             ))}
           </Select>

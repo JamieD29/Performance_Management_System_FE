@@ -1,5 +1,44 @@
 {
   "profileSetup": {
+    "steps": {
+      "personalInfo": "Thông tin cá nhân",
+      "workInfo": "Thông tin công tác"
+    },
+    "title": "Thiết lập hồ sơ",
+    "subtitle": "Vui lòng cung cấp thông tin cá nhân để hoàn tất đăng ký vào hệ thống",
+    "switchAccountTooltip": "Đăng xuất và đổi tài khoản",
+    "errors": {
+      "loadDepts": "Không thể tải danh sách bộ môn. Vui lòng thử lại.",
+      "submit": "Đã xảy ra lỗi khi lưu thông tin. Vui lòng thử lại."
+    },
+    "buttons": {
+      "back": "Quay lại",
+      "continue": "Tiếp tục",
+      "complete": "Hoàn tất đăng ký"
+    },
+    "personalInfoStep": {
+      "staffCodeLabel": "Mã cán bộ",
+      "staffCodePlaceholder": "Nhập mã cán bộ",
+      "fullNameLabel": "Họ và tên",
+      "fullNamePlaceholder": "Nhập họ và tên",
+      "dobLabel": "Ngày tháng năm sinh",
+      "emailLabel": "Email liên lạc",
+      "emailPlaceholder": "Nhập địa chỉ email",
+      "joinDateLabel": "Ngày vào trường",
+      "warningPrefix": "⚠️ Cảnh báo:",
+      "warningDescription": "Vui lòng kiểm tra lại ngày sinh và ngày vào trường rồi nhấn \"Tiếp tục\" lại."
+    },
+    "workInfoStep": {
+      "departmentLabel": "Đơn vị công tác",
+      "departmentPlaceholder": "Chọn đơn vị công tác",
+      "loadingDepts": "Đang tải...",
+      "degreeLabel": "Học vị",
+      "degreePlaceholder": "Chọn học vị",
+      "academicRankLabel": "Học hàm",
+      "academicRankPlaceholder": "Chọn học hàm",
+      "jobTitleLabel": "Chức danh nghề nghiệp",
+      "jobTitlePlaceholder": "Chọn chức danh nghề nghiệp"
+    },
     "confirmDialog": {
       "title": "Xác nhận thông tin",
       "subtitle": "Vui lòng kiểm tra kỹ các thông tin dưới đây trước khi xác nhận. Thông tin này sẽ được sử dụng để đăng ký nhân sự vào hệ thống.",

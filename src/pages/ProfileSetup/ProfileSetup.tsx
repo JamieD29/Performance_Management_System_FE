@@ -27,6 +27,7 @@ import { useProfileValidation } from "../../hooks/useProfileValidation";
 
 import type { DepartmentOption, ProfileFormData } from "./types";
 import { FALLBACK_ACADEMIC_RANKS, FALLBACK_DEGREES, FALLBACK_JOB_TITLES } from "./constants";
+import { useTranslation } from "react-i18next";
 import { useProfileOptions } from "../../hooks/useProfileOptions";
 import { PersonalInfoStep } from "./components/PersonalInfoStep";
 import { WorkInfoStep } from "./components/WorkInfoStep";
@@ -35,6 +36,7 @@ import { ConfirmationDialog } from "./components/ConfirmationDialog";
 const steps = ["Thông tin cá nhân", "Thông tin công tác"];
 
 export default function ProfileSetup() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   // Hàm đăng xuất / đổi tài khoản: xóa session và về trang login, đồng thời xóa bản nháp của tài khoản này
@@ -123,7 +125,7 @@ export default function ProfileSetup() {
         setDepartments(data);
       } catch (err) {
         console.error("Failed to load departments:", err);
-        setError("Không thể tải danh sách bộ môn. Vui lòng thử lại.");
+        setError(t("profileSetup.errors.loadDepts"));
       } finally {
         setLoadingDepts(false);
       }
@@ -246,7 +248,7 @@ export default function ProfileSetup() {
       console.error("Profile setup failed:", err);
       setError(
         err?.response?.data?.message ||
-          "Đã xảy ra lỗi khi lưu thông tin. Vui lòng thử lại.",
+          t("profileSetup.errors.submit"),
       );
       setConfirmOpen(false);
     } finally {
@@ -329,14 +331,13 @@ export default function ProfileSetup() {
                     letterSpacing: "-0.02em",
                   }}
                 >
-                  Thiết lập hồ sơ
+                  {t("profileSetup.title")}
                 </Typography>
                 <Typography
                   variant="body1"
                   sx={{ color: "#546e7a", maxWidth: 400, mx: "auto" }}
                 >
-                  Vui lòng cung cấp thông tin cá nhân để hoàn tất đăng ký vào hệ
-                  thống
+                  {t("profileSetup.subtitle")}
                 </Typography>
               </Box>
             </Fade>
@@ -357,7 +358,7 @@ export default function ProfileSetup() {
             >
               {/* Nút đổi tài khoản nằm trong card - chỉ hiện icon */}
               <Box sx={{ position: "absolute", top: 16, right: 16, zIndex: 10 }}>
-                <Tooltip title="Đăng xuất và đổi tài khoản" placement="left">
+                <Tooltip title={t("profileSetup.switchAccountTooltip")} placement="left">
                   <IconButton
                     onClick={handleSwitchAccount}
                     size="small"
@@ -381,9 +382,13 @@ export default function ProfileSetup() {
               </Box>
               {/* Stepper */}
               <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
-                {steps.map((label) => (
+                {steps.map((label, idx) => (
                   <Step key={label}>
-                    <StepLabel>{label}</StepLabel>
+                    <StepLabel>
+                      {idx === 0
+                        ? t("profileSetup.steps.personalInfo")
+                        : t("profileSetup.steps.workInfo")}
+                    </StepLabel>
                   </Step>
                 ))}
               </Stepper>
@@ -440,7 +445,7 @@ export default function ProfileSetup() {
                       },
                     }}
                   >
-                    Quay lại
+                    {t("profileSetup.buttons.back")}
                   </Button>
                 )}
 
@@ -452,7 +457,7 @@ export default function ProfileSetup() {
                     activeStep === 0 ? !isStep1Complete : !isStep2Complete
                   }
                   endIcon={
-                    activeStep === steps.length - 1 ? (
+                    activeStep === 1 ? (
                       <CheckCircleIcon />
                     ) : (
                       <NavigateNextIcon />
@@ -477,9 +482,9 @@ export default function ProfileSetup() {
                     },
                   }}
                 >
-                  {activeStep === steps.length - 1
-                    ? "Hoàn tất đăng ký"
-                    : "Tiếp tục"}
+                  {activeStep === 1
+                    ? t("profileSetup.buttons.complete")
+                    : t("profileSetup.buttons.continue")}
                 </Button>
               </Box>
             </Paper>

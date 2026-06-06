@@ -6,6 +6,7 @@ import {
   Person as PersonIcon,
   AssignmentInd as AssignmentIndIcon,
 } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
 import { AnimatedField } from "./AnimatedField";
 import type { ProfileFormData } from "../types";
 
@@ -21,6 +22,7 @@ export function PersonalInfoStep({
   onChange,
   validationError,
 }: PersonalInfoStepProps) {
+  const { t } = useTranslation();
   const now = new Date();
   const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
   const minJoinDateStr = "1995-01-01";
@@ -42,13 +44,13 @@ export function PersonalInfoStep({
             <AssignmentIndIcon fontSize="small" />
           </Box>
           <Typography variant="subtitle2" fontWeight={600} color="#37474f">
-            Mã cán bộ
+            {t("profileSetup.personalInfoStep.staffCodeLabel")}
           </Typography>
         </Stack>
         <TextField
           fullWidth
           size="small"
-          placeholder="Nhập mã cán bộ"
+          placeholder={t("profileSetup.personalInfoStep.staffCodePlaceholder")}
           value={formData.staffCode}
           onChange={(e) => {
             const val = e.target.value;
@@ -80,13 +82,13 @@ export function PersonalInfoStep({
             <PersonIcon fontSize="small" />
           </Box>
           <Typography variant="subtitle2" fontWeight={600} color="#37474f">
-            Họ và tên
+            {t("profileSetup.personalInfoStep.fullNameLabel")}
           </Typography>
         </Stack>
         <TextField
           fullWidth
           size="small"
-          placeholder="Nhập họ và tên"
+          placeholder={t("profileSetup.personalInfoStep.fullNamePlaceholder")}
           value={formData.fullName}
           onChange={(e) => {
             const val = e.target.value;
@@ -118,7 +120,7 @@ export function PersonalInfoStep({
             <EventIcon fontSize="small" />
           </Box>
           <Typography variant="subtitle2" fontWeight={600} color="#37474f">
-            Ngày tháng năm sinh
+            {t("profileSetup.personalInfoStep.dobLabel")}
           </Typography>
         </Stack>
         <TextField
@@ -153,14 +155,14 @@ export function PersonalInfoStep({
             <EmailIcon fontSize="small" />
           </Box>
           <Typography variant="subtitle2" fontWeight={600} color="#37474f">
-            Email liên lạc
+            {t("profileSetup.personalInfoStep.emailLabel")}
           </Typography>
         </Stack>
         <TextField
           fullWidth
           size="small"
           type="email"
-          placeholder="Nhập địa chỉ email"
+          placeholder={t("profileSetup.personalInfoStep.emailPlaceholder")}
           value={formData.email}
           onChange={(e) => onChange("email", e.target.value)}
           InputProps={{
@@ -191,7 +193,7 @@ export function PersonalInfoStep({
             <BadgeIcon fontSize="small" />
           </Box>
           <Typography variant="subtitle2" fontWeight={600} color="#37474f">
-            Ngày vào trường
+            {t("profileSetup.personalInfoStep.joinDateLabel")}
           </Typography>
         </Stack>
         <TextField
@@ -212,10 +214,10 @@ export function PersonalInfoStep({
         {/* Cảnh báo tuổi — hiển thị ngay dưới ngày vào trường */}
         {validationError && (
           <Alert severity="warning" sx={{ mt: 1.5, borderRadius: "10px" }}>
-            <strong>⚠️ Cảnh báo:</strong> {validationError}
+            <strong>{t("profileSetup.personalInfoStep.warningPrefix")}</strong> {validationError}
             <br />
             <Typography variant="caption" color="text.secondary">
-              Vui lòng kiểm tra lại ngày sinh và ngày vào trường rồi nhấn "Tiếp tục" lại.
+              {t("profileSetup.personalInfoStep.warningDescription")}
             </Typography>
           </Alert>
         )}

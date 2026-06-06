@@ -1,5 +1,44 @@
 {
   "profileSetup": {
+    "steps": {
+      "personalInfo": "Personal Information",
+      "workInfo": "Work Information"
+    },
+    "title": "Profile Setup",
+    "subtitle": "Please provide your personal information to complete registration in the system",
+    "switchAccountTooltip": "Log out and change account",
+    "errors": {
+      "loadDepts": "Failed to load department list. Please try again.",
+      "submit": "An error occurred while saving information. Please try again."
+    },
+    "buttons": {
+      "back": "Back",
+      "continue": "Continue",
+      "complete": "Complete Registration"
+    },
+    "personalInfoStep": {
+      "staffCodeLabel": "Staff Code",
+      "staffCodePlaceholder": "Enter staff code",
+      "fullNameLabel": "Full Name",
+      "fullNamePlaceholder": "Enter full name",
+      "dobLabel": "Date of Birth",
+      "emailLabel": "Contact Email",
+      "emailPlaceholder": "Enter email address",
+      "joinDateLabel": "School Join Date",
+      "warningPrefix": "⚠️ Warning:",
+      "warningDescription": "Please check your date of birth and join date, then click \"Continue\" again."
+    },
+    "workInfoStep": {
+      "departmentLabel": "Working Department",
+      "departmentPlaceholder": "Select department",
+      "loadingDepts": "Loading...",
+      "degreeLabel": "Degree",
+      "degreePlaceholder": "Select degree",
+      "academicRankLabel": "Academic Rank",
+      "academicRankPlaceholder": "Select academic rank",
+      "jobTitleLabel": "Job Title",
+      "jobTitlePlaceholder": "Select job title"
+    },
     "confirmDialog": {
       "title": "Confirm Information",
       "subtitle": "Please double-check the information below before confirming. This information will be used to register you into the system.",
