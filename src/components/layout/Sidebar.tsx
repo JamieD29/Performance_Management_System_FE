@@ -30,16 +30,22 @@ import {
   BarChart3,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import {
+  DRAWER_WIDTH,
+  COLLAPSED_DRAWER_WIDTH,
+  TRANSITION_DURATION,
+  TRANSITION_EASING,
+  SMOOTH_TRANSITION,
+  colors,
+  getItemStyles as getRawItemStyles,
+  getIconStyles as getRawIconStyles,
+  groupHeaderStyles as getRawGroupHeaderStyles,
+  sectionLabelSx as getRawSectionLabelSx,
+  sidebarBg,
+  popoverItemSx as getRawPopoverItemSx,
+} from "./Sidebar.styles";
 
-// ==========================================
-// CONSTANTS
-// ==========================================
-export const DRAWER_WIDTH = 280;
-export const COLLAPSED_DRAWER_WIDTH = 72;
-
-const TRANSITION_DURATION = "0.35s";
-const TRANSITION_EASING = "cubic-bezier(0.4, 0, 0.2, 1)";
-const SMOOTH_TRANSITION = `all ${TRANSITION_DURATION} ${TRANSITION_EASING}`;
+export { DRAWER_WIDTH, COLLAPSED_DRAWER_WIDTH };
 
 interface SidebarProps {
   mobileOpen: boolean;
@@ -126,118 +132,16 @@ export default function Sidebar({
   };
 
   // ==========================================
-  // 2. COLOR PALETTE
-  // ==========================================
-  const colors = {
-    bg: "#0F2854",
-    bgLight: "#1C4D8D",
-    bgDark: "#081736",
-    accent1: "#1C4D8D",
-    accent2: "#BDE8F5",
-    accent3: "#BDE8F5",
-    accent4: "#FFD60A",
-    text: "rgba(255, 255, 255, 0.88)",
-    textMuted: "rgba(255, 255, 255, 0.55)",
-    textBright: "#ffffff",
-    divider: "rgba(255, 255, 255, 0.15)",
-    hoverBg: "rgba(255, 255, 255, 0.12)",
-    activeBg: "rgba(255, 255, 255, 0.2)",
-    activeGlow: "0 2px 12px rgba(0, 0, 0, 0.15)",
-  };
-
-  // ==========================================
-  // 3. STYLING
+  // 2. LOCAL STYLE ADAPTERS
   // ==========================================
   const currentWidth = collapsed ? COLLAPSED_DRAWER_WIDTH : DRAWER_WIDTH;
 
-  const getItemStyles = (path: string) => ({
-    borderRadius: "12px",
-    minHeight: 46,
-    mb: 0.5,
-    mx: 0.5,
-    px: collapsed ? 1.5 : 2,
-    justifyContent: collapsed ? "center" : "flex-start",
-    color: isActive(path) ? colors.textBright : colors.text,
-    bgcolor: isActive(path) ? colors.activeBg : "transparent",
-    boxShadow: isActive(path) ? colors.activeGlow : "none",
-    fontWeight: isActive(path) ? 600 : 400,
-    transition: SMOOTH_TRANSITION,
-    position: "relative" as const,
-    overflow: "hidden",
-    "&:hover": {
-      bgcolor: isActive(path) ? colors.activeBg : colors.hoverBg,
-      color: colors.textBright,
-      transform: collapsed ? "none" : "translateX(3px)",
-      "& .MuiListItemIcon-root": {
-        color: colors.textBright,
-      },
-    },
-    "&::before": isActive(path)
-      ? {
-          content: '""',
-          position: "absolute",
-          left: 0,
-          top: "15%",
-          bottom: "15%",
-          width: "3px",
-          borderRadius: "0 4px 4px 0",
-          bgcolor: colors.accent3,
-          boxShadow: `0 0 8px ${colors.accent3}`,
-        }
-      : {},
-  });
+  const getItemStyles = (path: string) => getRawItemStyles(collapsed, isActive(path));
+  const getIconStyles = (path: string) => getRawIconStyles(collapsed, isActive(path));
+  const groupHeaderStyles = getRawGroupHeaderStyles(collapsed);
+  const sectionLabelSx = getRawSectionLabelSx(collapsed);
+  const popoverItemSx = (path: string) => getRawPopoverItemSx(isActive(path));
 
-  const getIconStyles = (path: string) => ({
-    color: isActive(path) ? "#0F2854" : colors.accent2,
-    minWidth: collapsed ? "unset" : 38,
-    mr: collapsed ? 0 : 1,
-    transition: `color ${TRANSITION_DURATION} ease`,
-  });
-
-  const groupHeaderStyles = {
-    borderRadius: "12px",
-    mb: 0.5,
-    mx: 0.5,
-    px: collapsed ? 1.5 : 2,
-    justifyContent: collapsed ? "center" : "flex-start",
-    color: colors.textBright,
-    transition: SMOOTH_TRANSITION,
-    "&:hover": {
-      bgcolor: colors.hoverBg,
-    },
-  };
-
-  const sectionLabelSx = {
-    display: collapsed ? "none" : "block",
-    px: 2,
-    pt: 2.5,
-    pb: 0.5,
-    fontSize: "0.78rem",
-    fontWeight: 800,
-    letterSpacing: "0.12em",
-    textTransform: "uppercase" as const,
-    color: colors.accent2,
-  };
-
-  const sidebarBg = {
-    bgcolor: colors.bg,
-    borderRight: "none",
-  };
-
-  // Popover item styles
-  const popoverItemSx = (path: string) => ({
-    borderRadius: "8px",
-    mx: 0.5,
-    mb: 0.3,
-    color: isActive(path) ? "#1C4D8D" : "#334155",
-    bgcolor: isActive(path) ? "#e8f0fe" : "transparent",
-    fontWeight: isActive(path) ? 600 : 400,
-    transition: "all 0.2s ease",
-    "&:hover": {
-      bgcolor: "#f1f5f9",
-      color: "#1C4D8D",
-    },
-  });
 
   // ==========================================
   // 4. POPOVER SUB-MENUS (collapsed mode)

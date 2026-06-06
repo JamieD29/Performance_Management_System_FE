@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
   Box,
-  Typography,
   Table,
   TableBody,
   TableCell,
@@ -9,7 +8,6 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Chip,
   IconButton,
   TextField,
   Button,
@@ -19,11 +17,6 @@ import {
   DialogActions,
 } from "@mui/material";
 import {
-  Comment,
-  Send,
-  Edit,
-  Add,
-  Delete,
   Save,
   Undo,
   Check,
@@ -33,6 +26,14 @@ import { showError, showSuccess } from "../../../utils/swal";
 import AddCriteriaDialog from "../../MyOkr/components/AddCriteriaDialog";
 import { validateStructureScores } from "./TemplateEditorDialog";
 import { useTranslation } from "react-i18next";
+import { OkrManagerOldRow } from "./OkrManagerTree/OkrManagerOldRow";
+import { OkrManagerChatRow } from "./OkrManagerTree/OkrManagerChatRow";
+import {
+  OkrManagerObjectiveRow,
+  OkrManagerKeyResultRow,
+  OkrManagerSubKeyResultRow,
+  OkrManagerSubSubKeyResultRow,
+} from "./OkrManagerTree/OkrManagerRows";
 
 export default function OkrManagerTree({
   okr,
@@ -41,7 +42,7 @@ export default function OkrManagerTree({
   okr: any;
   onRefresh: () => void;
 }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [chatMessage, setChatMessage] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
@@ -140,41 +141,6 @@ export default function OkrManagerTree({
       Number(newItem.maxScore || 0) !== Number(oldItem.maxScore || 0) ||
       Number(newItem.unitScore || 0) !== Number(oldItem.unitScore || 0) ||
       String(newItem.unit || "").trim() !== String(oldItem.unit || "").trim()
-    );
-  };
-
-  const renderOldRow = (oldItem: any, indent: number) => {
-    if (!oldItem) return null;
-    return (
-      <TableRow sx={{ bgcolor: "#f1f5f9", opacity: 0.7 }}>
-        <TableCell
-          sx={{
-            pl: indent,
-            textDecoration: "line-through",
-            color: "text.secondary",
-          }}
-        >
-          {oldItem.id}
-        </TableCell>
-        <TableCell
-          sx={{ textDecoration: "line-through", color: "text.secondary" }}
-        >
-          {t("departmentOkr.managerTree.proposedChanges.oldPrefix")}{oldItem.title}
-        </TableCell>
-        <TableCell
-          sx={{ textDecoration: "line-through", color: "text.secondary" }}
-        >
-          {oldItem.maxScore || "—"}
-        </TableCell>
-        <TableCell
-          sx={{ textDecoration: "line-through", color: "text.secondary" }}
-        >
-          {oldItem.unitScore
-            ? `+${oldItem.unitScore}/${oldItem.unit || t("departmentOkr.managerTree.proposedChanges.unitSuffix")}`
-            : "—"}
-        </TableCell>
-        <TableCell align="center"></TableCell>
-      </TableRow>
     );
   };
 
@@ -821,88 +787,6 @@ export default function OkrManagerTree({
     }
   };
 
-  const renderChatRow = (itemId: string, colSpan: number) => {
-    if (activeChatId !== itemId) return null;
-    const history = [
-      ...(okr.proposedChanges?.[itemId] || []),
-      ...(localComments[itemId] || []),
-    ];
-    return (
-      <TableRow>
-        <TableCell colSpan={colSpan} sx={{ p: 0, bgcolor: "#f1f5f9" }}>
-          <Box
-            sx={{
-              p: 2,
-              borderLeft: "3px solid #f59e0b",
-              ml: 2,
-              bgcolor: "#fff",
-              mb: 2,
-              mt: 1,
-              borderRadius: 1,
-              boxShadow: 1,
-            }}
-          >
-            <Typography variant="subtitle2" sx={{ mb: 1, color: "#92400e" }}>
-              {t("departmentOkr.managerTree.chat.title")}
-            </Typography>
-            {history.length > 0 ? (
-              <Box sx={{ mb: 2, maxHeight: 150, overflowY: "auto" }}>
-                {history.map((msg: any, idx: number) => (
-                  <Box
-                    key={idx}
-                    sx={{
-                      mb: 1,
-                      p: 1,
-                      bgcolor: msg.sender === "USER" ? "#eff6ff" : "#fff7ed",
-                      borderRadius: 1,
-                      maxWidth: "80%",
-                    }}
-                  >
-                    <Typography
-                      variant="caption"
-                      fontWeight="bold"
-                      color={msg.sender === "USER" ? "primary" : "warning.main"}
-                    >
-                      {msg.sender === "USER" ? t("departmentOkr.managerTree.chat.senderUser") : t("departmentOkr.managerTree.chat.senderManager")} -{" "}
-                      {new Date(msg.createdAt).toLocaleString(i18n.language === "vi" ? "vi-VN" : "en-US")}
-                    </Typography>
-                    <Typography variant="body2">{msg.message}</Typography>
-                  </Box>
-                ))}
-              </Box>
-            ) : (
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                {t("departmentOkr.managerTree.chat.noExchange")}
-              </Typography>
-            )}
-
-            <Box sx={{ display: "flex", gap: 1 }}>
-              <TextField
-                size="small"
-                fullWidth
-                placeholder={t("departmentOkr.managerTree.chat.inputPlaceholder")}
-                value={chatMessage}
-                onChange={(e) => setChatMessage(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSendChat(itemId);
-                }}
-              />
-              <Button
-                variant="contained"
-                color="warning"
-                disabled={chatLoading || !chatMessage.trim()}
-                onClick={() => handleSendChat(itemId)}
-                startIcon={<Send />}
-              >
-                {t("departmentOkr.managerTree.chat.sendBtn")}
-              </Button>
-            </Box>
-          </Box>
-        </TableCell>
-      </TableRow>
-    );
-  };
-
   return (
     <Box>
       {hasChanges && (
@@ -951,75 +835,30 @@ export default function OkrManagerTree({
 
               return (
                 <React.Fragment key={obj.id || oIndex}>
-                  {/* Objective row */}
-                  {isObjChanged && renderOldRow(oldObj, 2)}
-                  <TableRow
-                    sx={{ bgcolor: isObjChanged ? "#fef08a" : "#dbeafe" }}
-                  >
-                    <TableCell sx={{ fontWeight: "bold" }}>{obj.id}</TableCell>
-                    <TableCell sx={{ fontWeight: "bold" }}>
-                      {isObjChanged ? t("departmentOkr.managerTree.proposedChanges.newPrefix") : ""}
-                      {obj.title}
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: "bold" }}>
-                      {obj.maxScore}
-                    </TableCell>
-                    <TableCell></TableCell>
-                    <TableCell align="center">
-                      <Box
-                        sx={{
-                          display: "flex",
-                          gap: 1,
-                          justifyContent: "center",
-                        }}
-                      >
-                        <IconButton
-                          size="small"
-                          onClick={() => handleOpenAddDialog("KR", obj.id)}
-                          title={t("departmentOkr.managerTree.buttons.addCriteria")}
-                        >
-                          <Add fontSize="small" color="success" />
-                        </IconButton>
-                        {isObjChanged && (
-                          <IconButton
-                            size="small"
-                            onClick={() => handleUndoItem("OBJ", obj.id)}
-                            title={t("departmentOkr.managerTree.buttons.undoChanges")}
-                          >
-                            <Undo fontSize="small" color="primary" />
-                          </IconButton>
-                        )}
-                        <IconButton
-                          size="small"
-                          onClick={() => handleOpenEditDialog("OBJ", obj.id)}
-                          title={t("departmentOkr.managerTree.buttons.edit")}
-                        >
-                          <Edit fontSize="small" color="info" />
-                        </IconButton>
-                        <IconButton
-                          size="small"
-                          onClick={() =>
-                            setActiveChatId(
-                              activeChatId === obj.id ? null : obj.id,
-                            )
-                          }
-                        >
-                          <Comment
-                            fontSize="small"
-                            color={
-                              okr.proposedChanges?.[obj.id]?.length > 0 ||
-                                localComments[obj.id]?.length > 0
-                                ? "warning"
-                                : "inherit"
-                            }
-                          />
-                        </IconButton>
-                      </Box>
-                    </TableCell>
-                  </TableRow>
-                  {renderChatRow(obj.id, 5)}
+                  {isObjChanged && <OkrManagerOldRow oldItem={oldObj} indent={2} />}
+                  <OkrManagerObjectiveRow
+                    obj={obj}
+                    isObjChanged={isObjChanged}
+                    handleOpenAddDialog={handleOpenAddDialog}
+                    handleUndoItem={handleUndoItem}
+                    handleOpenEditDialog={handleOpenEditDialog}
+                    activeChatId={activeChatId}
+                    setActiveChatId={setActiveChatId}
+                    proposedChanges={okr.proposedChanges}
+                    localComments={localComments}
+                  />
+                  <OkrManagerChatRow
+                    itemId={obj.id}
+                    colSpan={5}
+                    activeChatId={activeChatId}
+                    proposedChanges={okr.proposedChanges}
+                    localComments={localComments}
+                    chatMessage={chatMessage}
+                    setChatMessage={setChatMessage}
+                    chatLoading={chatLoading}
+                    handleSendChat={handleSendChat}
+                  />
 
-                  {/* KR rows */}
                   {obj.items?.map((kr: any, kIndex: number) => {
                     const oldKr = findOriginalItem(obj.id, kr.id);
                     const isKrChanged = hasChanged(kr, oldKr);
@@ -1027,463 +866,107 @@ export default function OkrManagerTree({
 
                     return (
                       <React.Fragment key={`${oIndex}-${kIndex}`}>
-                        {isKrChanged && renderOldRow(oldKr, 3)}
-                        <TableRow
-                          sx={{
-                            bgcolor:
-                              isKrNew || isKrChanged || kr.isEdited
-                                ? "#fef08a"
-                                : "#f8fafc",
-                          }}
-                        >
-                          <TableCell
-                            sx={{
-                              pl: 3,
-                              fontWeight:
-                                isKrNew || isKrChanged || kr.isEdited
-                                  ? "bold"
-                                  : "normal",
-                            }}
-                          >
-                            {kr.id}
-                          </TableCell>
-                          <TableCell
-                            sx={{
-                              fontWeight:
-                                isKrNew || isKrChanged || kr.isEdited
-                                  ? "bold"
-                                  : "normal",
-                            }}
-                          >
-                            {isKrChanged ? t("departmentOkr.managerTree.proposedChanges.newPrefix") : ""}
-                            {kr.title}
-                          </TableCell>
-                          <TableCell>{kr.maxScore}</TableCell>
-                          <TableCell>
-                            {kr.unitScore
-                              ? `+${kr.unitScore}/${kr.unit || t("departmentOkr.managerTree.proposedChanges.unitSuffix")}`
-                              : "—"}
-                          </TableCell>
-                          <TableCell align="center">
-                            <Box
-                              sx={{
-                                display: "flex",
-                                gap: 1,
-                                justifyContent: "center",
-                              }}
-                            >
-                              <IconButton
-                                size="small"
-                                onClick={() =>
-                                  handleOpenAddDialog("SUBKR", obj.id, kr.id)
-                                }
-                                title={t("departmentOkr.managerTree.buttons.addSubCriteria")}
-                              >
-                                <Add fontSize="small" color="success" />
-                              </IconButton>
-                              {(isKrChanged || isKrNew || kr.isEdited) && (
-                                <>
-                                  <IconButton
-                                    size="small"
-                                    onClick={() =>
-                                      handleAcceptItem("KR", obj.id, kr.id)
-                                    }
-                                    title={t("departmentOkr.managerTree.buttons.acceptChanges")}
-                                  >
-                                    <Check fontSize="small" color="success" />
-                                  </IconButton>
-                                  <IconButton
-                                    size="small"
-                                    onClick={() =>
-                                      handleUndoItem("KR", obj.id, kr.id)
-                                    }
-                                    title={t("departmentOkr.managerTree.buttons.undoChanges")}
-                                  >
-                                    <Undo fontSize="small" color="primary" />
-                                  </IconButton>
-                                </>
-                              )}
-                              <IconButton
-                                size="small"
-                                onClick={() =>
-                                  handleOpenEditDialog("KR", obj.id, kr.id)
-                                }
-                                title={t("departmentOkr.managerTree.buttons.edit")}
-                              >
-                                <Edit fontSize="small" color="info" />
-                              </IconButton>
-                              <IconButton
-                                size="small"
-                                onClick={() =>
-                                  setActiveChatId(
-                                    activeChatId === kr.id ? null : kr.id,
-                                  )
-                                }
-                              >
-                                <Comment
-                                  fontSize="small"
-                                  color={
-                                    okr.proposedChanges?.[kr.id]?.length > 0 ||
-                                      localComments[kr.id]?.length > 0
-                                      ? "warning"
-                                      : "inherit"
-                                  }
-                                />
-                              </IconButton>
-                              <IconButton
-                                size="small"
-                                onClick={() => handleDeleteItem(obj.id, kr.id)}
-                                title={t("departmentOkr.managerTree.buttons.deleteCriteria")}
-                              >
-                                <Delete fontSize="small" color="error" />
-                              </IconButton>
-                            </Box>
-                          </TableCell>
-                        </TableRow>
-                        {renderChatRow(kr.id, 5)}
+                        {isKrChanged && <OkrManagerOldRow oldItem={oldKr} indent={3} />}
+                        <OkrManagerKeyResultRow
+                          kr={kr}
+                          objId={obj.id}
+                          isKrChanged={isKrChanged}
+                          isKrNew={isKrNew}
+                          handleOpenAddDialog={handleOpenAddDialog}
+                          handleAcceptItem={handleAcceptItem}
+                          handleUndoItem={handleUndoItem}
+                          handleOpenEditDialog={handleOpenEditDialog}
+                          handleDeleteItem={handleDeleteItem}
+                          activeChatId={activeChatId}
+                          setActiveChatId={setActiveChatId}
+                          proposedChanges={okr.proposedChanges}
+                          localComments={localComments}
+                        />
+                        <OkrManagerChatRow
+                          itemId={kr.id}
+                          colSpan={5}
+                          activeChatId={activeChatId}
+                          proposedChanges={okr.proposedChanges}
+                          localComments={localComments}
+                          chatMessage={chatMessage}
+                          setChatMessage={setChatMessage}
+                          chatLoading={chatLoading}
+                          handleSendChat={handleSendChat}
+                        />
 
-                        {/* Sub-KR rows */}
                         {kr.items?.map((sub: any, sIndex: number) => {
-                          const oldSub = findOriginalItem(
-                            obj.id,
-                            kr.id,
-                            sub.id,
-                          );
+                          const oldSub = findOriginalItem(obj.id, kr.id, sub.id);
                           const isSubChanged = hasChanged(sub, oldSub);
                           const isSubNew = originalStructure ? !oldSub : false;
 
                           return (
-                            <React.Fragment
-                              key={`${oIndex}-${kIndex}-${sIndex}`}
-                            >
-                              {isSubChanged && renderOldRow(oldSub, 6)}
-                              <TableRow
-                                sx={{
-                                  bgcolor:
-                                    isSubNew || isSubChanged || sub.isEdited
-                                      ? "#fef08a"
-                                      : "inherit",
-                                }}
-                              >
-                                <TableCell
-                                  sx={{
-                                    pl: 6,
-                                    fontWeight:
-                                      isSubNew || isSubChanged || sub.isEdited
-                                        ? "bold"
-                                        : "normal",
-                                  }}
-                                >
-                                  {sub.id}
-                                </TableCell>
-                                <TableCell
-                                  sx={{
-                                    fontWeight:
-                                      isSubNew || isSubChanged || sub.isEdited
-                                        ? "bold"
-                                        : "normal",
-                                  }}
-                                >
-                                  {isSubChanged ? t("departmentOkr.managerTree.proposedChanges.newPrefix") : ""}
-                                  {sub.title}
-                                </TableCell>
-                                <TableCell>{sub.maxScore}</TableCell>
-                                <TableCell>
-                                  {sub.unitScore
-                                    ? `+${sub.unitScore}/${sub.unit || t("departmentOkr.managerTree.proposedChanges.unitSuffix")}`
-                                    : "—"}
-                                </TableCell>
-                                <TableCell align="center">
-                                  <Box
-                                    sx={{
-                                      display: "flex",
-                                      gap: 1,
-                                      justifyContent: "center",
-                                    }}
-                                  >
-                                    <IconButton
-                                      size="small"
-                                      onClick={() =>
-                                        handleOpenEditDialog(
-                                          "SUBKR",
-                                          obj.id,
-                                          kr.id,
-                                          sub.id,
-                                        )
-                                      }
-                                      title={t("departmentOkr.managerTree.buttons.edit")}
-                                    >
-                                      <Edit fontSize="small" color="info" />
-                                    </IconButton>
-                                    {(isSubChanged ||
-                                      isSubNew ||
-                                      sub.isEdited) && (
-                                        <>
-                                          <IconButton
-                                            size="small"
-                                            onClick={() =>
-                                              handleAcceptItem(
-                                                "SUBKR",
-                                                obj.id,
-                                                kr.id,
-                                                sub.id,
-                                              )
-                                            }
-                                            title={t("departmentOkr.managerTree.buttons.acceptChanges")}
-                                          >
-                                            <Check
-                                              fontSize="small"
-                                              color="success"
-                                            />
-                                          </IconButton>
-                                          <IconButton
-                                            size="small"
-                                            onClick={() =>
-                                              handleUndoItem(
-                                                "SUBKR",
-                                                obj.id,
-                                                kr.id,
-                                                sub.id,
-                                              )
-                                            }
-                                            title={t("departmentOkr.managerTree.buttons.undoChanges")}
-                                          >
-                                            <Undo
-                                              fontSize="small"
-                                              color="primary"
-                                            />
-                                          </IconButton>
-                                        </>
-                                      )}
-                                    <IconButton
-                                      size="small"
-                                      onClick={() =>
-                                        setActiveChatId(
-                                          activeChatId === sub.id
-                                            ? null
-                                            : sub.id,
-                                        )
-                                      }
-                                    >
-                                      <Comment
-                                        fontSize="small"
-                                        color={
-                                          okr.proposedChanges?.[sub.id]
-                                            ?.length > 0 ||
-                                            localComments[sub.id]?.length > 0
-                                            ? "warning"
-                                            : "inherit"
-                                        }
-                                      />
-                                    </IconButton>
-                                    <IconButton
-                                      size="small"
-                                      onClick={() =>
-                                        handleDeleteItem(obj.id, kr.id, sub.id)
-                                      }
-                                      title={t("departmentOkr.managerTree.buttons.deleteSubCriteria")}
-                                    >
-                                      <Delete fontSize="small" color="error" />
-                                    </IconButton>
-                                  </Box>
-                                </TableCell>
-                              </TableRow>
-                              {renderChatRow(sub.id, 5)}
+                            <React.Fragment key={`${oIndex}-${kIndex}-${sIndex}`}>
+                              {isSubChanged && <OkrManagerOldRow oldItem={oldSub} indent={6} />}
+                              <OkrManagerSubKeyResultRow
+                                sub={sub}
+                                objId={obj.id}
+                                krId={kr.id}
+                                isSubChanged={isSubChanged}
+                                isSubNew={isSubNew}
+                                handleOpenEditDialog={handleOpenEditDialog}
+                                handleAcceptItem={handleAcceptItem}
+                                handleUndoItem={handleUndoItem}
+                                handleDeleteItem={handleDeleteItem}
+                                activeChatId={activeChatId}
+                                setActiveChatId={setActiveChatId}
+                                proposedChanges={okr.proposedChanges}
+                                localComments={localComments}
+                              />
+                              <OkrManagerChatRow
+                                itemId={sub.id}
+                                colSpan={5}
+                                activeChatId={activeChatId}
+                                proposedChanges={okr.proposedChanges}
+                                localComments={localComments}
+                                chatMessage={chatMessage}
+                                setChatMessage={setChatMessage}
+                                chatLoading={chatLoading}
+                                handleSendChat={handleSendChat}
+                              />
 
-                              {/* Sub-Sub-KR rows */}
-                              {sub.items?.map(
-                                (subsub: any, ssIndex: number) => {
-                                  const oldSubSub = findOriginalItem(
-                                    obj.id,
-                                    kr.id,
-                                    sub.id,
-                                    subsub.id,
-                                  );
-                                  const isSubSubChanged = hasChanged(
-                                    subsub,
-                                    oldSubSub,
-                                  );
-                                  const isSubSubNew = originalStructure
-                                    ? !oldSubSub
-                                    : false;
+                              {sub.items?.map((subsub: any, ssIndex: number) => {
+                                const oldSubSub = findOriginalItem(obj.id, kr.id, sub.id, subsub.id);
+                                const isSubSubChanged = hasChanged(subsub, oldSubSub);
+                                const isSubSubNew = originalStructure ? !oldSubSub : false;
 
-                                  return (
-                                    <React.Fragment
-                                      key={`${oIndex}-${kIndex}-${sIndex}-${ssIndex}`}
-                                    >
-                                      {isSubSubChanged &&
-                                        renderOldRow(oldSubSub, 9)}
-                                      <TableRow
-                                        sx={{
-                                          bgcolor:
-                                            isSubSubNew ||
-                                              isSubSubChanged ||
-                                              subsub.isEdited
-                                              ? "#fef08a"
-                                              : "#fffbeb",
-                                        }}
-                                      >
-                                        <TableCell
-                                          sx={{
-                                            pl: 9,
-                                            fontSize: "0.8rem",
-                                            fontWeight:
-                                              isSubSubNew ||
-                                                isSubSubChanged ||
-                                                subsub.isEdited
-                                                ? "bold"
-                                                : "normal",
-                                          }}
-                                        >
-                                          {subsub.id}
-                                        </TableCell>
-                                        <TableCell
-                                          sx={{
-                                            fontSize: "0.85rem",
-                                            fontWeight:
-                                              isSubSubNew ||
-                                                isSubSubChanged ||
-                                                subsub.isEdited
-                                                ? "bold"
-                                                : "normal",
-                                          }}
-                                        >
-                                          {isSubSubChanged ? t("departmentOkr.managerTree.proposedChanges.newPrefix") : ""}
-                                          {subsub.title}
-                                        </TableCell>
-                                        <TableCell
-                                          sx={{
-                                            fontWeight:
-                                              isSubSubNew ||
-                                                isSubSubChanged ||
-                                                subsub.isEdited
-                                                ? "bold"
-                                                : "normal",
-                                          }}
-                                        >
-                                          —
-                                        </TableCell>
-                                        <TableCell>
-                                          {subsub.unitScore
-                                            ? `+${subsub.unitScore}/${subsub.unit || t("departmentOkr.managerTree.proposedChanges.unitSuffix")}`
-                                            : "—"}
-                                        </TableCell>
-                                        <TableCell align="center">
-                                          <Box
-                                            sx={{
-                                              display: "flex",
-                                              gap: 1,
-                                              justifyContent: "center",
-                                            }}
-                                          >
-                                            <IconButton
-                                              size="small"
-                                              onClick={() =>
-                                                handleOpenEditDialog(
-                                                  "SUBSUBKR",
-                                                  obj.id,
-                                                  kr.id,
-                                                  sub.id,
-                                                  subsub.id,
-                                                )
-                                              }
-                                              title={t("departmentOkr.managerTree.buttons.edit")}
-                                            >
-                                              <Edit
-                                                fontSize="small"
-                                                color="info"
-                                              />
-                                            </IconButton>
-                                            {(isSubSubChanged ||
-                                              isSubSubNew ||
-                                              subsub.isEdited) && (
-                                                <>
-                                                  <IconButton
-                                                    size="small"
-                                                    onClick={() =>
-                                                      handleAcceptItem(
-                                                        "SUBSUBKR",
-                                                        obj.id,
-                                                        kr.id,
-                                                        sub.id,
-                                                        subsub.id,
-                                                      )
-                                                    }
-                                                    title={t("departmentOkr.managerTree.buttons.acceptChanges")}
-                                                  >
-                                                    <Check
-                                                      fontSize="small"
-                                                      color="success"
-                                                    />
-                                                  </IconButton>
-                                                  <IconButton
-                                                    size="small"
-                                                    onClick={() =>
-                                                      handleUndoItem(
-                                                        "SUBSUBKR",
-                                                        obj.id,
-                                                        kr.id,
-                                                        sub.id,
-                                                        subsub.id,
-                                                      )
-                                                    }
-                                                    title={t("departmentOkr.managerTree.buttons.undoChanges")}
-                                                  >
-                                                    <Undo
-                                                      fontSize="small"
-                                                      color="primary"
-                                                    />
-                                                  </IconButton>
-                                                </>
-                                              )}
-                                            <IconButton
-                                              size="small"
-                                              onClick={() =>
-                                                setActiveChatId(
-                                                  activeChatId === subsub.id
-                                                    ? null
-                                                    : subsub.id,
-                                                )
-                                              }
-                                            >
-                                              <Comment
-                                                fontSize="small"
-                                                color={
-                                                  okr.proposedChanges?.[
-                                                    subsub.id
-                                                  ]?.length > 0 ||
-                                                    localComments[subsub.id]
-                                                      ?.length > 0
-                                                    ? "warning"
-                                                    : "inherit"
-                                                }
-                                              />
-                                            </IconButton>
-                                            <IconButton
-                                              size="small"
-                                              onClick={() =>
-                                                handleDeleteItem(
-                                                  obj.id,
-                                                  kr.id,
-                                                  sub.id,
-                                                  subsub.id,
-                                                )
-                                              }
-                                              title={t("departmentOkr.managerTree.buttons.deleteSubCriteria")}
-                                            >
-                                              <Delete
-                                                fontSize="small"
-                                                color="error"
-                                              />
-                                            </IconButton>
-                                          </Box>
-                                        </TableCell>
-                                      </TableRow>
-                                      {renderChatRow(subsub.id, 5)}
-                                    </React.Fragment>
-                                  );
-                                },
-                              )}
+                                return (
+                                  <React.Fragment key={`${oIndex}-${kIndex}-${sIndex}-${ssIndex}`}>
+                                    {isSubSubChanged && <OkrManagerOldRow oldItem={oldSubSub} indent={9} />}
+                                    <OkrManagerSubSubKeyResultRow
+                                      subsub={subsub}
+                                      objId={obj.id}
+                                      krId={kr.id}
+                                      subId={sub.id}
+                                      isSubSubChanged={isSubSubChanged}
+                                      isSubSubNew={isSubSubNew}
+                                      handleOpenEditDialog={handleOpenEditDialog}
+                                      handleAcceptItem={handleAcceptItem}
+                                      handleUndoItem={handleUndoItem}
+                                      handleDeleteItem={handleDeleteItem}
+                                      activeChatId={activeChatId}
+                                      setActiveChatId={setActiveChatId}
+                                      proposedChanges={okr.proposedChanges}
+                                      localComments={localComments}
+                                    />
+                                    <OkrManagerChatRow
+                                      itemId={subsub.id}
+                                      colSpan={5}
+                                      activeChatId={activeChatId}
+                                      proposedChanges={okr.proposedChanges}
+                                      localComments={localComments}
+                                      chatMessage={chatMessage}
+                                      setChatMessage={setChatMessage}
+                                      chatLoading={chatLoading}
+                                      handleSendChat={handleSendChat}
+                                    />
+                                  </React.Fragment>
+                                );
+                              })}
                             </React.Fragment>
                           );
                         })}

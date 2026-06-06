@@ -3,30 +3,30 @@ import { api } from "./api";
 const RESOURCE_PATH = "/performance";
 
 export const performanceService = {
-  // Lấy danh sách kỳ đánh giá (Học kỳ)
+  // Fetch the list of evaluation cycles (e.g., semesters)
   getCycles: async () => {
     const response = await api.get(`${RESOURCE_PATH}/cycles`);
     return response.data;
   },
 
-  // 2. Lấy mẫu KPI (Nhóm A, B và các tiêu chí)
+  // Fetch KPI templates containing criteria groups
   getTemplates: async () => {
     const response = await api.get(`${RESOURCE_PATH}/template`);
     return response.data;
   },
 
-  // 3. Gửi đánh giá (Submit)
+  // Submit self-evaluation KPI for a user
   submitKpi: async (userId: string, data: any) => {
-    // Lưu ý: Cấu trúc body phải khớp với Backend Controller đã sửa
+    // Note: The payload structure must match the updated backend controller
     const payload = {
       userId: userId,
-      data: data, // Bao gồm cycleId và items
+      data: data, // Includes cycleId and evaluated items
     };
     const response = await api.post(`${RESOURCE_PATH}/kpi/submit`, payload);
     return response.data;
   },
 
-  // 4. Xem lịch sử (Optional - dùng sau)
+  // Fetch self KPI history for a specific cycle (Optional - for future use)
   getMyKpis: async (userId: string, cycleId: string) => {
     const response = await api.get(`${RESOURCE_PATH}/kpi/my-kpi`, {
       params: { userId, cycleId },
@@ -34,8 +34,9 @@ export const performanceService = {
     return response.data;
   },
 
-  //Duyệt
-  // 1. Lấy danh sách KPI của một User bất kỳ (Sếp xem nhân viên)
+  // --- Manager Approval Services ---
+
+  // Fetch KPI list of a specific employee (used by managers to view team members' KPIs)
   getUserKpis: async (userId: string, cycleId: string) => {
     const response = await api.get(`${RESOURCE_PATH}/kpi/my-kpi`, {
       params: { userId, cycleId },
@@ -43,7 +44,7 @@ export const performanceService = {
     return response.data;
   },
 
-  // 2. Gửi kết quả Duyệt (Chấm điểm)
+  // Submit review grading result and comment from the manager
   reviewKpi: async (payload: {
     id: string;
     managerScore: number;
@@ -54,7 +55,7 @@ export const performanceService = {
     return response.data;
   },
 
-  // 3. Lấy danh sách nhân viên cần duyệt trong kỳ
+  // Fetch department overview lists of employees pending review for a specific cycle
   getDepartmentOverview: async (cycleId: string) => {
     const response = await api.get(`${RESOURCE_PATH}/manager/overview`, {
       params: { cycleId },
@@ -62,3 +63,4 @@ export const performanceService = {
     return response.data;
   },
 };
+
