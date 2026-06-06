@@ -16,6 +16,7 @@ import {
   Warning as WarningIcon,
   CheckCircle as CheckCircleIcon,
 } from "@mui/icons-material";
+import { useTranslation, Trans } from "react-i18next";
 
 import type { ProfileFormData } from "../types";
 
@@ -42,6 +43,8 @@ export function ConfirmationDialog({
   selectedDegreeLabel,
   jobTitle,
 }: ConfirmationDialogProps) {
+  const { t } = useTranslation();
+
   return (
     <Dialog
       open={open}
@@ -65,12 +68,11 @@ export function ConfirmationDialog({
         }}
       >
         <WarningIcon sx={{ color: "#ff9800", fontSize: 28 }} />
-        Xác nhận thông tin
+        {t("profileSetup.confirmDialog.title")}
       </DialogTitle>
       <DialogContent>
         <Typography variant="body2" sx={{ color: "#546e7a", mb: 2.5 }}>
-          Vui lòng kiểm tra kỹ các thông tin dưới đây trước khi xác nhận. Thông
-          tin này sẽ được sử dụng để đăng ký nhân sự vào hệ thống.
+          {t("profileSetup.confirmDialog.subtitle")}
         </Typography>
 
         <Stack spacing={2}>
@@ -84,7 +86,7 @@ export function ConfirmationDialog({
           >
             <Stack spacing={1.5}>
               <Typography variant="subtitle2" color="primary" fontWeight={700}>
-                Thông tin cá nhân
+                {t("profileSetup.confirmDialog.personalInfoTitle")}
               </Typography>
               <Box
                 sx={{
@@ -97,7 +99,7 @@ export function ConfirmationDialog({
                   variant="body2"
                   sx={{ color: "#78909c", fontWeight: 500 }}
                 >
-                  🆔 Mã cán bộ
+                  {t("profileSetup.confirmDialog.staffCode")}
                 </Typography>
                 <Typography variant="body2" fontWeight={600} color="#37474f">
                   {formData.staffCode || "---"}
@@ -115,7 +117,7 @@ export function ConfirmationDialog({
                   variant="body2"
                   sx={{ color: "#78909c", fontWeight: 500 }}
                 >
-                  👤 Họ và tên
+                  {t("profileSetup.confirmDialog.fullName")}
                 </Typography>
                 <Typography variant="body2" fontWeight={600} color="#37474f">
                   {formData.fullName || "---"}
@@ -133,7 +135,7 @@ export function ConfirmationDialog({
                   variant="body2"
                   sx={{ color: "#78909c", fontWeight: 500 }}
                 >
-                  📅 Ngày sinh
+                  {t("profileSetup.confirmDialog.dob")}
                 </Typography>
                 <Typography variant="body2" fontWeight={600} color="#37474f">
                   {formData.dob || "---"}
@@ -151,7 +153,7 @@ export function ConfirmationDialog({
                   variant="body2"
                   sx={{ color: "#78909c", fontWeight: 500 }}
                 >
-                  📧 Email
+                  {t("profileSetup.confirmDialog.email")}
                 </Typography>
                 <Typography variant="body2" fontWeight={600} color="#37474f">
                   {formData.email || "---"}
@@ -169,7 +171,7 @@ export function ConfirmationDialog({
                   variant="body2"
                   sx={{ color: "#78909c", fontWeight: 500 }}
                 >
-                  🏫 Ngày vào trường
+                  {t("profileSetup.confirmDialog.joinDate")}
                 </Typography>
                 <Typography variant="body2" fontWeight={600} color="#37474f">
                   {formData.joinDate || "---"}
@@ -178,7 +180,7 @@ export function ConfirmationDialog({
 
               <Box sx={{ my: 1 }} />
               <Typography variant="subtitle2" color="primary" fontWeight={700}>
-                Thông tin công tác
+                {t("profileSetup.confirmDialog.workInfoTitle")}
               </Typography>
 
               <Box
@@ -192,7 +194,7 @@ export function ConfirmationDialog({
                   variant="body2"
                   sx={{ color: "#78909c", fontWeight: 500 }}
                 >
-                  📍 Bộ môn
+                  {t("profileSetup.confirmDialog.department")}
                 </Typography>
                 <Chip
                   label={selectedDeptName || "---"}
@@ -214,7 +216,7 @@ export function ConfirmationDialog({
                   variant="body2"
                   sx={{ color: "#78909c", fontWeight: 500 }}
                 >
-                  🏅 Học hàm
+                  {t("profileSetup.confirmDialog.academicRank")}
                 </Typography>
                 <Chip
                   label={selectedRankLabel || "---"}
@@ -238,7 +240,7 @@ export function ConfirmationDialog({
                   variant="body2"
                   sx={{ color: "#78909c", fontWeight: 500 }}
                 >
-                  🎓 Học vị
+                  {t("profileSetup.confirmDialog.degree")}
                 </Typography>
                 <Chip
                   label={selectedDegreeLabel || "---"}
@@ -262,7 +264,7 @@ export function ConfirmationDialog({
                   variant="body2"
                   sx={{ color: "#78909c", fontWeight: 500 }}
                 >
-                  💼 Chức vụ
+                  {t("profileSetup.confirmDialog.position")}
                 </Typography>
                 <Chip
                   label={jobTitle || "---"}
@@ -278,8 +280,10 @@ export function ConfirmationDialog({
           </Box>
 
           <Alert severity="warning" sx={{ borderRadius: "10px" }}>
-            Bạn xác nhận các thông tin trên là <strong>chính xác</strong>? Hệ
-            thống sẽ ghi nhận và phân bổ bạn vào bộ môn tương ứng.
+            <Trans i18nKey="profileSetup.confirmDialog.alertText">
+              Bạn xác nhận các thông tin trên là <strong>chính xác</strong>? Hệ
+              thống sẽ ghi nhận và phân bổ bạn vào bộ môn tương ứng.
+            </Trans>
           </Alert>
         </Stack>
       </DialogContent>
@@ -294,7 +298,7 @@ export function ConfirmationDialog({
             color: "#546e7a",
           }}
         >
-          Quay lại chỉnh sửa
+          {t("profileSetup.confirmDialog.backBtn")}
         </Button>
         <Button
           variant="contained"
@@ -318,7 +322,7 @@ export function ConfirmationDialog({
             },
           }}
         >
-          {submitting ? "Đang xử lý..." : "Xác nhận & Hoàn tất"}
+          {submitting ? t("profileSetup.confirmDialog.submittingText") : t("profileSetup.confirmDialog.confirmBtn")}
         </Button>
       </DialogActions>
     </Dialog>

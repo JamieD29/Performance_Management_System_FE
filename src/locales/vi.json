@@ -1,4 +1,25 @@
 {
+  "profileSetup": {
+    "confirmDialog": {
+      "title": "Xác nhận thông tin",
+      "subtitle": "Vui lòng kiểm tra kỹ các thông tin dưới đây trước khi xác nhận. Thông tin này sẽ được sử dụng để đăng ký nhân sự vào hệ thống.",
+      "personalInfoTitle": "Thông tin cá nhân",
+      "staffCode": "🆔 Mã cán bộ",
+      "fullName": "👤 Họ và tên",
+      "dob": "📅 Ngày sinh",
+      "email": "📧 Email",
+      "joinDate": "🏫 Ngày vào trường",
+      "workInfoTitle": "Thông tin công tác",
+      "department": "📍 Bộ môn",
+      "academicRank": "🏅 Học hàm",
+      "degree": "🎓 Học vị",
+      "position": "💼 Chức vụ",
+      "alertText": "Bạn xác nhận các thông tin trên là <1>chính xác</1>? Hệ thống sẽ ghi nhận và phân bổ bạn vào bộ môn tương ứng.",
+      "backBtn": "Quay lại chỉnh sửa",
+      "submittingText": "Đang xử lý...",
+      "confirmBtn": "Xác nhận & Hoàn tất"
+    }
+  },
   "login": {
     "title": "Chào Mừng Trở Lại",
     "subtitle": "Vui lòng đăng nhập bằng tài khoản tổ chức đã được cấp phép",

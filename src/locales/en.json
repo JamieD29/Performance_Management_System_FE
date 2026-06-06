@@ -1,4 +1,25 @@
 {
+  "profileSetup": {
+    "confirmDialog": {
+      "title": "Confirm Information",
+      "subtitle": "Please double-check the information below before confirming. This information will be used to register you into the system.",
+      "personalInfoTitle": "Personal Information",
+      "staffCode": "🆔 Staff Code",
+      "fullName": "👤 Full Name",
+      "dob": "📅 Date of Birth",
+      "email": "📧 Email",
+      "joinDate": "🏫 School Join Date",
+      "workInfoTitle": "Work Information",
+      "department": "📍 Department",
+      "academicRank": "🏅 Academic Rank",
+      "degree": "🎓 Degree",
+      "position": "💼 Job Title / Position",
+      "alertText": "Do you confirm that the above information is <1>accurate</1>? The system will record and assign you to the corresponding department.",
+      "backBtn": "Back to Edit",
+      "submittingText": "Processing...",
+      "confirmBtn": "Confirm & Complete"
+    }
+  },
   "login": {
     "title": "Welcome Back",
     "subtitle": "Please sign in with your authorized institutional account",

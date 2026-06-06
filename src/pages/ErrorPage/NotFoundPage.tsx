@@ -1,4 +1,3 @@
-import React from "react";
 import { Box, Typography, Button, Container, Paper } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
@@ -17,7 +16,7 @@ const NotFoundPage = () => {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "#f3f4f6", // Màu nền xám nhạt giống Dashboard của bạn
+        backgroundColor: "#f3f4f6", // Light gray background matching the dashboard layout
         p: 2,
       }}
     >
@@ -34,17 +33,17 @@ const NotFoundPage = () => {
             gap: 2,
           }}
         >
-          {/* Icon cảm xúc buồn hoặc Domain Error */}
+          {/* Sad emotion or Domain Error icon */}
           <SentimentVeryDissatisfiedIcon
             sx={{ fontSize: 80, color: "text.secondary", opacity: 0.5 }}
           />
 
-          {/* Tiêu đề 404 Lớn */}
+          {/* Large 404 header */}
           <Typography
             variant="h1"
             sx={{
               fontWeight: 900,
-              color: "#1e3a8a", // Màu xanh đậm HCMUS
+              color: "#1e3a8a", // Deep blue color matching brand identity
               fontSize: { xs: "4rem", md: "6rem" },
               lineHeight: 1,
             }}
@@ -52,7 +51,7 @@ const NotFoundPage = () => {
             404
           </Typography>
 
-          {/* Thông báo lỗi */}
+          {/* Error messages */}
           <Typography
             variant="h5"
             sx={{ fontWeight: 600, color: "text.primary" }}
@@ -68,12 +67,12 @@ const NotFoundPage = () => {
             {t("notFound.description")}
           </Typography>
 
-          {/* Các nút điều hướng */}
+          {/* Navigation action buttons */}
           <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
             <Button
               variant="outlined"
               startIcon={<ArrowBackIcon />}
-              onClick={() => navigate(-1)} // Quay lại trang trước
+              onClick={() => navigate(-1)} // Navigate back to the previous page
               sx={{ textTransform: "none", fontWeight: 600 }}
             >
               {t("notFound.goBack")}
@@ -82,9 +81,9 @@ const NotFoundPage = () => {
             <Button
               variant="contained"
               startIcon={<HomeIcon />}
-              onClick={() => navigate("/")} // Về trang chủ/Login
+              onClick={() => navigate("/")} // Navigate back to home/login
               sx={{
-                bgcolor: "#1e3a8a", // Màu xanh HCMUS
+                bgcolor: "#1e3a8a", // Brand blue color
                 "&:hover": { bgcolor: "#172554" },
                 textTransform: "none",
                 fontWeight: 600,
@@ -96,7 +95,7 @@ const NotFoundPage = () => {
           </Box>
         </Paper>
 
-        {/* Footer nhỏ (Optional) */}
+        {/* Small footer copyright label (Optional) */}
         <Typography
           variant="caption"
           display="block"
